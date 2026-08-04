@@ -159,6 +159,13 @@ p {
   text-wrap: pretty;
 }
 
+/* цифры в телефонах, часах и оценках не должны «плясать» по ширине */
+a[href^='tel:'],
+time,
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
 img,
 svg {
   display: block;
@@ -238,6 +245,12 @@ h1 + .lead {
   line-height: 1.5;
   color: var(--text-2);
   max-width: 46ch;
+  text-wrap: pretty;
+}
+
+/* заголовки карточек ломаются по смыслу, а не по краю колонки */
+h3 {
+  text-wrap: balance;
 }
 
 /* ── кнопки (из ДС Organic, палитра макета) ──────────────────────────────── */
