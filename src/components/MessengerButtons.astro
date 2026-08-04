@@ -1,0 +1,65 @@
+---
+/**
+ * Пара кнопок Telegram / Max — главный CTA лендинга, встречается в бенто,
+ * панели «торт по картинке», карточке «Как заказать» и в контактах.
+ */
+import { Image } from 'astro:assets';
+import tg from '../assets/tg.svg';
+import max from '../assets/max.png';
+import { site } from '../data/site';
+
+interface Props {
+  variant?: 'dark' | 'light' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  labels?: [string, string];
+  class?: string;
+}
+
+const {
+  variant = 'dark',
+  size = 'md',
+  labels = ['Telegram', 'Max'],
+  class: className = '',
+} = Astro.props;
+
+const variantClass = {
+  dark: 'btn--primary',
+  light: 'btn--light',
+  ghost: 'btn--secondary',
+}[variant];
+
+const sizeClass = size === 'sm' ? 'btn--sm' : size === 'lg' ? '' : 'btn--md';
+---
+
+<div class:list={['messengers', className]}>
+  <a
+    class:list={['btn', variantClass, sizeClass]}
+    href={site.links.telegram}
+    target="_blank"
+    rel="noopener"
+  >
+    <Image src={tg} alt="" width={18} height={18} aria-hidden="true" />
+    {labels[0]}
+  </a>
+  <a
+    class:list={['btn', variantClass, sizeClass]}
+    href={site.links.max}
+    target="_blank"
+    rel="noopener"
+  >
+    <Image src={max} alt="" width={18} height={18} aria-hidden="true" />
+    {labels[1]}
+  </a>
+</div>
+
+<style>
+  .messengers {
+    display: flex;
+    gap: 8px;
+  }
+
+  .messengers > .btn {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+</style>

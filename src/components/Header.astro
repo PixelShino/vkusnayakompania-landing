@@ -1,0 +1,190 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/logo.png';
+import { site, nav } from '../data/site';
+---
+
+<header class="header">
+  <div class="container header__in">
+    <a class="header__logo" href="#top" aria-label={`${site.name} — на главную`}>
+      <Image src={logo} alt={site.name} widths={[132, 264]} sizes="132px" loading="eager" />
+    </a>
+
+    <nav class="header__nav" aria-label="Основная навигация">
+      {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+    </nav>
+
+    <div class="header__actions">
+      <a class="btn btn--primary btn--sm header__cta" href={site.links.shop}>Заказать доставку</a>
+      <a class="header__phone" href={site.phoneHref}>{site.phone}</a>
+      <button
+        type="button"
+        class="header__burger"
+        aria-label="Открыть меню"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+      >
+        <span aria-hidden="true">≡</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="header__menu" id="mobile-menu" hidden>
+    <div class="container header__menu-in">
+      {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+      <a class="btn btn--primary btn--block" href={site.links.shop}>Заказать доставку</a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(255, 250, 237, 0.94);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #efe6d6;
+  }
+
+  .header__in {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding-block: 11px;
+  }
+
+  .header__logo {
+    flex: none;
+    display: block;
+    width: 104px;
+  }
+
+  .header__logo :global(img) {
+    width: 100%;
+    height: auto;
+  }
+
+  .header__nav {
+    display: none;
+    gap: 22px;
+    font-size: 14px;
+  }
+
+  .header__nav a {
+    color: var(--text);
+    text-decoration: none;
+    padding-block: 4px;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.16s ease;
+  }
+
+  .header__nav a:hover {
+    border-bottom-color: var(--line-4);
+  }
+
+  .header__actions {
+    margin-left: auto;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .header__cta {
+    display: none;
+  }
+
+  .header__phone {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .header__burger {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+    background: transparent;
+    font-size: 17px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .header__menu {
+    border-top: 1px solid #efe6d6;
+    background: var(--bg);
+  }
+
+  .header__menu[hidden] {
+    display: none;
+  }
+
+  .header__menu-in {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-block: 12px 18px;
+  }
+
+  .header__menu-in a:not(.btn) {
+    padding-block: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 1px solid var(--line-3);
+  }
+
+  .header__menu-in .btn {
+    margin-top: 10px;
+  }
+
+  @media (min-width: 768px) {
+    .header__logo {
+      width: 132px;
+    }
+
+    .header__nav {
+      display: flex;
+    }
+
+    .header__phone,
+    .header__burger,
+    .header__menu {
+      display: none;
+    }
+
+    .header__cta {
+      display: inline-flex;
+    }
+  }
+</style>
+
+<script>
+  const burger = document.querySelector<HTMLButtonElement>('.header__burger');
+  const menu = document.getElementById('mobile-menu');
+
+  if (burger && menu) {
+    const setOpen = (open: boolean) => {
+      menu.hidden = !open;
+      burger.setAttribute('aria-expanded', String(open));
+      burger.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
+    };
+
+    burger.addEventListener('click', () => setOpen(Boolean(menu.hidden)));
+    menu.addEventListener('click', (event) => {
+      if ((event.target as HTMLElement).closest('a')) setOpen(false);
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !menu.hidden) {
+        setOpen(false);
+        burger.focus();
+      }
+    });
+  }
+</script>

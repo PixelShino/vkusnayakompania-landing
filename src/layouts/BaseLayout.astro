@@ -1,0 +1,99 @@
+---
+import '@fontsource-variable/montserrat';
+import montserratCyrillic from '@fontsource-variable/montserrat/files/montserrat-cyrillic-wght-normal.woff2?url';
+import '../styles/global.css';
+import { site, places, yandexOrgUrl } from '../data/site';
+import Lightbox from '../components/Lightbox.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = site.title, description = site.description } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://example.com');
+const ogImage = new URL('/og.jpg', canonical);
+
+// Разметка организации: две точки одной кондитерской. Адреса, координаты,
+// часы и оценки — с карточек организации на Яндекс.Картах (см. `data/site.ts`).
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': places.map((place) => ({
+    '@type': 'Bakery',
+    '@id': `${canonical.origin}/#place-${place.n}`,
+    name: `${site.name} — ${place.addr}`,
+    description: site.description,
+    telephone: site.phone,
+    url: canonical.origin,
+    sameAs: [yandexOrgUrl(place.yandexOrg)],
+    priceRange: '₽₽',
+    servesCuisine: ['Кондитерская', 'Завтраки', 'Кофе'],
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: place.addr,
+      addressLocality: site.city,
+      addressCountry: 'RU',
+    },
+    geo: { '@type': 'GeoCoordinates', latitude: place.lat, longitude: place.lng },
+    openingHours: place.schemaHours,
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: place.rating.replace(',', '.'),
+      reviewCount: place.ratingCount,
+    },
+  })),
+};
+---
+
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical.href} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#FFFAED" />
+
+    <link rel="preload" as="font" type="font/woff2" href={montserratCyrillic} crossorigin />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical.href} />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:image" content={ogImage.href} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <meta name="generator" content={Astro.generator} />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">К основному содержимому</a>
+    <slot />
+    <Lightbox />
+
+    <style is:global>
+      .skip-link {
+        position: absolute;
+        left: 50%;
+        top: 8px;
+        z-index: 100;
+        translate: -50% -200%;
+        padding: 10px 18px;
+        border-radius: var(--r-pill);
+        background: var(--text);
+        color: var(--bg);
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: translate 0.18s ease;
+      }
+      .skip-link:focus-visible {
+        translate: -50% 0;
+      }
+    </style>
+  </body>
+</html>

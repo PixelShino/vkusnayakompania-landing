@@ -1,0 +1,53 @@
+---
+import Photo from './Photo.astro';
+import { heroPhotos, roomDetails } from '../data/catalog';
+---
+
+<section class="section" id="room">
+  <div class="container">
+    <h2>Зал</h2>
+    <p class="lead">
+      Светло, тихо и пахнет ванилью. Заходите с ноутбуком, с детьми или просто за кофе.
+    </p>
+
+    <Photo
+      photo={heroPhotos.room}
+      ratio="4 / 3"
+      ratioMd="16 / 7"
+      radius="22px"
+      sizes="(min-width: 1200px) 1296px, 100vw"
+      class="room__wide"
+    />
+
+    <div class="room__grid">
+      {
+        roomDetails.map((item) => (
+          <Photo
+            photo={item.photo}
+            ratio="4 / 3"
+            sizes="(min-width: 1200px) 420px, (min-width: 768px) 33vw, 100vw"
+          />
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .room__wide {
+    margin-top: 26px;
+  }
+
+  .room__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--gap);
+    margin-top: var(--gap);
+  }
+
+  @media (min-width: 768px) {
+    .room__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

@@ -1,0 +1,90 @@
+---
+import Photo from './Photo.astro';
+import { aboutPhotos } from '../data/catalog';
+
+// TODO(клиент): текст и факты — рабочая заготовка на основе макета
+// (в прототипе здесь стояли серые полосы-заглушки). Ждём финальный текст.
+const facts = ['С 2016 года', 'Две точки в Самаре', 'Свой цех, без закупа'];
+---
+
+<section class="section" id="about">
+  <div class="container">
+    <div class="about">
+      <div>
+        <h2>О нас</h2>
+        <p class="lead about__text">
+          Мы начали с одной витрины и одной печи: пекли по утрам столько, сколько успевали продать
+          за день. С тех пор появился свой цех, вторая точка и кухня — но правило осталось прежним.
+        </p>
+        <p class="lead about__text">
+          Ничего не закупаем на стороне: торты, пирожные и конфеты делаем сами, из того же, что
+          поставили бы себе на стол.
+        </p>
+
+        <ul class="about__facts">
+          {facts.map((fact) => <li>{fact}</li>)}
+        </ul>
+      </div>
+
+      <div class="about__grid">
+        {
+          aboutPhotos.map((photo, i) => (
+            <Photo
+              photo={photo}
+              ratio={i === 0 ? '16 / 10' : '1 / 1'}
+              sizes="(min-width: 1200px) 320px, 45vw"
+              class={i === 0 ? 'about__photo about__photo--wide' : 'about__photo'}
+            />
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: calc(var(--gap) + 18px);
+    align-items: center;
+  }
+
+  .about__text {
+    margin-top: 14px;
+  }
+
+  .about__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 18px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .about__facts li {
+    padding: 7px 14px;
+    border: 1px solid #e1e4cb;
+    border-radius: var(--r-pill);
+    background: #f1f2e7;
+    font-size: 12.5px;
+    color: var(--olive-dark);
+  }
+
+  .about__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap);
+  }
+
+  .about__photo--wide {
+    grid-column: span 2;
+  }
+
+  @media (min-width: 1200px) {
+    .about {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

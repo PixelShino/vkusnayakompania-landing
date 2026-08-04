@@ -1,0 +1,274 @@
+---
+import Photo from './Photo.astro';
+import MessengerButtons from './MessengerButtons.astro';
+import { heroPhotos, steps } from '../data/catalog';
+---
+
+<div class="sk" id="custom-cake">
+  <div class="sk__blob" aria-hidden="true"></div>
+  <div class="sk__grid">
+    <div class="sk__left">
+      <p class="kicker">Индивидуальный заказ</p>
+      <h3 class="sk__title">Торт по вашей картинке</h3>
+      <p class="lead sk__lead">
+        Скрин, фото из соцсетей, рисунок ребёнка — присылайте что угодно. В тот же день скажем,
+        повторим ли и за сколько.
+      </p>
+
+      <ul class="sk__pills">
+        <li>48 часов</li>
+        <li>от 3 500 ₽</li>
+        <li>Предоплата 50%</li>
+      </ul>
+
+      <ol class="sk__steps">
+        {
+          steps.map((step) => (
+            <li class="sk__step">
+              <div class="sk__rail" aria-hidden="true">
+                <span class="sk__num">{step.n}</span>
+                <span class="sk__line" />
+              </div>
+              <div class="sk__step-body">
+                <p class="sk__step-title">{step.title}</p>
+                <p class="sk__step-text">{step.text}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+
+      <MessengerButtons
+        variant="dark"
+        size="lg"
+        labels={['Написать в Telegram', 'Max']}
+        class="sk__btns"
+      />
+    </div>
+
+    <div class="sk__media">
+      <figure class="sk__shot">
+        <Photo
+          photo={heroPhotos.sketchRef}
+          ratio="4 / 5"
+          radius="20px"
+          sizes="(min-width: 1200px) 280px, 45vw"
+        />
+        <figcaption class="sk__cap">Ваша картинка</figcaption>
+      </figure>
+      <figure class="sk__shot sk__shot--offset">
+        <Photo
+          photo={heroPhotos.sketchOut}
+          ratio="4 / 5"
+          radius="20px"
+          sizes="(min-width: 1200px) 280px, 45vw"
+        />
+        <figcaption class="sk__cap sk__cap--hi">Наш торт</figcaption>
+      </figure>
+    </div>
+  </div>
+</div>
+
+<style>
+  .sk {
+    position: relative;
+    overflow: hidden;
+    margin-top: calc(var(--sec-pad) * 0.7);
+    padding: calc(var(--gap) + 10px);
+    border: 1px solid var(--line);
+    border-radius: var(--r-2xl);
+    background: var(--surface-panel);
+  }
+
+  .sk__blob {
+    position: absolute;
+    top: -130px;
+    right: -120px;
+    width: 260px;
+    height: 260px;
+    border-radius: var(--r-pill);
+    background: rgba(198, 113, 57, 0.1);
+    pointer-events: none;
+  }
+
+  .sk__grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: calc(var(--gap) + 8px);
+    align-items: start;
+  }
+
+  .sk__left {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sk__title {
+    margin-bottom: 12px;
+    font-size: var(--fs-h2);
+    line-height: 1.05;
+  }
+
+  .sk__lead {
+    max-width: 40ch;
+  }
+
+  .sk__pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 20px 0 26px;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sk__pills li {
+    padding: 8px 14px;
+    border-radius: var(--r-pill);
+    background: var(--text);
+    color: var(--surface);
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+
+  .sk__steps {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sk__step {
+    display: flex;
+    gap: 14px;
+    align-items: stretch;
+  }
+
+  .sk__rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: none;
+  }
+
+  .sk__num {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    flex: none;
+    border-radius: var(--r-pill);
+    background: var(--text);
+    color: var(--bg);
+    font-weight: var(--fw-heading);
+    font-size: 17px;
+    line-height: 1;
+  }
+
+  .sk__line {
+    flex: 1 1 auto;
+    width: 2px;
+    min-height: 10px;
+    margin: 6px 0 -2px;
+    background: repeating-linear-gradient(
+      to bottom,
+      #dcd2bf 0 5px,
+      transparent 5px 10px
+    );
+  }
+
+  .sk__step:last-child .sk__line {
+    background: none;
+  }
+
+  .sk__step-body {
+    padding-bottom: 20px;
+  }
+
+  .sk__step-title {
+    margin-bottom: 4px;
+    padding-top: 8px;
+    font-weight: var(--fw-heading);
+    font-size: calc(var(--fs-body) + 3px);
+    line-height: 1.15;
+  }
+
+  .sk__step-text {
+    font-size: calc(var(--fs-body) - 0.5px);
+    line-height: 1.5;
+    color: #6b6459;
+  }
+
+  .sk__btns {
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+
+  .sk__media {
+    order: -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    align-items: start;
+    margin-bottom: 4px;
+  }
+
+  .sk__shot {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+  }
+
+  .sk__shot--offset {
+    margin-top: 18px;
+  }
+
+  .sk__cap {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-5);
+    text-align: center;
+  }
+
+  .sk__cap--hi {
+    color: var(--terracotta-text);
+  }
+
+  @media (min-width: 768px) {
+    .sk {
+      padding: calc(var(--gap) + 24px);
+      border-radius: 32px;
+    }
+
+    .sk__blob {
+      top: -160px;
+      right: -140px;
+      width: 420px;
+      height: 420px;
+    }
+
+    .sk__title {
+      font-size: calc(var(--fs-h2) + 4px);
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .sk__grid {
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: calc(var(--gap) + 24px);
+    }
+
+    .sk__media {
+      order: 0;
+      gap: 14px;
+      margin-bottom: 0;
+    }
+
+    .sk__shot--offset {
+      margin-top: 34px;
+    }
+  }
+</style>

@@ -1,0 +1,144 @@
+---
+import MessengerButtons from './MessengerButtons.astro';
+import { site, places } from '../data/site';
+---
+
+<section class="bento-wrap">
+  <div class="container">
+    <div class="bento">
+      <div class="bento__hours">
+        <p class="bento__label">Сегодня открыто</p>
+        <p class="bento__big">{site.hours.label}</p>
+        <p class="bento__sub">{site.hours.note}</p>
+      </div>
+
+      <div class="bento__cell">
+        <p class="bento__num">48 ч</p>
+        <p class="bento__sub">на торт под заказ</p>
+      </div>
+
+      <div class="bento__cell">
+        <p class="bento__num">2 точки</p>
+        <p class="bento__sub">{places.map((p) => p.addr).join(' · ')}</p>
+      </div>
+
+      <div class="bento__contact">
+        <p class="bento__label">Написать нам</p>
+        <MessengerButtons variant="dark" size="md" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .bento-wrap {
+    padding-bottom: calc(var(--sec-pad) * 0.5);
+  }
+
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    margin-top: 18px;
+  }
+
+  .bento__hours,
+  .bento__contact {
+    grid-column: span 2;
+  }
+
+  .bento__hours {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 11px 13px;
+    border-radius: var(--r-sm);
+    background: var(--olive);
+    color: var(--bg);
+  }
+
+  .bento__cell {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    padding: 11px 13px;
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-sm);
+    background: var(--surface);
+  }
+
+  .bento__contact {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 7px;
+    padding: 10px;
+    border: 1px solid var(--line-warm);
+    border-radius: var(--r-sm);
+    background: var(--surface-warm);
+  }
+
+  .bento__label {
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.74;
+  }
+
+  .bento__big {
+    font-weight: var(--fw-heading);
+    font-size: 21px;
+    line-height: 1.04;
+    letter-spacing: -0.01em;
+  }
+
+  .bento__num {
+    font-weight: var(--fw-heading);
+    font-size: 17px;
+    line-height: 1.04;
+    color: var(--terracotta);
+  }
+
+  .bento__sub {
+    font-size: 10.5px;
+    line-height: 1.3;
+    opacity: 0.82;
+  }
+
+  @media (min-width: 768px) {
+    .bento {
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      margin-top: 34px;
+    }
+
+    .bento__hours,
+    .bento__cell,
+    .bento__contact {
+      padding: 18px 20px;
+      border-radius: 18px;
+    }
+
+    .bento__hours,
+    .bento__contact {
+      gap: 3px;
+    }
+
+    .bento__label {
+      font-size: 11px;
+    }
+
+    .bento__big {
+      font-size: 30px;
+    }
+
+    .bento__num {
+      font-size: 25px;
+    }
+
+    .bento__sub {
+      font-size: 12.5px;
+    }
+  }
+</style>

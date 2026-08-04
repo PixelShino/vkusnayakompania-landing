@@ -1,0 +1,196 @@
+---
+import YandexMap from './YandexMap.astro';
+import MessengerButtons from './MessengerButtons.astro';
+import { site, places, yandexOrgUrl } from '../data/site';
+---
+
+<section class="section" id="contacts">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="kicker">Две точки в городе</p>
+        <h2>Контакты</h2>
+      </div>
+      <div class="ct__phone-box">
+        <p class="ct__phone-label">Один номер на обе точки</p>
+        <a class="ct__phone" href={site.phoneHref}>{site.phone}</a>
+      </div>
+    </div>
+
+    <div class="ct">
+      <div class="ct__col">
+        {
+          places.map((place) => (
+            <article class="ct__card">
+              <div class="card-top">
+                <span class="card-mark card-mark--sm">{place.n}</span>
+                <span class="card-dash" />
+                <span class="card-pill card-pill--open">{place.status}</span>
+              </div>
+              <h3 class="ct__name">{place.addr}</h3>
+              <p class="ct__note">{place.note}</p>
+              <p class="ct__row">
+                <span class="ct__key">Часы</span>
+                <span class="ct__val">{place.hours}</span>
+              </p>
+              <div class="ct__actions">
+                <a class="btn btn--primary btn--md" href={place.phoneHref}>
+                  Позвонить {place.phone}
+                </a>
+                <a
+                  class="btn btn--secondary btn--md"
+                  href={yandexOrgUrl(place.yandexOrg)}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  Маршрут
+                </a>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+
+      <div class="ct__right">
+        <YandexMap />
+
+        <div class="ct__write">
+          <div class="blob" aria-hidden="true"></div>
+          <div class="ct__write-col">
+            <p class="ct__write-title">Написать нам</p>
+            <p class="ct__write-sub">Отвечаем с 9:00 до 21:00, обычно за пару минут</p>
+          </div>
+          <MessengerButtons variant="light" size="lg" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ct__phone-box {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .ct__phone-label {
+    font-size: 12px;
+    color: var(--text-5);
+  }
+
+  .ct__phone {
+    font-weight: var(--fw-heading);
+    font-size: calc(var(--fs-h3) + 2px);
+    letter-spacing: var(--ls-heading);
+    text-decoration: none;
+  }
+
+  .ct {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: calc(var(--gap) + 6px);
+    align-items: start;
+    margin-top: 26px;
+  }
+
+  .ct__col,
+  .ct__right {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--gap) + 2px);
+  }
+
+  .ct__card {
+    display: flex;
+    flex-direction: column;
+    padding: calc(var(--gap) + 4px);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    background: var(--bg);
+  }
+
+  .ct__name {
+    margin: 14px 0 4px;
+    font-size: calc(var(--fs-h3) + 1px);
+    line-height: 1.12;
+  }
+
+  .ct__note {
+    font-size: calc(var(--fs-body) - 0.5px);
+    color: var(--text-4);
+  }
+
+  .ct__row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 10px 0 14px;
+    border-top: 1px solid var(--line-3);
+  }
+
+  .ct__key {
+    flex: 0 0 78px;
+    font-size: 12px;
+    color: var(--text-5);
+  }
+
+  .ct__val {
+    font-size: calc(var(--fs-body) - 0.5px);
+    font-weight: 600;
+  }
+
+  .ct__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: auto;
+  }
+
+  .ct__write {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: calc(var(--gap) + 10px);
+    border-radius: var(--r-xl);
+    background: var(--olive);
+  }
+
+  .ct__write-col {
+    position: relative;
+    z-index: 1;
+  }
+
+  .ct__write-title {
+    margin-bottom: 6px;
+    font-weight: var(--fw-heading);
+    font-size: calc(var(--fs-h3) + 2px);
+    line-height: 1.12;
+    letter-spacing: var(--ls-heading);
+    color: var(--bg);
+  }
+
+  .ct__write-sub {
+    font-size: calc(var(--fs-body) - 0.5px);
+    line-height: 1.5;
+    color: rgba(255, 250, 237, 0.82);
+  }
+
+  .ct__write :global(.messengers) {
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (min-width: 1200px) {
+    .ct {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .ct__phone-box {
+      align-items: flex-end;
+    }
+  }
+</style>

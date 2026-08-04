@@ -1,0 +1,194 @@
+---
+/**
+ * Виджет Яндекс.Карт с карточкой организации: рейтинг, часы, телефон и кнопка
+ * «как добраться» — всё живое, прямо из Яндекс.Бизнеса.
+ *
+ * Точки переключаются табами (у каждой свой `oid`), потому что параметр `pt`
+ * виджетом игнорируется — метки рисует только статическое API. Iframe
+ * подставляется по IntersectionObserver, чтобы скрипты Яндекса не тормозили
+ * первую загрузку; без JS работает ссылка из `<noscript>`.
+ */
+import { places, yandexOrgUrl } from '../data/site';
+
+const widgetUrl = (place: (typeof places)[number]) =>
+  `https://yandex.ru/map-widget/v1/org/vkusnaya_kompaniya/${place.yandexOrg}/?ll=${place.lng}%2C${place.lat}&z=16`;
+---
+
+<div class="map-block">
+  <div class="map-tabs" role="tablist" aria-label="Точки на карте">
+    {
+      places.map((place, i) => (
+        <button
+          type="button"
+          role="tab"
+          class="map-tab"
+          data-map-tab
+          data-src={widgetUrl(place)}
+          aria-selected={i === 0 ? 'true' : 'false'}
+        >
+          <span class="map-tab__n">{place.n}</span>
+          {place.addr}
+        </button>
+      ))
+    }
+  </div>
+
+  <div class="map" data-map data-src={widgetUrl(places[0])}>
+    <div class="map__stub">
+      <p class="map__stub-label">Загружаем карту…</p>
+    </div>
+    <noscript>
+      <a class="map__fallback" href={yandexOrgUrl(places[0].yandexOrg)} target="_blank" rel="noopener">
+        Открыть на Яндекс.Картах
+      </a>
+    </noscript>
+  </div>
+</div>
+
+<style>
+  .map-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .map-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .map-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px 7px 7px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+    background: var(--bg);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color 0.16s ease,
+      color 0.16s ease,
+      border-color 0.16s ease;
+  }
+
+  .map-tab__n {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: var(--r-pill);
+    background: var(--surface);
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  .map-tab[aria-selected='true'] {
+    background: var(--text);
+    border-color: var(--text);
+    color: var(--bg);
+  }
+
+  .map-tab[aria-selected='true'] .map-tab__n {
+    background: rgba(255, 250, 237, 0.2);
+    color: var(--bg);
+  }
+
+  .map-tab:hover:not([aria-selected='true']) {
+    background: color-mix(in srgb, var(--text) 6%, transparent);
+  }
+
+  .map {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--r-xl);
+    background: repeating-linear-gradient(45deg, #efe7da 0 12px, #eae1d2 12px 24px);
+  }
+
+  .map :global(iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .map__stub,
+  .map__fallback {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+  }
+
+  .map__stub-label,
+  .map__fallback {
+    font-size: 13px;
+    color: var(--text-4);
+    text-decoration: none;
+  }
+
+  .map__stub-label {
+    padding: 8px 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+    background: var(--bg);
+  }
+
+  .map.is-loaded .map__stub {
+    display: none;
+  }
+</style>
+
+<script>
+  const holder = document.querySelector<HTMLElement>('[data-map]');
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-map-tab]')];
+
+  if (holder) {
+    let frame: HTMLIFrameElement | null = null;
+
+    const mount = (src: string) => {
+      if (frame) {
+        frame.src = src;
+        return;
+      }
+      frame = document.createElement('iframe');
+      frame.src = src;
+      frame.title = 'Карта: «Вкусная компания» в Самаре';
+      frame.loading = 'lazy';
+      frame.allowFullscreen = true;
+      frame.addEventListener('load', () => holder.classList.add('is-loaded'));
+      holder.appendChild(frame);
+    };
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        tabs.forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
+        mount(tab.dataset.src ?? '');
+      });
+    });
+
+    const start = () => mount(holder.dataset.src ?? '');
+
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            observer.disconnect();
+            start();
+          }
+        },
+        { rootMargin: '400px' },
+      );
+      observer.observe(holder);
+    } else {
+      start();
+    }
+  }
+</script>

@@ -1,0 +1,70 @@
+---
+import { site, footerLinks } from '../data/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container footer__in">
+    <div>
+      <p class="footer__brand">{site.name}</p>
+      <!-- TODO(клиент): юридическая строка — ИП/ООО, ИНН, ОГРН. -->
+      <p class="footer__legal">© {year} · {site.city}</p>
+    </div>
+
+    <nav class="footer__links" aria-label="Дополнительные ссылки">
+      {footerLinks.map((link) => <a href={link.href}>{link.label}</a>)}
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    margin-top: 20px;
+    padding-block: calc(var(--sec-pad) * 0.6);
+    background: var(--surface);
+  }
+
+  .footer__in {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .footer__brand {
+    margin-bottom: 8px;
+    font-weight: var(--fw-heading);
+    font-size: 19px;
+    letter-spacing: var(--ls-heading);
+  }
+
+  .footer__legal {
+    font-size: 12px;
+    color: var(--text-4);
+  }
+
+  .footer__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer__links a {
+    font-size: 12.5px;
+    text-decoration: none;
+    border-bottom: 1px solid var(--line-4);
+  }
+
+  .footer__links a:hover {
+    border-bottom-color: var(--text);
+  }
+
+  @media (min-width: 1200px) {
+    .footer__in {
+      flex-direction: row;
+      align-items: flex-end;
+    }
+  }
+</style>

@@ -1,0 +1,128 @@
+---
+import Photo from './Photo.astro';
+import CustomCake from './CustomCake.astro';
+import { cakes } from '../data/catalog';
+
+// Свёрнутая сетка показывает первые ряды и уходит в фейд — остальное
+// раскрывает кнопка. Скрытые карточки не рендерят картинки до раскрытия,
+// поэтому «Показать ещё» ещё и экономит трафик.
+---
+
+<section class="section" id="cakes">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <h2>Торты</h2>
+        <p class="lead">
+          Готовые модели печём за 48 часов. Меняем цвет и надпись — остальное как на фото.
+        </p>
+      </div>
+      <a class="btn btn--secondary btn--sm" href="#custom-cake">Свой торт по картинке</a>
+    </div>
+
+    <div class="cakes__grid" data-cakes-grid>
+      {
+        cakes.map((cake, i) => (
+          <article class="cake">
+            <Photo
+              photo={cake.photo}
+              ratio="3 / 4"
+              eager={i < 4}
+              sizes="(min-width: 1200px) 310px, (min-width: 768px) 240px, 45vw"
+            />
+            <h3 class="cake__name">{cake.name}</h3>
+            <p class="cake__meta">{cake.meta}</p>
+          </article>
+        ))
+      }
+    </div>
+
+    <div class="cakes__more">
+      <button type="button" class="btn btn--secondary" data-cakes-toggle aria-expanded="false">
+        Показать ещё
+      </button>
+      <p class="cakes__count" data-cakes-count>В витрине {cakes.length} тортов</p>
+    </div>
+
+    <CustomCake />
+  </div>
+</section>
+
+<style>
+  .cakes__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--gap);
+    margin-top: 26px;
+  }
+
+  /* свёрнутое состояние: часть карточек не показываем, низ уводим в фейд */
+  .cakes__grid:not(.is-expanded) > :nth-child(n + 7) {
+    display: none;
+  }
+
+  .cakes__grid:not(.is-expanded) {
+    -webkit-mask-image: linear-gradient(to bottom, #000 65%, rgba(0, 0, 0, 0.35) 88%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 65%, rgba(0, 0, 0, 0.35) 88%, transparent 100%);
+  }
+
+  .cake__name {
+    margin-top: 12px;
+    font-size: calc(var(--fs-h3) - 1px);
+    line-height: 1.2;
+  }
+
+  .cake__meta {
+    margin-top: 4px;
+    font-size: 12.5px;
+    color: var(--text-4);
+  }
+
+  .cakes__more {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 26px;
+  }
+
+  .cakes__count {
+    font-size: 12.5px;
+    color: var(--text-4);
+  }
+
+  @media (min-width: 768px) {
+    .cakes__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .cakes__grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    /* на четырёх колонках свёрнутая сетка показывает два полных ряда */
+    .cakes__grid:not(.is-expanded) > :nth-child(-n + 8) {
+      display: block;
+    }
+
+    .cakes__grid:not(.is-expanded) > :nth-child(n + 9) {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const grid = document.querySelector<HTMLElement>('[data-cakes-grid]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-cakes-toggle]');
+  const count = document.querySelector<HTMLElement>('[data-cakes-count]');
+  const total = grid?.children.length ?? 0;
+
+  toggle?.addEventListener('click', () => {
+    const expanded = grid!.classList.toggle('is-expanded');
+    toggle.textContent = expanded ? 'Свернуть' : 'Показать ещё';
+    toggle.setAttribute('aria-expanded', String(expanded));
+    if (count) count.textContent = expanded ? `Показаны все ${total}` : `В витрине ${total} тортов`;
+  });
+</script>

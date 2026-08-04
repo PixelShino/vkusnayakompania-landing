@@ -1,0 +1,457 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   «Вкусная компания» — токены и базовый слой.
+   Палитра, типографика и радиусы взяты из handoff/Landing.dc.html (helmet +
+   renderVals) — он источник истины. Кнопки унаследованы от дизайн-системы
+   Organic (handoff/_ds/…/styles.css), но перекрашены в палитру макета.
+
+   Брейкпоинты макета: 390 / 834 / 1440. Переменные меняются на 768px и 1200px,
+   так что в контрольных ширинах контейнер даёт ровно 354 / 762 / 1296 px.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* поверхности */
+  --bg: #fffaed;
+  --surface: #f6eee3;
+  --surface-panel: #f1efe0;
+  --surface-photo: #efe7da;
+  --surface-warm: #fbece0;
+
+  /* текст */
+  --text: #2c2927;
+  --text-2: #5a5348;
+  --text-3: #6b6252;
+  --text-4: #8c8272;
+  --text-5: #9a8c77;
+
+  /* линии */
+  --line: #e4dbc9;
+  --line-2: #e9decc;
+  --line-3: #efe5d6;
+  --line-4: #d6cbb8;
+  --line-warm: #f4d6bd;
+
+  /* акценты */
+  --olive: #868c56;
+  --olive-dark: #5f6439;
+  --olive-tint: #edf0e0;
+  --olive-tint-line: #dce2c6;
+  --terracotta: #c67139;
+  --terracotta-text: #8c4c24;
+
+  /* типографика */
+  --font: 'Montserrat Variable', 'Montserrat', system-ui, sans-serif;
+  --fw-heading: 800;
+  --ls-heading: -0.02em;
+
+  /* ритм — мобильные значения (390) */
+  --pad: 18px;
+  --gap: 12px;
+  --sec-pad: 44px;
+  --content: 354px;
+
+  --fs-h1: clamp(30px, 8.72vw, 40px);
+  --fs-h2: clamp(22px, 6.41vw, 29px);
+  --fs-h3: 17px;
+  --fs-body: 14px;
+  --fs-lead: 15px;
+
+  /* радиусы */
+  --r-pill: 999px;
+  --r-sm: 14px;
+  --r-md: 16px;
+  --r-lg: 20px;
+  --r-xl: 24px;
+  --r-2xl: 26px;
+
+  --header-h: 65px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --pad: 36px;
+    --gap: 16px;
+    --sec-pad: 64px;
+    --content: 762px;
+    --fs-h1: clamp(44px, 5.64vw, 58px);
+    --fs-h2: clamp(30px, 3.96vw, 40px);
+    --fs-h3: 19px;
+    --fs-body: 15px;
+    --fs-lead: 17px;
+  }
+}
+
+@media (min-width: 1200px) {
+  :root {
+    --pad: 72px;
+    --gap: 20px;
+    --sec-pad: 92px;
+    --content: 1296px;
+    --fs-h1: clamp(56px, 4.58vw, 66px);
+    --fs-h2: clamp(38px, 2.92vw, 42px);
+    --fs-h3: 21px;
+    --fs-body: 16px;
+    --fs-lead: 19px;
+  }
+}
+
+/* ── база ────────────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-h) + 12px);
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--fs-body);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font);
+  font-weight: var(--fw-heading);
+  letter-spacing: var(--ls-heading);
+  line-height: 1.07;
+  margin: 0;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--fs-h1);
+}
+h2 {
+  font-size: var(--fs-h2);
+}
+h3 {
+  font-size: var(--fs-h3);
+  line-height: 1.15;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--terracotta);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--terracotta) 30%, transparent);
+}
+
+/* ── раскладка ───────────────────────────────────────────────────────────── */
+
+.container {
+  width: 100%;
+  max-width: calc(var(--content) + var(--pad) * 2);
+  margin-inline: auto;
+  padding-inline: var(--pad);
+}
+
+.section {
+  padding-block: var(--sec-pad);
+}
+
+.section--alt {
+  background: var(--bg);
+}
+
+.section-head {
+  display: flex;
+  gap: 20px;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.kicker {
+  font-size: 11.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-4);
+  margin-bottom: 14px;
+}
+
+.lead {
+  font-size: var(--fs-lead);
+  line-height: 1.5;
+  color: var(--text-2);
+  max-width: 46ch;
+}
+
+/* ── кнопки (из ДС Organic, палитра макета) ──────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 46px;
+  padding-inline: 22px;
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease;
+}
+
+.btn img,
+.btn svg {
+  flex: none;
+}
+
+.btn--primary {
+  background: var(--text);
+  color: var(--bg);
+}
+.btn--primary:hover {
+  background: #413c37;
+}
+.btn--primary:active {
+  background: #1e1b19;
+}
+
+.btn--secondary {
+  border-color: var(--line);
+  color: var(--text);
+}
+.btn--secondary:hover {
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+.btn--secondary:active {
+  background: color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+/* светлая кнопка на тёмной/оливковой заливке */
+.btn--light {
+  background: var(--bg);
+  color: var(--text);
+}
+.btn--light:hover {
+  background: #fff;
+}
+
+/* призрачная на фото */
+.btn--ghost-light {
+  background: rgba(255, 250, 237, 0.16);
+  border-color: rgba(255, 250, 237, 0.5);
+  color: var(--bg);
+}
+.btn--ghost-light:hover {
+  background: rgba(255, 250, 237, 0.26);
+}
+
+.btn--sm {
+  height: 38px;
+  padding-inline: 16px;
+  font-size: 13px;
+}
+
+.btn--md {
+  height: 42px;
+  padding-inline: 18px;
+  font-size: 13.5px;
+}
+
+.btn--block {
+  width: 100%;
+}
+
+/* ── повторяющийся паттерн: круг → пунктир → пилюля ──────────────────────── */
+
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.card-mark {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-pill);
+  background: var(--text);
+  color: var(--bg);
+  font-weight: var(--fw-heading);
+  font-size: 21px;
+  line-height: 1;
+}
+
+.card-mark--light {
+  background: rgba(255, 250, 237, 0.18);
+  color: var(--bg);
+}
+
+.card-mark--sm {
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+}
+
+.card-dash {
+  flex: 1;
+  border-top: 2px dashed var(--line);
+}
+
+.card-dash--light {
+  border-top-color: rgba(255, 250, 237, 0.32);
+}
+
+.card-pill {
+  padding: 7px 13px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.card-pill--light {
+  background: rgba(255, 250, 237, 0.18);
+  border-color: transparent;
+  color: var(--bg);
+}
+
+.card-pill--open {
+  background: var(--olive-tint);
+  border-color: var(--olive-tint-line);
+  color: var(--olive-dark);
+}
+
+/* декоративный круг в углу акцентных карточек */
+.blob {
+  position: absolute;
+  width: 190px;
+  height: 190px;
+  right: -70px;
+  bottom: -80px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 250, 237, 0.1);
+  pointer-events: none;
+}
+
+/* ── горизонтальные рельсы ───────────────────────────────────────────────── */
+
+.rail {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: var(--pad);
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  width: calc(100% + var(--pad) * 2);
+  margin-inline: calc(var(--pad) * -1);
+  padding-inline: var(--pad);
+  padding-bottom: 4px;
+}
+
+.rail::-webkit-scrollbar {
+  display: none;
+}
+
+.rail > * {
+  scroll-snap-align: start;
+}
+
+/* ── медиа ───────────────────────────────────────────────────────────────── */
+
+.media {
+  position: relative;
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  aspect-ratio: var(--ratio, 3 / 4);
+  border-radius: var(--radius, var(--r-md));
+  background: var(--surface-photo);
+}
+
+@media (min-width: 768px) {
+  .media {
+    aspect-ratio: var(--ratio-md, var(--ratio, 3 / 4));
+  }
+}
+
+.media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
