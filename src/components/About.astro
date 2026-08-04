@@ -86,9 +86,9 @@ const facts = ['Шесть лет на кухне', 'Две точки в Сам
     grid-column: span 2;
   }
 
-  @media (min-width: 1200px) {
+  @media (min-width: 1000px) {
     .about {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
   }
 </style>

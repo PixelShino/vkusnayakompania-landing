@@ -184,9 +184,11 @@ import { site, places, yandexOrgUrl } from '../data/site';
     z-index: 1;
   }
 
-  @media (min-width: 1200px) {
+  /* с тысячи пикселей карта уже помещается рядом с карточками —
+     держать её во всю ширину под ними значит гнать страницу вниз впустую */
+  @media (min-width: 1000px) {
     .ct {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
 
     .ct__phone-box {

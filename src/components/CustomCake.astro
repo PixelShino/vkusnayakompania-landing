@@ -95,6 +95,9 @@ import { heroPhotos, steps } from '../data/catalog';
     position: relative;
     z-index: 1;
     display: grid;
+    /* minmax(0, …) вместо 1fr: иначе колонка не сжимается ниже min-content
+       и панель разъезжается на узких экранах */
+    grid-template-columns: minmax(0, 1fr);
     gap: calc(var(--gap) + 8px);
     align-items: start;
   }
@@ -102,6 +105,7 @@ import { heroPhotos, steps } from '../data/catalog';
   .sk__left {
     display: flex;
     flex-direction: column;
+    min-width: 0;
   }
 
   .sk__title {
@@ -184,6 +188,7 @@ import { heroPhotos, steps } from '../data/catalog';
   }
 
   .sk__step-body {
+    min-width: 0;
     padding-bottom: 20px;
   }
 
@@ -208,8 +213,9 @@ import { heroPhotos, steps } from '../data/catalog';
 
   .sk__media {
     order: -1;
+    min-width: 0;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 10px;
     align-items: start;
     margin-bottom: 4px;

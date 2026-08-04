@@ -55,11 +55,14 @@ const sizeClass = size === 'sm' ? 'btn--sm' : size === 'lg' ? '' : 'btn--md';
 <style>
   .messengers {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
   }
 
+  /* на узких экранах пара кнопок встаёт в столбик, а не распирает родителя:
+     текст в кнопке не переносится, поэтому базис задан явно */
   .messengers > .btn {
-    flex: 1 1 0;
+    flex: 1 1 128px;
     min-width: 0;
   }
 </style>
