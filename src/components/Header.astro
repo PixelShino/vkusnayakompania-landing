@@ -15,7 +15,12 @@ import { site, nav } from '../data/site';
     </nav>
 
     <div class="header__actions">
-      <a class="btn btn--primary btn--sm header__cta" href={site.links.shop}>Заказать доставку</a>
+      <a
+        class="btn btn--primary btn--sm header__cta"
+        href={site.links.shop}
+        target="_blank"
+        rel="noopener">Заказать доставку</a
+      >
       <a class="header__phone" href={site.phoneHref}>{site.phone}</a>
       <button
         type="button"
@@ -32,7 +37,9 @@ import { site, nav } from '../data/site';
   <div class="header__menu" id="mobile-menu" hidden>
     <div class="container header__menu-in">
       {nav.map((item) => <a href={item.href}>{item.label}</a>)}
-      <a class="btn btn--primary btn--block" href={site.links.shop}>Заказать доставку</a>
+      <a class="btn btn--primary btn--block" href={site.links.shop} target="_blank" rel="noopener">
+        Заказать доставку
+      </a>
     </div>
   </div>
 </header>

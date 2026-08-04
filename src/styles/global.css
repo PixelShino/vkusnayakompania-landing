@@ -207,11 +207,22 @@ button {
 
 .section-head {
   display: flex;
-  gap: 20px;
+  gap: 20px 28px;
   align-items: flex-end;
   justify-content: space-between;
   flex-wrap: wrap;
   margin-bottom: 4px;
+}
+
+/* лид всегда отбивается от заголовка одинаково, в какой бы секции ни стоял */
+.section-head h2 + .lead,
+h2 + .lead,
+h1 + .lead {
+  margin-top: 10px;
+}
+
+.section-head > div {
+  min-width: 0;
 }
 
 .kicker {

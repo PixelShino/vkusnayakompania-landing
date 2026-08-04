@@ -2,6 +2,7 @@
 import Photo from './Photo.astro';
 import CustomCake from './CustomCake.astro';
 import { cakes } from '../data/catalog';
+import { site } from '../data/site';
 
 // Свёрнутая сетка показывает первые ряды и уходит в фейд — остальное
 // раскрывает кнопка. Скрытые карточки не рендерят картинки до раскрытия,
@@ -14,7 +15,8 @@ import { cakes } from '../data/catalog';
       <div>
         <h2>Торты</h2>
         <p class="lead">
-          Готовые модели печём за 48 часов. Меняем цвет и надпись — остальное как на фото.
+          Двенадцать моделей в постоянном меню, каждая — за 48 часов. Цвет и надпись меняем под
+          повод, остальное как на фото.
         </p>
       </div>
       <a class="btn btn--secondary btn--sm" href="#custom-cake">Свой торт по картинке</a>
@@ -42,6 +44,9 @@ import { cakes } from '../data/catalog';
         Показать ещё
       </button>
       <p class="cakes__count" data-cakes-count>В витрине {cakes.length} тортов</p>
+      <a class="cakes__shop" href={site.shopSections.cakesReady} target="_blank" rel="noopener">
+        Торты, которые можно забрать сегодня →
+      </a>
     </div>
 
     <CustomCake />
@@ -89,6 +94,19 @@ import { cakes } from '../data/catalog';
   .cakes__count {
     font-size: 12.5px;
     color: var(--text-4);
+  }
+
+  .cakes__shop {
+    margin-left: auto;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--terracotta-text);
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--terracotta) 40%, transparent);
+  }
+
+  .cakes__shop:hover {
+    border-bottom-color: var(--terracotta);
   }
 
   @media (min-width: 768px) {

@@ -12,7 +12,8 @@ const pickup = places.map((p) => `${p.street} — ${p.opensAt}`).join(', ');
         <p class="kicker">Три способа</p>
         <h2>Как заказать</h2>
         <p class="lead">
-          Забрать с витрины, привезти домой или собрать торт под событие — выбирайте по срокам.
+          Забрать с витрины сегодня, привезти домой к ужину или собрать торт под событие —
+          выбирайте по срокам.
         </p>
       </div>
       <a class="how__phone" href={site.phoneHref}>{site.phone}</a>
@@ -27,10 +28,13 @@ const pickup = places.map((p) => `${p.street} — ${p.opensAt}`).join(', ');
         </div>
         <h3 class="how__title">Доставка</h3>
         <p class="how__text">
-          Каталог, корзина и оплата — в отдельном магазине. Есть приложения для iOS и Android.
+          Каталог, корзина и оплата — в магазине <b>vkusdostavka.shop</b>. Там же завтраки, супы и
+          паста. Есть приложения для iOS и Android.
         </p>
         <div class="how__foot">
-          <a class="btn btn--secondary btn--md" href={site.links.shop}>В магазин</a>
+          <a class="btn btn--secondary btn--md" href={site.links.shop} target="_blank" rel="noopener">
+            В магазин
+          </a>
         </div>
       </article>
 

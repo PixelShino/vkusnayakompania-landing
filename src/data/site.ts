@@ -24,15 +24,29 @@ export const site = {
     // для JSON-LD
     schema: ['Mo-Fr 08:00-21:00', 'Sa 08:30-21:00', 'Su 09:00-21:00'],
   },
-  // TODO(клиент): реальные ссылки на мессенджеры, магазин доставки, кейтеринг и приложение.
+  // Ссылки на действующие ресурсы «Вкусной компании».
+  // TODO(клиент): дать ссылку на канал в Max — остальное подтверждено.
   links: {
-    telegram: 'https://t.me/',
+    telegram: 'https://t.me/vkusnayakompania',
     max: 'https://max.ru/',
-    shop: '#',
-    catering: '#',
-    app: '#',
+    vk: 'https://vk.ru/vkusnayakompania',
+    shop: 'https://vkusdostavka.shop/',
+    catering: 'https://vkusnayakompania.ru/',
+    cateringServices: 'https://vkusnayakompania.ru/services/',
+    appIos: 'https://apps.apple.com/app/id6477568088',
+    appAndroid:
+      'https://play.google.com/store/apps/details?id=com.foodpicasso.cateringvkusnaya&hl=ru',
     privacy: '#',
     offer: '#',
+  },
+  /** Разделы магазина доставки — на них ведут кнопки секций */
+  shopSections: {
+    cakesReady: 'https://vkusdostavka.shop/s/torty-v-nalichii_31',
+    cakesCustom: 'https://vkusdostavka.shop/s/prazdnichnye-torty_26',
+    pastry: 'https://vkusdostavka.shop/s/pirojnye_30',
+    sweets: 'https://vkusdostavka.shop/s/konfety_29',
+    sets: 'https://vkusdostavka.shop/s/nabory-pirojnyh-i-konfet_33',
+    breakfasts: 'https://vkusdostavka.shop/s/zavtraki_1',
   },
   map: {
     center: { lat: 53.1959, lng: 50.1008 },
@@ -112,8 +126,37 @@ export const nav = [
 
 export const footerLinks = [
   { label: 'Магазин доставки', href: site.links.shop },
-  { label: 'Кейтеринг', href: site.links.catering },
-  { label: 'Приложение', href: site.links.app },
-  { label: 'Политика', href: site.links.privacy },
-  { label: 'Оферта', href: site.links.offer },
+  { label: 'Кейтеринг и банкеты', href: site.links.catering },
+  { label: 'Приложение', href: '#apps' },
+  { label: 'ВКонтакте', href: site.links.vk },
+  { label: 'Telegram', href: site.links.telegram },
+];
+
+/** Соседние проекты «Вкусной компании» — блок перелинковки */
+export const ecosystem = [
+  {
+    kicker: 'Доставка',
+    title: 'Магазин на каждый день',
+    text: 'Завтраки, супы, паста, торты в наличии и пирожные — с доставкой по Самаре или самовывозом. Оплата на сайте.',
+    href: site.links.shop,
+    cta: 'Открыть меню',
+    domain: 'vkusdostavka.shop',
+    links: [
+      { label: 'Торты в наличии', href: site.shopSections.cakesReady },
+      { label: 'Пирожные', href: site.shopSections.pastry },
+      { label: 'Завтраки', href: site.shopSections.breakfasts },
+    ],
+  },
+  {
+    kicker: 'События',
+    title: 'Кейтеринг и банкеты',
+    text: 'Фуршет, банкет или праздник под ключ: блюда, обслуживание, оформление и программа. Шесть лет и сотни мероприятий.',
+    href: site.links.catering,
+    cta: 'Смотреть услуги',
+    domain: 'vkusnayakompania.ru',
+    links: [
+      { label: 'Услуги и форматы', href: site.links.cateringServices },
+      { label: 'Частые вопросы', href: 'https://vkusnayakompania.ru/faq/' },
+    ],
+  },
 ];

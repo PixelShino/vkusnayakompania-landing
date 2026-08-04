@@ -34,7 +34,8 @@ import { heroPhotos, roomDetails } from '../data/catalog';
 </section>
 
 <style>
-  .room__wide {
+  /* см. About: класс на корне дочернего компонента требует `:global` */
+  .container > :global(.room__wide) {
     margin-top: 26px;
   }
 

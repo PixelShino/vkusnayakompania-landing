@@ -30,7 +30,12 @@ import { site } from '../data/site';
           </p>
           <div class="hero__overlay-cta">
             <a class="btn btn--primary btn--block" href="#cakes">Смотреть торты</a>
-            <a class="btn btn--ghost-light btn--block" href={site.links.shop}>Заказать доставку</a>
+            <a
+              class="btn btn--ghost-light btn--block"
+              href={site.links.shop}
+              target="_blank"
+              rel="noopener">Заказать доставку</a
+            >
           </div>
         </div>
       </Photo>
@@ -51,7 +56,9 @@ import { site } from '../data/site';
         </p>
         <div class="hero__cta">
           <a class="btn btn--primary" href="#cakes">Смотреть торты</a>
-          <a class="btn btn--secondary" href={site.links.shop}>Заказать доставку</a>
+          <a class="btn btn--secondary" href={site.links.shop} target="_blank" rel="noopener">
+            Заказать доставку
+          </a>
         </div>
       </div>
     </div>
@@ -126,7 +133,8 @@ import { site } from '../data/site';
     font-size: 14.5px;
   }
 
-  .hero__wide,
+  /* классы на корне дочернего `Photo.astro` — нужен `:global` */
+  .hero__grid > :global(.hero__wide),
   .hero__text {
     display: none;
   }
@@ -149,7 +157,7 @@ import { site } from '../data/site';
       align-items: stretch;
     }
 
-    .hero__tall {
+    .hero__grid > :global(.hero__tall) {
       grid-column: 1;
       grid-row: 1 / span 2;
       height: 100%;
@@ -160,7 +168,7 @@ import { site } from '../data/site';
       display: none;
     }
 
-    .hero__wide {
+    .hero__grid > :global(.hero__wide) {
       display: block;
       grid-column: 2;
       grid-row: 1;
