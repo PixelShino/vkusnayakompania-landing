@@ -1,12 +1,11 @@
 ---
 import Photo from './Photo.astro';
 import CustomCake from './CustomCake.astro';
-import { cakes } from '../data/catalog';
+import { cakes, cakeFilters } from '../data/catalog';
 import { site } from '../data/site';
 
-// Свёрнутая сетка показывает первые ряды и уходит в фейд — остальное
-// раскрывает кнопка. Скрытые карточки не рендерят картинки до раскрытия,
-// поэтому «Показать ещё» ещё и экономит трафик.
+// Свёрнутая витрина показывает два ряда и уходит в фейд; остальное открывает
+// кнопка. Фильтры и «показать ещё» работают на классах — без перерисовки DOM.
 ---
 
 <section class="section" id="cakes">
@@ -22,22 +21,44 @@ import { site } from '../data/site';
       <a class="btn btn--secondary btn--sm" href="#custom-cake">Свой торт по картинке</a>
     </div>
 
+    <div class="cakes__filters rail" role="group" aria-label="Фильтр по видам тортов">
+      {
+        cakeFilters.map((filter, i) => (
+          <button
+            type="button"
+            class="chip"
+            data-filter={filter}
+            aria-pressed={i === 0 ? 'true' : 'false'}
+          >
+            {filter}
+          </button>
+        ))
+      }
+    </div>
+
     <div class="cakes__grid" data-cakes-grid>
       {
         cakes.map((cake, i) => (
-          <article class="cake">
+          <article class="cake" data-tags={[cake.name, ...(cake.tags ?? [])].join('|')}>
             <Photo
               photo={cake.photo}
               ratio="3 / 4"
               eager={i < 4}
               sizes="(min-width: 1200px) 310px, (min-width: 768px) 240px, 45vw"
-            />
-            <h3 class="cake__name">{cake.name}</h3>
-            <p class="cake__meta">{cake.meta}</p>
+            >
+              <figcaption class="cake__caption">
+                <span class="cake__name">{cake.name}</span>
+                <span class="cake__meta">{cake.meta}</span>
+              </figcaption>
+            </Photo>
           </article>
         ))
       }
     </div>
+
+    <p class="cakes__empty" data-cakes-empty hidden>
+      В этой подборке пока пусто. Напишите нам — соберём под ваш повод.
+    </p>
 
     <div class="cakes__more">
       <button type="button" class="btn btn--secondary" data-cakes-toggle aria-expanded="false">
@@ -54,11 +75,45 @@ import { site } from '../data/site';
 </section>
 
 <style>
+  .cakes__filters {
+    margin-top: 22px;
+    padding-bottom: 6px;
+    gap: 8px;
+    scroll-snap-type: none;
+  }
+
+  .chip {
+    flex: none;
+    padding: 9px 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+    background: var(--bg);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #4c463d;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color 0.16s ease,
+      border-color 0.16s ease,
+      color 0.16s ease;
+  }
+
+  .chip:hover {
+    border-color: var(--text);
+  }
+
+  .chip[aria-pressed='true'] {
+    background: var(--text);
+    border-color: var(--text);
+    color: var(--surface);
+  }
+
   .cakes__grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: var(--gap);
-    margin-top: 26px;
+    margin-top: 20px;
   }
 
   /* свёрнутое состояние: часть карточек не показываем, низ уводим в фейд */
@@ -67,19 +122,49 @@ import { site } from '../data/site';
   }
 
   .cakes__grid:not(.is-expanded) {
-    -webkit-mask-image: linear-gradient(to bottom, #000 65%, rgba(0, 0, 0, 0.35) 88%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 65%, rgba(0, 0, 0, 0.35) 88%, transparent 100%);
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      #000 62%,
+      rgba(0, 0, 0, 0.32) 88%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(to bottom, #000 62%, rgba(0, 0, 0, 0.32) 88%, transparent 100%);
+  }
+
+  /* отфильтрованные прячем всегда — правило сильнее счётчика выше */
+  .cakes__grid > .cake.is-hidden {
+    display: none !important;
+  }
+
+  .cake__caption {
+    position: absolute;
+    inset: auto 0 0 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 38px 14px 13px;
+    pointer-events: none;
+    background: linear-gradient(to top, rgba(28, 25, 22, 0.82), rgba(28, 25, 22, 0));
   }
 
   .cake__name {
-    margin-top: 12px;
+    font-weight: var(--fw-heading);
     font-size: calc(var(--fs-h3) - 1px);
     line-height: 1.2;
+    letter-spacing: var(--ls-heading);
+    color: var(--bg);
+    text-wrap: balance;
   }
 
   .cake__meta {
-    margin-top: 4px;
-    font-size: 12.5px;
+    font-size: 12px;
+    color: rgba(255, 250, 237, 0.76);
+  }
+
+  .cakes__empty {
+    margin-top: 20px;
+    font-size: var(--fs-body);
     color: var(--text-4);
   }
 
@@ -88,7 +173,7 @@ import { site } from '../data/site';
     gap: 14px;
     align-items: center;
     flex-wrap: wrap;
-    margin-top: 26px;
+    margin-top: 24px;
   }
 
   .cakes__count {
@@ -97,7 +182,6 @@ import { site } from '../data/site';
   }
 
   .cakes__shop {
-    margin-left: auto;
     font-size: 13px;
     font-weight: 600;
     color: var(--terracotta-text);
@@ -113,6 +197,10 @@ import { site } from '../data/site';
     .cakes__grid {
       grid-template-columns: repeat(3, 1fr);
     }
+
+    .cakes__shop {
+      margin-left: auto;
+    }
   }
 
   @media (min-width: 1200px) {
@@ -120,7 +208,7 @@ import { site } from '../data/site';
       grid-template-columns: repeat(4, 1fr);
     }
 
-    /* на четырёх колонках свёрнутая сетка показывает два полных ряда */
+    /* на четырёх колонках свёрнутая витрина показывает два полных ряда */
     .cakes__grid:not(.is-expanded) > :nth-child(-n + 8) {
       display: block;
     }
@@ -135,12 +223,54 @@ import { site } from '../data/site';
   const grid = document.querySelector<HTMLElement>('[data-cakes-grid]');
   const toggle = document.querySelector<HTMLButtonElement>('[data-cakes-toggle]');
   const count = document.querySelector<HTMLElement>('[data-cakes-count]');
-  const total = grid?.children.length ?? 0;
+  const empty = document.querySelector<HTMLElement>('[data-cakes-empty]');
+  const chips = [...document.querySelectorAll<HTMLButtonElement>('[data-filter]')];
 
-  toggle?.addEventListener('click', () => {
-    const expanded = grid!.classList.toggle('is-expanded');
-    toggle.textContent = expanded ? 'Свернуть' : 'Показать ещё';
-    toggle.setAttribute('aria-expanded', String(expanded));
-    if (count) count.textContent = expanded ? `Показаны все ${total}` : `В витрине ${total} тортов`;
-  });
+  if (grid && toggle && count) {
+    const cards = [...grid.children] as HTMLElement[];
+    const total = cards.length;
+    let filter = chips[0]?.dataset.filter ?? 'Все';
+
+    const visible = () => cards.filter((card) => !card.classList.contains('is-hidden')).length;
+
+    const sync = () => {
+      const shown = visible();
+      const expanded = grid.classList.contains('is-expanded');
+      const collapsedLimit = window.matchMedia('(min-width: 1200px)').matches ? 8 : 6;
+      const hasMore = shown > collapsedLimit;
+
+      toggle.hidden = !hasMore;
+      toggle.textContent = expanded ? 'Свернуть' : 'Показать ещё';
+      toggle.setAttribute('aria-expanded', String(expanded));
+
+      if (filter === 'Все') {
+        count.textContent = expanded ? `Показаны все ${total}` : `В витрине ${total} тортов`;
+      } else {
+        count.textContent = `${shown} из ${total} подходят`;
+      }
+
+      if (empty) empty.hidden = shown > 0;
+    };
+
+    toggle.addEventListener('click', () => {
+      grid.classList.toggle('is-expanded');
+      sync();
+    });
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        filter = chip.dataset.filter ?? 'Все';
+        chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+        cards.forEach((card) => {
+          const tags = card.dataset.tags ?? '';
+          card.classList.toggle('is-hidden', filter !== 'Все' && !tags.includes(filter));
+        });
+        // при узкой подборке разворачиваем сетку, чтобы не прятать пару карточек
+        grid.classList.toggle('is-expanded', filter !== 'Все');
+        sync();
+      });
+    });
+
+    sync();
+  }
 </script>

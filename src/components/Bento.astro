@@ -35,11 +35,15 @@ import { site, places } from '../data/site';
     padding-bottom: calc(var(--sec-pad) * 0.5);
   }
 
+  /* на телефоне бенто наезжает на нижний край фото первого экрана:
+     карточка часов вырезается из снимка кольцом цвета фона */
   .bento {
+    position: relative;
+    z-index: 3;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 6px;
-    margin-top: 18px;
+    margin-top: -46px;
   }
 
   .bento__hours,
@@ -51,10 +55,11 @@ import { site, places } from '../data/site';
     display: flex;
     flex-direction: column;
     gap: 1px;
-    padding: 11px 13px;
-    border-radius: var(--r-sm);
+    padding: 13px 15px;
+    border-radius: var(--r-lg);
     background: var(--olive);
     color: var(--bg);
+    box-shadow: 0 0 0 5px var(--bg);
   }
 
   .bento__cell {
@@ -111,6 +116,10 @@ import { site, places } from '../data/site';
       grid-template-columns: repeat(6, 1fr);
       gap: 10px;
       margin-top: 34px;
+    }
+
+    .bento__hours {
+      box-shadow: none;
     }
 
     .bento__hours,

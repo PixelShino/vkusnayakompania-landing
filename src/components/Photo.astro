@@ -4,9 +4,6 @@
  * поэтому srcset собирается из URL — без скачивания и оптимизации на сборке.
  * Когда приедут реальные снимки, здесь меняется только источник: файл из
  * `src/assets/` и `<Image />` из `astro:assets`.
- *
- * `zoom` делает кликабельным всё фото (в макете была маленькая кнопка ⤢ —
- * README сам просил в проде расширить зону на весь снимок).
  */
 import type { Photo } from '../data/catalog';
 
@@ -17,7 +14,6 @@ interface Props {
   ratioMd?: string;
   radius?: string;
   sizes?: string;
-  zoom?: boolean;
   eager?: boolean;
   class?: string;
 }
@@ -28,7 +24,6 @@ const {
   ratioMd,
   radius,
   sizes = '(min-width: 1200px) 320px, (min-width: 768px) 240px, 50vw',
-  zoom = true,
   eager = false,
   class: className = '',
 } = Astro.props;
@@ -53,60 +48,4 @@ const srcset = WIDTHS.map((w) => `${url(w)} ${w}w`).join(', ');
     fetchpriority={eager ? 'high' : 'auto'}
   />
   <slot />
-  {
-    zoom && (
-      <button
-        type="button"
-        class="media__zoom"
-        data-zoom={url(1800)}
-        data-zoom-alt={photo.alt}
-        aria-label={`Открыть фото во весь экран: ${photo.alt}`}
-      >
-        <span class="media__zoom-icon" aria-hidden="true">⤢</span>
-      </button>
-    )
-  }
 </figure>
-
-<style>
-  .media__zoom {
-    position: absolute;
-    inset: 0;
-    z-index: 3;
-    display: block;
-    width: 100%;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    cursor: zoom-in;
-  }
-
-  .media__zoom-icon {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    border-radius: var(--r-pill);
-    background: rgba(44, 41, 39, 0.5);
-    color: var(--bg);
-    font-size: 13px;
-    line-height: 1;
-    opacity: 0;
-    transition: opacity 0.16s ease;
-  }
-
-  .media:hover .media__zoom-icon,
-  .media__zoom:focus-visible .media__zoom-icon {
-    opacity: 1;
-  }
-
-  /* на тач-устройствах hover не случится — показываем сразу */
-  @media (hover: none) {
-    .media__zoom-icon {
-      opacity: 1;
-    }
-  }
-</style>

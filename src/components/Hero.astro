@@ -14,7 +14,7 @@ import { site } from '../data/site';
     <div class="hero__grid">
       <Photo
         photo={heroPhotos.tall}
-        ratio="3 / 4"
+        ratio="3 / 4.4"
         ratioMd="auto"
         radius="var(--r-xl)"
         sizes="(min-width: 1200px) 520px, (min-width: 768px) 45vw, 100vw"
@@ -101,7 +101,8 @@ import { site } from '../data/site';
     display: flex;
     flex-direction: column;
     gap: 9px;
-    padding: 20px 18px;
+    /* снизу оставлен запас: туда наезжает бенто из соседней секции */
+    padding: 20px 18px 76px;
   }
 
   .kicker--light {
