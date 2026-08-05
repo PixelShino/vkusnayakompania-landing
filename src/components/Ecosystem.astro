@@ -110,6 +110,13 @@ import { ecosystem, site } from '../data/site';
     background: var(--olive);
   }
 
+  /* киккер и домен не переносятся внутри себя, поэтому при нехватке места
+     домен уходит строкой ниже — иначе он вылезал за край карточки */
+  .eco__card .card-top {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
   .eco__kicker {
     padding: 7px 13px;
     border: 1px solid var(--line-2);
@@ -130,6 +137,7 @@ import { ecosystem, site } from '../data/site';
   }
 
   .eco__domain {
+    margin-inline-start: auto;
     font-size: 12px;
     color: var(--text-4);
     white-space: nowrap;
