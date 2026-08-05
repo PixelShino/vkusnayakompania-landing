@@ -65,7 +65,8 @@
   --r-xl: 24px;
   --r-2xl: 26px;
 
-  --header-h: 65px;
+  /* реальная высота липкой шапки: по ней считается отступ якорей */
+  --header-h: 68px;
 }
 
 @media (min-width: 768px) {
@@ -79,6 +80,7 @@
     --fs-h3: 19px;
     --fs-body: 15px;
     --fs-lead: 17px;
+    --header-h: 80px;
   }
 }
 
@@ -214,10 +216,6 @@ button {
      высоту после первого показа, поэтому полоса прокрутки не прыгает */
   content-visibility: auto;
   contain-intrinsic-size: auto 700px;
-}
-
-.section--alt {
-  background: var(--bg);
 }
 
 .section-head {
@@ -410,12 +408,6 @@ h3 {
   color: var(--bg);
 }
 
-.card-pill--open {
-  background: var(--olive-tint);
-  border-color: var(--olive-tint-line);
-  color: var(--olive-dark);
-}
-
 /* декоративный круг в углу акцентных карточек */
 .blob {
   position: absolute;
@@ -478,14 +470,3 @@ h3 {
   object-fit: cover;
 }
 
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
-}

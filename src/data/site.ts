@@ -10,7 +10,6 @@
 
 export const site = {
   name: 'Вкусная компания',
-  legalName: 'Вкусная компания',
   city: 'Самара',
   title: 'Вкусная компания — кондитерская и кухня в Самаре',
   description:
@@ -41,10 +40,6 @@ export const site = {
     sweets: 'https://vkusdostavka.shop/s/konfety_29',
     sets: 'https://vkusdostavka.shop/s/nabory-pirojnyh-i-konfet_33',
     breakfasts: 'https://vkusdostavka.shop/s/zavtraki_1',
-  },
-  map: {
-    center: { lat: 53.1959, lng: 50.1008 },
-    zoom: 12,
   },
 } as const;
 
@@ -88,12 +83,6 @@ export const hoursRows = (schedule: Schedule) => {
   }));
 };
 
-/** «Пн–пт 8:00 — 21:00 · Сб 8:30 — 21:00 · Вс 9:00 — 21:00» — одной строкой */
-export const hoursText = (schedule: Schedule) =>
-  hoursRows(schedule)
-    .map((row) => `${row.days} ${row.hours}`)
-    .join(' · ');
-
 const pluralRules = new Intl.PluralRules('ru-RU');
 
 /** Склонение при числительном: `plural(463, 'отзыв', 'отзыва', 'отзывов')` */
@@ -130,7 +119,6 @@ export type Place = {
   /** id организации на Яндекс.Картах — им живёт виджет и ссылки «маршрут» */
   yandexOrg: string;
   rating: string;
-  ratingCount: number;
 };
 
 // Адреса, координаты, часы и рейтинги сняты с карточек организации на
@@ -147,7 +135,6 @@ export const places: Place[] = [
     lng: 50.100202,
     yandexOrg: '154837147598',
     rating: '4,8',
-    ratingCount: 765,
   },
   {
     n: '2',
@@ -159,7 +146,6 @@ export const places: Place[] = [
     lng: 50.202188,
     yandexOrg: '243452895564',
     rating: '5,0',
-    ratingCount: 320,
   },
 ];
 
