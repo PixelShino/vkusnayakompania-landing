@@ -83,6 +83,29 @@ export const hoursRows = (schedule: Schedule) => {
   }));
 };
 
+const toMinutes = (time: string) => Number(time.slice(0, 2)) * 60 + Number(time.slice(3));
+
+/**
+ * Что показывать на плашке точки в конкретный момент.
+ * `day` — как в `Date.getDay()`, `minutes` — с полуночи. Время берётся по
+ * Самаре и только в браузере, поэтому расчёт вынесен сюда отдельной функцией:
+ * так его можно проверить без страницы (`npm test`).
+ */
+export const openState = (schedule: Schedule, day: number, minutes: number) => {
+  const [open, close] = schedule[day];
+  const beforeOpen = minutes < toMinutes(open);
+  const isOpen = !beforeOpen && minutes < toMinutes(close);
+
+  return {
+    isOpen,
+    label: isOpen
+      ? `Открыто до ${shortTime(close)}`
+      : beforeOpen
+        ? `Откроется в ${shortTime(open)}`
+        : `Откроется завтра в ${shortTime(schedule[(day + 1) % 7][0])}`,
+  };
+};
+
 const pluralRules = new Intl.PluralRules('ru-RU');
 
 /** Склонение при числительном: `plural(463, 'отзыв', 'отзыва', 'отзывов')` */

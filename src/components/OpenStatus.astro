@@ -51,11 +51,9 @@ const weekday = schedule[1];
 </style>
 
 <script>
-  type Hours = [open: string, close: string];
+  import { openState, shortTime, type Schedule } from '../data/site';
 
   const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const toMinutes = (time: string) => Number(time.slice(0, 2)) * 60 + Number(time.slice(3));
-  const short = (time: string) => time.replace(/^0/, '');
 
   const nodes = document.querySelectorAll<HTMLElement>('[data-schedule]');
 
@@ -75,24 +73,18 @@ const weekday = schedule[1];
 
     if (day >= 0) {
       nodes.forEach((node) => {
-        const schedule = JSON.parse(node.dataset.schedule ?? '[]') as Hours[];
-        const [open, close] = schedule[day] ?? [];
-        if (!open) return;
+        const schedule = JSON.parse(node.dataset.schedule ?? 'null') as Schedule | null;
+        if (!schedule?.[day]) return;
 
         if ('today' in node.dataset) {
-          node.textContent = `${short(open)} — ${short(close)}`;
+          const [open, close] = schedule[day];
+          node.textContent = `${shortTime(open)} — ${shortTime(close)}`;
           return;
         }
 
-        const beforeOpen = now < toMinutes(open);
-        const isOpen = !beforeOpen && now < toMinutes(close);
-
-        node.textContent = isOpen
-          ? `Открыто до ${short(close)}`
-          : beforeOpen
-            ? `Откроется в ${short(open)}`
-            : `Откроется завтра в ${short(schedule[(day + 1) % 7][0])}`;
-        node.classList.toggle('is-open', isOpen);
+        const state = openState(schedule, day, now);
+        node.textContent = state.label;
+        node.classList.toggle('is-open', state.isOpen);
         node.hidden = false;
       });
     }

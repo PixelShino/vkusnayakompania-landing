@@ -17,6 +17,7 @@ npm run dev      # http://localhost:4321
 npm run build    # сборка в dist/
 npm run preview  # посмотреть собранное
 npm run check    # типы и диагностика .astro
+npm test         # расписание и статус точек (Node сам читает TypeScript)
 ```
 
 > **Windows-грабли.** Запускать из пути с тем же регистром, что и на диске
@@ -34,6 +35,7 @@ npm run check    # типы и диагностика .astro
 | `src/styles/global.css` | токены (палитра, ритм, брейкпоинты), кнопки, общие паттерны |
 | `src/layouts/BaseLayout.astro` | мета, OpenGraph, JSON-LD, шрифт, preload первого экрана |
 | `src/scripts/lazy-frame.ts` | ленивые iframe карты и отзывов + переключение точек |
+| `src/data/site.check.ts` | проверка расписания и статуса — единственной логики на странице |
 | `src/components/OpenStatus.astro` | «Открыто до 21:00» — считается по времени Самары |
 | `handoff/` | исходная выгрузка Claude Designer — эталон вёрстки, в прод не идёт |
 
