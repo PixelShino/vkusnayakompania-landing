@@ -18,12 +18,6 @@ export const site = {
   // номер подтверждён карточкой организации на Яндекс.Картах
   phone: '+7 987 955-25-65',
   phoneHref: 'tel:+79879552565',
-  hours: {
-    label: '8:00 — 21:00',
-    note: 'Пн–пт с 8:00, сб с 8:30, вс с 9:00 · витрина полная с утра',
-    // для JSON-LD
-    schema: ['Mo-Fr 08:00-21:00', 'Sa 08:30-21:00', 'Su 09:00-21:00'],
-  },
   // Ссылки на действующие ресурсы «Вкусной компании».
   // TODO(клиент): дать ссылку на канал в Max — остальное подтверждено.
   links: {
@@ -54,17 +48,83 @@ export const site = {
   },
 } as const;
 
+/** Часы одного дня: открытие и закрытие в 24-часовом формате. */
+export type Hours = [open: string, close: string];
+
+/** Неделя: индекс — день как в `Date.getDay()` (0 — воскресенье). */
+export type Schedule = [Hours, Hours, Hours, Hours, Hours, Hours, Hours];
+
+const DAYS_RU = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
+const DAYS_EN = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+/** порядок показа — с понедельника, как читает человек */
+const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
+/** Подряд идущие дни с одинаковыми часами — в одну группу. */
+const groupDays = (schedule: Schedule) =>
+  WEEK_ORDER.reduce<{ days: number[]; hours: Hours }[]>((groups, day) => {
+    const last = groups.at(-1);
+    const hours = schedule[day];
+    if (last && last.hours[0] === hours[0] && last.hours[1] === hours[1]) last.days.push(day);
+    else groups.push({ days: [day], hours });
+    return groups;
+  }, []);
+
+/** «08:00» → «8:00» — ведущий ноль нужен схеме, но не человеку */
+export const shortTime = (time: string) => time.replace(/^0/, '');
+
+const capitalize = (word: string) => word.charAt(0).toUpperCase() + word.slice(1);
+
+/** Расписание строками: `[{ days: 'Пн–пт', hours: '8:00 — 21:00' }, …]` */
+export const hoursRows = (schedule: Schedule) => {
+  const groups = groupDays(schedule);
+  return groups.map(({ days, hours }) => ({
+    days:
+      groups.length === 1
+        ? 'Ежедневно'
+        : days.length > 1
+          ? `${capitalize(DAYS_RU[days[0]])}–${DAYS_RU[days[days.length - 1]]}`
+          : capitalize(DAYS_RU[days[0]]),
+    hours: `${shortTime(hours[0])} — ${shortTime(hours[1])}`,
+  }));
+};
+
+/** «Пн–пт 8:00 — 21:00 · Сб 8:30 — 21:00 · Вс 9:00 — 21:00» — одной строкой */
+export const hoursText = (schedule: Schedule) =>
+  hoursRows(schedule)
+    .map((row) => `${row.days} ${row.hours}`)
+    .join(' · ');
+
+const pluralRules = new Intl.PluralRules('ru-RU');
+
+/** Склонение при числительном: `plural(463, 'отзыв', 'отзыва', 'отзывов')` */
+export const plural = (count: number, one: string, few: string, many: string) =>
+  ({ one, few, many, other: many, two: few, zero: many })[pluralRules.select(count)];
+
+/** `['Mo-Fr 08:00-21:00', …]` — формат `openingHours` в schema.org */
+export const schemaHours = (schedule: Schedule) =>
+  groupDays(schedule).map(({ days, hours }) => {
+    const name =
+      days.length > 1 ? `${DAYS_EN[days[0]]}-${DAYS_EN[days[days.length - 1]]}` : DAYS_EN[days[0]];
+    return `${name} ${hours[0]}-${hours[1]}`;
+  });
+
+/** Одинаковые будни + отдельные суббота и воскресенье. */
+const week = (weekday: Hours, sat: Hours, sun: Hours): Schedule => [
+  sun,
+  weekday,
+  weekday,
+  weekday,
+  weekday,
+  weekday,
+  sat,
+];
+
 export type Place = {
   n: string;
   addr: string;
   street: string;
   note: string;
-  hours: string;
-  schemaHours: string[];
-  opensAt: string;
-  phone: string;
-  phoneHref: string;
-  status: string;
+  schedule: Schedule;
   lat: number;
   lng: number;
   /** id организации на Яндекс.Картах — им живёт виджет и ссылки «маршрут» */
@@ -82,12 +142,7 @@ export const places: Place[] = [
     addr: 'Садовая, 212Б',
     street: 'Садовая',
     note: 'Кондитерская и кухня',
-    hours: 'Пн–пт 8:00 — 21:00 · сб 8:30 · вс 9:00',
-    schemaHours: ['Mo-Fr 08:00-21:00', 'Sa 08:30-21:00', 'Su 09:00-21:00'],
-    opensAt: 'с восьми',
-    phone: site.phone,
-    phoneHref: site.phoneHref,
-    status: 'Открыто',
+    schedule: week(['08:00', '21:00'], ['08:30', '21:00'], ['09:00', '21:00']),
     lat: 53.195878,
     lng: 50.100202,
     yandexOrg: '154837147598',
@@ -99,12 +154,7 @@ export const places: Place[] = [
     addr: 'Советской Армии, 177',
     street: 'Советской Армии',
     note: 'Ресторан и кондитерская',
-    hours: 'Ежедневно 9:00 — 22:30',
-    schemaHours: ['Mo-Su 09:00-22:30'],
-    opensAt: 'с девяти',
-    phone: site.phone,
-    phoneHref: site.phoneHref,
-    status: 'Открыто',
+    schedule: week(['09:00', '22:30'], ['09:00', '22:30'], ['09:00', '22:30']),
     lat: 53.222568,
     lng: 50.202188,
     yandexOrg: '243452895564',
@@ -113,9 +163,47 @@ export const places: Place[] = [
   },
 ];
 
-/** Ссылка на карточку точки в Яндекс.Картах (там же кнопка «как добраться») */
+/**
+ * Публичные показатели с карточек организации на Яндекс.Картах.
+ *
+ * Тексты чужих отзывов сюда не переносятся: они принадлежат авторам, а
+ * условия Яндекс.Карт запрещают выгружать их в свои сервисы. Сами отзывы
+ * страница показывает официальным виджетом (`yandexReviewsUrl`), здесь только
+ * цифры — их можно цитировать со ссылкой на источник.
+ *
+ * TODO(клиент): цифры сняты вручную 5 августа 2026; обновлять раз в квартал.
+ */
+export const yandexStats = {
+  /** средневзвешенное по двум точкам: (4,8 × 765 + 5,0 × 320) / 1085 = 4,86 */
+  score: '4,9',
+  ratings: 1085,
+  reviews: 463,
+  award: 'Хорошее место 2026',
+  /** доля положительных отзывов по рубрикам — с карточки на Садовой */
+  highlights: [
+    { label: 'Еда', percent: 87 },
+    { label: 'Десерты', percent: 82 },
+    { label: 'Персонал', percent: 78 },
+    { label: 'Кофе', percent: 71 },
+    { label: 'Напитки', percent: 68 },
+  ],
+};
+
+/** Официальный виджет отзывов Яндекса — единственный легальный способ показать их у себя */
+export const yandexReviewsUrl = (orgId: string) =>
+  `https://yandex.ru/maps-reviews-widget/${orgId}?comments`;
+
+/** Ссылка на карточку точки в Яндекс.Картах */
 export const yandexOrgUrl = (orgId: string) =>
   `https://yandex.ru/maps/org/vkusnaya_kompaniya/${orgId}/`;
+
+/** Iframe-виджет карточки организации — им живёт карта в контактах */
+export const yandexWidgetUrl = (place: Pick<Place, 'yandexOrg' | 'lat' | 'lng'>) =>
+  `https://yandex.ru/map-widget/v1/org/vkusnaya_kompaniya/${place.yandexOrg}/?ll=${place.lng}%2C${place.lat}&z=16`;
+
+/** Маршрут до точки: первый пункт пустой — Яндекс подставит местоположение гостя */
+export const yandexRouteUrl = (place: Pick<Place, 'lat' | 'lng'>) =>
+  `https://yandex.ru/maps/?rtext=~${place.lat}%2C${place.lng}&rtt=auto&z=16`;
 
 export const nav = [
   { label: 'Торты', href: '#cakes' },
@@ -127,7 +215,8 @@ export const nav = [
 export const footerLinks = [
   { label: 'Магазин доставки', href: site.links.shop },
   { label: 'Кейтеринг и банкеты', href: site.links.catering },
-  { label: 'Приложение', href: '#apps' },
+  { label: 'App Store', href: site.links.appIos },
+  { label: 'Google Play', href: site.links.appAndroid },
   { label: 'ВКонтакте', href: site.links.vk },
   { label: 'Telegram', href: site.links.telegram },
 ];

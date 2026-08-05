@@ -1,0 +1,100 @@
+---
+/**
+ * Живой статус точки: «Открыто до 21:00» / «Откроется в 8:00».
+ *
+ * Считается в браузере по времени Самары (`Europe/Samara`, UTC+4), а не при
+ * сборке: статичная плашка «Открыто» врала бы всем, кто зашёл ночью. До
+ * расчёта элемент скрыт, поэтому неверный статус не показывается никогда —
+ * без JS плашки просто нет, а часы рядом остаются на месте.
+ *
+ * `mode="today"` — тот же расчёт, но выводит часы сегодняшнего дня; в HTML
+ * лежит будний диапазон, чтобы место было занято до инициализации.
+ */
+import type { Schedule } from '../data/site';
+import { shortTime } from '../data/site';
+
+interface Props {
+  schedule: Schedule;
+  /** `pill` — плашка статуса, `today` — часы сегодняшнего дня */
+  mode?: 'pill' | 'today';
+  class?: string;
+}
+
+const { schedule, mode = 'pill', class: className = '' } = Astro.props;
+const weekday = schedule[1];
+---
+
+{
+  mode === 'pill' ? (
+    <span
+      class:list={['card-pill', 'open-pill', className]}
+      data-schedule={JSON.stringify(schedule)}
+      hidden
+    />
+  ) : (
+    <span class={className} data-schedule={JSON.stringify(schedule)} data-today>
+      {shortTime(weekday[0])} — {shortTime(weekday[1])}
+    </span>
+  )
+}
+
+<style>
+  .open-pill:not([hidden]) {
+    display: inline-block;
+  }
+
+  .open-pill.is-open {
+    background: var(--olive-tint);
+    border-color: var(--olive-tint-line);
+    color: var(--olive-dark);
+  }
+</style>
+
+<script>
+  type Hours = [open: string, close: string];
+
+  const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const toMinutes = (time: string) => Number(time.slice(0, 2)) * 60 + Number(time.slice(3));
+  const short = (time: string) => time.replace(/^0/, '');
+
+  const nodes = document.querySelectorAll<HTMLElement>('[data-schedule]');
+
+  if (nodes.length) {
+    // время самой Самары, а не браузера гостя: гость может смотреть из Москвы
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/Samara',
+      weekday: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    }).formatToParts(new Date());
+
+    const part = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
+    const day = WEEKDAYS.indexOf(part('weekday'));
+    const now = Number(part('hour')) * 60 + Number(part('minute'));
+
+    if (day >= 0) {
+      nodes.forEach((node) => {
+        const schedule = JSON.parse(node.dataset.schedule ?? '[]') as Hours[];
+        const [open, close] = schedule[day] ?? [];
+        if (!open) return;
+
+        if ('today' in node.dataset) {
+          node.textContent = `${short(open)} — ${short(close)}`;
+          return;
+        }
+
+        const beforeOpen = now < toMinutes(open);
+        const isOpen = !beforeOpen && now < toMinutes(close);
+
+        node.textContent = isOpen
+          ? `Открыто до ${short(close)}`
+          : beforeOpen
+            ? `Откроется в ${short(open)}`
+            : `Откроется завтра в ${short(schedule[(day + 1) % 7][0])}`;
+        node.classList.toggle('is-open', isOpen);
+        node.hidden = false;
+      });
+    }
+  }
+</script>

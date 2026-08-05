@@ -1,15 +1,21 @@
 ---
 import MessengerButtons from './MessengerButtons.astro';
-import { site, places } from '../data/site';
+import OpenStatus from './OpenStatus.astro';
+import { places } from '../data/site';
+
+const main = places[0];
 ---
 
 <section class="bento-wrap">
   <div class="container">
     <div class="bento">
       <div class="bento__hours">
-        <p class="bento__label">Сегодня открыто</p>
-        <p class="bento__big">{site.hours.label}</p>
-        <p class="bento__sub">{site.hours.note}</p>
+        <div class="bento__hours-top">
+          <p class="bento__label">Сегодня</p>
+          <OpenStatus schedule={main.schedule} class="bento__status" />
+        </div>
+        <OpenStatus schedule={main.schedule} mode="today" class="bento__big tnum" />
+        <p class="bento__sub">{main.addr} · витрина полная с утра</p>
       </div>
 
       <div class="bento__cell">
@@ -17,10 +23,10 @@ import { site, places } from '../data/site';
         <p class="bento__sub">на торт под заказ</p>
       </div>
 
-      <div class="bento__cell">
+      <a class="bento__cell bento__cell--link" href="#contacts">
         <p class="bento__num">2 точки</p>
-        <p class="bento__sub">{places.map((p) => p.addr).join(' · ')}</p>
-      </div>
+        <p class="bento__sub">{places.map((place) => place.street).join(' · ')}</p>
+      </a>
 
       <div class="bento__contact">
         <p class="bento__label">Написать нам</p>
@@ -62,6 +68,23 @@ import { site, places } from '../data/site';
     box-shadow: 0 0 0 5px var(--bg);
   }
 
+  .bento__hours-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  /* пилюля статуса живёт на оливковой заливке — своя расцветка */
+  .bento__hours :global(.bento__status),
+  .bento__hours :global(.bento__status.is-open) {
+    padding: 4px 10px;
+    border-color: transparent;
+    background: rgba(255, 250, 237, 0.18);
+    color: var(--bg);
+    font-size: 11px;
+  }
+
   .bento__cell {
     display: flex;
     flex-direction: column;
@@ -71,6 +94,15 @@ import { site, places } from '../data/site';
     border: 1px solid var(--line-2);
     border-radius: var(--r-sm);
     background: var(--surface);
+  }
+
+  .bento__cell--link {
+    text-decoration: none;
+    transition: border-color 0.16s ease;
+  }
+
+  .bento__cell--link:hover {
+    border-color: var(--line-4);
   }
 
   .bento__contact {
@@ -91,7 +123,8 @@ import { site, places } from '../data/site';
     opacity: 0.78;
   }
 
-  .bento__big {
+  .bento__hours :global(.bento__big) {
+    display: block;
     font-weight: var(--fw-heading);
     font-size: 21px;
     line-height: 1.04;
@@ -138,7 +171,7 @@ import { site, places } from '../data/site';
       font-size: 11px;
     }
 
-    .bento__big {
+    .bento__hours :global(.bento__big) {
       font-size: 30px;
     }
 

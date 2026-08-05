@@ -2,7 +2,7 @@
 import MessengerButtons from './MessengerButtons.astro';
 import { site, places } from '../data/site';
 
-const pickup = places.map((p) => `${p.street} — ${p.opensAt}`).join(', ');
+const streets = places.map((place) => place.street).join(' и ');
 ---
 
 <section class="section" id="how">
@@ -46,7 +46,8 @@ const pickup = places.map((p) => `${p.street} — ${p.opensAt}`).join(', ');
         </div>
         <h3 class="how__title">Самовывоз</h3>
         <p class="how__text">
-          То, что стоит на витрине, можно просто забрать. {pickup}.
+          То, что стоит на витрине, можно просто забрать — на {streets}. Часы у точек разные, они
+          рядом на карте.
         </p>
         <div class="how__foot">
           <a class="btn btn--secondary btn--md" href="#contacts">Адреса и часы</a>

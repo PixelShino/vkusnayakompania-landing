@@ -1,7 +1,8 @@
 ---
 import YandexMap from './YandexMap.astro';
 import MessengerButtons from './MessengerButtons.astro';
-import { site, places, yandexOrgUrl } from '../data/site';
+import OpenStatus from './OpenStatus.astro';
+import { site, places, hoursRows, yandexRouteUrl, yandexWidgetUrl } from '../data/site';
 ---
 
 <section class="section" id="contacts">
@@ -11,40 +12,55 @@ import { site, places, yandexOrgUrl } from '../data/site';
         <p class="kicker">Две точки в городе</p>
         <h2>Контакты</h2>
       </div>
-      <div class="ct__phone-box">
-        <p class="ct__phone-label">Один номер на обе точки</p>
-        <a class="ct__phone" href={site.phoneHref}>{site.phone}</a>
-      </div>
+      <a class="ct__phone" href={site.phoneHref}>
+        <span class="ct__phone-label">Один номер на обе точки</span>
+        <span class="ct__phone-num">{site.phone}</span>
+      </a>
     </div>
 
     <div class="ct">
       <div class="ct__col">
         {
-          places.map((place) => (
-            <article class="ct__card">
+          places.map((place, i) => (
+            <article class:list={['ct__card', { 'is-shown': i === 0 }]} data-place>
               <div class="card-top">
                 <span class="card-mark card-mark--sm">{place.n}</span>
                 <span class="card-dash" />
-                <span class="card-pill card-pill--open">{place.status}</span>
+                <OpenStatus schedule={place.schedule} />
               </div>
+
               <h3 class="ct__name">{place.addr}</h3>
               <p class="ct__note">{place.note}</p>
-              <p class="ct__row">
-                <span class="ct__key">Часы</span>
-                <span class="ct__val">{place.hours}</span>
-              </p>
+
+              <dl class="ct__hours">
+                {hoursRows(place.schedule).map((row) => (
+                  <div class="ct__hours-row">
+                    <dt>{row.days}</dt>
+                    <dd class="tnum">{row.hours}</dd>
+                  </div>
+                ))}
+              </dl>
+
               <div class="ct__actions">
-                <a class="btn btn--primary btn--md" href={place.phoneHref}>
-                  Позвонить {place.phone}
-                </a>
                 <a
-                  class="btn btn--secondary btn--md"
-                  href={yandexOrgUrl(place.yandexOrg)}
+                  class="btn btn--primary btn--md ct__route"
+                  href={yandexRouteUrl(place)}
                   target="_blank"
                   rel="noopener"
                 >
                   Маршрут
+                  <span aria-hidden="true">→</span>
                 </a>
+                <button
+                  type="button"
+                  class="btn btn--secondary btn--md ct__show"
+                  data-frame-target="map"
+                  data-src={yandexWidgetUrl(place)}
+                  data-frame-name={place.addr}
+                  aria-pressed={i === 0 ? 'true' : 'false'}
+                >
+                  Показать на карте
+                </button>
               </div>
             </article>
           ))
@@ -68,10 +84,11 @@ import { site, places, yandexOrgUrl } from '../data/site';
 </section>
 
 <style>
-  .ct__phone-box {
+  .ct__phone {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
+    text-decoration: none;
   }
 
   .ct__phone-label {
@@ -79,11 +96,11 @@ import { site, places, yandexOrgUrl } from '../data/site';
     color: var(--text-5);
   }
 
-  .ct__phone {
+  .ct__phone-num {
     font-weight: var(--fw-heading);
     font-size: calc(var(--fs-h3) + 2px);
     letter-spacing: var(--ls-heading);
-    text-decoration: none;
+    font-variant-numeric: tabular-nums;
   }
 
   .ct {
@@ -108,6 +125,12 @@ import { site, places, yandexOrgUrl } from '../data/site';
     border: 1px solid var(--line);
     border-radius: var(--r-lg);
     background: var(--bg);
+    transition: border-color 0.16s ease;
+  }
+
+  /* точка, которую сейчас показывает карта */
+  .ct__card.is-shown {
+    border-color: var(--line-4);
   }
 
   .ct__name {
@@ -121,22 +144,32 @@ import { site, places, yandexOrgUrl } from '../data/site';
     color: var(--text-4);
   }
 
-  .ct__row {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    margin-top: 12px;
-    padding: 10px 0 14px;
+  /* часы — таблицей, чтобы «сб 8:30 — 21:00» читалось за один взгляд */
+  .ct__hours {
+    margin: 12px 0 16px;
+    padding: 12px 0 0;
     border-top: 1px solid var(--line-3);
   }
 
-  .ct__key {
-    flex: 0 0 78px;
+  .ct__hours-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .ct__hours-row + .ct__hours-row {
+    margin-top: 4px;
+  }
+
+  .ct__hours dt {
+    flex: 0 0 auto;
+    min-width: 62px;
     font-size: 12px;
     color: var(--text-5);
   }
 
-  .ct__val {
+  .ct__hours dd {
+    margin: 0;
     font-size: calc(var(--fs-body) - 0.5px);
     font-weight: 600;
   }
@@ -146,6 +179,16 @@ import { site, places, yandexOrgUrl } from '../data/site';
     flex-wrap: wrap;
     gap: 8px;
     margin-top: auto;
+  }
+
+  .ct__route,
+  .ct__show {
+    flex: 1 1 150px;
+  }
+
+  .ct__show[aria-pressed='true'] {
+    border-color: var(--line-4);
+    background: color-mix(in srgb, var(--text) 5%, transparent);
   }
 
   .ct__write {
@@ -191,7 +234,7 @@ import { site, places, yandexOrgUrl } from '../data/site';
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
 
-    .ct__phone-box {
+    .ct__phone {
       align-items: flex-end;
     }
   }
