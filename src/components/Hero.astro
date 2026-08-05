@@ -23,8 +23,10 @@ import { site } from '../data/site';
       >
         <div class="hero__scrim" aria-hidden="true"></div>
         <div class="hero__overlay">
-          <p class="kicker kicker--light">Кондитерская и кухня · {site.city}</p>
-          <h1 class="hero__overlay-title">Печём с утра, пока не разберут</h1>
+          <p class="kicker kicker--light" aria-hidden="true">Кондитерская и кухня · {site.city}</p>
+          {/* тот же текст, что в `h1` выше: на телефоне заголовок показывается
+              поверх фото, но второго `h1` в документе быть не должно */}
+          <p class="hero__overlay-title" aria-hidden="true">Печём с утра, пока не разберут</p>
           <p class="hero__overlay-lead">
             Торты на&nbsp;заказ, пирожные и&nbsp;конфеты&nbsp;— и&nbsp;завтраки, супы и&nbsp;паста
             в&nbsp;зале.
@@ -74,8 +76,15 @@ import { site } from '../data/site';
     padding-top: calc(var(--sec-pad) * 0.6);
   }
 
+  /* на телефоне заголовок лежит поверх фото, но из документа он не исчезает:
+     иначе `h1` пропал бы и для поиска, и для чтения с экрана */
   .hero__head {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
   }
 
   .hero__grid {
@@ -146,7 +155,12 @@ import { site } from '../data/site';
 
   @media (min-width: 768px) {
     .hero__head {
-      display: block;
+      position: static;
+      width: auto;
+      height: auto;
+      margin: 0;
+      overflow: visible;
+      clip-path: none;
     }
 
     .hero__head h1 {
