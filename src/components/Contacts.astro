@@ -227,6 +227,20 @@ import { site, places, hoursRows, yandexRouteUrl, yandexWidgetUrl } from '../dat
     z-index: 1;
   }
 
+  /* на планшете карта ещё под карточками, но сами карточки короткие —
+     ставим их рядом, чтобы карта не уезжала на второй экран */
+  @media (min-width: 700px) and (max-width: 999px) {
+    .ct__col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: start;
+    }
+
+    .ct__card {
+      height: 100%;
+    }
+  }
+
   /* с тысячи пикселей карта уже помещается рядом с карточками —
      держать её во всю ширину под ними значит гнать страницу вниз впустую */
   @media (min-width: 1000px) {

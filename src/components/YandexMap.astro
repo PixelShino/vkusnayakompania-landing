@@ -100,6 +100,13 @@ import { places, yandexOrgUrl, yandexWidgetUrl } from '../data/site';
   .map.is-loaded .map__stub {
     display: none;
   }
+
+  /* во всю ширину планшета квадратная карта съедает целый экран */
+  @media (min-width: 700px) and (max-width: 999px) {
+    .map {
+      aspect-ratio: 16 / 9;
+    }
+  }
 </style>
 
 <script>

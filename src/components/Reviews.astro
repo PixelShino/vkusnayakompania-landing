@@ -229,6 +229,8 @@ import { places, plural, yandexOrgUrl, yandexReviewsUrl, yandexStats } from '../
     display: flex;
     flex-direction: column;
     gap: 8px;
+    /* в одну колонку полоса на всю ширину планшета читается хуже, чем короткая */
+    max-width: 520px;
     margin: 18px 0 0;
     padding: 0;
     list-style: none;
