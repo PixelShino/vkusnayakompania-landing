@@ -80,7 +80,7 @@ const main = places[0];
   .bento__hours :global(.bento__status.is-open) {
     padding: 4px 10px;
     border-color: transparent;
-    background: rgba(255, 250, 237, 0.18);
+    background: rgba(28, 25, 22, 0.24);
     color: var(--bg);
     font-size: 11px;
   }
@@ -123,6 +123,12 @@ const main = places[0];
     opacity: 0.78;
   }
 
+  /* на оливковой заливке любая прозрачность роняет контраст ниже нормы */
+  .bento__hours .bento__label,
+  .bento__hours .bento__sub {
+    opacity: 1;
+  }
+
   .bento__hours :global(.bento__big) {
     display: block;
     font-weight: var(--fw-heading);
@@ -135,7 +141,8 @@ const main = places[0];
     font-weight: var(--fw-heading);
     font-size: 17px;
     line-height: 1.04;
-    color: var(--terracotta);
+    /* текстовая терракота: заливочная на кремовом даёт 3,1:1 и не читается */
+    color: var(--terracotta-text);
   }
 
   .bento__sub {

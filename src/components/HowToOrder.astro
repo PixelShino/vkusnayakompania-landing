@@ -46,8 +46,8 @@ const streets = places.map((place) => place.street).join(' и ');
         </div>
         <h3 class="how__title">Самовывоз</h3>
         <p class="how__text">
-          То, что стоит на витрине, можно просто забрать — на {streets}. Часы у точек разные, они
-          рядом на карте.
+          То, что стоит на витрине, можно просто забрать с любой из двух точек: {streets}. Часы у них
+          разные — смотрите в контактах.
         </p>
         <div class="how__foot">
           <a class="btn btn--secondary btn--md" href="#contacts">Адреса и часы</a>
@@ -102,7 +102,7 @@ const streets = places.map((place) => place.street).join(' и ');
   }
 
   .how__card--hi {
-    border-color: #7c8250;
+    border-color: var(--olive);
     background: var(--olive);
     color: var(--bg);
   }
@@ -124,7 +124,7 @@ const streets = places.map((place) => place.street).join(' и ');
   }
 
   .how__card--hi .how__text {
-    color: rgba(255, 250, 237, 0.86);
+    color: var(--bg);
   }
 
   .how__foot {
