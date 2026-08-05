@@ -107,15 +107,14 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  /* переход по якорю мгновенный: плавный не дружит с `content-visibility`
+     у секций — он стартует, пока высоты ещё не посчитаны, и не доезжает */
+  scroll-behavior: auto;
   scroll-padding-top: calc(var(--header-h) + 12px);
   -webkit-text-size-adjust: 100%;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
   *,
   *::before,
   *::after {
@@ -208,14 +207,15 @@ button {
   padding-inline: var(--pad);
 }
 
+/* Секции ниже первого экрана не считаются, пока до них не долистали: на
+   слабом телефоне это снимает почти секунду со стилей и раскладки.
+   Плата — мгновенный переход по якорю вместо плавного (см. `scroll-behavior`
+   выше): пока секция не отрисована, её высота — догадка, и плавная прокрутка
+   останавливалась на полпути, не доезжая до «Контактов» двух экранов. */
 .section {
   padding-block: var(--sec-pad);
-  /* секции ниже первого экрана не считаются, пока до них не долистали:
-     на слабом телефоне это снимало ~секунду со стилей и раскладки.
-     `auto` в `contain-intrinsic-size` заставляет браузер запомнить настоящую
-     высоту после первого показа, поэтому полоса прокрутки не прыгает */
   content-visibility: auto;
-  contain-intrinsic-size: auto 700px;
+  contain-intrinsic-size: auto 900px;
 }
 
 .section-head {
