@@ -1,6 +1,13 @@
 ---
-import { reviews, rating } from '../data/catalog';
-import { places, yandexOrgUrl } from '../data/site';
+/**
+ * Отзывы — настоящие, из официального виджета Яндекс.Карт.
+ *
+ * Копировать тексты отзывов к себе нельзя (авторские права авторов + условия
+ * Яндекс.Карт), поэтому вместо переписанных «отзывов» стоит живой виджет: он
+ * сам обновляется и его нельзя подделать. Слева — цифры и награда с карточки
+ * организации, они факты и цитируются со ссылкой на источник.
+ */
+import { places, plural, yandexOrgUrl, yandexReviewsUrl, yandexStats } from '../data/site';
 ---
 
 <section class="section" id="reviews">
@@ -9,6 +16,10 @@ import { places, yandexOrgUrl } from '../data/site';
       <div class="rev__aside">
         <p class="kicker">Отзывы</p>
         <h2>Что говорят гости</h2>
+        <p class="lead">
+          Ничего не переписываем и не отбираем — рядом живой виджет Яндекс Карт со всеми отзывами,
+          как есть.
+        </p>
 
         <div class="rev__score">
           <div class="blob" aria-hidden="true"></div>
@@ -21,11 +32,11 @@ import { places, yandexOrgUrl } from '../data/site';
               </svg>
             </span>
             <span class="card-dash card-dash--light"></span>
-            <span class="card-pill card-pill--light">{rating.period}</span>
+            <span class="card-pill card-pill--light">{yandexStats.award}</span>
           </div>
 
           <div class="rev__big-row">
-            <p class="rev__big">{rating.score}</p>
+            <p class="rev__big tnum">{yandexStats.score}</p>
             <div class="rev__stars" aria-hidden="true">
               {
                 Array.from({ length: 5 }).map(() => (
@@ -37,7 +48,11 @@ import { places, yandexOrgUrl } from '../data/site';
             </div>
           </div>
 
-          <p class="rev__score-meta">{rating.total}</p>
+          <p class="rev__score-meta">
+            {yandexStats.ratings} {plural(yandexStats.ratings, 'оценка', 'оценки', 'оценок')} и{' '}
+            {yandexStats.reviews} {plural(yandexStats.reviews, 'отзыв', 'отзыва', 'отзывов')} на
+            Яндекс Картах — по двум точкам
+          </p>
 
           <div class="rev__sources">
             {
@@ -49,37 +64,76 @@ import { places, yandexOrgUrl } from '../data/site';
                   rel="noopener"
                 >
                   <span class="rev__source-name">{place.street}</span>
-                  <span class="rev__source-score">{place.rating}</span>
+                  <span class="rev__source-score tnum">{place.rating}</span>
                 </a>
               ))
             }
           </div>
         </div>
+
+        <ul class="rev__marks">
+          {
+            yandexStats.highlights.map((mark) => (
+              <li class="rev__mark">
+                <span class="rev__mark-label">{mark.label}</span>
+                <span class="rev__mark-bar" aria-hidden="true">
+                  <span class="rev__mark-fill" style={`width:${mark.percent}%`} />
+                </span>
+                <span class="rev__mark-value tnum">{mark.percent}%</span>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="rev__marks-note">Доля положительных упоминаний в отзывах — по данным Яндекса</p>
       </div>
 
-      <div class="rev__list rail">
-        {
-          reviews.map((review) => (
-            <figure class="rev__card">
-              <div class="card-top">
-                <span class="card-mark" aria-hidden="true">
-                  {review.initial}
-                </span>
-                <span class="card-dash" />
-                <span class="card-pill">{review.source}</span>
-              </div>
-              <blockquote class="rev__quote">{review.text}</blockquote>
-              <figcaption class="rev__foot">
-                <span class="rev__name">{review.author}</span>
-                <span class="rev__date">{review.date}</span>
-              </figcaption>
-            </figure>
-          ))
-        }
+      <div class="rev__widget">
+        <div class="rev__tabs" role="group" aria-label="Отзывы по точкам">
+          {
+            places.map((place, i) => (
+              <button
+                type="button"
+                class="rev__tab"
+                data-frame-target="reviews"
+                data-src={yandexReviewsUrl(place.yandexOrg)}
+                data-frame-name={place.addr}
+                aria-pressed={i === 0 ? 'true' : 'false'}
+              >
+                {place.addr}
+                <span class="rev__tab-score tnum">{place.rating}</span>
+              </button>
+            ))
+          }
+        </div>
+
+        <div
+          class="rev__frame"
+          data-frame="reviews"
+          data-frame-title="Отзывы о «Вкусной компании» на Яндекс Картах"
+          data-src={yandexReviewsUrl(places[0].yandexOrg)}
+        >
+          <p class="rev__frame-stub">Загружаем отзывы…</p>
+          <noscript>
+            <a
+              class="rev__frame-stub"
+              href={`${yandexOrgUrl(places[0].yandexOrg)}reviews/`}
+              target="_blank"
+              rel="noopener"
+            >
+              Читать отзывы на Яндекс Картах
+            </a>
+          </noscript>
+        </div>
+
+        <p class="rev__frame-note">
+          Виджет Яндекс Карт · <a
+            href={`${yandexOrgUrl(places[0].yandexOrg)}reviews/`}
+            target="_blank"
+            rel="noopener">открыть все отзывы</a
+          >
+        </p>
       </div>
     </div>
-
-    <p class="rev__hint">Свайп в сторону — ещё отзывы</p>
   </div>
 </section>
 
@@ -97,7 +151,7 @@ import { places, yandexOrgUrl } from '../data/site';
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    margin-top: 18px;
+    margin-top: 22px;
     padding: calc(var(--gap) + 10px);
     border-radius: var(--r-xl);
     background: var(--text);
@@ -128,8 +182,8 @@ import { places, yandexOrgUrl } from '../data/site';
   .rev__score-meta {
     position: relative;
     z-index: 1;
-    font-size: var(--fs-body);
-    line-height: 1.55;
+    font-size: calc(var(--fs-body) - 0.5px);
+    line-height: 1.5;
     color: rgba(255, 250, 237, 0.86);
   }
 
@@ -137,18 +191,21 @@ import { places, yandexOrgUrl } from '../data/site';
     position: relative;
     z-index: 1;
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     margin-top: auto;
     padding-top: 18px;
   }
 
   .rev__source {
-    flex: 1 1 0;
+    flex: 1 1 auto;
+    min-width: max-content;
     height: 42px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    padding-inline: 14px;
     border-radius: var(--r-pill);
     background: var(--bg);
     text-decoration: none;
@@ -167,83 +224,158 @@ import { places, yandexOrgUrl } from '../data/site';
     color: var(--terracotta-text);
   }
 
-  .rev__card {
-    flex: 0 0 auto;
-    width: 80%;
+  /* за что хвалят — компактные полоски вместо пилюль: цифра и доля читаются разом */
+  .rev__marks {
     display: flex;
     flex-direction: column;
-    margin: 0;
-    padding: calc(var(--gap) + 10px);
-    border: 1px solid var(--line);
-    border-radius: var(--r-xl);
-    background: var(--bg);
-  }
-
-  .rev__quote {
-    margin: 20px 0 0;
-    font-size: calc(var(--fs-body) + 3px);
-    font-weight: 400;
-    line-height: 1.35;
-  }
-
-  .rev__foot {
-    display: flex;
-    align-items: baseline;
     gap: 8px;
-    margin-top: auto;
-    padding-top: 16px;
+    margin: 18px 0 0;
+    padding: 0;
+    list-style: none;
   }
 
-  .rev__name {
+  .rev__mark {
+    display: grid;
+    grid-template-columns: 74px minmax(0, 1fr) 38px;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .rev__mark-label {
     font-size: 13px;
+    color: var(--text-2);
+  }
+
+  .rev__mark-bar {
+    height: 6px;
+    border-radius: var(--r-pill);
+    background: var(--line-3);
+    overflow: hidden;
+  }
+
+  .rev__mark-fill {
+    display: block;
+    height: 100%;
+    border-radius: var(--r-pill);
+    background: var(--olive);
+  }
+
+  .rev__mark-value {
+    font-size: 12.5px;
     font-weight: 600;
+    text-align: right;
+    color: var(--text-3);
   }
 
-  .rev__date {
-    font-size: 11.5px;
-    color: var(--text-5);
-  }
-
-  .rev__hint {
+  .rev__marks-note {
     margin-top: 10px;
     font-size: 11.5px;
     color: var(--text-5);
   }
 
+  .rev__widget {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .rev__tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .rev__tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+    background: var(--bg);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color 0.16s ease,
+      border-color 0.16s ease,
+      color 0.16s ease;
+  }
+
+  .rev__tab-score {
+    color: var(--terracotta-text);
+  }
+
+  .rev__tab[aria-pressed='true'] {
+    background: var(--text);
+    border-color: var(--text);
+    color: var(--bg);
+  }
+
+  .rev__tab[aria-pressed='true'] .rev__tab-score {
+    color: rgba(255, 250, 237, 0.72);
+  }
+
+  .rev__tab:hover:not([aria-pressed='true']) {
+    background: color-mix(in srgb, var(--text) 6%, transparent);
+  }
+
+  /* высота фиксированная: внутри виджета свой скролл, а страница не должна
+     прыгать, когда кадр наконец подгрузится */
+  .rev__frame {
+    position: relative;
+    height: 460px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--r-xl);
+    background: var(--surface);
+  }
+
+  .rev__frame :global(iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .rev__frame-stub {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    color: var(--text-4);
+    text-decoration: none;
+  }
+
+  .rev__frame.is-loaded .rev__frame-stub {
+    display: none;
+  }
+
+  .rev__frame-note {
+    font-size: 11.5px;
+    color: var(--text-5);
+  }
+
   @media (min-width: 768px) {
-    .rev__list {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: var(--gap);
-      align-items: start;
-      width: 100%;
-      margin-inline: 0;
-      padding-inline: 0;
-      overflow: visible;
+    .rev__frame {
+      height: 520px;
     }
+  }
 
-    .rev__card {
-      width: auto;
-    }
-
-    /* лёгкая шахматка — как в макете */
-    .rev__card:nth-child(even) {
-      margin-top: 26px;
+  @media (min-width: 1000px) {
+    .rev {
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: calc(var(--gap) + 24px);
     }
 
     .rev__big {
       font-size: 58px;
     }
-
-    .rev__hint {
-      display: none;
-    }
-  }
-
-  @media (min-width: 1200px) {
-    .rev {
-      grid-template-columns: 0.82fr 1.18fr;
-      gap: calc(var(--gap) + 28px);
-    }
   }
 </style>
+
+<script>
+  import '../scripts/lazy-frame';
+</script>
