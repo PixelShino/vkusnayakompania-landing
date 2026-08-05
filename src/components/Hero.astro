@@ -41,12 +41,15 @@ import { site } from '../data/site';
         </div>
       </Photo>
 
+      {/* виден сразу, но приоритет низкий: на телефоне кадр вообще скрыт, а на
+          десктопе не должен отбирать канал у LCP-снимка слева */}
       <Photo
         photo={heroPhotos.wide}
         ratio="16 / 9"
         radius="var(--r-xl)"
         sizes="(min-width: 1200px) 700px, 55vw"
         eager
+        priority="low"
         class="hero__wide"
       />
 

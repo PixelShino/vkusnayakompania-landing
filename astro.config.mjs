@@ -7,4 +7,9 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: 'https://vkus-com.ru',
   integrations: [sitemap()],
+  build: {
+    // страница одна: отдельный файл стилей стоит лишнего похода по сети —
+    // на медленной мобильной связи это полсекунды до первой отрисовки
+    inlineStylesheets: 'always',
+  },
 });

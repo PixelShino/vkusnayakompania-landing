@@ -7,7 +7,16 @@ import { site, nav } from '../data/site';
 <header class="header">
   <div class="container header__in">
     <a class="header__logo" href="#top" aria-label={`${site.name} — на главную`}>
-      <Image src={logo} alt={site.name} widths={[132, 264]} sizes="132px" loading="eager" />
+      <Image
+      src={logo}
+      alt={site.name}
+      widths={[132, 264]}
+      sizes="132px"
+      format="avif"
+      quality={60}
+      loading="eager"
+      fetchpriority="high"
+    />
     </a>
 
     <nav class="header__nav" aria-label="Основная навигация">

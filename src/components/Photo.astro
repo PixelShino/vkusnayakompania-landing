@@ -2,10 +2,11 @@
 /**
  * Фото витрины. Плейсхолдеры Unsplash отдают любой размер параметром `w`,
  * поэтому srcset собирается из URL — без скачивания и оптимизации на сборке.
- * Когда приедут реальные снимки, здесь меняется только источник: файл из
- * `src/assets/` и `<Image />` из `astro:assets`.
+ * Если у снимка есть `file` (реальное фото из `src/assets`), рисуем его через
+ * `astro:assets`: свой домен, avif и пережатие на сборке.
  */
-import type { Photo } from '../data/catalog';
+import { Image } from 'astro:assets';
+import { PHOTO_WIDTHS, photoSrcset, photoUrl, type Photo } from '../data/catalog';
 
 interface Props {
   photo: Photo;
@@ -15,6 +16,8 @@ interface Props {
   radius?: string;
   sizes?: string;
   eager?: boolean;
+  /** приоритет загрузки: `low` — для кадра, который виден сразу, но не главный */
+  priority?: 'high' | 'low';
   class?: string;
 }
 
@@ -25,27 +28,39 @@ const {
   radius,
   sizes = '(min-width: 1200px) 320px, (min-width: 768px) 240px, 50vw',
   eager = false,
+  priority = eager ? 'high' : 'low',
   class: className = '',
 } = Astro.props;
-
-const WIDTHS = [400, 640, 900, 1300, 1800];
-const url = (w: number) =>
-  `https://images.unsplash.com/photo-${photo.id}?auto=format&fit=crop&q=70&w=${w}`;
-const srcset = WIDTHS.map((w) => `${url(w)} ${w}w`).join(', ');
 ---
 
 <figure
   class:list={['media', className]}
   style={`--ratio:${ratio};${ratioMd ? `--ratio-md:${ratioMd};` : ''}${radius ? `--radius:${radius};` : ''}`}
 >
-  <img
-    src={url(900)}
-    srcset={srcset}
-    sizes={sizes}
-    alt={photo.alt}
-    loading={eager ? 'eager' : 'lazy'}
-    decoding={eager ? 'sync' : 'async'}
-    fetchpriority={eager ? 'high' : 'auto'}
-  />
+  {
+    photo.file ? (
+      <Image
+        src={photo.file}
+        alt={photo.alt}
+        widths={PHOTO_WIDTHS}
+        sizes={sizes}
+        format="avif"
+        quality={52}
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        fetchpriority={priority}
+      />
+    ) : (
+      <img
+        src={photoUrl(photo.id, 800)}
+        srcset={photoSrcset(photo.id)}
+        sizes={sizes}
+        alt={photo.alt}
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        fetchpriority={priority}
+      />
+    )
+  }
   <slot />
 </figure>

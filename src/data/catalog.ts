@@ -8,7 +8,24 @@
  * переезжают в `src/assets/` и на компонент `astro:assets`.
  */
 
-export type Photo = { id: string; alt: string };
+import heroTall from '../assets/hero-tall.jpg';
+
+/**
+ * Снимок: либо `id` плейсхолдера с Unsplash, либо файл из `src/assets` — его
+ * Astro пережимает на сборке и отдаёт со своего домена. Реальные фото клиента
+ * приедут вторым способом: чужой хост в критическом пути стоит секунды LCP.
+ */
+export type Photo = { id: string; alt: string; file?: ImageMetadata };
+
+/** Ширины для `srcset`: Unsplash отдаёт любой размер параметром `w` */
+export const PHOTO_WIDTHS = [480, 800, 1200, 1600];
+
+// q=60: на фотографии еды разница с 70 не видна, а вес кадра падает на четверть
+export const photoUrl = (id: string, width: number) =>
+  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&q=60&w=${width}`;
+
+export const photoSrcset = (id: string) =>
+  PHOTO_WIDTHS.map((width) => `${photoUrl(id, width)} ${width}w`).join(', ');
 export type Item = { name: string; meta: string; price?: string; photo: Photo; tags?: string[] };
 
 /** Фильтры витрины. Первый — состояние по умолчанию. */
@@ -53,7 +70,12 @@ export const roomDetails: Item[] = [
 ];
 
 export const heroPhotos = {
-  tall: { id: '1583338917451-face2751d8d5', alt: 'Витрина кондитерской «Вкусная компания»' },
+  // кадр первого экрана — он же LCP, поэтому лежит локально
+  tall: {
+    id: '1583338917451-face2751d8d5',
+    alt: 'Витрина кондитерской «Вкусная компания»',
+    file: heroTall,
+  },
   wide: { id: '1546237769-6f84ec1a512a', alt: 'Зал кондитерской днём' },
   room: { id: '1587241321921-91a834d6d191', alt: 'Общий план зала кондитерской' },
   sketchRef: { id: '1535141192574-5d4897c12636', alt: 'Картинка-референс, присланная гостем' },
