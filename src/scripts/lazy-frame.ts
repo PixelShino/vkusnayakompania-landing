@@ -1,9 +1,7 @@
 /**
- * Ленивый iframe для виджетов Яндекса (карта, отзывы).
- *
- * Скрипты Яндекса весят больше всей страницы, поэтому кадр подставляется,
- * только когда контейнер подходит к экрану. Переключается кнопками
- * `[data-frame-target="имя"]` с `data-src`; подпись рядом — `[data-frame-label]`.
+ * Ленивый iframe для виджетов Яндекса: кадр подставляется, когда контейнер
+ * подходит к экрану. Переключают кнопки `[data-frame-target="имя"]` с
+ * `data-src`, подпись рядом — `[data-frame-label]`.
  */
 
 const mountFrame = (holder: HTMLElement) => {
@@ -34,7 +32,7 @@ const mountFrame = (holder: HTMLElement) => {
       });
       if (label) label.textContent = target.dataset.frameName ?? '';
       mount(target.dataset.src ?? '');
-      // виджет может лежать ниже кнопки — иначе клик выглядит как «ничего не произошло»
+      // виджет может лежать ниже кнопки
       holder.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
   });

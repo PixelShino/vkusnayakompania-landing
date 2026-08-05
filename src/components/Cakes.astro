@@ -4,8 +4,7 @@ import CustomCake from './CustomCake.astro';
 import { cakes, cakeFilters } from '../data/catalog';
 import { site } from '../data/site';
 
-// Свёрнутая витрина показывает два ряда и уходит в фейд; остальное открывает
-// кнопка. Фильтры и «показать ещё» работают на классах — без перерисовки DOM.
+// Фильтры и «показать ещё» — на классах, без перерисовки DOM.
 ---
 
 <section class="section" id="cakes">
@@ -116,7 +115,7 @@ import { site } from '../data/site';
     margin-top: 20px;
   }
 
-  /* свёрнутое состояние: часть карточек не показываем, низ уводим в фейд */
+  /* свёрнутая витрина: два ряда, низ уходит в фейд */
   .cakes__grid:not(.is-expanded) > :nth-child(n + 7) {
     display: none;
   }
@@ -131,7 +130,7 @@ import { site } from '../data/site';
     mask-image: linear-gradient(to bottom, #000 62%, rgba(0, 0, 0, 0.32) 88%, transparent 100%);
   }
 
-  /* отфильтрованные прячем всегда — правило сильнее счётчика выше */
+  /* правило сильнее счётчика выше: отфильтрованное скрыто всегда */
   .cakes__grid > .cake.is-hidden {
     display: none !important;
   }
@@ -208,7 +207,7 @@ import { site } from '../data/site';
       grid-template-columns: repeat(4, 1fr);
     }
 
-    /* на четырёх колонках свёрнутая витрина показывает два полных ряда */
+    /* четыре колонки — два полных ряда в свёрнутом виде */
     .cakes__grid:not(.is-expanded) > :nth-child(-n + 8) {
       display: block;
     }
@@ -265,7 +264,7 @@ import { site } from '../data/site';
           const tags = card.dataset.tags ?? '';
           card.classList.toggle('is-hidden', filter !== 'Все' && !tags.includes(filter));
         });
-        // при узкой подборке разворачиваем сетку, чтобы не прятать пару карточек
+        // подборку короче двух рядов не сворачиваем
         grid.classList.toggle('is-expanded', filter !== 'Все');
         sync();
       });

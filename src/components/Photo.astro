@@ -1,9 +1,7 @@
 ---
 /**
- * Фото витрины. Плейсхолдеры Unsplash отдают любой размер параметром `w`,
- * поэтому srcset собирается из URL — без скачивания и оптимизации на сборке.
- * Если у снимка есть `file` (реальное фото из `src/assets`), рисуем его через
- * `astro:assets`: свой домен, avif и пережатие на сборке.
+ * Снимок с `file` идёт через `astro:assets` (свой домен, avif, пережатие на
+ * сборке); плейсхолдер Unsplash — обычным `img` со `srcset` из URL.
  */
 import { Image } from 'astro:assets';
 import { PHOTO_WIDTHS, photoSrcset, photoUrl, type Photo } from '../data/catalog';

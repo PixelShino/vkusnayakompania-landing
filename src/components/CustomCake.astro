@@ -95,8 +95,7 @@ import { heroPhotos, steps } from '../data/catalog';
     position: relative;
     z-index: 1;
     display: grid;
-    /* minmax(0, …) вместо 1fr: иначе колонка не сжимается ниже min-content
-       и панель разъезжается на узких экранах */
+    /* minmax(0, …) вместо 1fr: колонка должна сжиматься ниже min-content */
     grid-template-columns: minmax(0, 1fr);
     gap: calc(var(--gap) + 8px);
     align-items: start;

@@ -3,10 +3,9 @@ import montserratCyrillic from '@fontsource-variable/montserrat/files/montserrat
 import montserratLatin from '@fontsource-variable/montserrat/files/montserrat-latin-wght-normal.woff2?url';
 import '../styles/global.css';
 
-// `@font-face` объявлены руками вместо импорта всего пакета: тот тянет ещё
-// `latin-ext`, `cyrillic-ext` и `vietnamese` — 100+ КБ, которые страница
-// подтягивала на старте и которых на ней нет ни одного символа.
-// `unicode-range` скопированы из `unicode.json` пакета.
+// `@font-face` вручную вместо импорта пакета: он объявляет ещё `latin-ext`,
+// `cyrillic-ext` и `vietnamese` — 100+ КБ подмножеств, которых тут нет.
+// `unicode-range` — из `unicode.json` пакета.
 const fontFaces = `
 @font-face {
   font-family: 'Montserrat Variable';
@@ -29,8 +28,7 @@ import { site, places, yandexOrgUrl, schemaHours } from '../data/site';
 import { getImage } from 'astro:assets';
 import { heroPhotos, photoSrcset, PHOTO_WIDTHS } from '../data/catalog';
 
-// снимок первого экрана — он же LCP; браузер узнаёт о нём из preload, не дожидаясь
-// разбора страницы, а `sizes` повторяет то, что стоит в `Hero.astro`
+// preload снимка первого экрана; `sizes` повторяет заданное в `Hero.astro`
 const heroSizes = '(min-width: 1200px) 520px, (min-width: 768px) 45vw, 100vw';
 const heroSrcset = heroPhotos.tall.file
   ? (
@@ -52,8 +50,7 @@ const { title = site.title, description = site.description } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://example.com');
 const ogImage = new URL('/og.jpg', canonical);
 
-// Разметка организации: две точки одной кондитерской. Адреса, координаты,
-// часы и оценки — с карточек организации на Яндекс.Картах (см. `data/site.ts`).
+// Разметка организации: две точки одной кондитерской.
 const jsonLd = {
   '@context': 'https://schema.org',
   '@graph': places.map((place) => ({
@@ -76,9 +73,8 @@ const jsonLd = {
     hasMap: yandexOrgUrl(place.yandexOrg),
     image: ogImage.href,
     openingHours: schemaHours(place.schedule),
-    // aggregateRating сознательно нет: оценки собраны Яндексом, а Google
-    // запрещает переносить в разметку рейтинги с чужих площадок. На странице
-    // цифры остаются — со ссылкой на источник.
+    // без aggregateRating: Google запрещает переносить в разметку оценки
+    // с чужих площадок, а собственных отзывов у сайта нет
   })),
 };
 ---

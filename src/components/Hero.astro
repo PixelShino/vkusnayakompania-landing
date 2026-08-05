@@ -24,8 +24,7 @@ import { site } from '../data/site';
         <div class="hero__scrim" aria-hidden="true"></div>
         <div class="hero__overlay">
           <p class="kicker kicker--light" aria-hidden="true">Кондитерская и кухня · {site.city}</p>
-          {/* тот же текст, что в `h1` выше: на телефоне заголовок показывается
-              поверх фото, но второго `h1` в документе быть не должно */}
+          {/* дубль `h1` поверх фото: второго `h1` в документе быть не должно */}
           <p class="hero__overlay-title" aria-hidden="true">Печём с утра, пока не разберут</p>
           <p class="hero__overlay-lead">
             Торты на&nbsp;заказ, пирожные и&nbsp;конфеты&nbsp;— и&nbsp;завтраки, супы и&nbsp;паста
@@ -43,8 +42,7 @@ import { site } from '../data/site';
         </div>
       </Photo>
 
-      {/* виден сразу, но приоритет низкий: на телефоне кадр вообще скрыт, а на
-          десктопе не должен отбирать канал у LCP-снимка слева */}
+      {/* виден сразу, но канал у LCP-снимка слева отбирать не должен */}
       <Photo
         photo={heroPhotos.wide}
         ratio="16 / 9"
@@ -76,8 +74,7 @@ import { site } from '../data/site';
     padding-top: calc(var(--sec-pad) * 0.6);
   }
 
-  /* на телефоне заголовок лежит поверх фото, но из документа он не исчезает:
-     иначе `h1` пропал бы и для поиска, и для чтения с экрана */
+  /* на телефоне `h1` не выключаем, а прячем: он нужен поиску и скринридеру */
   .hero__head {
     position: absolute;
     width: 1px;
@@ -91,7 +88,6 @@ import { site } from '../data/site';
     display: block;
   }
 
-  /* мобильный первый экран — фото 3:4 с текстом поверх */
   .hero__scrim {
     position: absolute;
     inset: 0;
@@ -113,7 +109,7 @@ import { site } from '../data/site';
     display: flex;
     flex-direction: column;
     gap: 9px;
-    /* снизу оставлен запас: туда наезжает бенто из соседней секции */
+    /* запас снизу: туда наезжает бенто из соседней секции */
     padding: 20px 18px 76px;
   }
 

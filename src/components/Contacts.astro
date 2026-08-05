@@ -144,7 +144,6 @@ import { site, places, hoursRows, yandexRouteUrl, yandexWidgetUrl } from '../dat
     color: var(--text-4);
   }
 
-  /* часы — таблицей, чтобы «сб 8:30 — 21:00» читалось за один взгляд */
   .ct__hours {
     margin: 12px 0 16px;
     padding: 12px 0 0;
@@ -227,8 +226,7 @@ import { site, places, hoursRows, yandexRouteUrl, yandexWidgetUrl } from '../dat
     z-index: 1;
   }
 
-  /* на планшете карта ещё под карточками, но сами карточки короткие —
-     ставим их рядом, чтобы карта не уезжала на второй экран */
+  /* карточки в две колонки: иначе карта уезжает на второй экран */
   @media (min-width: 700px) and (max-width: 999px) {
     .ct__col {
       display: grid;
@@ -241,8 +239,7 @@ import { site, places, hoursRows, yandexRouteUrl, yandexWidgetUrl } from '../dat
     }
   }
 
-  /* с тысячи пикселей карта уже помещается рядом с карточками —
-     держать её во всю ширину под ними значит гнать страницу вниз впустую */
+  /* карта помещается рядом с карточками */
   @media (min-width: 1000px) {
     .ct {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
