@@ -1,120 +1,143 @@
-# Лендинг «Вкусная компания»
+<div align="center">
 
-Одностраничник кондитерской в Самаре: витрина тортов, торт по картинке, десерты,
-зал, отзывы, две точки на карте. Основная конверсия — написать в Telegram или Max,
-позвонить либо уйти в магазин доставки.
+# Vkusnaya Kompaniya — bakery landing page
 
-Собран на **Astro 5** без UI-фреймворка: интерактива на странице четыре штуки, и
-все четыре закрываются платформой (`scroll-snap`, пара обработчиков, два ленивых
-iframe) — React здесь не окупается. `Lighthouse` на мобильном — 99 / 100 / 100 / 100,
-на десктопе 100 по всем четырём.
+Single-page site for a bakery and kitchen with two locations in Samara, Russia.
+Built with **Astro 5**, no UI framework, ~5 kB of JavaScript on the wire.
 
-## Запуск
+[![Astro](https://img.shields.io/badge/Astro-5.18-FF5D01?logo=astro&logoColor=white)](https://astro.build)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+![JS shipped](https://img.shields.io/badge/JS%20shipped-5.4%20kB-6f7546)
+![Lighthouse mobile](https://img.shields.io/badge/Lighthouse%20mobile-99%20·%20100%20·%20100%20·%20100-brightgreen)
+![Lighthouse desktop](https://img.shields.io/badge/Lighthouse%20desktop-100%20·%20100%20·%20100%20·%20100-brightgreen)
+
+**English** · [Русский](README.ru.md)
+
+<img src="docs/screenshots/hero.webp" alt="Hero section on desktop" width="900">
+
+</div>
+
+## Screenshots
+
+| Showcase | Contacts |
+|---|---|
+| <img src="docs/screenshots/cakes.webp" alt="Cake showcase with filters" width="440"> | <img src="docs/screenshots/contacts.webp" alt="Contacts with schedule and Yandex map" width="440"> |
+
+| Mobile — hero | Mobile — showcase | Mobile — contacts |
+|---|---|---|
+| <img src="docs/screenshots/mobile-hero.webp" alt="Mobile hero" width="240"> | <img src="docs/screenshots/mobile-cakes.webp" alt="Mobile showcase" width="240"> | <img src="docs/screenshots/mobile-contacts.webp" alt="Mobile contacts" width="240"> |
+
+## Highlights
+
+- **No UI framework.** The page has four interactive pieces — a sticky menu, showcase
+  filters, "show more", and two lazy iframes. All four are covered by the platform, so
+  React would only add weight.
+- **Opening status computed in the browser** against `Europe/Samara`, not baked into the
+  HTML at build time — a static "Open now" would lie to everyone visiting at night.
+- **Business hours live in one place.** A `Schedule` tuple in `src/data/site.ts` renders
+  the human-readable table, the status pill and the `openingHours` field of the
+  schema.org markup, and it is covered by tests.
+- **Reviews come from the official Yandex Maps widget.** Review texts belong to their
+  authors and cannot be copied onto a third-party site; only the aggregate numbers are
+  quoted, with a link to the source.
+- **Images are content, not decoration.** AVIF via `astro:assets`, explicit `srcset`,
+  the LCP frame preloaded from the same origin.
+- **Accessible by default.** Every text step holds ≥4.5:1 contrast, focus is visible,
+  the map and reviews have `noscript` fallbacks, and the page has a skip link.
+
+## Tech stack
+
+| | |
+|---|---|
+| Framework | [Astro 5](https://astro.build) — static output, zero hydration |
+| Language | TypeScript (strict), plain CSS with custom properties |
+| Images | `astro:assets` → AVIF, `<Image />` + `getImage()` for the preload |
+| Fonts | Montserrat Variable, self-hosted, only Cyrillic and Latin subsets |
+| SEO | JSON-LD `@graph` of two `Bakery` nodes, OpenGraph, sitemap, `robots.txt` |
+| Tests | `node:assert` — no test runner, Node reads the TypeScript directly |
+
+## Getting started
 
 ```bash
 npm install
 npm run dev      # http://localhost:4321
-npm run build    # сборка в dist/
-npm run preview  # посмотреть собранное
-npm run check    # типы и диагностика .astro
-npm test         # расписание и статус точек (Node сам читает TypeScript)
+npm run build    # static output in dist/
+npm run preview  # serve the built site
+npm run check    # types and .astro diagnostics
+npm test         # schedule and opening-status logic
 ```
 
-> **Windows-грабли.** Запускать из пути с тем же регистром, что и на диске
-> (`D:\Code\Projects\...`, не `D:\code\projects\...`). При расхождении Astro теряет
-> метаданные компиляции и **молча выбрасывает весь CSS** из сборки — страница
-> собирается без единого стиля.
+> **Windows note.** Run from a path that matches the on-disk letter case
+> (`D:\Code\Projects\…`, not `D:\code\projects\…`). On a mismatch Astro loses compile
+> metadata and **silently drops all CSS** from the build.
 
-## Что где лежит
+## Project structure
 
-| Путь | Что это |
+| Path | What lives there |
 |---|---|
-| `src/data/site.ts` | контакты, часы, адреса точек, ссылки на все ресурсы компании |
-| `src/data/catalog.ts` | торты, десерты, фото зала, шаги заказа, сборка `srcset` |
-| `src/components/` | секции лендинга, по компоненту на секцию |
-| `src/styles/global.css` | токены (палитра, ритм, брейкпоинты), кнопки, общие паттерны |
-| `src/layouts/BaseLayout.astro` | мета, OpenGraph, JSON-LD, шрифт, preload первого экрана |
-| `src/scripts/lazy-frame.ts` | ленивые iframe карты и отзывов + переключение точек |
-| `src/data/site.check.ts` | проверка расписания и статуса — единственной логики на странице |
-| `src/components/OpenStatus.astro` | «Открыто до 21:00» — считается по времени Самары |
-| `handoff/` | исходная выгрузка Claude Designer — эталон вёрстки, в прод не идёт |
+| `src/data/site.ts` | contacts, business hours, addresses, every outbound link |
+| `src/data/catalog.ts` | cakes, desserts, room photos, order steps, `srcset` helpers |
+| `src/data/site.check.ts` | assertions for the schedule and status logic |
+| `src/components/` | one component per section of the page |
+| `src/layouts/BaseLayout.astro` | meta, OpenGraph, JSON-LD, fonts, LCP preload |
+| `src/scripts/lazy-frame.ts` | lazy iframes for the map and reviews, location switching |
+| `src/styles/global.css` | design tokens, buttons, shared patterns |
+| `handoff/` | original design handoff — reference only, never shipped |
 
-**Менять контент — в `src/data/`.** Вёрстку трогать не нужно: тексты секций живут в
-компонентах, а всё перечислимое (позиции витрины, отзывы, точки) — в данных.
+Content changes go into `src/data/`. Section copy lives in the components; everything
+enumerable (showcase items, locations, links) lives in the data files.
 
-## Как устроен адаптив
+## How it stays fast
 
-Макет был нарисован под три фиксированные ширины — 390 / 834 / 1440. В проде это
-CSS-переменные, которые переключаются на `768px` и `1200px`:
+- **CSS is inlined** into the document — no render-blocking stylesheet request.
+- **`@font-face` is declared by hand** for the Cyrillic and Latin subsets only. Importing
+  the font package pulled in `latin-ext`, `cyrillic-ext` and `vietnamese` — 100+ kB of
+  subsets the page never renders a glyph from.
+- **The LCP image is preloaded** with the same `srcset`/`sizes` the markup uses, so the
+  browser starts the fetch before it parses the page.
+- **Sections below the fold are skipped** until they are scrolled into view
+  (`content-visibility: auto`). The trade-off is documented in the CSS: anchor jumps are
+  instant instead of smooth, because unrendered sections only estimate their height.
+- **Third-party widgets are deferred.** Yandex Maps and the reviews widget mount through
+  an `IntersectionObserver` and never touch the critical path.
+
+Measured with Lighthouse 12 against a gzip-serving production build: mobile
+99 / 100 / 100 / 100 (median of five runs), desktop 100 / 100 / 100 / 100.
+
+## Responsive scale
+
+The design was drawn for three fixed widths — 390 / 834 / 1440. In production those are
+custom properties that switch at `768px` and `1200px`:
 
 | | mobile | tablet | desktop |
 |---|---|---|---|
-| боковой отступ | 18 | 36 | 72 |
-| контент | 354 | 762 | 1296 |
+| side padding | 18 | 36 | 72 |
+| content width | 354 | 762 | 1296 |
 | H1 / H2 | 34 / 25 | 47 / 33 | 66 / 42 |
-| отступ секции | 44 | 64 | 92 |
-| колонки: торты / десерты | 2 / 2 | 3 / 3 | 4 / 3 |
+| section padding | 44 | 64 | 92 |
+| columns: cakes / desserts | 2 / 2 | 3 / 3 | 4 / 3 |
 
-В контрольных ширинах цифры совпадают с макетом до пикселя, между ними тянутся
-через `clamp()`.
+At the three reference widths the numbers match the design to the pixel; in between they
+interpolate with `clamp()`.
 
-## Решения, о которых стоит знать
+## Tests
 
-- **Фотографии — плейсхолдеры Unsplash.** Хранится только id снимка, `srcset`
-  собирает `Photo.astro` из URL-параметров. Реальные фото кладутся в `src/assets/` и
-  подставляются в поле `file` снимка — дальше `astro:assets` сам сделает `avif` и
-  нужные размеры. Так уже сделан кадр первого экрана: он же LCP, и чужой хост в
-  критическом пути стоил секунды.
-- **Скорость.** Стили инлайнятся в страницу, шрифт объявлен вручную только для
-  кириллицы и латиницы (пакет тянул ещё 100+ КБ ненужных подмножеств), секции ниже
-  первого экрана считаются лениво через `content-visibility`.
-- **Карта — виджет Яндекса по `oid` организации**, одна на две точки: переключается
-  кнопкой «Показать на карте» в карточке. Параметр `pt` (свои метки) виджет
-  игнорирует, поэтому показываем карточку организации — в ней сразу рейтинг, часы и
-  «как добраться». Главное действие карточки — «Маршрут» прямой ссылкой.
-- **Отзывы — официальный виджет Яндекс Карт.** Копировать тексты чужих отзывов
-  нельзя (права авторов + условия Яндекса), а сочинять — тем более. Рядом только
-  цифры с карточки организации: они факты и ведут на источник. Обновлять вручную,
-  разметку `aggregateRating` для них не ставим — Google запрещает переносить в неё
-  рейтинги с чужих площадок.
-- **Статус «Открыто / Откроется в 8:00» считается в браузере** по `Europe/Samara`.
-  До расчёта плашки нет: статичная соврала бы всем, кто зашёл ночью.
-- **Просмотра фото во весь экран нет** — сознательно: фото на странице и так
-  крупные, а лишний слой поверх контента только мешает.
-- **«Показать ещё»** не просто раскрывает сетку — скрытые карточки не рендерят
-  картинки, пока их не показали.
-- **Из дизайн-системы Organic** взяты только кнопки и `:focus-visible`: остальное
-  (шрифт, палитра) лендинг всё равно перекрывал.
+`npm test` runs `src/data/site.check.ts` — the only logic on the page that cannot be
+verified by looking at it, since it depends on the weekday, the time of day and the
+Samara time zone:
 
-## Данные, сверенные с Яндекс.Картами
+- schedule → human-readable rows and schema.org `openingHours`
+- opening and closing boundaries (open at exactly 08:00, closed at exactly 21:00)
+- Saturday's later opening, and midnight rollover into the next day's hours
+- Russian plural forms for the rating counters
 
-В макете адреса были выдуманные (`Садовая, 12`, `Ново-Садовая, 204`, `Lorem ipsum`),
-а телефон встречался в двух вариантах. Сейчас в `site.ts` — реальные карточки
-организации:
+No runner and no dependencies: `node:assert` plus Node's native TypeScript support.
 
-- **Садовая, 212Б** — кондитерская, 4,8 (765 оценок), пн-пт с 8:00
-- **Советской Армии, 177** — ресторан и кондитерская, 5,0 (320 оценок)
-- телефон `+7 987 955-25-65` — один на обе точки, совпадает на всех ресурсах компании
+## Related
 
-## Что ждём от клиента
-
-- [ ] **Фотографии**: минимум 8 тортов, 6 десертов, 4 по залу, 2–3 с производства,
-      2 для блока «торт по картинке»
-- [ ] **Ссылку на Max** — в `site.links.max` заглушка (остальные ссылки реальные)
-- [ ] **Юридическую строку** в футер: ИП/ООО, ИНН, ОГРН
-- [ ] **Политику и оферту** — в футере стоят `#`
-- [ ] **Часы второй точки** и примечания к адресам (в макете их не было)
-- [ ] **Обновлять цифры Яндекса** в `yandexStats` — сняты вручную 5 августа 2026
-- [ ] **Домен лендинга**: сейчас `vkus-com.ru` (домен куплен, сайта на нём нет)
-- [ ] **`public/og.jpg`** — сейчас типографская плашка со слоганом; когда появится
-      живое фото витрины, заменить (1200×630)
-- [ ] Показывать ли цены на карточках тортов (в данных они есть, в вёрстке скрыты)
-
-## Соседние ресурсы
-
-| Что | Адрес |
+| | |
 |---|---|
-| Магазин доставки | [vkusdostavka.shop](https://vkusdostavka.shop/) |
-| Кейтеринг и банкеты | [vkusnayakompania.ru](https://vkusnayakompania.ru/) |
-| Приложение | [App Store](https://apps.apple.com/app/id6477568088) · [Google Play](https://play.google.com/store/apps/details?id=com.foodpicasso.cateringvkusnaya) |
-| Соцсети | [VK](https://vk.ru/vkusnayakompania) · [Telegram](https://t.me/vkusnayakompania) |
+| Delivery shop | [vkusdostavka.shop](https://vkusdostavka.shop/) |
+| Catering | [vkusnayakompania.ru](https://vkusnayakompania.ru/) |
+| Apps | [App Store](https://apps.apple.com/app/id6477568088) · [Google Play](https://play.google.com/store/apps/details?id=com.foodpicasso.cateringvkusnaya) |
+| Social | [VK](https://vk.ru/vkusnayakompania) · [Telegram](https://t.me/vkusnayakompania) |

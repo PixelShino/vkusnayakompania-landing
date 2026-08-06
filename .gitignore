@@ -23,5 +23,5 @@ pnpm-debug.log*
 # playwright artifacts
 .playwright-mcp/
 
-# playwright / скриншоты проверок
-*.jpeg
+# playwright / скриншоты проверок в корне (в src/assets .jpeg не трогаем)
+/*.jpeg
