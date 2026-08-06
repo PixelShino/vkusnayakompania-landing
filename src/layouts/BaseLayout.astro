@@ -48,7 +48,13 @@ interface Props {
 
 const { title = site.title, description = site.description } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://example.com');
-const ogImage = new URL('/og.jpg', canonical);
+
+// на превью-сборке сайт лежит в подкаталоге, поэтому файлы из `public` — через `base`
+const asset = (path: string) => `${import.meta.env.BASE_URL.replace(/\/$/, '')}/${path}`;
+const ogImage = new URL(asset('og.jpg'), canonical);
+
+// превью не должно попасть в поиск и конкурировать с боевым доменом
+const isPreview = canonical.hostname !== 'vkus-com.ru';
 
 // Разметка организации: две точки одной кондитерской.
 const jsonLd = {
@@ -87,7 +93,8 @@ const jsonLd = {
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical.href} />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {isPreview && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="icon" href={asset('favicon.svg')} type="image/svg+xml" />
     <meta name="theme-color" content="#FFFAED" />
 
     <style is:global set:html={fontFaces}></style>
