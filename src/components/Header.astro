@@ -44,7 +44,7 @@ const nav = navFor(content);
 
       <div class="header__actions">
         <a class="header__phone" href={settings.phoneHref}>{settings.phone}</a>
-        <button type="button" class="btn btn--secondary btn--sm" data-book="Бронь стола">
+        <button type="button" class="btn btn--secondary btn--sm header__book" data-book="Бронь стола">
           Забронировать стол
         </button>
         <a
@@ -221,7 +221,7 @@ const nav = navFor(content);
 
   @media (min-width: 768px) {
     .header__logo {
-      width: 132px;
+      width: 108px;
       margin-right: 0;
     }
 
@@ -234,13 +234,14 @@ const nav = navFor(content);
 
     .header__nav {
       flex-direction: row;
-      gap: 22px;
-      margin-inline: 28px auto;
+      gap: 13px;
+      margin-inline: 10px auto;
     }
 
     .header__nav a {
       padding-block: 4px;
-      font-size: 14px;
+      font-size: 12.5px;
+      white-space: nowrap;
       font-weight: 400;
       border-bottom: 1px solid transparent;
       transition: border-color 0.16s ease;
@@ -259,11 +260,12 @@ const nav = navFor(content);
       font-size: 13px;
     }
 
-    .header__phone {
-      display: block;
-      margin-right: 6px;
+    .header__book {
+      display: none;
     }
 
+    /* до 1200 в строку помещаются логотип, навигация и одно действие:
+       телефон и бронь возвращаются, когда контейнер вырастает до 1296 */
     .header__call,
     .header__burger {
       display: none;
@@ -274,6 +276,36 @@ const nav = navFor(content);
         color: var(--text);
         border-bottom-color: var(--line-4);
       }
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .header__logo {
+      width: 116px;
+    }
+
+    .header__nav {
+      gap: 16px;
+      margin-inline: 14px auto;
+    }
+
+    .header__nav a {
+      font-size: 13px;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .header__logo {
+      width: 132px;
+    }
+
+    .header__phone {
+      display: block;
+      margin-right: 6px;
+    }
+
+    .header__book {
+      display: inline-flex;
     }
   }
 </style>
