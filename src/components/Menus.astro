@@ -1,0 +1,151 @@
+---
+/**
+ * Three menu cards: cafe, restaurant, confectionery. A card without a published
+ * menu keeps its place and says so instead of showing a dead button.
+ * Три карточки меню: кафе, ресторан, кондитерская. Карточка без выложенного
+ * меню остаётся на месте и пишет об этом вместо мёртвой кнопки.
+ */
+import { menuFor } from '../lib/select';
+import type { Content, Direction } from '../lib/content';
+import cake from '../assets/icons/cake.svg?raw';
+
+interface Props {
+  content: Content;
+}
+
+const { content } = Astro.props;
+const { settings, home, directions, menus } = content;
+
+const KEYS: Direction['key'][] = ['cafe', 'restaurant', 'confectionery'];
+
+// dates come as YYYY-MM-DD; UTC keeps the day from sliding on a western builder
+// даты приходят как YYYY-MM-DD; UTC не даёт дню съехать на сборке западнее
+const day = (date: string) =>
+  new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', timeZone: 'UTC' }).format(
+    new Date(`${date}T00:00:00Z`),
+  );
+
+const cards = KEYS.map((key) => directions.find((item) => item.key === key))
+  .filter((direction) => direction !== undefined)
+  .map((direction) => ({ direction, menu: menuFor(menus, direction.id) }));
+---
+
+<section class="section" id="menu">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <h2>Меню</h2>
+        {home.menu_text && <p class="lead">{home.menu_text}</p>}
+      </div>
+      <a class="btn btn--primary btn--sm" href={settings.shop_url} target="_blank" rel="noopener">
+        Заказать в приложении
+      </a>
+    </div>
+
+    <div class="mn__grid">
+      {
+        cards.map(({ direction, menu }) => (
+          <article class="mn">
+            <div class="card-top">
+              <span class="card-mark card-mark--sm">
+                {direction.place ? (
+                  direction.place.n
+                ) : (
+                  <span class="icon" aria-hidden="true">
+                    <Fragment set:html={cake} />
+                  </span>
+                )}
+              </span>
+              <span class="card-dash" />
+              <span class="card-pill">
+                {menu ? `обновлено ${day(menu.updated)}` : 'скоро'}
+              </span>
+            </div>
+
+            <h3 class="mn__title">{direction.title}</h3>
+            <p class="mn__kind">{direction.place?.kind ?? 'пирожные, торты, конфеты'}</p>
+
+            <div class="mn__foot">
+              {menu ? (
+                <a class="btn btn--secondary btn--md" href={menu.file.href} target="_blank" rel="noopener">
+                  Смотреть меню
+                </a>
+              ) : (
+                <p class="mn__soon">Меню скоро появится</p>
+              )}
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .mn__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: calc(var(--gap) + 2px);
+    margin-top: 26px;
+    align-items: stretch;
+  }
+
+  .mn {
+    display: flex;
+    flex-direction: column;
+    padding: calc(var(--gap) + 8px);
+    border: 1px solid var(--line);
+    border-radius: var(--r-xl);
+    background: var(--surface);
+    transition: border-color 0.16s ease;
+  }
+
+  .icon {
+    display: inline-flex;
+    width: 18px;
+    height: 18px;
+  }
+
+  .icon > :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .mn__title {
+    margin: 18px 0 6px;
+    font-size: calc(var(--fs-h3) + 1px);
+    line-height: 1.14;
+  }
+
+  .mn__kind {
+    font-size: var(--fs-body);
+    color: var(--text-3);
+  }
+
+  .mn__foot {
+    margin-top: auto;
+    padding-top: 20px;
+  }
+
+  /* пустое состояние занимает ту же высоту, что и кнопка: карточки не пляшут */
+  .mn__soon {
+    display: flex;
+    align-items: center;
+    min-height: 42px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-4);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .mn:hover {
+      border-color: var(--line-4);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .mn__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>
