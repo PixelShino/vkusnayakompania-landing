@@ -8,15 +8,19 @@ import fs from 'node:fs';
 import { normalize, type Raw, type ResolveImage } from '../lib/content.ts';
 import fixture from './fixture.json' with { type: 'json' };
 
+// fixture files are not in git: CI and the VPS build from Directus and have none,
+// so the on-disk check runs only where `pnpm fixture` was executed
+// файлы фикстуры не в git: CI и VPS собирают из Directus и их не имеют,
+// поэтому сверка с диском идёт только там, где запускали `pnpm fixture`
 const DIR = 'src/data/fixture-files';
 const files = fs.existsSync(DIR) ? fs.readdirSync(DIR) : [];
-if (!files.length) throw new Error('нет src/data/fixture-files — запусти pnpm fixture');
+if (!files.length) console.log(`${DIR} пуст — проверяю данные без файлов (для pnpm dev нужен pnpm fixture)`);
 
-// в голом Node `import.meta.glob` недоступен: подменяем резолвер картинок и
-// заодно сверяем, что файл фикстуры лежит на диске
+// в голом Node `import.meta.glob` недоступен: подменяем резолвер картинок и,
+// когда файлы скачаны, сверяем, что каждый лежит на диске
 const resolve: ResolveImage = (file) => {
   const name = `${file.id}.${file.filename_download.split('.').pop()?.toLowerCase()}`;
-  if (!files.includes(name))
+  if (files.length && !files.includes(name))
     throw new Error(`нет файла ${DIR}/${name} (${file.title ?? file.id}) — запусти pnpm fixture`);
   return `/${DIR}/${name}`;
 };
