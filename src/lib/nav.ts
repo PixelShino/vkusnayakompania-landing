@@ -16,13 +16,21 @@ export const navFor = (content: Content) => [
   { label: 'Контакты', href: '#contacts' },
 ];
 
-/** Ссылки подвала: незаполненные в админке не рисуются. */
-export const footerLinksFor = ({ settings }: Content) =>
-  [
+type Link = { label: string; href: string };
+const filled = (links: { label: string; href?: string }[]) =>
+  links.filter((link) => Boolean(link.href)) as Link[];
+
+/** Ссылки подвала по группам: незаполненные в админке не рисуются. */
+export const footerGroupsFor = ({ settings }: Content) => ({
+  social: filled([
+    { label: 'ВКонтакте', href: settings.vk },
+    { label: 'Telegram', href: settings.telegram },
+    { label: 'Max', href: settings.max },
+  ]),
+  more: filled([
     { label: 'Магазин доставки', href: settings.shop_url },
     { label: 'Кейтеринг и банкеты', href: settings.catering_url },
     { label: 'App Store', href: settings.app_ios },
     { label: 'Google Play', href: settings.app_android },
-    { label: 'ВКонтакте', href: settings.vk },
-    { label: 'Telegram', href: settings.telegram },
-  ].filter((link) => Boolean(link.href)) as { label: string; href: string }[];
+  ]),
+});
