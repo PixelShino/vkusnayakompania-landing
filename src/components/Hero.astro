@@ -256,8 +256,30 @@ const afishaDate = afisha ? dayMonth.format(new Date(afisha.date)) : '';
   }
 
   @media (min-width: 768px) {
+    /* шапка здесь `fixed` и фона не имеет — кадр начинается от самого верха */
     .hero {
-      min-height: 82vh;
+      min-height: 100svh;
+    }
+
+    /* Верх кадра светлый (витрина с лампами): без скрима кремовые пункты меню
+       в прозрачной шапке дают 2,7:1. Плато 0,74…0,70 держится всю высоту шапки
+       (88 px) — на самом светлом пикселе фона это 4,9:1 — и только потом гаснет.
+       Абсолютный — значит не флекс-элемент родителя.
+       A plateau over the header height, then the fade: the bright display case
+       under the labels needs a constant floor, not a linear ramp. */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0 0 auto;
+      z-index: 1;
+      height: 220px;
+      background: linear-gradient(
+        to bottom,
+        rgb(44 41 39 / 0.74) 0,
+        rgb(44 41 39 / 0.7) 88px,
+        rgb(44 41 39 / 0) 220px
+      );
+      pointer-events: none;
     }
 
     .hero__in {

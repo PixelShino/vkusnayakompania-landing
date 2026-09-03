@@ -2,10 +2,12 @@
 /**
  * Sticky header. The nav list and both CTAs are written once: on desktop
  * `display: contents` unpacks them into the bar, under 768 the same node
- * becomes the drop-down panel.
+ * becomes the drop-down panel. `header--over` is the desktop-only state where
+ * the bar floats over the first screen with no background of its own.
  * Липкая шапка. Список навигации и обе кнопки написаны один раз: на десктопе
  * `display: contents` раскладывает их в строку шапки, под 768 тот же узел
- * становится выпадающей панелью.
+ * становится выпадающей панелью. `header--over` — десктопное состояние, когда
+ * шапка лежит поверх первого экрана без собственного фона.
  */
 import { Image } from 'astro:assets';
 import logo from '../assets/logo.png';
@@ -22,7 +24,7 @@ const { settings } = content;
 const nav = navFor(content);
 ---
 
-<header class="header">
+<header class="header header--over">
   <div class="container header__bar">
     <a class="header__logo" href="#top" aria-label={`${BRAND.name} — на главную`}>
       <Image
@@ -308,12 +310,102 @@ const nav = navFor(content);
       display: inline-flex;
     }
   }
+
+  /* ── прозрачная шапка поверх первого экрана (только десктоп) ───────────── */
+  /* The bar floats over the hero photo until the page is scrolled; under 768
+     it stays the cream sticky bar, because there the photo starts below it.
+     `scripting: enabled` — не украшение: непрозрачной шапку делает скрипт, а без
+     него кремовые подписи повисли бы над кремовыми секциями.
+     Without scripting nothing would repaint the bar, so the whole state is
+     gated on it and the header stays the plain cream one. */
+  @media (min-width: 768px) and (scripting: enabled) {
+    .header--over {
+      position: fixed;
+      inset: 0 0 auto;
+      transition-property: background-color, border-color;
+      transition-duration: 160ms;
+      transition-timing-function: ease;
+    }
+
+    .header--over .header__logo :global(img) {
+      transition: filter 160ms ease;
+    }
+
+    /* цвет тоже переходит: без него подписи меняются рывком раньше фона */
+    .header--over .header__nav a {
+      transition-property: border-color, color;
+      transition-duration: 0.16s;
+    }
+
+    /* пока первый экран не тронут: фона нет, содержимое живёт по правилам фото */
+    .header--over:not(.is-solid) {
+      background: transparent;
+      border-bottom-color: transparent;
+    }
+
+    .header--over:not(.is-solid) .header__nav a,
+    .header--over:not(.is-solid) .header__phone {
+      color: var(--bg);
+    }
+
+    /* логотип — тёмный PNG: на фото белый и кремовый неразличимы */
+    .header--over:not(.is-solid) .header__logo :global(img) {
+      filter: brightness(0) invert(1);
+    }
+
+    /* `btn--ghost-light` и `btn--light` повторены здесь, а не подставлены
+       классами: состояние переключает скролл, а не разметка */
+    .header--over:not(.is-solid) .header__book {
+      background: rgb(255 250 237 / 0.16);
+      border-color: rgb(255 250 237 / 0.5);
+      color: var(--bg);
+    }
+
+    .header--over:not(.is-solid) .header__book:active {
+      background: rgb(255 250 237 / 0.3);
+    }
+
+    .header--over:not(.is-solid) .header__actions .btn--primary {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .header--over:not(.is-solid) .header__actions .btn--primary:active {
+      background: var(--surface);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .header--over:not(.is-solid) .header__nav a:hover {
+        color: var(--bg);
+        border-bottom-color: var(--bg);
+      }
+
+      .header--over:not(.is-solid) .header__book:hover {
+        background: rgb(255 250 237 / 0.26);
+      }
+
+      .header--over:not(.is-solid) .header__actions .btn--primary:hover {
+        background: var(--surface);
+      }
+    }
+  }
 </style>
 
 <script>
   const header = document.querySelector<HTMLElement>('.header');
   const burger = header?.querySelector<HTMLButtonElement>('.header__burger');
   const panel = document.getElementById('header-menu');
+
+  // Порог вместо IntersectionObserver по `#top`: наблюдатель держал бы шапку
+  // прозрачной весь первый экран, а верхний скрим героя к тому времени уже
+  // уезжает вверх — контраст подписей становится непроверяемым.
+  // A threshold, not an observer on `#top`: the hero's top scrim scrolls away
+  // long before the section does, and the labels lose their measured contrast.
+  if (header) {
+    const paint = () => header.classList.toggle('is-solid', window.scrollY > 40);
+    paint();
+    window.addEventListener('scroll', paint, { passive: true });
+  }
 
   if (header && burger && panel) {
     const setOpen = (open: boolean) => {
