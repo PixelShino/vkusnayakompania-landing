@@ -632,14 +632,14 @@ if (dialog && title) {
 
 **Файлы:** `Gallery.astro`, `src/scripts/rail.ts`, `src/styles/global.css`.
 
-- [ ] **Шаг 1:** для каждой точки с фото — заголовок `place.name`, `.rail` со
+- [x] **Шаг 1:** для каждой точки с фото — заголовок `place.name`, `.rail` со
   `scroll-snap`, кадры 4:3 шириной 82vw / 46vw / 31vw, подпись под фото
   (`caption`, иначе `alt` не дублировать — пусто). Стрелки «назад/вперёд»
   (`aria-label`) скроллят на ширину кадра, скрыты на тач-устройствах
   (`@media (hover: none)`). Секция скрыта, если фото нет ни у одной точки.
-- [ ] **Шаг 2:** `rail.ts`: `[data-rail]` + `[data-rail-prev]`/`[data-rail-next]`,
+- [x] **Шаг 2:** `rail.ts`: `[data-rail]` + `[data-rail-prev]`/`[data-rail-next]`,
   `scrollBy({ left: ±card.width, behavior: matchMedia(reduce) ? 'auto' : 'smooth' })`.
-- [ ] **Шаг 3:** скриншоты, коммит `feat(gallery): ленты фото по адресам`.
+- [x] **Шаг 3:** скриншоты, коммит `feat(gallery): ленты фото по адресам`.
 
 ### Задача 5.2: Починка ленивого кадра
 

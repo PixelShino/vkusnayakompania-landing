@@ -1,0 +1,202 @@
+---
+/**
+ * One snap rail of 4:3 frames per venue that has photos. Arrows are a desktop
+ * affordance only: on touch the rail is swiped.
+ * По ленте на каждую точку с фото, кадры 4:3 со скролл-снапом. Стрелки нужны
+ * только на десктопе — на тач-устройствах лента листается пальцем.
+ */
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { Content } from '../lib/content';
+
+interface Props {
+  content: Content;
+}
+
+const { content } = Astro.props;
+const shown = content.places.filter((place) => place.gallery.length > 0);
+---
+
+{
+  shown.length > 0 && (
+    <section class="section" id="gallery">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Зал</h2>
+          </div>
+        </div>
+
+        {shown.map((place) => (
+          <div class="gl" data-rail-group>
+            <div class="gl__head">
+              <h3 class="gl__name">{place.name}</h3>
+              <div class="gl__arrows">
+                <button type="button" class="gl__arrow" data-rail-prev aria-label="Предыдущие фото">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M14.5 5.5 8 12l6.5 6.5" />
+                  </svg>
+                </button>
+                <button type="button" class="gl__arrow" data-rail-next aria-label="Следующие фото">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9.5 5.5 16 12l-6.5 6.5" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="rail gl__rail" data-rail>
+              {place.gallery.map((shot) => (
+                <div class="gl__item">
+                  <figure class="media gl__media" style="--ratio: 4 / 3">
+                    <Image
+                      src={shot.image.src as ImageMetadata}
+                      width={shot.image.width}
+                      height={shot.image.height}
+                      alt={shot.image.alt}
+                      widths={[480, 800, 1200, 1600]}
+                      sizes="(min-width: 1200px) 31vw, (min-width: 768px) 46vw, 82vw"
+                      format="avif"
+                      quality={52}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </figure>
+                  {shot.caption && <p class="gl__caption">{shot.caption}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .gl {
+    margin-top: 26px;
+  }
+
+  /* между лентами отбивка больше, чем между заголовком секции и первой */
+  .gl + .gl {
+    margin-top: 36px;
+  }
+
+  .gl__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+
+  .gl__name {
+    font-size: var(--fs-h3);
+    min-width: 0;
+  }
+
+  .gl__arrows {
+    display: none;
+    gap: 8px;
+    flex: none;
+  }
+
+  .gl__arrow {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    transition:
+      background-color 0.16s ease,
+      border-color 0.16s ease,
+      opacity 0.16s ease,
+      scale 0.12s ease-out;
+  }
+
+  .gl__arrow:active:not(:disabled) {
+    scale: 0.96;
+  }
+
+  .gl__arrow svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .gl__arrow:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .gl__rail {
+    scroll-behavior: auto;
+  }
+
+  .gl__item {
+    flex: none;
+    width: 82vw;
+  }
+
+  .gl__media {
+    --radius: var(--r-lg);
+  }
+
+  .gl__media :global(img) {
+    outline: 1px solid rgb(0 0 0 / 0.08);
+    outline-offset: -1px;
+  }
+
+  .gl__caption {
+    margin-top: 8px;
+    font-size: 12.5px;
+    color: var(--text-4);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .gl__rail {
+      scroll-behavior: smooth;
+    }
+  }
+
+  /* стрелки только там, где есть курсор: пальцем лента листается сама */
+  @media (hover: hover) and (pointer: fine) {
+    .gl__arrows {
+      display: flex;
+    }
+
+    .gl__arrow:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--text) 6%, transparent);
+      border-color: var(--line-4);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .gl {
+      margin-top: 30px;
+    }
+
+    .gl + .gl {
+      margin-top: 44px;
+    }
+
+    .gl__item {
+      width: 46vw;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .gl__item {
+      width: 31vw;
+    }
+  }
+</style>
+
+<script>
+  import '../scripts/rail';
+</script>
