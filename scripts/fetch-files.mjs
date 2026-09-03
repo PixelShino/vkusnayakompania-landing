@@ -1,9 +1,11 @@
 // Documents from Directus → public/media/<id>.<ext>, so the page links to its
 // own domain instead of an URL with the token in it. Without Directus the same
-// files are copied from the fixture. Idempotent: what is there is not fetched again.
+// files are copied from the fixture. Directus files are always re-fetched: a
+// replaced PDF keeps its id, so a cached copy would go stale; fixture copies are skipped.
 // Документы из Directus в public/media/<id>.<ext>: страница ссылается на свой
 // домен, а не на адрес с токеном. Без Directus те же файлы копируются из
-// фикстуры. Идемпотентен: уже скачанное не качается заново.
+// фикстуры. Из Directus качаем всегда: заменённый PDF сохраняет id, и кешированная
+// копия устарела бы; копии из фикстуры пропускаются, если уже есть.
 //
 // Run / Запуск: pnpm files (шаг prebuild)
 import fs from 'node:fs/promises';
@@ -41,7 +43,7 @@ let saved = 0;
 for (const file of files) {
   const name = `${file.id}.${file.filename_download.split('.').pop().toLowerCase()}`;
   const dest = `${OUT}/${name}`;
-  if (await fs.access(dest).then(() => true, () => false)) continue;
+  if (!source && (await fs.access(dest).then(() => true, () => false))) continue;
   if (source) {
     const r = await fetch(`${BASE}/assets/${file.id}?access_token=${TOKEN}`);
     if (!r.ok) throw new Error(`asset ${name} (${file.title ?? file.id}) → ${r.status}`);
