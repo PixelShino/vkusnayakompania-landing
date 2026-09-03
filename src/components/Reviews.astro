@@ -182,7 +182,7 @@ const highlights = settings.yandex_highlights;
     margin-top: 22px;
     padding: calc(var(--gap) + 10px);
     border-radius: var(--r-xl);
-    background: var(--text);
+    background: var(--olive);
     color: var(--bg);
   }
 
@@ -212,7 +212,8 @@ const highlights = settings.yandex_highlights;
     z-index: 1;
     font-size: calc(var(--fs-body) - 0.5px);
     line-height: 1.5;
-    color: rgba(255, 250, 237, 0.86);
+    /* на оливковой заливке текст только непрозрачный: 0,86 давало 3,9:1 */
+    color: var(--bg);
   }
 
   .rev__sources {

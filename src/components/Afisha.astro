@@ -84,6 +84,11 @@ const datetime = time ? `${afisha.date}T${time}` : afisha.date;
 </section>
 
 <style>
+  /* полоса во всю ширину: зелёный отбивает афишу от кремовых соседей */
+  #afisha {
+    background: var(--olive-tint);
+  }
+
   .af {
     display: grid;
     grid-template-columns: 1fr;
@@ -102,7 +107,7 @@ const datetime = time ? `${afisha.date}T${time}` : afisha.date;
   .af__poster :global(img) {
     width: 100%;
     height: auto;
-    outline: 1px solid rgb(0 0 0 / 0.08);
+    outline: 1px solid var(--olive-tint-line);
     outline-offset: -1px;
   }
 
@@ -130,6 +135,11 @@ const datetime = time ? `${afisha.date}T${time}` : afisha.date;
     flex-wrap: wrap;
     gap: 10px;
     margin-top: 24px;
+  }
+
+  /* тёплая `--line` на оливковой подложке пропадает — рамка берёт её тон */
+  .af__actions .btn--secondary {
+    border-color: var(--olive-tint-line);
   }
 
   /* на телефоне обе кнопки на всю ширину колонки, чтобы не рвать ряд */

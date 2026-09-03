@@ -64,7 +64,8 @@ const docs = [
   .footer {
     margin-top: 20px;
     padding-block: calc(var(--sec-pad) * 0.6);
-    background: var(--surface);
+    background: var(--olive-dark);
+    color: var(--bg);
   }
 
   .footer__in {
@@ -89,10 +90,11 @@ const docs = [
     letter-spacing: var(--ls-heading);
   }
 
+  /* 0,82, а не 0,7: замер на `--olive-dark` даёт 4,65:1 против 3,88:1 */
   .footer__legal {
     font-size: 12px;
     line-height: 1.5;
-    color: var(--text-4);
+    color: rgb(255 250 237 / 0.82);
   }
 
   .footer__docs {
@@ -112,16 +114,12 @@ const docs = [
   .footer__links a {
     font-size: 12.5px;
     text-decoration: none;
-    border-bottom: 1px solid var(--line-4);
+    border-bottom: 1px solid rgb(255 250 237 / 0.4);
   }
 
   .footer__docs a:hover,
   .footer__links a:hover {
-    border-bottom-color: var(--text);
-  }
-
-  .footer__docs a {
-    color: var(--text-4);
+    border-bottom-color: var(--bg);
   }
 
   @media (min-width: 1200px) {

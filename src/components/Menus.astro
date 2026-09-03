@@ -94,9 +94,9 @@ const cards = KEYS.map((key) => directions.find((item) => item.key === key))
     display: flex;
     flex-direction: column;
     padding: calc(var(--gap) + 8px);
-    border: 1px solid var(--line);
+    border: 1px solid var(--olive-tint-line);
     border-radius: var(--r-xl);
-    background: var(--surface);
+    background: var(--olive-tint);
     transition: border-color 0.16s ease;
   }
 
@@ -139,7 +139,7 @@ const cards = KEYS.map((key) => directions.find((item) => item.key === key))
 
   @media (hover: hover) and (pointer: fine) {
     .mn:hover {
-      border-color: var(--line-4);
+      border-color: color-mix(in srgb, var(--olive) 45%, transparent);
     }
   }
 
