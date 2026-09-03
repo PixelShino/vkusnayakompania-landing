@@ -117,9 +117,11 @@ const docs = [
     border-bottom: 1px solid rgb(255 250 237 / 0.4);
   }
 
-  .footer__docs a:hover,
-  .footer__links a:hover {
-    border-bottom-color: var(--bg);
+  @media (hover: hover) and (pointer: fine) {
+    .footer__docs a:hover,
+    .footer__links a:hover {
+      border-bottom-color: var(--bg);
+    }
   }
 
   @media (min-width: 1200px) {

@@ -347,8 +347,10 @@ const highlights = settings.yandex_highlights;
     color: rgba(255, 250, 237, 0.72);
   }
 
-  .rev__tab:hover:not([aria-pressed='true']) {
-    background: color-mix(in srgb, var(--text) 6%, transparent);
+  @media (hover: hover) and (pointer: fine) {
+    .rev__tab:hover:not([aria-pressed='true']) {
+      background: color-mix(in srgb, var(--text) 6%, transparent);
+    }
   }
 
   /* фиксированная высота: внутри виджета свой скролл, а страница не прыгает при загрузке кадра */

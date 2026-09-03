@@ -164,8 +164,10 @@ const points = places.map((place) => ({
     border-bottom: 1px solid var(--line-4);
   }
 
-  .map__stub-link:hover {
-    border-bottom-color: var(--text);
+  @media (hover: hover) and (pointer: fine) {
+    .map__stub-link:hover {
+      border-bottom-color: var(--text);
+    }
   }
 
   .map.is-loaded .map__stub {

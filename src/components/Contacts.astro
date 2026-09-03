@@ -215,9 +215,11 @@ const { places, settings, home } = content;
       text-decoration-color 0.16s ease;
   }
 
-  .ct__org:hover {
-    color: var(--text);
-    text-decoration-color: var(--text);
+  @media (hover: hover) and (pointer: fine) {
+    .ct__org:hover {
+      color: var(--text);
+      text-decoration-color: var(--text);
+    }
   }
 
   .ct__route,
