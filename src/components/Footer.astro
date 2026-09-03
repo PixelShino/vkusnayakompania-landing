@@ -1,4 +1,10 @@
 ---
+/**
+ * Footer: legal line and documents come from the admin panel, so an unfilled
+ * field simply does not render.
+ * Подвал: юрстрока и документы приходят из админки — незаполненное поле просто
+ * не рисуется, заглушек «ИНН —» не бывает.
+ */
 import { BRAND } from '../data/site';
 import { footerLinksFor } from '../lib/nav.ts';
 import type { Content } from '../lib/content.ts';
@@ -7,16 +13,45 @@ interface Props {
   content: Content;
 }
 
-const footerLinks = footerLinksFor(Astro.props.content);
+const { content } = Astro.props;
+const { settings } = content;
+
+const footerLinks = footerLinksFor(content);
 const year = new Date().getFullYear();
+
+const legal = [
+  settings.legal_name,
+  settings.inn && `ИНН ${settings.inn}`,
+  settings.ogrn && `ОГРН ${settings.ogrn}`,
+  settings.legal_address,
+]
+  .filter(Boolean)
+  .join(' · ');
+
+const docs = [
+  { label: 'Политика', href: settings.policy?.href },
+  { label: 'Оферта', href: settings.offer?.href },
+].filter((doc) => Boolean(doc.href)) as { label: string; href: string }[];
 ---
 
 <footer class="footer">
   <div class="container footer__in">
-    <div>
+    <div class="footer__col">
       <p class="footer__brand">{BRAND.name}</p>
-      <!-- TODO(клиент): юридическая строка — ИП/ООО, ИНН, ОГРН. -->
       <p class="footer__legal">© {year} · {BRAND.city}</p>
+      {legal && <p class="footer__legal">{legal}</p>}
+
+      {
+        docs.length > 0 && (
+          <nav class="footer__docs" aria-label="Документы">
+            {docs.map((doc) => (
+              <a href={doc.href} target="_blank" rel="noopener">
+                {doc.label}
+              </a>
+            ))}
+          </nav>
+        )
+      }
     </div>
 
     <nav class="footer__links" aria-label="Дополнительные ссылки">
@@ -40,8 +75,15 @@ const year = new Date().getFullYear();
     align-items: flex-start;
   }
 
+  .footer__col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 46ch;
+  }
+
   .footer__brand {
-    margin-bottom: 8px;
+    margin-bottom: 2px;
     font-weight: var(--fw-heading);
     font-size: 19px;
     letter-spacing: var(--ls-heading);
@@ -49,7 +91,15 @@ const year = new Date().getFullYear();
 
   .footer__legal {
     font-size: 12px;
+    line-height: 1.5;
     color: var(--text-4);
+  }
+
+  .footer__docs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 4px;
   }
 
   .footer__links {
@@ -58,14 +108,20 @@ const year = new Date().getFullYear();
     gap: 16px;
   }
 
+  .footer__docs a,
   .footer__links a {
     font-size: 12.5px;
     text-decoration: none;
     border-bottom: 1px solid var(--line-4);
   }
 
+  .footer__docs a:hover,
   .footer__links a:hover {
     border-bottom-color: var(--text);
+  }
+
+  .footer__docs a {
+    color: var(--text-4);
   }
 
   @media (min-width: 1200px) {
