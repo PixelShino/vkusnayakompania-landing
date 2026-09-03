@@ -1,11 +1,13 @@
 ---
 /**
- * One plain horizontal slider over the photos of every venue: a single frame in
- * the viewport, snap per frame, arrows and a counter. Frames of the second venue
+ * One long horizontal strip over the photos of every venue: three frames on a
+ * desktop, two on a tablet, one and a peek on a phone; swipe on touch, drag with
+ * the mouse, arrows and keys page by one frame. Frames of the second venue
  * follow the first — the guest picks nothing, the address is in every caption.
- * Один простой горизонтальный слайдер по фото всех точек: во вьюпорте ровно
- * один кадр, снап по кадру, стрелки и счётчик. Кадры второй точки идут за
- * первой — выбирать гостю нечего, адрес стоит в подписи каждого кадра.
+ * Одна длинная горизонтальная лента по фото всех точек: три кадра на десктопе,
+ * два на планшете, кадр с краешком следующего на телефоне; свайп на таче,
+ * перетаскивание мышью, стрелки и клавиши листают по кадру. Кадры второй точки
+ * идут за первой — выбирать гостю нечего, адрес стоит в подписи каждого кадра.
  */
 import Photo from './Photo.astro';
 import type { Content } from '../lib/content.ts';
@@ -16,15 +18,14 @@ interface Props {
 
 const { places } = Astro.props.content;
 
-// кадр во всю ширину контейнера: 1296 с 1440, ниже — окно минус боковые отступы
-// the frame is the full container width: 1296 from 1440, viewport minus padding below
+// ширина кадра = ширина ленты по колонкам: треть с 1200, половина с 768, 78 % на телефоне
+// frame width = strip width per column: a third from 1200, a half from 768, 78 % on a phone
 const SIZES = [
-  '(min-width: 1440px) 1296px',
-  '(min-width: 1200px) calc(100vw - 144px)',
-  '(min-width: 834px) 762px',
-  '(min-width: 768px) calc(100vw - 72px)',
-  '(min-width: 390px) 354px',
-  'calc(100vw - 36px)',
+  '(min-width: 1440px) 419px',
+  '(min-width: 1200px) calc((100vw - 184px) / 3)',
+  '(min-width: 834px) 373px',
+  '(min-width: 768px) calc((100vw - 88px) / 2)',
+  '78vw',
 ].join(', ');
 
 const shots = places.flatMap((place) =>
@@ -34,8 +35,8 @@ const shots = places.flatMap((place) =>
   })),
 );
 
-// один кадр листать некуда: ни стрелок, ни счётчика
-// nothing to page through with a single frame: no arrows, no counter
+// один кадр листать некуда: стрелок нет
+// nothing to page through with a single frame: no arrows
 const many = shots.length > 1;
 ---
 
@@ -53,9 +54,6 @@ const many = shots.length > 1;
 
           {many && (
             <div class="gl__nav">
-              <p class="gl__count tnum">
-                <span data-slider-index>1</span> / {shots.length}
-              </p>
               <button
                 type="button"
                 class="gl__arrow"
@@ -109,7 +107,6 @@ const many = shots.length > 1;
               <Photo
                 photo={shot.photo}
                 ratio="4 / 3"
-                ratioMd="3 / 2"
                 radius="var(--r-lg)"
                 sizes={SIZES}
                 class="gl__media"
@@ -131,13 +128,6 @@ const many = shots.length > 1;
     align-items: center;
     gap: 10px;
     flex: none;
-  }
-
-  .gl__count {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-3);
-    padding-inline-end: 2px;
   }
 
   .gl__arrow {
@@ -171,10 +161,16 @@ const many = shots.length > 1;
     cursor: default;
   }
 
+  /* лента выходит за поля до края контейнера, кадры снапятся к левому полю
+     the strip bleeds past the padding to the container edge, frames snap to the left padding */
   .gl__rail {
+    --slide: 78%;
     display: flex;
     gap: var(--gap);
     margin-top: 26px;
+    margin-inline: calc(-1 * var(--pad));
+    padding-inline: var(--pad);
+    scroll-padding-inline: var(--pad);
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     overscroll-behavior-x: contain;
@@ -183,12 +179,22 @@ const many = shots.length > 1;
     -webkit-overflow-scrolling: touch;
   }
 
+  .gl__rail.is-dragging {
+    scroll-snap-type: none;
+    cursor: grabbing;
+  }
+
+  .gl__rail :global(img) {
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
   .gl__rail::-webkit-scrollbar {
     display: none;
   }
 
   .gl__slide {
-    flex: 0 0 100%;
+    flex: 0 0 var(--slide);
     min-width: 0;
     scroll-snap-align: start;
   }
@@ -210,10 +216,15 @@ const many = shots.length > 1;
       background: color-mix(in srgb, var(--text) 6%, transparent);
       border-color: var(--line-4);
     }
+
+    .gl__rail {
+      cursor: grab;
+    }
   }
 
   @media (min-width: 768px) {
     .gl__rail {
+      --slide: calc((100% - var(--gap)) / 2);
       margin-top: 30px;
     }
 
@@ -223,32 +234,25 @@ const many = shots.length > 1;
     }
   }
 
-  /* 1296 px в ширину: при 3:2 кадр вырастает до 864 px, и стрелки уезжают с
-     экрана ноутбука вместе с подписью. DESIGN.md отводит общему плану зала
-     16:7, поэтому 2:1 остаётся внутри системы.
-     1296 px wide: a 3:2 frame is 864 px tall and pushes the arrows and the
-     caption off a laptop screen. DESIGN.md gives the wide room shot 16:7, so
-     2:1 stays inside the system. */
   @media (min-width: 1200px) {
-    .gl__rail :global(.gl__media) {
-      aspect-ratio: 2 / 1;
+    .gl__rail {
+      --slide: calc((100% - 2 * var(--gap)) / 3);
     }
   }
 </style>
 
 <script>
   /**
-   * Arrows and the counter for the venue slider. Edges are marked with
+   * Arrows, keys and mouse drag for the venue strip. Edges are marked with
    * `aria-disabled` rather than `disabled`: a native disabled button drops the
    * keyboard focus to `<body>` mid-scroll.
-   * Стрелки и счётчик слайдера залов. Край помечается `aria-disabled`, а не
-   * `disabled`: нативно погашенная кнопка роняет фокус на `<body>` прямо во
-   * время прокрутки.
+   * Стрелки, клавиши и перетаскивание мышью для ленты залов. Край помечается
+   * `aria-disabled`, а не `disabled`: нативно погашенная кнопка роняет фокус
+   * на `<body>` прямо во время прокрутки.
    */
   const rail = document.querySelector<HTMLElement>('[data-slider-rail]');
   const prev = document.querySelector<HTMLButtonElement>('[data-slider-prev]');
   const next = document.querySelector<HTMLButtonElement>('[data-slider-next]');
-  const index = document.querySelector<HTMLElement>('[data-slider-index]');
   const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const off = (button: HTMLButtonElement | null) =>
@@ -268,7 +272,6 @@ const many = shots.length > 1;
       const max = rail.scrollWidth - rail.clientWidth - 1;
       prev?.setAttribute('aria-disabled', String(rail.scrollLeft <= 0));
       next?.setAttribute('aria-disabled', String(rail.scrollLeft >= max));
-      if (index) index.textContent = String(Math.round(rail.scrollLeft / step()) + 1);
     };
 
     const go = (direction: number) => {
@@ -288,6 +291,27 @@ const many = shots.length > 1;
       event.preventDefault();
       go(direction);
     });
+
+    // мышью ленту тянут как пальцем: на время захвата снап выключен, после
+    // отпускания лента сама доснапится к ближайшему кадру
+    // the mouse drags the strip like a finger: snap is off while captured and
+    // the strip settles on the nearest frame once released
+    let dragX = 0;
+    let dragLeft = 0;
+    rail.addEventListener('pointerdown', (event) => {
+      if (event.pointerType !== 'mouse' || event.button !== 0) return;
+      dragX = event.clientX;
+      dragLeft = rail.scrollLeft;
+      rail.classList.add('is-dragging');
+      rail.setPointerCapture(event.pointerId);
+    });
+    rail.addEventListener('pointermove', (event) => {
+      if (!rail.classList.contains('is-dragging')) return;
+      rail.scrollLeft = dragLeft - (event.clientX - dragX);
+    });
+    const release = () => rail.classList.remove('is-dragging');
+    rail.addEventListener('pointerup', release);
+    rail.addEventListener('pointercancel', release);
 
     // ResizeObserver ловит момент, когда секция наконец получила размеры
     // ResizeObserver catches the moment the section finally gets its size
