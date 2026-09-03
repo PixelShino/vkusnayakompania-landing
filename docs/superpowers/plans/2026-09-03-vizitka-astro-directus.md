@@ -690,15 +690,15 @@ if (dialog && title) {
 
 **Файлы:** `src/pages/index.astro`, удаление старых компонентов.
 
-- [ ] **Шаг 1:** порядок: Header → Hero → Directions → Afisha → Promos →
+- [x] **Шаг 1:** порядок: Header → Hero → Directions → Afisha → Promos →
   Menus → Cakes → Gallery → Delivery → Reviews → Contacts → Footer;
   `BookingDialog` и `StickyBar` в `BaseLayout`.
-- [ ] **Шаг 2:** удалить `Bento`, `Sweets`, `Room`, `HowToOrder`, `Ecosystem`,
+- [x] **Шаг 2:** удалить `Bento`, `Sweets`, `Room`, `HowToOrder`, `Ecosystem`,
   `CustomCake`, `handoff/`; вычистить неиспользуемый CSS (`.blob` оставить,
   если используется).
-- [ ] **Шаг 3:** `pnpm test && pnpm check && pnpm build`; скриншоты всей
+- [x] **Шаг 3:** `pnpm test && pnpm check && pnpm build`; скриншоты всей
   страницы 390 / 834 / 1440; первый прогон полировки по `impeccable audit`.
-- [ ] **Шаг 4:** коммит `feat(page): сборка визитки из новых секций`.
+- [x] **Шаг 4:** коммит `feat(page): сборка визитки из новых секций`.
 
 ---
 

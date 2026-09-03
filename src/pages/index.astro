@@ -2,30 +2,33 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
-import Bento from '../components/Bento.astro';
+import Directions from '../components/Directions.astro';
+import Afisha from '../components/Afisha.astro';
+import Promos from '../components/Promos.astro';
+import Menus from '../components/Menus.astro';
 import Cakes from '../components/Cakes.astro';
-import Sweets from '../components/Sweets.astro';
-import Room from '../components/Room.astro';
-import HowToOrder from '../components/HowToOrder.astro';
-import Ecosystem from '../components/Ecosystem.astro';
+import Gallery from '../components/Gallery.astro';
+import Delivery from '../components/Delivery.astro';
 import Reviews from '../components/Reviews.astro';
 import Contacts from '../components/Contacts.astro';
 import Footer from '../components/Footer.astro';
 import { getContent } from '../lib/content.ts';
 
 const content = await getContent();
+const { afisha, promos, places, settings } = content;
 ---
 
 <BaseLayout content={content}>
   <Header content={content} />
   <main id="main">
     <Hero content={content} />
-    <Bento content={content} />
+    <Directions content={content} />
+    {afisha && <Afisha afisha={afisha} />}
+    <Promos promos={promos} places={places} settings={settings} />
+    <Menus content={content} />
     <Cakes content={content} />
-    <Sweets content={content} />
-    <Room content={content} />
-    <HowToOrder content={content} />
-    <Ecosystem content={content} />
+    <Gallery content={content} />
+    <Delivery content={content} />
     <Reviews content={content} />
     <Contacts content={content} />
   </main>
