@@ -105,7 +105,6 @@ export type Promo = {
   title: string;
   text: string;
   place?: Place;
-  cta: 'book' | 'order' | 'none';
 };
 
 /** `status` остаётся в типе: по нему `menuFor` выбирает свежее меню направления. */

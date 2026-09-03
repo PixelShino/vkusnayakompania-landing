@@ -21,7 +21,7 @@ collections:
         дате
       preview_url: null
       singleton: false
-      sort: null
+      sort: 1
       sort_field: null
       translations:
         - language: ru-RU
@@ -49,7 +49,7 @@ collections:
       note: Витрина работ на заказ, без цен
       preview_url: null
       singleton: false
-      sort: null
+      sort: 4
       sort_field: sort
       translations:
         - language: ru-RU
@@ -79,7 +79,7 @@ collections:
         Добавлять и удалять нельзя, кнопки зашиты по ключу
       preview_url: null
       singleton: false
-      sort: null
+      sort: 6
       sort_field: sort
       translations:
         - language: ru-RU
@@ -107,7 +107,7 @@ collections:
       note: Первый экран, SEO и тексты секций
       preview_url: null
       singleton: true
-      sort: null
+      sort: 7
       sort_field: null
       translations:
         - language: ru-RU
@@ -135,7 +135,7 @@ collections:
       note: 'PDF меню по направлению: кафе, ресторан, кондитерская'
       preview_url: null
       singleton: false
-      sort: null
+      sort: 3
       sort_field: null
       translations:
         - language: ru-RU
@@ -163,7 +163,7 @@ collections:
       note: 'Две точки: адреса, часы, координаты, галерея'
       preview_url: null
       singleton: false
-      sort: null
+      sort: 5
       sort_field: null
       translations:
         - language: ru-RU
@@ -219,7 +219,7 @@ collections:
       note: Карточки акций, сгруппированы по адресу
       preview_url: null
       singleton: false
-      sort: null
+      sort: 2
       sort_field: sort
       translations:
         - language: ru-RU
@@ -247,7 +247,7 @@ collections:
       note: Контакты, ссылки, юрлицо, цифры Яндекса
       preview_url: null
       singleton: true
-      sort: null
+      sort: 8
       sort_field: null
       translations:
         - language: ru-RU
@@ -3546,62 +3546,6 @@ fields:
       has_auto_increment: false
       foreign_key_table: places
       foreign_key_column: id
-  - collection: promos
-    field: cta
-    type: string
-    meta:
-      collection: promos
-      conditions: null
-      display: labels
-      display_options:
-        choices:
-          - text: Забронировать стол
-            value: book
-          - text: Заказать доставку
-            value: order
-          - text: Без кнопки
-            value: none
-      field: cta
-      group: null
-      hidden: false
-      interface: select-dropdown
-      note: null
-      options:
-        choices:
-          - text: Забронировать стол
-            value: book
-          - text: Заказать доставку
-            value: order
-          - text: Без кнопки
-            value: none
-      readonly: false
-      required: true
-      searchable: true
-      sort: 95
-      special: null
-      translations:
-        - language: ru-RU
-          translation: Кнопка
-      validation: null
-      validation_message: null
-      width: half
-    schema:
-      name: cta
-      table: promos
-      data_type: character varying
-      default_value: book
-      max_length: 255
-      numeric_precision: null
-      numeric_scale: null
-      is_nullable: false
-      is_unique: false
-      is_indexed: false
-      is_primary_key: false
-      is_generated: false
-      generation_expression: null
-      has_auto_increment: false
-      foreign_key_table: null
-      foreign_key_column: null
   - collection: promos
     field: show_from
     type: date

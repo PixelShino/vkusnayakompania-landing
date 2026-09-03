@@ -1,20 +1,19 @@
 ---
 /**
  * Live promos in one grid: the «both venues» group first, then venue by venue.
- * Groups carry no headings — the address is signed at the bottom of a card.
+ * A card is text only — conditions plus the address at the bottom, no action.
  * Живые акции одной сеткой: сначала группа «обе точки», затем по точкам.
- * Заголовков у групп нет — адрес подписан внизу карточки.
+ * Карточка только текстовая: условия и адрес внизу, без кнопки.
  */
 import { groupByPlace } from '../lib/select';
-import type { Place, Promo, Settings } from '../lib/content';
+import type { Place, Promo } from '../lib/content';
 
 interface Props {
   promos: Promo[];
   places: Place[];
-  settings: Settings;
 }
 
-const { promos, places, settings } = Astro.props;
+const { promos, places } = Astro.props;
 
 // groups keep the «both venues» bucket first; the rest follow the venue order
 // группировка ставит «обе точки» первыми, остальные идут в порядке точек
@@ -42,42 +41,10 @@ const ordered = [null, ...places.map((place) => place.id)]
               <h3 class="pr__title">{promo.title}</h3>
               <p class="pr__text">{promo.text}</p>
 
-              <div class="pr__foot">
-                {promo.cta === 'book' && (
-                  <button
-                    type="button"
-                    class:list={[
-                      'btn',
-                      'btn--md',
-                      i === 0 && !promo.place ? 'btn--light' : 'btn--secondary',
-                    ]}
-                    data-book={
-                      promo.place ? `Бронь стола: ${promo.place.street}` : 'Бронь стола'
-                    }
-                  >
-                    Забронировать стол
-                  </button>
-                )}
-                {promo.cta === 'order' && (
-                  <a
-                    class:list={[
-                      'btn',
-                      'btn--md',
-                      i === 0 && !promo.place ? 'btn--light' : 'btn--secondary',
-                    ]}
-                    href={settings.shop_url}
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    Заказать доставку
-                  </a>
-                )}
-
-                <p class="pr__addr">
-                  <span class="pr__dash" aria-hidden="true" />
-                  {promo.place?.name ?? 'Обе точки'}
-                </p>
-              </div>
+              <p class="pr__addr">
+                <span class="pr__dash" aria-hidden="true" />
+                {promo.place?.name ?? 'Обе точки'}
+              </p>
             </article>
           ))}
         </div>
@@ -133,21 +100,15 @@ const ordered = [null, ...places.map((place) => place.id)]
     color: var(--bg);
   }
 
-  .pr__foot {
+  /* адрес прижат к низу карточки: у соседних карточек подписи на одной линии */
+  .pr__addr {
     position: relative;
     z-index: 1;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-    margin-top: auto;
-    padding-top: 20px;
-  }
-
-  .pr__addr {
-    display: flex;
     align-items: center;
     gap: 10px;
+    margin-top: auto;
+    padding-top: 20px;
     font-size: 12.5px;
     font-weight: 600;
     color: var(--text-4);
