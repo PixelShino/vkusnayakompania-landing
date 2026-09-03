@@ -1,0 +1,229 @@
+---
+/**
+ * Olive panel for the app and the shop: text on the left, a phone mockup cut
+ * off by the panel edge on the right. No screenshot — no mockup column.
+ * Оливковая панель про приложение и магазин: слева текст, справа мокап
+ * телефона, срезанный краем панели. Нет скриншота — нет и колонки с мокапом.
+ */
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { Content } from '../lib/content';
+import appstore from '../assets/icons/appstore.svg?raw';
+import googleplay from '../assets/icons/googleplay.svg?raw';
+
+interface Props {
+  content: Content;
+}
+
+const { content } = Astro.props;
+const { settings, home } = content;
+const shot = home.app_screenshot;
+
+const STORES = [
+  { label: 'App Store', href: settings.app_ios, icon: appstore },
+  { label: 'Google Play', href: settings.app_android, icon: googleplay },
+].filter((store) => Boolean(store.href));
+---
+
+<section class="section" id="delivery">
+  <div class="container">
+    <div class:list={['dl', { 'dl--solo': !shot }]}>
+      <div class="blob" aria-hidden="true"></div>
+
+      <div class="dl__col">
+        <h2 class="dl__title">{home.delivery_title}</h2>
+        {home.delivery_text && <p class="dl__text">{home.delivery_text}</p>}
+        {home.delivery_note && <p class="dl__note">{home.delivery_note}</p>}
+
+        <div class="dl__actions">
+          {
+            STORES.map((store) => (
+              <a class="btn btn--light btn--md dl__store" href={store.href} target="_blank" rel="noopener">
+                <span class="icon" aria-hidden="true">
+                  <Fragment set:html={store.icon} />
+                </span>
+                {store.label}
+              </a>
+            ))
+          }
+          <a class="btn btn--md dl__ghost" href={settings.shop_url} target="_blank" rel="noopener">
+            Открыть магазин
+          </a>
+        </div>
+      </div>
+
+      {
+        shot && (
+          <div class="dl__phone">
+            <Image
+              class="dl__screen"
+              src={shot.src as ImageMetadata}
+              width={shot.width}
+              height={shot.height}
+              alt={shot.alt}
+              widths={[240, 480, 640]}
+              sizes="260px"
+              format="avif"
+              quality={52}
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .dl {
+    --dl-pad: calc(var(--gap) + 12px);
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: calc(var(--gap) + 8px);
+    padding: var(--dl-pad);
+    border-radius: var(--r-2xl);
+    background: var(--olive);
+    color: var(--bg);
+  }
+
+  /* круг-декорация уходит в нижний угол под кнопки: поверх текста он крал бы контраст */
+  .dl .blob {
+    right: auto;
+    left: -80px;
+    bottom: -90px;
+  }
+
+  .dl__col {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+  }
+
+  /* на оливковой заливке текст только `--bg`: `--surface` даёт 4,2:1 */
+  .dl__text {
+    margin-top: 12px;
+    font-size: var(--fs-body);
+    color: var(--bg);
+    max-width: 52ch;
+  }
+
+  .dl__note {
+    margin-top: 16px;
+    font-size: var(--fs-lead);
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--bg);
+    text-wrap: balance;
+  }
+
+  .dl__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  /* иконка слева: паддинг с её стороны на 2 px меньше — оптическая балансировка */
+  .dl__store {
+    padding-inline: 16px 18px;
+  }
+
+  .icon {
+    display: inline-flex;
+    flex: none;
+    width: 18px;
+    height: 18px;
+  }
+
+  .icon > :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* заливка `.btn--ghost-light` на оливковом роняет текст до 3,5:1 — только обводка */
+  .dl__ghost {
+    background: transparent;
+    border-color: rgb(255 250 237 / 0.55);
+    color: var(--bg);
+  }
+
+  .dl__phone {
+    position: relative;
+    z-index: 1;
+    width: 200px;
+    height: 415px;
+    padding: 8px;
+    border-radius: 32px;
+    background: var(--text);
+    justify-self: center;
+    align-self: end;
+    /* отрицательный отступ решает, насколько мокап срежется нижним краем панели */
+    margin-bottom: calc(var(--dl-pad) * -1 - 110px);
+  }
+
+  .dl__phone :global(img) {
+    width: 100%;
+    height: 100%;
+    border-radius: 24px;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .dl__ghost:hover {
+      background: transparent;
+      border-color: var(--bg);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .dl {
+      --dl-pad: calc(var(--gap) + 20px);
+      grid-template-columns: 7fr 5fr;
+      gap: calc(var(--gap) + 16px);
+      align-items: center;
+    }
+
+    .dl--solo {
+      grid-template-columns: 1fr;
+    }
+
+    .dl__phone {
+      width: 220px;
+      height: 460px;
+      border-radius: 36px;
+      margin-bottom: calc(var(--dl-pad) * -1 - 110px);
+      transform: rotate(-6deg) translateY(24px);
+    }
+
+    .dl__phone :global(img) {
+      border-radius: 28px;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .dl {
+      --dl-pad: 40px;
+      /* колонка по ширине наклонённого мокапа: `5fr` от 1296 оставляет пустоту */
+      grid-template-columns: minmax(0, 1fr) 340px;
+    }
+
+    .dl--solo {
+      grid-template-columns: 1fr;
+    }
+
+    .dl__phone {
+      width: 260px;
+      height: 540px;
+      border-radius: 40px;
+      margin-bottom: calc(var(--dl-pad) * -1 - 150px);
+    }
+
+    .dl__phone :global(img) {
+      border-radius: 32px;
+    }
+  }
+</style>
