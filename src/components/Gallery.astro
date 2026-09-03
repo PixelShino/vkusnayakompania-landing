@@ -1,126 +1,163 @@
 ---
 /**
- * One snap rail of 4:3 frames per venue that has photos. Arrows are a desktop
- * affordance only: on touch the rail is swiped.
- * По ленте на каждую точку с фото, кадры 4:3 со скролл-снапом. Стрелки нужны
- * только на десктопе — на тач-устройствах лента листается пальцем.
+ * One plain horizontal slider over the photos of every venue: a single frame in
+ * the viewport, snap per frame, arrows and a counter. Frames of the second venue
+ * follow the first — the guest picks nothing, the address is in every caption.
+ * Один простой горизонтальный слайдер по фото всех точек: во вьюпорте ровно
+ * один кадр, снап по кадру, стрелки и счётчик. Кадры второй точки идут за
+ * первой — выбирать гостю нечего, адрес стоит в подписи каждого кадра.
  */
-import type { ImageMetadata } from 'astro';
-import { Image } from 'astro:assets';
-import type { Content } from '../lib/content';
+import Photo from './Photo.astro';
+import type { Content } from '../lib/content.ts';
 
 interface Props {
   content: Content;
 }
 
-const { content } = Astro.props;
-const shown = content.places.filter((place) => place.gallery.length > 0);
+const { places } = Astro.props.content;
+
+// кадр во всю ширину контейнера: 1296 с 1440, ниже — окно минус боковые отступы
+// the frame is the full container width: 1296 from 1440, viewport minus padding below
+const SIZES = [
+  '(min-width: 1440px) 1296px',
+  '(min-width: 1200px) calc(100vw - 144px)',
+  '(min-width: 834px) 762px',
+  '(min-width: 768px) calc(100vw - 72px)',
+  '(min-width: 390px) 354px',
+  'calc(100vw - 36px)',
+].join(', ');
+
+const shots = places.flatMap((place) =>
+  place.gallery.map((shot) => ({
+    photo: shot.image,
+    caption: [place.name, shot.caption].filter(Boolean).join(' · '),
+  })),
+);
+
+// один кадр листать некуда: ни стрелок, ни счётчика
+// nothing to page through with a single frame: no arrows, no counter
+const many = shots.length > 1;
 ---
 
 {
-  shown.length > 0 && (
-    <section class="section" id="gallery">
+  shots.length > 0 && (
+    <section class="section" id="gallery" aria-labelledby="gallery-title">
       <div class="container">
         <div class="section-head">
           <div>
-            <h2>Зал</h2>
+            <h2 id="gallery-title">О заведении</h2>
+            <p class="lead">
+              Два зала в Самаре: кафе на Садовой и ресторан на Советской Армии.
+            </p>
           </div>
+
+          {many && (
+            <div class="gl__nav">
+              <p class="gl__count tnum">
+                <span data-slider-index>1</span> / {shots.length}
+              </p>
+              <button
+                type="button"
+                class="gl__arrow"
+                data-slider-prev
+                aria-disabled="true"
+                aria-label="Предыдущее фото"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M14.5 5.5 8 12l6.5 6.5" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="gl__arrow"
+                data-slider-next
+                aria-label="Следующее фото"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M9.5 5.5 16 12l-6.5 6.5" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
 
-        {shown.map((place) => (
-          <div class="gl" data-rail-group>
-            <div class="gl__head">
-              <h3 class="gl__name">{place.name}</h3>
-              <div class="gl__arrows">
-                <button type="button" class="gl__arrow" data-rail-prev aria-label="Предыдущие фото">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M14.5 5.5 8 12l6.5 6.5" />
-                  </svg>
-                </button>
-                <button type="button" class="gl__arrow" data-rail-next aria-label="Следующие фото">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M9.5 5.5 16 12l-6.5 6.5" />
-                  </svg>
-                </button>
-              </div>
+        <div
+          class="gl__rail"
+          data-slider-rail
+          tabindex="0"
+          role="group"
+          aria-label="Фотографии залов"
+        >
+          {shots.map((shot, i) => (
+            <div class="gl__slide">
+              <Photo
+                photo={shot.photo}
+                ratio="4 / 3"
+                ratioMd="3 / 2"
+                radius="var(--r-lg)"
+                sizes={SIZES}
+                class="gl__media"
+                eager={i < 2}
+                priority="low"
+              />
+              <p class="gl__caption">{shot.caption}</p>
             </div>
-
-            <div class="rail gl__rail" data-rail>
-              {place.gallery.map((shot) => (
-                <div class="gl__item">
-                  <figure class="media gl__media" style="--ratio: 4 / 3">
-                    <Image
-                      src={shot.image.src as ImageMetadata}
-                      width={shot.image.width}
-                      height={shot.image.height}
-                      alt={shot.image.alt}
-                      widths={[480, 800, 1200, 1600]}
-                      sizes="(min-width: 1200px) 31vw, (min-width: 768px) 46vw, 82vw"
-                      format="avif"
-                      quality={52}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </figure>
-                  {shot.caption && <p class="gl__caption">{shot.caption}</p>}
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   )
 }
 
 <style>
-  .gl {
-    margin-top: 26px;
-  }
-
-  /* между лентами отбивка больше, чем между заголовком секции и первой */
-  .gl + .gl {
-    margin-top: 36px;
-  }
-
-  .gl__head {
+  .gl__nav {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 14px;
-  }
-
-  .gl__name {
-    font-size: var(--fs-h3);
-    min-width: 0;
-  }
-
-  .gl__arrows {
-    display: none;
-    gap: 8px;
+    gap: 10px;
     flex: none;
+  }
+
+  .gl__count {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-3);
+    padding-inline-end: 2px;
   }
 
   .gl__arrow {
     display: grid;
     place-items: center;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     padding: 0;
     border: 1px solid var(--line);
     border-radius: var(--r-pill);
     background: transparent;
     color: var(--text);
     cursor: pointer;
-    transition:
-      background-color 0.16s ease,
-      border-color 0.16s ease,
-      opacity 0.16s ease,
-      scale 0.12s ease-out;
+    /* перечислено поимённо: `all` тянул бы за собой и рамку, и размеры */
+    transition-property: scale, background-color, border-color, opacity;
+    transition-duration: 120ms, 0.16s, 0.16s, 0.16s;
+    transition-timing-function: var(--ease-out), ease, ease, ease;
   }
 
-  .gl__arrow:active:not(:disabled) {
+  .gl__arrow:not([aria-disabled='true']):active {
     scale: 0.96;
   }
 
@@ -129,74 +166,131 @@ const shown = content.places.filter((place) => place.gallery.length > 0);
     height: 20px;
   }
 
-  .gl__arrow:disabled {
+  .gl__arrow[aria-disabled='true'] {
     opacity: 0.35;
     cursor: default;
   }
 
   .gl__rail {
-    scroll-behavior: auto;
+    display: flex;
+    gap: var(--gap);
+    margin-top: 26px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
   }
 
-  .gl__item {
-    flex: none;
-    width: 82vw;
+  .gl__rail::-webkit-scrollbar {
+    display: none;
   }
 
-  .gl__media {
-    --radius: var(--r-lg);
+  .gl__slide {
+    flex: 0 0 100%;
+    min-width: 0;
+    scroll-snap-align: start;
   }
 
-  .gl__media :global(img) {
+  /* `:global` — кадр рисует `Photo.astro`, метки области у него нет */
+  .gl__rail :global(.gl__media img) {
     outline: 1px solid rgb(0 0 0 / 0.08);
     outline-offset: -1px;
   }
 
   .gl__caption {
-    margin-top: 8px;
+    margin-top: 10px;
     font-size: 12.5px;
     color: var(--text-4);
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    .gl__rail {
-      scroll-behavior: smooth;
-    }
-  }
-
-  /* стрелки только там, где есть курсор: пальцем лента листается сама */
   @media (hover: hover) and (pointer: fine) {
-    .gl__arrows {
-      display: flex;
-    }
-
-    .gl__arrow:hover:not(:disabled) {
+    .gl__arrow:not([aria-disabled='true']):hover {
       background: color-mix(in srgb, var(--text) 6%, transparent);
       border-color: var(--line-4);
     }
   }
 
   @media (min-width: 768px) {
-    .gl {
+    .gl__rail {
       margin-top: 30px;
     }
 
-    .gl + .gl {
-      margin-top: 44px;
-    }
-
-    .gl__item {
-      width: 46vw;
+    .gl__caption {
+      margin-top: 12px;
+      font-size: 13px;
     }
   }
 
+  /* 1296 px в ширину: при 3:2 кадр вырастает до 864 px, и стрелки уезжают с
+     экрана ноутбука вместе с подписью. DESIGN.md отводит общему плану зала
+     16:7, поэтому 2:1 остаётся внутри системы.
+     1296 px wide: a 3:2 frame is 864 px tall and pushes the arrows and the
+     caption off a laptop screen. DESIGN.md gives the wide room shot 16:7, so
+     2:1 stays inside the system. */
   @media (min-width: 1200px) {
-    .gl__item {
-      width: 31vw;
+    .gl__rail :global(.gl__media) {
+      aspect-ratio: 2 / 1;
     }
   }
 </style>
 
 <script>
-  import '../scripts/rail';
+  /**
+   * Arrows and the counter for the venue slider. Edges are marked with
+   * `aria-disabled` rather than `disabled`: a native disabled button drops the
+   * keyboard focus to `<body>` mid-scroll.
+   * Стрелки и счётчик слайдера залов. Край помечается `aria-disabled`, а не
+   * `disabled`: нативно погашенная кнопка роняет фокус на `<body>` прямо во
+   * время прокрутки.
+   */
+  const rail = document.querySelector<HTMLElement>('[data-slider-rail]');
+  const prev = document.querySelector<HTMLButtonElement>('[data-slider-prev]');
+  const next = document.querySelector<HTMLButtonElement>('[data-slider-next]');
+  const index = document.querySelector<HTMLElement>('[data-slider-index]');
+  const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const off = (button: HTMLButtonElement | null) =>
+    button?.getAttribute('aria-disabled') === 'true';
+
+  if (rail) {
+    const step = () =>
+      (rail.firstElementChild?.getBoundingClientRect().width ?? rail.clientWidth) +
+      (parseFloat(getComputedStyle(rail).columnGap) || 0);
+
+    const sync = () => {
+      // пока секцию пропускает `content-visibility`, кадры не разложены и обе
+      // ширины равны: по ним обе стрелки погасли бы навсегда
+      // while `content-visibility` skips the section the frames are not laid
+      // out and both widths match: judging by them would kill both arrows
+      if (rail.scrollWidth <= rail.clientWidth) return;
+      const max = rail.scrollWidth - rail.clientWidth - 1;
+      prev?.setAttribute('aria-disabled', String(rail.scrollLeft <= 0));
+      next?.setAttribute('aria-disabled', String(rail.scrollLeft >= max));
+      if (index) index.textContent = String(Math.round(rail.scrollLeft / step()) + 1);
+    };
+
+    const go = (direction: number) => {
+      if (direction < 0 ? off(prev) : off(next)) return;
+      rail.scrollBy({ left: direction * step(), behavior: smooth ? 'smooth' : 'auto' });
+    };
+
+    prev?.addEventListener('click', () => go(-1));
+    next?.addEventListener('click', () => go(1));
+    rail.addEventListener('scroll', sync, { passive: true });
+
+    // снап отбирает нативную прокрутку стрелками, поэтому листаем кадрами сами
+    // snap fights the native arrow-key scroll, so we page by frame ourselves
+    rail.addEventListener('keydown', (event) => {
+      const direction = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+      if (!direction) return;
+      event.preventDefault();
+      go(direction);
+    });
+
+    // ResizeObserver ловит момент, когда секция наконец получила размеры
+    // ResizeObserver catches the moment the section finally gets its size
+    new ResizeObserver(sync).observe(rail);
+  }
 </script>
