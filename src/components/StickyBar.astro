@@ -1,0 +1,80 @@
+---
+/**
+ * Mobile-only bottom bar: shows up once the first screen is scrolled past.
+ * On desktop it does not exist — the header keeps both actions in sight.
+ * Нижняя полоса только для телефона: появляется, когда первый экран уехал
+ * вверх. На десктопе её нет — там обе кнопки и так видны в шапке.
+ */
+import type { Settings } from '../lib/content.ts';
+
+interface Props {
+  settings: Settings;
+}
+
+const { settings } = Astro.props;
+---
+
+<div class="bar" id="sticky-bar">
+  <a class="btn btn--secondary" href={settings.phoneHref}>Позвонить</a>
+  <a class="btn btn--primary" href={settings.shop_url} target="_blank" rel="noopener">
+    Заказать доставку
+  </a>
+</div>
+
+<style>
+  .bar {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 15;
+    display: flex;
+    gap: 8px;
+    padding: 8px var(--pad) calc(8px + env(safe-area-inset-bottom));
+    background: var(--bg);
+    border-top: 1px solid var(--line-3);
+
+    translate: 0 100%;
+    visibility: hidden;
+    transition-property: translate, visibility;
+    transition-duration: 200ms;
+    transition-timing-function: var(--ease-out);
+  }
+
+  .bar.is-on {
+    translate: 0 0;
+    visibility: visible;
+  }
+
+  /* ширина по подписи, свободное место делится поровну: на 320 две равные
+     половины режут «Заказать доставку» */
+  .bar .btn {
+    flex: 1 1 auto;
+    padding-inline: 14px;
+    font-size: 13.5px;
+  }
+
+  @media (min-width: 768px) {
+    .bar {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bar,
+    .bar.is-on {
+      translate: none;
+    }
+  }
+</style>
+
+<style is:global>
+  /* место под полосу, чтобы она не легла на подвал */
+  @media (max-width: 767px) {
+    body {
+      padding-bottom: calc(62px + env(safe-area-inset-bottom));
+    }
+  }
+</style>
+
+<script>
+  import '../scripts/sticky-bar';
+</script>

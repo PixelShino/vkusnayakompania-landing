@@ -26,6 +26,7 @@ const fontFaces = `
 `;
 import { getImage } from 'astro:assets';
 import BookingDialog from '../components/BookingDialog.astro';
+import StickyBar from '../components/StickyBar.astro';
 import { BRAND, schemaHours, yandexOrgUrl } from '../data/site';
 import { HERO_SIZES, widthsFor } from '../lib/hero.ts';
 import type { Content } from '../lib/content.ts';
@@ -169,6 +170,7 @@ const jsonLd = {
       )
     }
 
+    <StickyBar settings={settings} />
     <BookingDialog settings={settings} note={home.contacts_note} />
   </body>
 </html>

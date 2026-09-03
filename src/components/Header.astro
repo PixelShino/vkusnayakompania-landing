@@ -1,4 +1,12 @@
 ---
+/**
+ * Sticky header. The nav list and both CTAs are written once: on desktop
+ * `display: contents` unpacks them into the bar, under 768 the same node
+ * becomes the drop-down panel.
+ * Липкая шапка. Список навигации и обе кнопки написаны один раз: на десктопе
+ * `display: contents` раскладывает их в строку шапки, под 768 тот же узел
+ * становится выпадающей панелью.
+ */
 import { Image } from 'astro:assets';
 import logo from '../assets/logo.png';
 import { BRAND } from '../data/site';
@@ -15,51 +23,81 @@ const nav = navFor(content);
 ---
 
 <header class="header">
-  <div class="container header__in">
+  <div class="container header__bar">
     <a class="header__logo" href="#top" aria-label={`${BRAND.name} — на главную`}>
       <Image
-      src={logo}
-      alt={BRAND.name}
-      widths={[132, 264]}
-      sizes="132px"
-      format="avif"
-      quality={60}
-      loading="eager"
-      fetchpriority="high"
-    />
+        src={logo}
+        alt={BRAND.name}
+        widths={[132, 264]}
+        sizes="132px"
+        format="avif"
+        quality={60}
+        loading="eager"
+        fetchpriority="high"
+      />
     </a>
 
-    <nav class="header__nav" aria-label="Основная навигация">
-      {nav.map((item) => <a href={item.href}>{item.label}</a>)}
-    </nav>
+    <div class="header__panel" id="header-menu">
+      <nav class="header__nav" aria-label="Основная навигация">
+        {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+      </nav>
 
-    <div class="header__actions">
-      <a
-        class="btn btn--primary btn--sm header__cta"
-        href={settings.shop_url}
-        target="_blank"
-        rel="noopener">Заказать доставку</a
-      >
-      <a class="header__phone" href={settings.phoneHref}>{settings.phone}</a>
-      <button
-        type="button"
-        class="header__burger"
-        aria-label="Открыть меню"
-        aria-expanded="false"
-        aria-controls="mobile-menu"
-      >
-        <span aria-hidden="true">≡</span>
-      </button>
+      <div class="header__actions">
+        <a class="header__phone" href={settings.phoneHref}>{settings.phone}</a>
+        <button type="button" class="btn btn--secondary btn--sm" data-book="Бронь стола">
+          Забронировать стол
+        </button>
+        <a
+          class="btn btn--primary btn--sm"
+          href={settings.shop_url}
+          target="_blank"
+          rel="noopener">Заказать доставку</a
+        >
+      </div>
     </div>
-  </div>
 
-  <div class="header__menu" id="mobile-menu" hidden>
-    <div class="container header__menu-in">
-      {nav.map((item) => <a href={item.href}>{item.label}</a>)}
-      <a class="btn btn--primary btn--block" href={settings.shop_url} target="_blank" rel="noopener">
-        Заказать доставку
-      </a>
-    </div>
+    <a
+      class="header__call"
+      href={settings.phoneHref}
+      aria-label={`Позвонить ${settings.phone}`}
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.75"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path
+          d="M6.3 3.5h3l1.4 3.6-1.9 1.4a11.5 11.5 0 0 0 5.7 5.7l1.4-1.9 3.6 1.4v3a1.8 1.8 0 0 1-2 1.8A16.3 16.3 0 0 1 4.5 5.5a1.8 1.8 0 0 1 1.8-2Z"
+        ></path>
+      </svg>
+    </a>
+
+    <button
+      type="button"
+      class="header__burger"
+      aria-label="Открыть меню"
+      aria-expanded="false"
+      aria-controls="header-menu"
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.75"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <path d="M4 7h16M4 12h16M4 17h16"></path>
+      </svg>
+    </button>
   </div>
 </header>
 
@@ -68,22 +106,22 @@ const nav = navFor(content);
     position: sticky;
     top: 0;
     z-index: 20;
-    background: rgba(255, 250, 237, 0.94);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid #efe6d6;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line-3);
   }
 
-  .header__in {
+  .header__bar {
     display: flex;
     align-items: center;
-    gap: 24px;
-    padding-block: 11px;
+    gap: 10px;
+    height: var(--header-h);
   }
 
   .header__logo {
     flex: none;
     display: block;
     width: 104px;
+    margin-right: auto;
   }
 
   .header__logo :global(img) {
@@ -91,126 +129,187 @@ const nav = navFor(content);
     height: auto;
   }
 
-  .header__nav {
+  /* панель под шапкой; на десктопе её разбирает `display: contents` ниже */
+  .header__panel {
     display: none;
-    gap: 22px;
-    font-size: 14px;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: calc(100dvh - var(--header-h));
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding: 6px var(--pad) calc(18px + env(safe-area-inset-bottom));
+    background: var(--bg);
+    border-bottom: 1px solid var(--line-3);
+  }
+
+  .header.is-open .header__panel {
+    display: block;
+  }
+
+  .header__nav {
+    display: flex;
+    flex-direction: column;
   }
 
   .header__nav a {
+    padding-block: 12px;
+    font-size: 15px;
+    font-weight: 600;
     color: var(--text);
     text-decoration: none;
-    padding-block: 4px;
-    border-bottom: 1px solid transparent;
-    transition: border-color 0.16s ease;
-  }
-
-  .header__nav a:hover {
-    border-bottom-color: var(--line-4);
+    border-bottom: 1px solid var(--line-3);
+    transition: color 0.16s ease;
   }
 
   .header__actions {
-    margin-left: auto;
     display: flex;
-    gap: 10px;
-    align-items: center;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
   }
 
-  .header__cta {
-    display: none;
+  .header__actions .btn {
+    width: 100%;
+    height: 46px;
+    font-size: 14px;
   }
 
+  /* на телефоне номер живёт в кнопке-трубке слева от бургера */
   .header__phone {
-    font-size: 13px;
+    display: none;
+    font-size: 14px;
     font-weight: 600;
     color: var(--text);
     text-decoration: none;
     white-space: nowrap;
   }
 
+  .header__call,
   .header__burger {
-    width: 38px;
-    height: 38px;
+    flex: none;
+    width: 44px;
+    height: 44px;
     display: grid;
     place-items: center;
     border: 1px solid var(--line);
     border-radius: var(--r-pill);
     background: transparent;
-    font-size: 17px;
-    line-height: 1;
-    cursor: pointer;
-  }
-
-  .header__menu {
-    border-top: 1px solid #efe6d6;
-    background: var(--bg);
-  }
-
-  .header__menu[hidden] {
-    display: none;
-  }
-
-  .header__menu-in {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding-block: 12px 18px;
-  }
-
-  .header__menu-in a:not(.btn) {
-    padding-block: 10px;
-    font-size: 15px;
-    font-weight: 600;
     color: var(--text);
-    text-decoration: none;
-    border-bottom: 1px solid var(--line-3);
+    cursor: pointer;
+    transition-property: scale, background-color;
+    transition-duration: 120ms, 0.16s;
+    transition-timing-function: var(--ease-out), ease;
   }
 
-  .header__menu-in .btn {
-    margin-top: 10px;
+  .header__call:active,
+  .header__burger:active {
+    scale: 0.96;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .header__nav a:hover {
+      color: var(--terracotta-text);
+    }
+
+    .header__call:hover,
+    .header__burger:hover {
+      background: color-mix(in srgb, var(--text) 6%, transparent);
+    }
   }
 
   @media (min-width: 768px) {
     .header__logo {
       width: 132px;
+      margin-right: 0;
+    }
+
+    /* оба селектора — чтобы открытое на телефоне меню не осталось панелью
+       после поворота или растягивания окна до десктопа */
+    .header .header__panel,
+    .header.is-open .header__panel {
+      display: contents;
     }
 
     .header__nav {
-      display: flex;
+      flex-direction: row;
+      gap: 22px;
+      margin-inline: 28px auto;
     }
 
-    .header__phone,
-    .header__burger,
-    .header__menu {
+    .header__nav a {
+      padding-block: 4px;
+      font-size: 14px;
+      font-weight: 400;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.16s ease;
+    }
+
+    .header__actions {
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+      margin-top: 0;
+    }
+
+    .header__actions .btn {
+      width: auto;
+      height: 38px;
+      font-size: 13px;
+    }
+
+    .header__phone {
+      display: block;
+      margin-right: 6px;
+    }
+
+    .header__call,
+    .header__burger {
       display: none;
     }
 
-    .header__cta {
-      display: inline-flex;
+    @media (hover: hover) and (pointer: fine) {
+      .header__nav a:hover {
+        color: var(--text);
+        border-bottom-color: var(--line-4);
+      }
     }
   }
 </style>
 
 <script>
-  const burger = document.querySelector<HTMLButtonElement>('.header__burger');
-  const menu = document.getElementById('mobile-menu');
+  const header = document.querySelector<HTMLElement>('.header');
+  const burger = header?.querySelector<HTMLButtonElement>('.header__burger');
+  const panel = document.getElementById('header-menu');
 
-  if (burger && menu) {
+  if (header && burger && panel) {
     const setOpen = (open: boolean) => {
-      menu.hidden = !open;
+      header.classList.toggle('is-open', open);
       burger.setAttribute('aria-expanded', String(open));
       burger.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
+      // страница под раскрытым меню не должна уезжать
+      // the page must not scroll under the open menu
+      document.body.style.overflow = open ? 'hidden' : '';
     };
 
-    burger.addEventListener('click', () => setOpen(Boolean(menu.hidden)));
-    menu.addEventListener('click', (event) => {
-      if ((event.target as HTMLElement).closest('a')) setOpen(false);
+    burger.addEventListener('click', () => setOpen(!header.classList.contains('is-open')));
+
+    panel.addEventListener('click', (event) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest('a, button')) setOpen(false);
     });
+
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && !menu.hidden) {
-        setOpen(false);
-        burger.focus();
-      }
+      if (event.key !== 'Escape' || !header.classList.contains('is-open')) return;
+      setOpen(false);
+      burger.focus();
+    });
+
+    // на десктопе панель раскладывается в строку — снимаем блокировку прокрутки
+    // the panel unpacks into the bar on desktop — release the scroll lock
+    matchMedia('(min-width: 768px)').addEventListener('change', (event) => {
+      if (event.matches) setOpen(false);
     });
   }
 </script>
