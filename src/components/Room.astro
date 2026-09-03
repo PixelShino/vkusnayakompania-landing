@@ -1,6 +1,15 @@
 ---
 import Photo from './Photo.astro';
-import { heroPhotos, roomDetails } from '../data/catalog';
+import type { Content } from '../lib/content.ts';
+
+interface Props {
+  content: Content;
+}
+
+// зал берётся из галереи первой точки: первый кадр общим планом, дальше детали
+const gallery = Astro.props.content.places[0].gallery;
+const wide = gallery[0]?.image;
+const details = gallery.slice(1, 4);
 ---
 
 <section class="section" id="room">
@@ -11,7 +20,7 @@ import { heroPhotos, roomDetails } from '../data/catalog';
     </p>
 
     <Photo
-      photo={heroPhotos.room}
+      photo={wide}
       ratio="4 / 3"
       ratioMd="16 / 7"
       radius="22px"
@@ -21,9 +30,9 @@ import { heroPhotos, roomDetails } from '../data/catalog';
 
     <div class="room__grid">
       {
-        roomDetails.map((item) => (
+        details.map((item) => (
           <Photo
-            photo={item.photo}
+            photo={item.image}
             ratio="4 / 3"
             sizes="(min-width: 1200px) 420px, (min-width: 768px) 33vw, 100vw"
           />

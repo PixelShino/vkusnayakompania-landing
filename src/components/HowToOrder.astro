@@ -1,7 +1,12 @@
 ---
 import MessengerButtons from './MessengerButtons.astro';
-import { site, places } from '../data/site';
+import type { Content } from '../lib/content.ts';
 
+interface Props {
+  content: Content;
+}
+
+const { settings, places } = Astro.props.content;
 const streets = places.map((place) => place.street).join(' и ');
 ---
 
@@ -16,7 +21,7 @@ const streets = places.map((place) => place.street).join(' и ');
           выбирайте по срокам.
         </p>
       </div>
-      <a class="how__phone" href={site.phoneHref}>{site.phone}</a>
+      <a class="how__phone" href={settings.phoneHref}>{settings.phone}</a>
     </div>
 
     <div class="how__grid">
@@ -32,7 +37,7 @@ const streets = places.map((place) => place.street).join(' и ');
           паста. Есть приложения для iOS и Android.
         </p>
         <div class="how__foot">
-          <a class="btn btn--secondary btn--md" href={site.links.shop} target="_blank" rel="noopener">
+          <a class="btn btn--secondary btn--md" href={settings.shop_url} target="_blank" rel="noopener">
             В магазин
           </a>
         </div>
@@ -66,7 +71,7 @@ const streets = places.map((place) => place.street).join(' и ');
           Готовая модель или своя картинка. Меняем цвет и надпись, считаем стоимость в тот же день.
         </p>
         <div class="how__foot">
-          <MessengerButtons variant="light" size="md" />
+          <MessengerButtons settings={settings} variant="light" size="md" />
         </div>
       </article>
     </div>

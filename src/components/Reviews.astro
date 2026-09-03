@@ -3,7 +3,16 @@
  * Отзывы — официальным виджетом Яндекс.Карт: копировать тексты к себе нельзя
  * (права авторов + условия Карт). Слева — цифры с карточки организации.
  */
-import { places, plural, yandexOrgUrl, yandexReviewsUrl, yandexStats } from '../data/site';
+import { plural, yandexOrgUrl, yandexReviewsUrl } from '../data/site';
+import type { Content } from '../lib/content.ts';
+
+interface Props {
+  content: Content;
+}
+
+const { places, settings } = Astro.props.content;
+const ratings = settings.yandex_ratings ?? 0;
+const reviews = settings.yandex_reviews ?? 0;
 ---
 
 <section class="section" id="reviews">
@@ -28,11 +37,11 @@ import { places, plural, yandexOrgUrl, yandexReviewsUrl, yandexStats } from '../
               </svg>
             </span>
             <span class="card-dash card-dash--light"></span>
-            <span class="card-pill card-pill--light">{yandexStats.award}</span>
+            <span class="card-pill card-pill--light">{settings.yandex_award}</span>
           </div>
 
           <div class="rev__big-row">
-            <p class="rev__big tnum">{yandexStats.score}</p>
+            <p class="rev__big tnum">{settings.yandex_score}</p>
             <div class="rev__stars" aria-hidden="true">
               {
                 Array.from({ length: 5 }).map(() => (
@@ -45,8 +54,8 @@ import { places, plural, yandexOrgUrl, yandexReviewsUrl, yandexStats } from '../
           </div>
 
           <p class="rev__score-meta">
-            {yandexStats.ratings} {plural(yandexStats.ratings, 'оценка', 'оценки', 'оценок')} и{' '}
-            {yandexStats.reviews} {plural(yandexStats.reviews, 'отзыв', 'отзыва', 'отзывов')} на
+            {ratings} {plural(ratings, 'оценка', 'оценки', 'оценок')} и{' '}
+            {reviews} {plural(reviews, 'отзыв', 'отзыва', 'отзывов')} на
             Яндекс Картах — по двум точкам
           </p>
 
@@ -55,7 +64,7 @@ import { places, plural, yandexOrgUrl, yandexReviewsUrl, yandexStats } from '../
               places.map((place) => (
                 <a
                   class="rev__source"
-                  href={`${yandexOrgUrl(place.yandexOrg)}reviews/`}
+                  href={`${yandexOrgUrl(place.yandex_org)}reviews/`}
                   target="_blank"
                   rel="noopener"
                 >
@@ -69,7 +78,7 @@ import { places, plural, yandexOrgUrl, yandexReviewsUrl, yandexStats } from '../
 
         <ul class="rev__marks">
           {
-            yandexStats.highlights.map((mark) => (
+            settings.yandex_highlights.map((mark) => (
               <li class="rev__mark">
                 <span class="rev__mark-label">{mark.label}</span>
                 <span class="rev__mark-bar" aria-hidden="true">
@@ -91,11 +100,11 @@ import { places, plural, yandexOrgUrl, yandexReviewsUrl, yandexStats } from '../
                 type="button"
                 class="rev__tab"
                 data-frame-target="reviews"
-                data-src={yandexReviewsUrl(place.yandexOrg)}
-                data-frame-name={place.addr}
+                data-src={yandexReviewsUrl(place.yandex_org)}
+                data-frame-name={place.name}
                 aria-pressed={i === 0 ? 'true' : 'false'}
               >
-                {place.addr}
+                {place.name}
                 <span class="rev__tab-score tnum">{place.rating}</span>
               </button>
             ))
@@ -106,13 +115,13 @@ import { places, plural, yandexOrgUrl, yandexReviewsUrl, yandexStats } from '../
           class="rev__frame"
           data-frame="reviews"
           data-frame-title="Отзывы о «Вкусной компании» на Яндекс Картах"
-          data-src={yandexReviewsUrl(places[0].yandexOrg)}
+          data-src={yandexReviewsUrl(places[0].yandex_org)}
         >
           <p class="rev__frame-stub">Загружаем отзывы…</p>
           <noscript>
             <a
               class="rev__frame-stub"
-              href={`${yandexOrgUrl(places[0].yandexOrg)}reviews/`}
+              href={`${yandexOrgUrl(places[0].yandex_org)}reviews/`}
               target="_blank"
               rel="noopener"
             >
@@ -123,7 +132,7 @@ import { places, plural, yandexOrgUrl, yandexReviewsUrl, yandexStats } from '../
 
         <p class="rev__frame-note">
           Виджет Яндекс Карт · <a
-            href={`${yandexOrgUrl(places[0].yandexOrg)}reviews/`}
+            href={`${yandexOrgUrl(places[0].yandex_org)}reviews/`}
             target="_blank"
             rel="noopener">открыть все отзывы</a
           >

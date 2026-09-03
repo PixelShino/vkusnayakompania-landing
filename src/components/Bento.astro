@@ -1,8 +1,14 @@
 ---
 import MessengerButtons from './MessengerButtons.astro';
 import OpenStatus from './OpenStatus.astro';
-import { places } from '../data/site';
+import type { Content } from '../lib/content.ts';
 
+interface Props {
+  content: Content;
+}
+
+const { content } = Astro.props;
+const { places, settings } = content;
 const main = places[0];
 ---
 
@@ -15,7 +21,7 @@ const main = places[0];
           <OpenStatus schedule={main.schedule} class="bento__status" />
         </div>
         <OpenStatus schedule={main.schedule} mode="today" class="bento__big tnum" />
-        <p class="bento__sub">{main.addr} · витрина полная с утра</p>
+        <p class="bento__sub">{main.name} · витрина полная с утра</p>
       </div>
 
       <div class="bento__cell">
@@ -30,7 +36,7 @@ const main = places[0];
 
       <div class="bento__contact">
         <p class="bento__label">Написать нам</p>
-        <MessengerButtons variant="dark" size="md" />
+        <MessengerButtons settings={settings} variant="dark" size="md" />
       </div>
     </div>
   </div>

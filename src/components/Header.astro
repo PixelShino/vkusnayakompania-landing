@@ -1,15 +1,25 @@
 ---
 import { Image } from 'astro:assets';
 import logo from '../assets/logo.png';
-import { site, nav } from '../data/site';
+import { BRAND } from '../data/site';
+import { navFor } from '../lib/nav.ts';
+import type { Content } from '../lib/content.ts';
+
+interface Props {
+  content: Content;
+}
+
+const { content } = Astro.props;
+const { settings } = content;
+const nav = navFor(content);
 ---
 
 <header class="header">
   <div class="container header__in">
-    <a class="header__logo" href="#top" aria-label={`${site.name} — на главную`}>
+    <a class="header__logo" href="#top" aria-label={`${BRAND.name} — на главную`}>
       <Image
       src={logo}
-      alt={site.name}
+      alt={BRAND.name}
       widths={[132, 264]}
       sizes="132px"
       format="avif"
@@ -26,11 +36,11 @@ import { site, nav } from '../data/site';
     <div class="header__actions">
       <a
         class="btn btn--primary btn--sm header__cta"
-        href={site.links.shop}
+        href={settings.shop_url}
         target="_blank"
         rel="noopener">Заказать доставку</a
       >
-      <a class="header__phone" href={site.phoneHref}>{site.phone}</a>
+      <a class="header__phone" href={settings.phoneHref}>{settings.phone}</a>
       <button
         type="button"
         class="header__burger"
@@ -46,7 +56,7 @@ import { site, nav } from '../data/site';
   <div class="header__menu" id="mobile-menu" hidden>
     <div class="container header__menu-in">
       {nav.map((item) => <a href={item.href}>{item.label}</a>)}
-      <a class="btn btn--primary btn--block" href={site.links.shop} target="_blank" rel="noopener">
+      <a class="btn btn--primary btn--block" href={settings.shop_url} target="_blank" rel="noopener">
         Заказать доставку
       </a>
     </div>

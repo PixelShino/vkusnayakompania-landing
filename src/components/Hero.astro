@@ -1,29 +1,39 @@
 ---
 import Photo from './Photo.astro';
-import { heroPhotos } from '../data/catalog';
-import { site } from '../data/site';
+import { BRAND } from '../data/site';
+import { HERO_SIZES } from '../lib/hero.ts';
+import type { Content } from '../lib/content.ts';
+
+interface Props {
+  content: Content;
+}
+
+const { content } = Astro.props;
+const { home, settings } = content;
+// широкий кадр справа: снимок кафе, пока в контенте нет отдельного поля
+const wide = content.directions.find((direction) => direction.key === 'cafe')?.photo ?? home.hero_image;
 ---
 
 <section class="hero" id="top">
   <div class="container">
     <div class="hero__head">
-      <p class="kicker">Кондитерская и кухня · {site.city}</p>
+      <p class="kicker">Кондитерская и кухня · {BRAND.city}</p>
       <h1>Печём с утра, пока не разберут</h1>
     </div>
 
     <div class="hero__grid">
       <Photo
-        photo={heroPhotos.tall}
+        photo={home.hero_image}
         ratio="3 / 4.4"
         ratioMd="auto"
         radius="var(--r-xl)"
-        sizes="(min-width: 1200px) 520px, (min-width: 768px) 45vw, 100vw"
+        sizes={HERO_SIZES}
         eager
         class="hero__tall"
       >
         <div class="hero__scrim" aria-hidden="true"></div>
         <div class="hero__overlay">
-          <p class="kicker kicker--light" aria-hidden="true">Кондитерская и кухня · {site.city}</p>
+          <p class="kicker kicker--light" aria-hidden="true">Кондитерская и кухня · {BRAND.city}</p>
           {/* дубль `h1` поверх фото: второго `h1` в документе быть не должно */}
           <p class="hero__overlay-title" aria-hidden="true">Печём с утра, пока не разберут</p>
           <p class="hero__overlay-lead">
@@ -34,7 +44,7 @@ import { site } from '../data/site';
             <a class="btn btn--primary btn--block" href="#cakes">Смотреть торты</a>
             <a
               class="btn btn--ghost-light btn--block"
-              href={site.links.shop}
+              href={settings.shop_url}
               target="_blank"
               rel="noopener">Заказать доставку</a
             >
@@ -44,7 +54,7 @@ import { site } from '../data/site';
 
       {/* виден сразу, но канал у LCP-снимка слева отбирать не должен */}
       <Photo
-        photo={heroPhotos.wide}
+        photo={wide}
         ratio="16 / 9"
         radius="var(--r-xl)"
         sizes="(min-width: 1200px) 700px, 55vw"
@@ -60,7 +70,7 @@ import { site } from '../data/site';
         </p>
         <div class="hero__cta">
           <a class="btn btn--primary" href="#cakes">Смотреть торты</a>
-          <a class="btn btn--secondary" href={site.links.shop} target="_blank" rel="noopener">
+          <a class="btn btn--secondary" href={settings.shop_url} target="_blank" rel="noopener">
             Заказать доставку
           </a>
         </div>

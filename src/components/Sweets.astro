@@ -1,7 +1,15 @@
 ---
 import Photo from './Photo.astro';
-import { sweets } from '../data/catalog';
-import { site } from '../data/site';
+import type { Content } from '../lib/content.ts';
+
+interface Props {
+  content: Content;
+}
+
+const { content } = Astro.props;
+const { settings } = content;
+// витрины десертов в контенте пока нет: секцию закрывают первые торты
+const sweets = content.cakes.slice(0, 6);
 ---
 
 <section class="section" id="sweets">
@@ -16,7 +24,7 @@ import { site } from '../data/site';
       </div>
       <a
         class="btn btn--secondary btn--sm"
-        href={site.shopSections.pastry}
+        href={settings.shop_pastry ?? settings.shop_url}
         target="_blank"
         rel="noopener"
       >
@@ -33,8 +41,8 @@ import { site } from '../data/site';
               ratio="1 / 1"
               sizes="(min-width: 1200px) 420px, (min-width: 768px) 33vw, 45vw"
             />
-            <h3 class="sweets__name">{item.name}</h3>
-            <p class="sweets__meta">{item.meta}</p>
+            <h3 class="sweets__name">{item.title}</h3>
+            <p class="sweets__meta">{item.note}</p>
           </article>
         ))
       }

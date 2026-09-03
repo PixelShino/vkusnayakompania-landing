@@ -445,22 +445,22 @@ export const getContent: () => Promise<Content>; // кешируется на с
 `YandexMap.astro`, `Footer.astro`, `Photo.astro`, `src/data/site.ts`,
 `src/data/catalog.ts`.
 
-- [ ] **Шаг 1:** `index.astro` получает `const content = await getContent()` и
+- [x] **Шаг 1:** `index.astro` получает `const content = await getContent()` и
   передаёт в компоненты пропсами; старые секции пока остаются, но читают из
   `content`. `Photo.astro`: `photo.file` принимает `ImageMetadata | string`,
   для строки обязательны `width`/`height`.
-- [ ] **Шаг 2:** `BaseLayout.astro`: `title`/`description` из `home`,
+- [x] **Шаг 2:** `BaseLayout.astro`: `title`/`description` из `home`,
   `robots` = `noindex` если `!home.robots_index` или превью-хост, OG из
   `home.og_image` (через `getImage` 1200×630) с фолбэком на `public/og.jpg`,
   JSON-LD из `content.places`, Метрика при `settings.metrika_id`.
-- [ ] **Шаг 3:** из `site.ts` удалить данные (`site`, `places`, `yandexStats`,
+- [x] **Шаг 3:** из `site.ts` удалить данные (`site`, `places`, `yandexStats`,
   `nav`, `footerLinks`, `ecosystem`); `catalog.ts` удалить; починить импорты.
   `yandexOrgUrl` → `https://yandex.ru/maps/org/${orgId}/` (без slug; проверить
   `curl -I` на оба id, что редирект ведёт на карточки).
-- [ ] **Шаг 4:** `pnpm test && pnpm check && pnpm build` зелёные, страница
+- [x] **Шаг 4:** `pnpm test && pnpm check && pnpm build` зелёные, страница
   выглядит как раньше на 390/1440 (скриншоты, сравнить с
   `docs/screenshots/`).
-- [ ] **Шаг 5:** коммит `refactor(content): страница читает контент из Directus`.
+- [x] **Шаг 5:** коммит `refactor(content): страница читает контент из Directus`.
 
 ---
 

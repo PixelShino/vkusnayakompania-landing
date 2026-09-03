@@ -4,12 +4,19 @@
  * а параметр `pt` игнорирует — свои метки умеет только статическое API.
  * Точку выбирают кнопки `[data-frame-target="map"]` в контактах.
  */
-import { places, yandexOrgUrl, yandexWidgetUrl } from '../data/site';
+import { yandexOrgUrl, yandexWidgetUrl } from '../data/site';
+import type { Content } from '../lib/content.ts';
+
+interface Props {
+  content: Content;
+}
+
+const { places } = Astro.props.content;
 ---
 
 <div class="map-block">
   <p class="map-label">
-    На карте: <b data-frame-label="map">{places[0].addr}</b>
+    На карте: <b data-frame-label="map">{places[0].name}</b>
   </p>
 
   <div
@@ -24,7 +31,7 @@ import { places, yandexOrgUrl, yandexWidgetUrl } from '../data/site';
     <noscript>
       <a
         class="map__fallback"
-        href={yandexOrgUrl(places[0].yandexOrg)}
+        href={yandexOrgUrl(places[0].yandex_org)}
         target="_blank"
         rel="noopener"
       >

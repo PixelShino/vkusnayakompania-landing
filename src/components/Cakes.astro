@@ -1,10 +1,16 @@
 ---
 import Photo from './Photo.astro';
 import CustomCake from './CustomCake.astro';
-import { cakes, cakeFilters } from '../data/catalog';
-import { site } from '../data/site';
+import type { Content } from '../lib/content.ts';
 
-// Фильтры и «показать ещё» — на классах, без перерисовки DOM.
+interface Props {
+  content: Content;
+}
+
+const { content } = Astro.props;
+const { cakes, settings } = content;
+
+// «показать ещё» — на классе, без перерисовки DOM
 ---
 
 <section class="section" id="cakes">
@@ -20,25 +26,10 @@ import { site } from '../data/site';
       <a class="btn btn--secondary btn--sm" href="#custom-cake">Свой торт по картинке</a>
     </div>
 
-    <div class="cakes__filters rail" role="group" aria-label="Фильтр по видам тортов">
-      {
-        cakeFilters.map((filter, i) => (
-          <button
-            type="button"
-            class="chip"
-            data-filter={filter}
-            aria-pressed={i === 0 ? 'true' : 'false'}
-          >
-            {filter}
-          </button>
-        ))
-      }
-    </div>
-
     <div class="cakes__grid" data-cakes-grid>
       {
         cakes.map((cake, i) => (
-          <article class="cake" data-tags={[cake.name, ...(cake.tags ?? [])].join('|')}>
+          <article class="cake">
             <Photo
               photo={cake.photo}
               ratio="3 / 4"
@@ -46,8 +37,8 @@ import { site } from '../data/site';
               sizes="(min-width: 1200px) 310px, (min-width: 768px) 240px, 45vw"
             >
               <figcaption class="cake__caption">
-                <span class="cake__name">{cake.name}</span>
-                <span class="cake__meta">{cake.meta}</span>
+                <span class="cake__name">{cake.title}</span>
+                <span class="cake__meta">{cake.note}</span>
               </figcaption>
             </Photo>
           </article>
@@ -55,21 +46,17 @@ import { site } from '../data/site';
       }
     </div>
 
-    <p class="cakes__empty" data-cakes-empty hidden>
-      В этой подборке пока пусто. Напишите нам — соберём под ваш повод.
-    </p>
-
     <div class="cakes__more">
       <button type="button" class="btn btn--secondary" data-cakes-toggle aria-expanded="false">
         Показать ещё
       </button>
       <p class="cakes__count" data-cakes-count>В витрине {cakes.length} тортов</p>
-      <a class="cakes__shop" href={site.shopSections.cakesReady} target="_blank" rel="noopener">
+      <a class="cakes__shop" href={settings.shop_cakes_ready ?? settings.shop_url} target="_blank" rel="noopener">
         Торты, которые можно забрать сегодня →
       </a>
     </div>
 
-    <CustomCake />
+    <CustomCake content={content} />
   </div>
 </section>
 
@@ -222,52 +209,23 @@ import { site } from '../data/site';
   const grid = document.querySelector<HTMLElement>('[data-cakes-grid]');
   const toggle = document.querySelector<HTMLButtonElement>('[data-cakes-toggle]');
   const count = document.querySelector<HTMLElement>('[data-cakes-count]');
-  const empty = document.querySelector<HTMLElement>('[data-cakes-empty]');
-  const chips = [...document.querySelectorAll<HTMLButtonElement>('[data-filter]')];
 
   if (grid && toggle && count) {
-    const cards = [...grid.children] as HTMLElement[];
-    const total = cards.length;
-    let filter = chips[0]?.dataset.filter ?? 'Все';
-
-    const visible = () => cards.filter((card) => !card.classList.contains('is-hidden')).length;
+    const total = grid.children.length;
 
     const sync = () => {
-      const shown = visible();
       const expanded = grid.classList.contains('is-expanded');
       const collapsedLimit = window.matchMedia('(min-width: 1200px)').matches ? 8 : 6;
-      const hasMore = shown > collapsedLimit;
 
-      toggle.hidden = !hasMore;
+      toggle.hidden = total <= collapsedLimit;
       toggle.textContent = expanded ? 'Свернуть' : 'Показать ещё';
       toggle.setAttribute('aria-expanded', String(expanded));
-
-      if (filter === 'Все') {
-        count.textContent = expanded ? `Показаны все ${total}` : `В витрине ${total} тортов`;
-      } else {
-        count.textContent = `${shown} из ${total} подходят`;
-      }
-
-      if (empty) empty.hidden = shown > 0;
+      count.textContent = expanded ? `Показаны все ${total}` : `В витрине ${total} тортов`;
     };
 
     toggle.addEventListener('click', () => {
       grid.classList.toggle('is-expanded');
       sync();
-    });
-
-    chips.forEach((chip) => {
-      chip.addEventListener('click', () => {
-        filter = chip.dataset.filter ?? 'Все';
-        chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
-        cards.forEach((card) => {
-          const tags = card.dataset.tags ?? '';
-          card.classList.toggle('is-hidden', filter !== 'Все' && !tags.includes(filter));
-        });
-        // подборку короче двух рядов не сворачиваем
-        grid.classList.toggle('is-expanded', filter !== 'Все');
-        sync();
-      });
     });
 
     sync();

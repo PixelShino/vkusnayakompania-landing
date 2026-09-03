@@ -1,39 +1,12 @@
-/** Контакты, часы, адреса и ссылки. Неподтверждённое помечено TODO(клиент). */
+/**
+ * Schedule helpers and Yandex Maps links. The content itself lives in Directus
+ * and reaches the page through `src/lib/content.ts`.
+ * Функции расписания и ссылки на Яндекс Карты. Сам контент лежит в Directus и
+ * приходит на страницу через `src/lib/content.ts`.
+ */
 
-export const site = {
-  name: 'Вкусная компания',
-  city: 'Самара',
-  title: 'Вкусная компания — кондитерская и кухня в Самаре',
-  description:
-    'Торты на заказ за 48 часов, пирожные и конфеты с собственного цеха, завтраки и обеды в зале. Две точки в Самаре, доставка по городу.',
-  // номер подтверждён карточкой организации на Яндекс.Картах
-  phone: '+7 987 955-25-65',
-  phoneHref: 'tel:+79879552565',
-  // Ссылки на действующие ресурсы «Вкусной компании».
-  // TODO(клиент): дать ссылку на канал в Max — остальное подтверждено.
-  links: {
-    telegram: 'https://t.me/vkusnayakompania',
-    max: 'https://max.ru/',
-    vk: 'https://vk.ru/vkusnayakompania',
-    shop: 'https://vkusdostavka.shop/',
-    catering: 'https://vkusnayakompania.ru/',
-    cateringServices: 'https://vkusnayakompania.ru/services/',
-    appIos: 'https://apps.apple.com/app/id6477568088',
-    appAndroid:
-      'https://play.google.com/store/apps/details?id=com.foodpicasso.cateringvkusnaya&hl=ru',
-    privacy: '#',
-    offer: '#',
-  },
-  /** Разделы магазина доставки — на них ведут кнопки секций */
-  shopSections: {
-    cakesReady: 'https://vkusdostavka.shop/s/torty-v-nalichii_31',
-    cakesCustom: 'https://vkusdostavka.shop/s/prazdnichnye-torty_26',
-    pastry: 'https://vkusdostavka.shop/s/pirojnye_30',
-    sweets: 'https://vkusdostavka.shop/s/konfety_29',
-    sets: 'https://vkusdostavka.shop/s/nabory-pirojnyh-i-konfet_33',
-    breakfasts: 'https://vkusdostavka.shop/s/zavtraki_1',
-  },
-} as const;
+/** Имя и город: в модели Directus их нет, меняются раз в жизни компании. */
+export const BRAND = { name: 'Вкусная компания', city: 'Самара' } as const;
 
 /** Часы одного дня: открытие и закрытие в 24-часовом формате. */
 export type Hours = [open: string, close: string];
@@ -152,136 +125,18 @@ export const toSchedule = (rows: HoursRow[]): Schedule => {
   return out as Schedule;
 };
 
-/** Одинаковые будни + отдельные суббота и воскресенье. */
-const week = (weekday: Hours, sat: Hours, sun: Hours): Schedule => [
-  sun,
-  weekday,
-  weekday,
-  weekday,
-  weekday,
-  weekday,
-  sat,
-];
-
-export type Place = {
-  n: string;
-  addr: string;
-  street: string;
-  note: string;
-  schedule: Schedule;
-  lat: number;
-  lng: number;
-  /** id организации на Яндекс.Картах: по нему строятся виджет и ссылки */
-  yandexOrg: string;
-  rating: string;
-};
-
-// Адреса, координаты, часы и оценки — с карточек организации на Яндекс.Картах.
-// TODO(клиент): подтвердить часы второй точки и примечания к адресам.
-export const places: Place[] = [
-  {
-    n: '1',
-    addr: 'Садовая, 212Б',
-    street: 'Садовая',
-    note: 'Кондитерская и кухня',
-    schedule: week(['08:00', '21:00'], ['08:30', '21:00'], ['09:00', '21:00']),
-    lat: 53.195878,
-    lng: 50.100202,
-    yandexOrg: '154837147598',
-    rating: '4,8',
-  },
-  {
-    n: '2',
-    addr: 'Советской Армии, 177',
-    street: 'Советской Армии',
-    note: 'Ресторан и кондитерская',
-    schedule: week(['09:00', '22:30'], ['09:00', '22:30'], ['09:00', '22:30']),
-    lat: 53.222568,
-    lng: 50.202188,
-    yandexOrg: '243452895564',
-    rating: '5,0',
-  },
-];
-
-/**
- * Показатели с карточек организации на Яндекс.Картах — только цифры, тексты
- * отзывов приходят виджетом (`yandexReviewsUrl`).
- *
- * TODO(клиент): цифры сняты вручную 5 августа 2026; обновлять раз в квартал.
- */
-export const yandexStats = {
-  /** средневзвешенное по двум точкам: (4,8 × 765 + 5,0 × 320) / 1085 = 4,86 */
-  score: '4,9',
-  ratings: 1085,
-  reviews: 463,
-  award: 'Хорошее место 2026',
-  /** доля положительных отзывов по рубрикам — с карточки на Садовой */
-  highlights: [
-    { label: 'Еда', percent: 87 },
-    { label: 'Десерты', percent: 82 },
-    { label: 'Персонал', percent: 78 },
-    { label: 'Кофе', percent: 71 },
-    { label: 'Напитки', percent: 68 },
-  ],
-};
-
 /** Официальный виджет отзывов Яндекса */
 export const yandexReviewsUrl = (orgId: string) =>
   `https://yandex.ru/maps-reviews-widget/${orgId}?comments`;
 
-/** Ссылка на карточку точки в Яндекс.Картах */
-export const yandexOrgUrl = (orgId: string) =>
-  `https://yandex.ru/maps/org/vkusnaya_kompaniya/${orgId}/`;
+// Yandex serves the org card at the slug-less path and points og:url there itself
+// Яндекс отдаёт карточку по адресу без slug и сам указывает его в og:url
+export const yandexOrgUrl = (orgId: string) => `https://yandex.ru/maps/org/${orgId}/`;
 
 /** Iframe-виджет карточки организации */
-export const yandexWidgetUrl = (place: Pick<Place, 'yandexOrg' | 'lat' | 'lng'>) =>
-  `https://yandex.ru/map-widget/v1/org/vkusnaya_kompaniya/${place.yandexOrg}/?ll=${place.lng}%2C${place.lat}&z=16`;
+export const yandexWidgetUrl = (place: { yandex_org: string; lat: number; lng: number }) =>
+  `https://yandex.ru/map-widget/v1/org/vkusnaya_kompaniya/${place.yandex_org}/?ll=${place.lng}%2C${place.lat}&z=16`;
 
 /** Маршрут до точки: первый пункт пустой — Яндекс подставит местоположение гостя */
-export const yandexRouteUrl = (place: Pick<Place, 'lat' | 'lng'>) =>
+export const yandexRouteUrl = (place: { lat: number; lng: number }) =>
   `https://yandex.ru/maps/?rtext=~${place.lat}%2C${place.lng}&rtt=auto&z=16`;
-
-export const nav = [
-  { label: 'Торты', href: '#cakes' },
-  { label: 'Десерты', href: '#sweets' },
-  { label: 'Зал', href: '#room' },
-  { label: 'Контакты', href: '#contacts' },
-];
-
-export const footerLinks = [
-  { label: 'Магазин доставки', href: site.links.shop },
-  { label: 'Кейтеринг и банкеты', href: site.links.catering },
-  { label: 'App Store', href: site.links.appIos },
-  { label: 'Google Play', href: site.links.appAndroid },
-  { label: 'ВКонтакте', href: site.links.vk },
-  { label: 'Telegram', href: site.links.telegram },
-];
-
-/** Соседние проекты «Вкусной компании» — блок перелинковки */
-export const ecosystem = [
-  {
-    kicker: 'Доставка',
-    title: 'Магазин на каждый день',
-    text: 'Завтраки, супы, паста, торты в наличии и пирожные — с доставкой по Самаре или самовывозом. Оплата на сайте.',
-    href: site.links.shop,
-    cta: 'Открыть меню',
-    domain: 'vkusdostavka.shop',
-    links: [
-      { label: 'Торты в наличии', href: site.shopSections.cakesReady },
-      { label: 'Пирожные', href: site.shopSections.pastry },
-      { label: 'Завтраки', href: site.shopSections.breakfasts },
-    ],
-  },
-  {
-    kicker: 'События',
-    title: 'Кейтеринг и банкеты',
-    text: 'Фуршет, банкет или праздник под ключ: блюда, обслуживание, оформление и программа. Шесть лет и сотни мероприятий.',
-    href: site.links.catering,
-    cta: 'Смотреть услуги',
-    domain: 'vkusnayakompania.ru',
-    links: [
-      { label: 'Услуги и форматы', href: site.links.cateringServices },
-      { label: 'Частые вопросы', href: 'https://vkusnayakompania.ru/faq/' },
-    ],
-  },
-];

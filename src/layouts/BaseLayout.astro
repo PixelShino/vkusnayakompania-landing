@@ -24,59 +24,78 @@ const fontFaces = `
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
 }
 `;
-import { site, places, yandexOrgUrl, schemaHours } from '../data/site';
 import { getImage } from 'astro:assets';
-import { heroPhotos, photoSrcset, PHOTO_WIDTHS } from '../data/catalog';
-
-// preload снимка первого экрана; `sizes` повторяет заданное в `Hero.astro`
-const heroSizes = '(min-width: 1200px) 520px, (min-width: 768px) 45vw, 100vw';
-const heroSrcset = heroPhotos.tall.file
-  ? (
-      await getImage({
-        src: heroPhotos.tall.file,
-        widths: PHOTO_WIDTHS,
-        format: 'avif',
-        quality: 52,
-      })
-    ).srcSet.attribute
-  : photoSrcset(heroPhotos.tall.id);
+import { BRAND, schemaHours, yandexOrgUrl } from '../data/site';
+import { HERO_SIZES, widthsFor } from '../lib/hero.ts';
+import type { Content } from '../lib/content.ts';
 
 interface Props {
-  title?: string;
-  description?: string;
+  content: Content;
 }
 
-const { title = site.title, description = site.description } = Astro.props;
+const { content } = Astro.props;
+const { home, settings, places } = content;
+
+const title = home.seo_title;
+const description = home.seo_description;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://example.com');
 
 // на превью-сборке сайт лежит в подкаталоге, поэтому файлы из `public` — через `base`
 const asset = (path: string) => `${import.meta.env.BASE_URL.replace(/\/$/, '')}/${path}`;
-const ogImage = new URL(asset('og.jpg'), canonical);
 
 // превью не должно попасть в поиск и конкурировать с боевым доменом
 const isPreview = canonical.hostname !== 'vkus-com.ru';
+const noindex = isPreview || !home.robots_index;
 
-// Разметка организации: две точки одной кондитерской.
+// preload снимка первого экрана; `sizes` общий с `Hero.astro`
+const heroSrcset = (
+  await getImage({
+    src: home.hero_image.src,
+    width: home.hero_image.width,
+    height: home.hero_image.height,
+    widths: widthsFor(home.hero_image.width),
+    format: 'avif',
+    quality: 52,
+  })
+).srcSet.attribute;
+
+// OG-картинка режется под 1200×630; без неё остаётся статичная из `public`
+const ogImage = home.og_image
+  ? new URL(
+      (
+        await getImage({
+          src: home.og_image.src,
+          width: 1200,
+          height: 630,
+          fit: 'cover',
+          format: 'jpeg',
+        })
+      ).src,
+      canonical,
+    )
+  : new URL(asset('og.jpg'), canonical);
+
+// Разметка организации: две точки одной компании.
 const jsonLd = {
   '@context': 'https://schema.org',
   '@graph': places.map((place) => ({
     '@type': 'Bakery',
     '@id': `${canonical.origin}/#place-${place.n}`,
-    name: `${site.name} — ${place.addr}`,
-    description: site.description,
-    telephone: site.phone,
+    name: `${BRAND.name} — ${place.name}`,
+    description,
+    telephone: settings.phone,
     url: canonical.origin,
-    sameAs: [yandexOrgUrl(place.yandexOrg)],
+    sameAs: [yandexOrgUrl(place.yandex_org)],
     priceRange: '₽₽',
     servesCuisine: ['Кондитерская', 'Завтраки', 'Кофе'],
     address: {
       '@type': 'PostalAddress',
-      streetAddress: place.addr,
-      addressLocality: site.city,
+      streetAddress: place.name,
+      addressLocality: BRAND.city,
       addressCountry: 'RU',
     },
     geo: { '@type': 'GeoCoordinates', latitude: place.lat, longitude: place.lng },
-    hasMap: yandexOrgUrl(place.yandexOrg),
+    hasMap: yandexOrgUrl(place.yandex_org),
     image: ogImage.href,
     openingHours: schemaHours(place.schedule),
     // без aggregateRating: Google запрещает переносить в разметку оценки
@@ -93,24 +112,23 @@ const jsonLd = {
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical.href} />
-    {isPreview && <meta name="robots" content="noindex, nofollow" />}
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="icon" href={asset('favicon.svg')} type="image/svg+xml" />
     <meta name="theme-color" content="#FFFAED" />
 
     <style is:global set:html={fontFaces}></style>
     <link rel="preload" as="font" type="font/woff2" href={montserratCyrillic} crossorigin />
 
-    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
     <link
       rel="preload"
       as="image"
       imagesrcset={heroSrcset}
-      imagesizes={heroSizes}
+      imagesizes={HERO_SIZES}
       fetchpriority="high"
     />
 
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content={site.name} />
+    <meta property="og:site_name" content={BRAND.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical.href} />
@@ -120,10 +138,35 @@ const jsonLd = {
 
     <meta name="generator" content={Astro.generator} />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />
+
+    {
+      settings.metrika_id && (
+        <script is:inline define:vars={{ metrikaId: settings.metrika_id }}>
+          {`(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+          m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+          (window,document,'script','https://mc.yandex.ru/metrika/tag.js','ym');
+          ym(Number(metrikaId),'init',{clickmap:true,trackLinks:true,accurateTrackBounce:true});`}
+        </script>
+      )
+    }
   </head>
   <body>
     <a class="skip-link" href="#main">К основному содержимому</a>
     <slot />
+
+    {
+      settings.metrika_id && (
+        <noscript>
+          <div>
+            <img
+              src={`https://mc.yandex.ru/watch/${settings.metrika_id}`}
+              style="position:absolute;left:-9999px"
+              alt=""
+            />
+          </div>
+        </noscript>
+      )
+    }
 
     <style is:global>
       .skip-link {

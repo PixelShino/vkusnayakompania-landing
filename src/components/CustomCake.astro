@@ -1,7 +1,22 @@
 ---
 import Photo from './Photo.astro';
 import MessengerButtons from './MessengerButtons.astro';
-import { heroPhotos, steps } from '../data/catalog';
+import type { Content } from '../lib/content.ts';
+
+interface Props {
+  content: Content;
+}
+
+const { settings, cakes } = Astro.props.content;
+// пары «картинка гостя → наш торт» в контенте нет: показываем работы из витрины
+const [sketchRef, sketchOut] = cakes;
+
+const steps = [
+  { n: '1', title: 'Присылаете картинку', text: 'В Telegram или Max. Скрин, фото, рисунок — что угодно.' },
+  { n: '2', title: 'Считаем', text: 'В тот же день говорим, повторим ли и сколько это будет стоить.' },
+  { n: '3', title: 'Подтверждаете', text: 'Дата, вес, надпись. Предоплата половины.' },
+  { n: '4', title: 'Забираете через 48 часов', text: 'Самовывоз с любой точки или доставка по Самаре.' },
+];
 ---
 
 <div class="sk" id="custom-cake">
@@ -39,6 +54,7 @@ import { heroPhotos, steps } from '../data/catalog';
       </ol>
 
       <MessengerButtons
+        settings={settings}
         variant="dark"
         size="lg"
         labels={['Написать в Telegram', 'Max']}
@@ -49,7 +65,7 @@ import { heroPhotos, steps } from '../data/catalog';
     <div class="sk__media">
       <figure class="sk__shot">
         <Photo
-          photo={heroPhotos.sketchRef}
+          photo={sketchRef.photo}
           ratio="4 / 5"
           radius="20px"
           sizes="(min-width: 1200px) 280px, 45vw"
@@ -58,7 +74,7 @@ import { heroPhotos, steps } from '../data/catalog';
       </figure>
       <figure class="sk__shot sk__shot--offset">
         <Photo
-          photo={heroPhotos.sketchOut}
+          photo={sketchOut.photo}
           ratio="4 / 5"
           radius="20px"
           sizes="(min-width: 1200px) 280px, 45vw"

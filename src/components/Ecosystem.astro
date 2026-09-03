@@ -1,5 +1,39 @@
 ---
-import { ecosystem, site } from '../data/site';
+import type { Content } from '../lib/content.ts';
+
+interface Props {
+  content: Content;
+}
+
+const { settings } = Astro.props.content;
+
+// соседние проекты: ссылки из админки, тексты живут здесь до этапа 4.5
+const ecosystem = [
+  {
+    kicker: 'Доставка',
+    title: 'Магазин на каждый день',
+    text: 'Завтраки, супы, паста, торты в наличии и пирожные — с доставкой по Самаре или самовывозом. Оплата на сайте.',
+    href: settings.shop_url,
+    cta: 'Открыть меню',
+    domain: 'vkusdostavka.shop',
+    links: [
+      { label: 'Торты в наличии', href: settings.shop_cakes_ready },
+      { label: 'Пирожные', href: settings.shop_pastry },
+      { label: 'Завтраки', href: settings.shop_breakfasts },
+    ].filter((link) => Boolean(link.href)),
+  },
+  {
+    kicker: 'События',
+    title: 'Кейтеринг и банкеты',
+    text: 'Фуршет, банкет или праздник под ключ: блюда, обслуживание, оформление и программа. Шесть лет и сотни мероприятий.',
+    href: settings.catering_url,
+    cta: 'Смотреть услуги',
+    domain: 'vkusnayakompania.ru',
+    links: [{ label: 'Услуги и форматы', href: settings.catering_services_url }].filter((link) =>
+      Boolean(link.href),
+    ),
+  },
+];
 ---
 
 <section class="section eco" id="apps">
@@ -63,12 +97,12 @@ import { ecosystem, site } from '../data/site';
 
         <div class="eco__foot">
           <div class="eco__stores">
-            <a class="btn btn--light btn--md" href={site.links.appIos} target="_blank" rel="noopener">
+            <a class="btn btn--light btn--md" href={settings.app_ios} target="_blank" rel="noopener">
               App Store
             </a>
             <a
               class="btn btn--light btn--md"
-              href={site.links.appAndroid}
+              href={settings.app_android}
               target="_blank"
               rel="noopener"
             >

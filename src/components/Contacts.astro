@@ -2,7 +2,15 @@
 import YandexMap from './YandexMap.astro';
 import MessengerButtons from './MessengerButtons.astro';
 import OpenStatus from './OpenStatus.astro';
-import { site, places, hoursRows, yandexRouteUrl, yandexWidgetUrl } from '../data/site';
+import { hoursRows, yandexRouteUrl, yandexWidgetUrl } from '../data/site';
+import type { Content } from '../lib/content.ts';
+
+interface Props {
+  content: Content;
+}
+
+const { content } = Astro.props;
+const { places, settings, home } = content;
 ---
 
 <section class="section" id="contacts">
@@ -12,9 +20,9 @@ import { site, places, hoursRows, yandexRouteUrl, yandexWidgetUrl } from '../dat
         <p class="kicker">Две точки в городе</p>
         <h2>Контакты</h2>
       </div>
-      <a class="ct__phone" href={site.phoneHref}>
+      <a class="ct__phone" href={settings.phoneHref}>
         <span class="ct__phone-label">Один номер на обе точки</span>
-        <span class="ct__phone-num">{site.phone}</span>
+        <span class="ct__phone-num">{settings.phone}</span>
       </a>
     </div>
 
@@ -29,8 +37,8 @@ import { site, places, hoursRows, yandexRouteUrl, yandexWidgetUrl } from '../dat
                 <OpenStatus schedule={place.schedule} />
               </div>
 
-              <h3 class="ct__name">{place.addr}</h3>
-              <p class="ct__note">{place.note}</p>
+              <h3 class="ct__name">{place.name}</h3>
+              <p class="ct__note">{place.kind}</p>
 
               <dl class="ct__hours">
                 {hoursRows(place.schedule).map((row) => (
@@ -56,7 +64,7 @@ import { site, places, hoursRows, yandexRouteUrl, yandexWidgetUrl } from '../dat
                   class="btn btn--secondary btn--md ct__show"
                   data-frame-target="map"
                   data-src={yandexWidgetUrl(place)}
-                  data-frame-name={place.addr}
+                  data-frame-name={place.name}
                   aria-pressed={i === 0 ? 'true' : 'false'}
                 >
                   Показать на карте
@@ -68,15 +76,15 @@ import { site, places, hoursRows, yandexRouteUrl, yandexWidgetUrl } from '../dat
       </div>
 
       <div class="ct__right">
-        <YandexMap />
+        <YandexMap content={content} />
 
         <div class="ct__write">
           <div class="blob" aria-hidden="true"></div>
           <div class="ct__write-col">
             <p class="ct__write-title">Написать нам</p>
-            <p class="ct__write-sub">Отвечаем с 9:00 до 21:00, обычно за пару минут</p>
+            <p class="ct__write-sub">{home.contacts_note}</p>
           </div>
-          <MessengerButtons variant="light" size="lg" />
+          <MessengerButtons settings={settings} variant="light" size="lg" />
         </div>
       </div>
     </div>

@@ -11,20 +11,23 @@ import Ecosystem from '../components/Ecosystem.astro';
 import Reviews from '../components/Reviews.astro';
 import Contacts from '../components/Contacts.astro';
 import Footer from '../components/Footer.astro';
+import { getContent } from '../lib/content.ts';
+
+const content = await getContent();
 ---
 
-<BaseLayout>
-  <Header />
+<BaseLayout content={content}>
+  <Header content={content} />
   <main id="main">
-    <Hero />
-    <Bento />
-    <Cakes />
-    <Sweets />
-    <Room />
-    <HowToOrder />
-    <Ecosystem />
-    <Reviews />
-    <Contacts />
+    <Hero content={content} />
+    <Bento content={content} />
+    <Cakes content={content} />
+    <Sweets content={content} />
+    <Room content={content} />
+    <HowToOrder content={content} />
+    <Ecosystem content={content} />
+    <Reviews content={content} />
+    <Contacts content={content} />
   </main>
-  <Footer />
+  <Footer content={content} />
 </BaseLayout>

@@ -1,13 +1,17 @@
 ---
 /**
- * Снимок с `file` идёт через `astro:assets` (свой домен, avif, пережатие на
- * сборке); плейсхолдер Unsplash — обычным `img` со `srcset` из URL.
+ * Frame from the content: a local file or a Directus URL, both through
+ * `astro:assets` — the build resizes them and serves copies from our domain.
+ * Кадр из контента: свой файл или адрес Directus — оба идут через
+ * `astro:assets`, сборка режет их и отдаёт копии со своего домена.
  */
 import { Image } from 'astro:assets';
-import { PHOTO_WIDTHS, photoSrcset, photoUrl, type Photo } from '../data/catalog';
+import type { ImageMetadata } from 'astro';
+import type { Img } from '../lib/content.ts';
+import { widthsFor } from '../lib/hero.ts';
 
 interface Props {
-  photo: Photo;
+  photo: Img;
   ratio?: string;
   /** пропорция с 768px, если на планшете и десктопе кадр другой */
   ratioMd?: string;
@@ -29,36 +33,28 @@ const {
   priority = eager ? 'high' : 'low',
   class: className = '',
 } = Astro.props;
+
+// <Image> принимает и адрес, и файл, но типы у него — размеченное объединение:
+// при заданных width/height строка безопасна, поэтому сужаем один раз здесь
+const src = photo.src as ImageMetadata;
 ---
 
 <figure
   class:list={['media', className]}
   style={`--ratio:${ratio};${ratioMd ? `--ratio-md:${ratioMd};` : ''}${radius ? `--radius:${radius};` : ''}`}
 >
-  {
-    photo.file ? (
-      <Image
-        src={photo.file}
-        alt={photo.alt}
-        widths={PHOTO_WIDTHS}
-        sizes={sizes}
-        format="avif"
-        quality={52}
-        loading={eager ? 'eager' : 'lazy'}
-        decoding="async"
-        fetchpriority={priority}
-      />
-    ) : (
-      <img
-        src={photoUrl(photo.id, 800)}
-        srcset={photoSrcset(photo.id)}
-        sizes={sizes}
-        alt={photo.alt}
-        loading={eager ? 'eager' : 'lazy'}
-        decoding="async"
-        fetchpriority={priority}
-      />
-    )
-  }
+  <Image
+    src={src}
+    alt={photo.alt}
+    width={photo.width}
+    height={photo.height}
+    widths={widthsFor(photo.width)}
+    sizes={sizes}
+    format="avif"
+    quality={52}
+    loading={eager ? 'eager' : 'lazy'}
+    decoding="async"
+    fetchpriority={priority}
+  />
   <slot />
 </figure>
