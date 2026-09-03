@@ -60,26 +60,32 @@ const points = places.map((place) => ({
         >
           <div class="map__stub">
             <p class="map__stub-label">Загружаем карту…</p>
+            <p class="map__stub-hint">Открыть в Яндекс Картах:</p>
+            {places.map((place) => (
+              <a
+                class="map__stub-link"
+                href={yandexOrgUrl(place.yandex_org)}
+                target="_blank"
+                rel="noopener"
+              >
+                {place.name}
+              </a>
+            ))}
           </div>
-          <noscript>
-            <div class="map__stub">
-              <p class="map__stub-hint">Открыть в Яндекс Картах:</p>
-              {places.map((place) => (
-                <a
-                  class="map__stub-link"
-                  href={yandexOrgUrl(place.yandex_org)}
-                  target="_blank"
-                  rel="noopener"
-                >
-                  {place.name}
-                </a>
-              ))}
-            </div>
-          </noscript>
         </div>
       </>
     )
   }
+
+  {/* JS off: nothing is loading, only the links below are real */}
+  {/* Без JS ничего не грузится — подпись гасим, живыми остаются ссылки */}
+  <noscript>
+    <style is:inline>
+      .map__stub-label {
+        display: none;
+      }
+    </style>
+  </noscript>
 </div>
 
 <style>
