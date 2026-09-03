@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-09-03T11:50:04.254Z",
+  "exportedAt": "2026-09-03T11:52:40.038Z",
   "settings": {
     "id": 1,
     "phone": "+7 987 955-25-65",
@@ -76,13 +76,13 @@
     },
     "og_image": null,
     "app_screenshot": {
-      "id": "2bb89d0d-891f-42ec-ad5f-832e131ebb0f",
-      "filename_download": "app-screenshot.jpg",
-      "title": "[заглушка] Экран приложения «Вкусная компания»",
+      "id": "34f5cdba-2efe-4f93-a348-eb4226f216ef",
+      "filename_download": "app-screen.png",
+      "title": "Экран приложения «Вкусная компания»",
       "alt": "Экран приложения «Вкусная компания»",
-      "width": 900,
-      "height": 1950,
-      "type": "image/jpeg"
+      "width": 920,
+      "height": 1993,
+      "type": "image/png"
     }
   },
   "places": [
