@@ -780,16 +780,16 @@ echo "релиз $STAMP"
 
 ### Задача 7.1: Два прогона полировки
 
-- [ ] **Шаг 1:** `impeccable audit` по всей странице → список → правки →
+- [x] **Шаг 1:** `impeccable audit` по всей странице → список → правки →
   повторный audit. Затем `make-interfaces-feel-better` по деталям: оптика
   иконок, tabular-nums, радиусы, тени.
-- [ ] **Шаг 2:** чек: контраст ≥ 4,5:1 всех пар текст/фон (включая текст на
+- [x] **Шаг 2:** чек: контраст ≥ 4,5:1 всех пар текст/фон (включая текст на
   фото), `focus-visible` везде, `aria-label` на icon-only кнопках, нет
   `transition: all` / `ease-in` / `scale(0)`, reduced-motion, 320 px без
   горизонтального скролла.
-- [ ] **Шаг 3:** Lighthouse mobile ≥ 90 perf (`pnpm build && pnpm preview`,
+- [x] **Шаг 3:** Lighthouse mobile ≥ 90 perf (`pnpm build && pnpm preview`,
   Chrome DevTools MCP или lighthouse MCP).
-- [ ] **Шаг 4:** скриншоты в `docs/screenshots/` обновить, коммит
+- [x] **Шаг 4:** скриншоты в `docs/screenshots/` обновить, коммит
   `style(landing): полировка визитки`.
 
 ### Задача 7.2: Документация

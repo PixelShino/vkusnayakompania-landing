@@ -157,16 +157,20 @@ const points = places.map((place) => ({
   }
 
   .map__stub-link {
+    display: inline-block;
+    padding-block: 6px;
     font-size: 13px;
     font-weight: 600;
     color: var(--text);
-    text-decoration: none;
-    border-bottom: 1px solid var(--line-4);
+    text-decoration: underline;
+    text-decoration-color: var(--line-4);
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.16s ease;
   }
 
   @media (hover: hover) and (pointer: fine) {
     .map__stub-link:hover {
-      border-bottom-color: var(--text);
+      text-decoration-color: var(--text);
     }
   }
 

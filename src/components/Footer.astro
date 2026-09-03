@@ -110,17 +110,23 @@ const docs = [
     gap: 16px;
   }
 
+  /* underline via text-decoration so the vertical padding (32 px target) does not move the line
+     подчёркивание через text-decoration: вертикальный паддинг (зона 32 px) не сдвигает линию */
   .footer__docs a,
   .footer__links a {
+    display: inline-block;
+    padding-block: 6px;
     font-size: 12.5px;
-    text-decoration: none;
-    border-bottom: 1px solid rgb(255 250 237 / 0.4);
+    text-decoration: underline;
+    text-decoration-color: rgb(255 250 237 / 0.4);
+    text-underline-offset: 4px;
+    transition: text-decoration-color 0.16s ease;
   }
 
   @media (hover: hover) and (pointer: fine) {
     .footer__docs a:hover,
     .footer__links a:hover {
-      border-bottom-color: var(--bg);
+      text-decoration-color: var(--bg);
     }
   }
 

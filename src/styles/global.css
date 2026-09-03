@@ -381,6 +381,14 @@ h3 {
   font-size: 13px;
 }
 
+/* on touch screens the small button grows to a 42 px target
+   на тач-экранах мелкая кнопка растёт до зоны нажатия 42 px */
+@media (pointer: coarse) {
+  .btn--sm {
+    height: 42px;
+  }
+}
+
 .btn--md {
   height: 42px;
   padding-inline: 18px;
