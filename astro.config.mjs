@@ -1,6 +1,11 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { loadEnv } from './scripts/env.mjs';
+
+// Astro fills import.meta.env from .env, but not process.env this config reads
+// Astro кладёт .env в import.meta.env, но не в process.env, который читает конфиг
+loadEnv();
 
 // Images from Directus are fetched at build time from this host (token in the URL)
 // Картинки из Directus сборка тянет с этого хоста, токен в адресе

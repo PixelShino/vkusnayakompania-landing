@@ -10,9 +10,11 @@
     "build": "astro build",
     "preview": "astro preview --host 127.0.0.1",
     "check": "astro check",
-    "test": "node src/data/site.check.ts",
+    "test": "node src/data/site.check.ts && node src/lib/select.check.ts && node src/data/content.check.ts",
     "fixture": "node scripts/export-fixture.mjs",
-    "setup": "node scripts/directus-setup.mjs"
+    "files": "node scripts/fetch-files.mjs",
+    "setup": "node scripts/directus-setup.mjs",
+    "prebuild": "node src/data/content.check.ts && node scripts/fetch-files.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
@@ -24,6 +26,9 @@
     "typescript": "^6.0.3"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild", "sharp"]
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp"
+    ]
   }
 }

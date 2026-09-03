@@ -424,19 +424,19 @@ export const getContent: () => Promise<Content>; // кешируется на с
 проходят одну функцию `normalize(raw, resolveImage)`. `today` — дата в
 `Europe/Samara`. Картинка без `alt` → `Error('alt пуст у файла <title>')`.
 
-- [ ] **Шаг 1:** `content.check.ts` на фикстуре: телефон есть, две точки,
+- [x] **Шаг 1:** `content.check.ts` на фикстуре: телефон есть, две точки,
   у каждой семь строк часов, `hero_image` есть, `seo_title` ≤ 60,
   `seo_description` ≤ 160, у всех картинок `alt`, у направлений ровно пять
   разных ключей. При падении сообщение называет поле. Для фикстур-файлов:
   если папка пуста — `Error('нет src/data/fixture-files — запусти pnpm fixture')`.
-- [ ] **Шаг 2:** запуск → падение на импорте `content.ts`.
-- [ ] **Шаг 3:** `content.ts` (загрузка, нормализация, кеш в переменной модуля).
-- [ ] **Шаг 4:** `scripts/fetch-files.mjs` — качает в `public/media/<id>.<ext>`
+- [x] **Шаг 2:** запуск → падение на импорте `content.ts`.
+- [x] **Шаг 3:** `content.ts` (загрузка, нормализация, кеш в переменной модуля).
+- [x] **Шаг 4:** `scripts/fetch-files.mjs` — качает в `public/media/<id>.<ext>`
   все PDF из `settings.policy_file`, `settings.offer_file`, `menus.file`;
   в режиме фикстуры копирует из `fixture-files/`.
-- [ ] **Шаг 5:** `pnpm test` зелёный (все три файла), `pnpm build` с
+- [x] **Шаг 5:** `pnpm test` зелёный (все три файла), `pnpm build` с
   `DIRECTUS_URL` и без него.
-- [ ] **Шаг 6:** коммит `feat(content): загрузчик контента из Directus и фикстуры`.
+- [x] **Шаг 6:** коммит `feat(content): загрузчик контента из Directus и фикстуры`.
 
 ### Задача 2.5: Переключение существующих компонентов на контент
 
