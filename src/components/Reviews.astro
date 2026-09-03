@@ -101,6 +101,7 @@ const reviews = settings.yandex_reviews ?? 0;
                 class="rev__tab"
                 data-frame-target="reviews"
                 data-src={yandexReviewsUrl(place.yandex_org)}
+                data-frame-href={`${yandexOrgUrl(place.yandex_org)}reviews/`}
                 data-frame-name={place.name}
                 aria-pressed={i === 0 ? 'true' : 'false'}
               >
@@ -119,22 +120,29 @@ const reviews = settings.yandex_reviews ?? 0;
         >
           <p class="rev__frame-stub">Загружаем отзывы…</p>
           <noscript>
-            <a
-              class="rev__frame-stub"
-              href={`${yandexOrgUrl(places[0].yandex_org)}reviews/`}
-              target="_blank"
-              rel="noopener"
-            >
-              Читать отзывы на Яндекс Картах
-            </a>
+            {/* без JS вкладки не работают: по ссылке на каждую точку */}
+            <div class="rev__frame-stub rev__frame-links">
+              {
+                places.map((place) => (
+                  <a
+                    href={`${yandexOrgUrl(place.yandex_org)}reviews/`}
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    Отзывы: {place.name}
+                  </a>
+                ))
+              }
+            </div>
           </noscript>
         </div>
 
         <p class="rev__frame-note">
           Виджет Яндекс Карт · <a
+            data-frame-link="reviews"
             href={`${yandexOrgUrl(places[0].yandex_org)}reviews/`}
             target="_blank"
-            rel="noopener">открыть все отзывы</a
+            rel="noopener">Все отзывы</a
           >
         </p>
       </div>
@@ -353,6 +361,12 @@ const reviews = settings.yandex_reviews ?? 0;
     font-size: 13px;
     color: var(--text-4);
     text-decoration: none;
+  }
+
+  .rev__frame-links {
+    gap: 10px;
+    padding-inline: var(--pad);
+    text-align: center;
   }
 
   .rev__frame.is-loaded .rev__frame-stub {
