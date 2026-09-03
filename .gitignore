@@ -23,5 +23,12 @@ pnpm-debug.log*
 # playwright artifacts
 .playwright-mcp/
 
-# playwright / скриншоты проверок в корне (в src/assets .jpeg не трогаем)
+# скриншоты проверок в корне (в src/assets .jpeg не трогаем)
 /*.jpeg
+
+# контент из Directus: файлы фикстуры и документы для public
+src/data/fixture-files/
+public/media/
+
+# настройки Claude Code
+.claude/
