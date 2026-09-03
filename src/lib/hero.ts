@@ -7,7 +7,8 @@
 
 export const PHOTO_WIDTHS = [480, 800, 1200, 1600];
 
-export const HERO_SIZES = '(min-width: 1200px) 520px, (min-width: 768px) 45vw, 100vw';
+/** снимок первого экрана лежит на всю ширину окна — на любой ширине это `100vw` */
+export const HERO_SIZES = '100vw';
 
 /** Ширины `srcset` без апскейла: крупнее оригинала кадры не режем. */
 export const widthsFor = (width: number) => [...PHOTO_WIDTHS.filter((w) => w < width), width];

@@ -1,6 +1,14 @@
 ---
+/**
+ * First screen: the photo fills the viewport, everything else sits on top of
+ * the scrim in the bottom-left corner — a poster with two actions under the
+ * thumb, as `docs/PRODUCT.md` asks.
+ * Первый экран: фото на весь экран, остальное лежит поверх скрима в левом
+ * нижнем углу — афиша с двумя кнопками под пальцем, как просит
+ * `docs/PRODUCT.md`.
+ */
 import Photo from './Photo.astro';
-import { BRAND } from '../data/site';
+import OpenStatus from './OpenStatus.astro';
 import { HERO_SIZES } from '../lib/hero.ts';
 import type { Content } from '../lib/content.ts';
 
@@ -9,70 +17,60 @@ interface Props {
 }
 
 const { content } = Astro.props;
-const { home, settings } = content;
-// широкий кадр справа: снимок кафе, пока в контенте нет отдельного поля
-const wide = content.directions.find((direction) => direction.key === 'cafe')?.photo ?? home.hero_image;
+const { home, settings, places, afisha } = content;
+
+const dayMonth = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' });
+const afishaDate = afisha ? dayMonth.format(new Date(afisha.date)) : '';
 ---
 
 <section class="hero" id="top">
-  <div class="container">
-    <div class="hero__head">
-      <p class="kicker">Кондитерская и кухня · {BRAND.city}</p>
-      <h1>Печём с утра, пока не разберут</h1>
-    </div>
-
-    <div class="hero__grid">
-      <Photo
-        photo={home.hero_image}
-        ratio="3 / 4.4"
-        ratioMd="auto"
-        radius="var(--r-xl)"
-        sizes={HERO_SIZES}
-        eager
-        class="hero__tall"
-      >
-        <div class="hero__scrim" aria-hidden="true"></div>
-        <div class="hero__overlay">
-          <p class="kicker kicker--light" aria-hidden="true">Кондитерская и кухня · {BRAND.city}</p>
-          {/* дубль `h1` поверх фото: второго `h1` в документе быть не должно */}
-          <p class="hero__overlay-title" aria-hidden="true">Печём с утра, пока не разберут</p>
-          <p class="hero__overlay-lead">
-            Торты на&nbsp;заказ, пирожные и&nbsp;конфеты&nbsp;— и&nbsp;завтраки, супы и&nbsp;паста
-            в&nbsp;зале.
-          </p>
-          <div class="hero__overlay-cta">
-            <a class="btn btn--primary btn--block" href="#cakes">Смотреть торты</a>
-            <a
-              class="btn btn--ghost-light btn--block"
-              href={settings.shop_url}
-              target="_blank"
-              rel="noopener">Заказать доставку</a
-            >
-          </div>
-        </div>
-      </Photo>
-
-      {/* виден сразу, но канал у LCP-снимка слева отбирать не должен */}
-      <Photo
-        photo={wide}
-        ratio="16 / 9"
-        radius="var(--r-xl)"
-        sizes="(min-width: 1200px) 700px, 55vw"
-        eager
-        priority="low"
-        class="hero__wide"
-      />
-
-      <div class="hero__text">
-        <p class="lead">
-          Торты на&nbsp;заказ, пирожные, конфеты&nbsp;— и&nbsp;завтраки, супы и&nbsp;паста
-          в&nbsp;зале. Всё своё, всё с&nbsp;одной кухни.
-        </p>
-        <div class="hero__cta">
-          <a class="btn btn--primary" href="#cakes">Смотреть торты</a>
-          <a class="btn btn--secondary" href={settings.shop_url} target="_blank" rel="noopener">
-            Заказать доставку
+  <Photo
+    photo={home.hero_image}
+    ratio="auto"
+    ratioMd="auto"
+    radius="0"
+    sizes={HERO_SIZES}
+    eager
+    class="hero__photo"
+  />
+  <div class="hero__veil">
+    <div class="container hero__in">
+      <div class="hero__box">
+      {
+        afisha && (
+          <a class="hero__afisha" href="#afisha">
+            Афиша<span class="hero__sep" aria-hidden="true">·</span>
+            <time datetime={afisha.date}>{afishaDate}</time>
+            <span class="hero__sep" aria-hidden="true">·</span>
+            {afisha.title}
           </a>
+        )
+      }
+
+      <h1>{home.hero_title}</h1>
+      {home.hero_text && <p class="lead hero__lead">{home.hero_text}</p>}
+
+      <div class="hero__cta">
+        <a class="btn btn--light" href={settings.shop_url} target="_blank" rel="noopener">
+          Заказать доставку
+        </a>
+        <button type="button" class="btn btn--ghost-light" data-book="Бронь стола">
+          Забронировать стол
+        </button>
+      </div>
+
+      <div class="hero__foot">
+        <a class="hero__phone" href={settings.phoneHref}>{settings.phone}</a>
+        <div class="hero__places">
+          {
+            places.map((place) => (
+              <a class="hero__place" href="#contacts">
+                {place.name}
+                <OpenStatus schedule={place.schedule} class="hero__status" />
+              </a>
+            ))
+          }
+        </div>
         </div>
       </div>
     </div>
@@ -81,140 +79,212 @@ const wide = content.directions.find((direction) => direction.key === 'cafe')?.p
 
 <style>
   .hero {
-    padding-top: calc(var(--sec-pad) * 0.6);
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    /* шапка липкая и стоит в потоке: без вычета её высоты кнопки уезжают
+       за нижний край экрана */
+    min-height: calc(100svh - var(--header-h));
   }
 
-  /* на телефоне `h1` не выключаем, а прячем: он нужен поиску и скринридеру */
-  .hero__head {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-
-  .hero__grid {
-    display: block;
-  }
-
-  .hero__scrim {
+  /* класс лежит на корне дочернего `Photo.astro` — нужен `:global` */
+  .hero > :global(.hero__photo) {
     position: absolute;
     inset: 0;
+    height: 100%;
+  }
+
+  .hero > :global(.hero__photo img) {
+    object-position: center 40%;
+  }
+
+  /* Скрим привязан к тексту, а не к экрану: на телефоне блок занимает три
+     четверти кадра, и градиент «от низа экрана» отдаёт заголовку 0,13 альфы —
+     белое по светлой витрине — 2,1:1. Здесь верхние 160 px гасят переход, а
+     под текстом держится 0,58…0,88.
+     The scrim is tied to the text, not to the viewport: a screen-anchored
+     gradient leaves the headline at 0.13 alpha over a bright display case. */
+  .hero__veil {
+    position: relative;
     z-index: 1;
-    pointer-events: none;
+    width: 100%;
+    padding-top: 160px;
     background: linear-gradient(
       to top,
-      rgba(26, 23, 20, 0.9) 0%,
-      rgba(26, 23, 20, 0.72) 30%,
-      rgba(26, 23, 20, 0.28) 62%,
-      rgba(26, 23, 20, 0.02) 100%
+      rgb(44 41 39 / 0.9) 0%,
+      rgb(44 41 39 / 0.78) 55%,
+      rgb(44 41 39 / 0.68) 84%,
+      rgb(44 41 39 / 0) 100%
     );
   }
 
-  .hero__overlay {
-    position: absolute;
-    inset: auto 0 0 0;
-    z-index: 4;
-    display: flex;
-    flex-direction: column;
-    gap: 9px;
-    /* запас снизу: туда наезжает бенто из соседней секции */
-    padding: 20px 18px 76px;
-  }
-
-  .kicker--light {
-    color: rgba(255, 250, 237, 0.72);
-    margin-bottom: 0;
-  }
-
-  .hero__overlay-title {
-    font-size: 31px;
-    line-height: 1.06;
-    letter-spacing: -0.01em;
+  .hero__in {
+    padding-block: 0 34px;
     color: var(--bg);
   }
 
-  .hero__overlay-lead {
-    font-size: 14px;
-    line-height: 1.45;
-    color: rgba(255, 250, 237, 0.84);
+  .hero__afisha {
+    display: inline-block;
+    max-width: 100%;
+    margin-bottom: 16px;
+    padding: 7px 13px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    border: 1px solid rgb(255 250 237 / 0.32);
+    border-radius: var(--r-pill);
+    /* подложка темнее фона, а не светлее: светлая на белом кадре роняет
+       контраст подписи до 2,1:1 (`docs/DESIGN.md`, раздел «Цвет») */
+    background: rgb(28 25 22 / 0.38);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--bg);
+    text-decoration: none;
+    vertical-align: bottom;
+    transition-property: scale, background-color;
+    transition-duration: 120ms, 0.16s;
+    transition-timing-function: var(--ease-out), ease;
   }
 
-  .hero__overlay-cta {
+  .hero__afisha:active {
+    scale: 0.96;
+  }
+
+  .hero__sep {
+    margin-inline: 6px;
+    opacity: 0.6;
+  }
+
+  .hero h1 {
+    max-width: 15ch;
+  }
+
+  .hero__lead {
+    color: var(--surface);
+    max-width: 38ch;
+  }
+
+  .hero__cta {
     display: flex;
     flex-direction: column;
-    gap: 7px;
-    margin-top: 2px;
+    gap: 8px;
+    margin-top: 22px;
   }
 
-  .hero__overlay-cta .btn {
+  .hero__cta .btn {
     height: 48px;
     font-size: 14.5px;
   }
 
-  /* классы на корне дочернего `Photo.astro` — нужен `:global` */
-  .hero__grid > :global(.hero__wide),
-  .hero__text {
-    display: none;
+  .hero__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 18px;
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid rgb(255 250 237 / 0.22);
+  }
+
+  .hero__phone {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--bg);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .hero__places {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .hero__place {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 13px;
+    border: 1px solid rgb(255 250 237 / 0.32);
+    border-radius: var(--r-pill);
+    /* подложка темнее фона, а не светлее: светлая на белом кадре роняет
+       контраст подписи до 2,1:1 (`docs/DESIGN.md`, раздел «Цвет») */
+    background: rgb(28 25 22 / 0.38);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--bg);
+    text-decoration: none;
+    transition-property: scale, background-color;
+    transition-duration: 120ms, 0.16s;
+    transition-timing-function: var(--ease-out), ease;
+  }
+
+  .hero__place:active {
+    scale: 0.96;
+  }
+
+  /* пилюля `OpenStatus` внутри нашей — четыре класса против трёх у неё */
+  .hero__place :global(.hero__status.card-pill) {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+  }
+
+  /* точка живёт на самом статусе: пока он скрыт до расчёта, её тоже нет */
+  .hero__place :global(.hero__status)::before {
+    content: '·';
+    margin-inline: 6px;
+    opacity: 0.6;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .hero__afisha:hover,
+    .hero__place:hover {
+      background: rgb(28 25 22 / 0.5);
+    }
+
+    .hero__phone:hover {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+  }
+
+  .hero__box {
+    max-width: 640px;
   }
 
   @media (min-width: 768px) {
-    .hero__head {
-      position: static;
-      width: auto;
-      height: auto;
-      margin: 0;
-      overflow: visible;
-      clip-path: none;
+    .hero {
+      min-height: 82vh;
     }
 
-    .hero__head h1 {
-      max-width: 18ch;
-      margin-bottom: 26px;
+    .hero__in {
+      padding-block: 0 54px;
     }
 
-    .hero__grid {
-      display: grid;
-      grid-template-columns: 0.85fr 1.15fr;
-      grid-template-rows: auto auto;
-      gap: var(--gap);
-      align-items: stretch;
-    }
-
-    .hero__grid > :global(.hero__tall) {
-      grid-column: 1;
-      grid-row: 1 / span 2;
-      height: 100%;
-    }
-
-    .hero__scrim,
-    .hero__overlay {
-      display: none;
-    }
-
-    .hero__grid > :global(.hero__wide) {
-      display: block;
-      grid-column: 2;
-      grid-row: 1;
-    }
-
-    .hero__text {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      grid-column: 2;
-      grid-row: 2;
-      padding: calc(var(--gap) + 10px);
-      border-radius: 22px;
-      background: var(--surface);
+    .hero__afisha {
+      font-size: 13px;
     }
 
     .hero__cta {
-      display: flex;
-      gap: 10px;
+      flex-direction: row;
       flex-wrap: wrap;
-      margin-top: 24px;
+      gap: 10px;
+    }
+
+    .hero__cta .btn {
+      padding-inline: 26px;
+    }
+
+    .hero__foot {
+      gap: 12px 22px;
+      margin-top: 28px;
+    }
+
+    .hero__phone {
+      font-size: 30px;
     }
   }
 </style>
