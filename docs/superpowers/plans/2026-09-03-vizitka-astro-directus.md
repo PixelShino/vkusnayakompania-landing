@@ -273,15 +273,15 @@ console.log(`fixture: ${files.size} файлов`);
 
 **Файлы:** `package.json`, `pnpm-lock.yaml`, `astro.config.mjs`, `.env.example`.
 
-- [ ] **Шаг 1:** `pnpm import` → `pnpm-lock.yaml`, удалить
+- [x] **Шаг 1:** `pnpm import` → `pnpm-lock.yaml`, удалить
   `package-lock.json`, `pnpm install`, `pnpm build` зелёный.
-- [ ] **Шаг 2:** `package.json` scripts: `dev`, `build`, `preview`, `check`,
+- [x] **Шаг 2:** `package.json` scripts: `dev`, `build`, `preview`, `check`,
   `test: "node src/data/site.check.ts && node src/lib/select.check.ts && node src/data/content.check.ts"`,
   `fixture: "node scripts/export-fixture.mjs"`,
   `files: "node scripts/fetch-files.mjs"`,
   `setup: "node scripts/directus-setup.mjs"`,
   `prebuild: "node src/data/content.check.ts && node scripts/fetch-files.mjs"`.
-- [ ] **Шаг 3:** `astro.config.mjs`:
+- [x] **Шаг 3:** `astro.config.mjs`:
 
 ```js
 import { defineConfig } from 'astro/config';
@@ -301,9 +301,9 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Шаг 4:** `.env.example` в корне: `DIRECTUS_URL=`, `DIRECTUS_TOKEN=`,
+- [x] **Шаг 4:** `.env.example` в корне: `DIRECTUS_URL=`, `DIRECTUS_TOKEN=`,
   `PUBLIC_YANDEX_MAPS_KEY=`, `SITE=https://vkus-com.ru`.
-- [ ] **Шаг 5:** коммит `chore(build): переезд на pnpm и картинки из Directus`.
+- [x] **Шаг 5:** коммит `chore(build): переезд на pnpm и картинки из Directus`.
 
 ### Задача 2.2: Расписание из строк админки
 
