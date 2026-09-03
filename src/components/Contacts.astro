@@ -3,6 +3,7 @@ import YandexMap from './YandexMap.astro';
 import MessengerButtons from './MessengerButtons.astro';
 import OpenStatus from './OpenStatus.astro';
 import { hoursRows, yandexOrgUrl, yandexRouteUrl, yandexWidgetUrl } from '../data/site';
+import yandexPin from '../assets/icons/yandex-maps.svg?raw';
 import type { Content } from '../lib/content.ts';
 
 interface Props {
@@ -20,17 +21,13 @@ const { places, settings, home } = content;
         <p class="kicker">Две точки в городе</p>
         <h2>Контакты</h2>
       </div>
-      <a class="ct__phone" href={settings.phoneHref}>
-        <span class="ct__phone-label">Один номер на обе точки</span>
-        <span class="ct__phone-num">{settings.phone}</span>
-      </a>
     </div>
 
     <div class="ct">
       <div class="ct__col">
         {
-          places.map((place, i) => (
-            <article class:list={['ct__card', { 'is-shown': i === 0 }]} data-place>
+          places.map((place) => (
+            <article class="ct__card" data-place>
               <div class="card-top">
                 <span class="card-mark card-mark--sm">{place.n}</span>
                 <span class="card-dash" />
@@ -39,6 +36,7 @@ const { places, settings, home } = content;
 
               <h3 class="ct__name">{place.name}</h3>
               <p class="ct__note">{place.kind}</p>
+              <a class="ct__tel" href={place.phoneHref}>{place.phone}</a>
 
               <dl class="ct__hours">
                 {hoursRows(place.schedule).map((row) => (
@@ -56,17 +54,21 @@ const { places, settings, home } = content;
                   target="_blank"
                   rel="noopener"
                 >
-                  Маршрут
+                  <span class="ct__ya" aria-hidden="true">
+                    <Fragment set:html={yandexPin} />
+                  </span>
+                  Построить маршрут
                 </a>
-                {/* обе ветки карты: `data-frame-target` — виджет, `data-map-focus` — JS API */}
+                {/* обе ветки карты: `data-frame-target` — виджет с центром на точке
+                    (обе метки остаются), `data-map-focus` — JS API */}
                 <button
                   type="button"
                   class="btn btn--secondary btn--md ct__show"
                   data-frame-target="map"
-                  data-src={yandexWidgetUrl(place)}
+                  data-src={yandexWidgetUrl(places, place)}
                   data-frame-name={place.name}
                   data-map-focus={String(place.id)}
-                  aria-pressed={i === 0 ? 'true' : 'false'}
+                  aria-pressed="false"
                 >
                   Показать на карте
                 </button>
@@ -102,25 +104,6 @@ const { places, settings, home } = content;
 </section>
 
 <style>
-  .ct__phone {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    text-decoration: none;
-  }
-
-  .ct__phone-label {
-    font-size: 12px;
-    color: var(--text-5);
-  }
-
-  .ct__phone-num {
-    font-weight: var(--fw-heading);
-    font-size: calc(var(--fs-h3) + 2px);
-    letter-spacing: var(--ls-heading);
-    font-variant-numeric: tabular-nums;
-  }
-
   .ct {
     display: grid;
     grid-template-columns: 1fr;
@@ -146,7 +129,7 @@ const { places, settings, home } = content;
     transition: border-color 0.16s ease;
   }
 
-  /* точка, которую сейчас показывает карта */
+  /* точка, на которой сейчас стоит карта; изначально карта показывает обе */
   .ct__card.is-shown {
     border-color: var(--line-4);
   }
@@ -160,6 +143,18 @@ const { places, settings, home } = content;
   .ct__note {
     font-size: calc(var(--fs-body) - 0.5px);
     color: var(--text-4);
+  }
+
+  /* свой номер у каждой точки — крупнее часов, как заголовок карточки */
+  .ct__tel {
+    align-self: flex-start;
+    margin-top: 10px;
+    padding-block: 2px;
+    font-weight: var(--fw-heading);
+    font-size: calc(var(--fs-h3) + 1px);
+    letter-spacing: var(--ls-heading);
+    font-variant-numeric: tabular-nums;
+    text-decoration: none;
   }
 
   .ct__hours {
@@ -220,11 +215,38 @@ const { places, settings, home } = content;
       color: var(--text);
       text-decoration-color: var(--text);
     }
+
+    .ct__tel:hover {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
   }
 
-  .ct__route,
+  /* «Построить маршрут» шире соседа: на телефоне кнопки встают друг под другом */
+  .ct__route {
+    flex: 1 1 190px;
+  }
+
   .ct__show {
     flex: 1 1 150px;
+  }
+
+  /* логотип Яндекс Карт — единственный цветной значок на кнопке; кремовый
+     кружок держит красный пин читаемым на оливковой заливке */
+  .ct__ya {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 24px;
+    height: 24px;
+    margin-left: -8px;
+    border-radius: var(--r-pill);
+    background: var(--bg);
+  }
+
+  .ct__ya :global(svg) {
+    width: 15px;
+    height: 15px;
   }
 
   /* карта не загрузилась — кнопке некуда вести; `.btn` перебивает `[hidden]` */
@@ -290,10 +312,6 @@ const { places, settings, home } = content;
   @media (min-width: 1000px) {
     .ct {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    }
-
-    .ct__phone {
-      align-items: flex-end;
     }
   }
 </style>

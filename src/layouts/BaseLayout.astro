@@ -85,7 +85,7 @@ const jsonLd = {
     '@id': `${canonical.origin}/#place-${place.n}`,
     name: `${BRAND.name} — ${place.name}`,
     description,
-    telephone: settings.phone,
+    telephone: place.phone,
     url: canonical.origin,
     sameAs: [yandexOrgUrl(place.yandex_org)],
     priceRange: '₽₽',
@@ -171,6 +171,6 @@ const jsonLd = {
     }
 
     <StickyBar settings={settings} />
-    <BookingDialog settings={settings} note={home.contacts_note} />
+    <BookingDialog settings={settings} places={places} note={home.contacts_note} />
   </body>
 </html>

@@ -72,6 +72,9 @@ export type Place = {
   name: string;
   street: string;
   kind: string;
+  /** телефон точки; пустой в админке — общий из `settings` */
+  phone: string;
+  phoneHref: string;
   schedule: Schedule;
   lat: number;
   lng: number;
@@ -155,7 +158,8 @@ type RawHome = Omit<Home, 'hero_image' | 'og_image' | 'app_screenshot'> & {
   og_image?: RawFile;
   app_screenshot?: RawFile;
 };
-type RawPlace = Omit<Place, 'n' | 'schedule' | 'gallery'> & {
+type RawPlace = Omit<Place, 'n' | 'schedule' | 'gallery' | 'phone' | 'phoneHref'> & {
+  phone?: string | null;
   hours: HoursRow[];
   gallery?: { sort?: number; caption?: string; directus_files_id: RawFile }[];
 };
@@ -186,6 +190,8 @@ const need = <T>(value: T | null | undefined, message: string): T => {
   if (value === null || value === undefined) throw new Error(message);
   return value;
 };
+
+const telHref = (phone: string) => `tel:${phone.replace(/[^0-9+]/g, '')}`;
 
 const toImg = (file: RawFile | null | undefined, resolve: ResolveImage): Img | undefined => {
   if (!file) return undefined;
@@ -219,22 +225,30 @@ const samaraToday = () =>
 export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraToday()): Content => {
   const img = (file: RawFile | null | undefined) => toImg(file, resolveImage);
 
-  const places: Place[] = raw.places.map((place, i) => ({
-    ...place,
-    n: String(i + 1),
-    schedule: scheduleOf(place),
-    gallery: (place.gallery ?? []).map((row) => ({
-      image: need(img(row.directus_files_id), `places «${place.name}»: пустое фото в галерее`),
-      caption: row.caption,
-    })),
-  }));
+  const mainPhone = need(raw.settings.phone, 'settings.phone: не заполнен телефон');
+  const places: Place[] = raw.places.map((place, i) => {
+    // a venue without its own number answers on the main one
+    // точка без своего номера отвечает по общему
+    const phone = place.phone?.trim() || mainPhone;
+    return {
+      ...place,
+      n: String(i + 1),
+      phone,
+      phoneHref: telHref(phone),
+      schedule: scheduleOf(place),
+      gallery: (place.gallery ?? []).map((row) => ({
+        image: need(img(row.directus_files_id), `places «${place.name}»: пустое фото в галерее`),
+        caption: row.caption,
+      })),
+    };
+  });
   const byId = new Map(places.map((place) => [place.id, place]));
   const at = (id: number | undefined, where: string) =>
     id ? need(byId.get(id), `${where}: адреса ${id} нет в places`) : undefined;
 
   const settings: Settings = {
     ...raw.settings,
-    phoneHref: `tel:${need(raw.settings.phone, 'settings.phone: не заполнен телефон').replace(/[^0-9+]/g, '')}`,
+    phoneHref: telHref(mainPhone),
     policy: toDoc(raw.settings.policy_file),
     offer: toDoc(raw.settings.offer_file),
     yandex_highlights: raw.settings.yandex_highlights ?? [],

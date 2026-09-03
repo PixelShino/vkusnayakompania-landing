@@ -48,9 +48,11 @@ const venueActions = (direction: Direction): Action[] => [
 
 /**
  * Порядок карточек и их шапка: у точек в круге номер, а в пилюле живой статус,
- * у остальных — иконка и короткое слово. `phone` добавляет телефон к кнопкам.
+ * у остальных — иконка и короткое слово. `phone` добавляет телефон точки
+ * (у кейтеринга и банкетов — общий).
  * Card order and card top: venues get the venue number and a live status pill,
- * the rest get an icon and a short word. `phone` appends the phone to actions.
+ * the rest get an icon and a short word. `phone` appends the venue's phone
+ * (catering and banquets use the main one).
  */
 const CARDS: {
   key: Direction['key'];
@@ -168,8 +170,8 @@ const cards = CARDS.map((row) => ({ ...row, direction: at(row.key) })).filter(
                 ),
               )}
               {phone && (
-                <a class="dir__phone" href={settings.phoneHref}>
-                  {settings.phone}
+                <a class="dir__phone" href={(direction.place ?? settings).phoneHref}>
+                  {(direction.place ?? settings).phone}
                 </a>
               )}
             </div>

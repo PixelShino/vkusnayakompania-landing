@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-09-03T11:52:40.038Z",
+  "exportedAt": "2026-09-03T12:59:33.781Z",
   "settings": {
     "id": 1,
     "phone": "+7 987 955-25-65",
@@ -15,9 +15,9 @@
     "shop_cakes_custom": "https://vkusdostavka.shop/s/prazdnichnye-torty_26",
     "shop_pastry": "https://vkusdostavka.shop/s/pirojnye_30",
     "shop_breakfasts": "https://vkusdostavka.shop/s/zavtraki_1",
-    "legal_name": null,
-    "inn": null,
-    "ogrn": null,
+    "legal_name": "ИП Стрельникова Екатерина Александровна",
+    "inn": "631895460666",
+    "ogrn": "319631300064539",
     "legal_address": null,
     "yandex_score": "4,9",
     "yandex_award": "Хорошее место 2026",
@@ -132,7 +132,8 @@
       "lng": 50.1002,
       "yandex_org": "154837147598",
       "rating": "4,8",
-      "date_updated": null,
+      "date_updated": "2026-09-03T12:59:17.177Z",
+      "phone": "+7 987 955-25-65",
       "gallery": [
         {
           "id": 1,
@@ -238,7 +239,8 @@
       "lng": 50.202187,
       "yandex_org": "243452895564",
       "rating": "5,0",
-      "date_updated": null,
+      "date_updated": "2026-09-03T12:59:17.204Z",
+      "phone": "+7 937 999-66-33",
       "gallery": [
         {
           "id": 5,
@@ -389,7 +391,7 @@
       "link": null,
       "show_from": null,
       "show_until": null,
-      "date_updated": "2026-09-03T11:49:54.400Z",
+      "date_updated": "2026-09-03T12:33:08.493Z",
       "poster": {
         "id": "5e2bec84-4ca4-48dc-80b0-23e581b295c8",
         "filename_download": "afisha-poster-placeholder.jpg",
@@ -454,7 +456,7 @@
       "direction": 1,
       "title": "Меню кафе",
       "updated": "2026-09-01",
-      "date_updated": null,
+      "date_updated": "2026-09-03T12:33:08.540Z",
       "file": {
         "id": "d64b343a-b876-45eb-8a02-5b0e5260ee7d",
         "filename_download": "menu-cafe.pdf",

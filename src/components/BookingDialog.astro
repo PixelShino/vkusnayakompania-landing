@@ -6,15 +6,23 @@
  * значение атрибута идёт в заголовок, `data-book-note` меняет подсказку.
  */
 import MessengerButtons from './MessengerButtons.astro';
-import type { Settings } from '../lib/content.ts';
+import type { Place, Settings } from '../lib/content.ts';
 
 interface Props {
   settings: Settings;
+  places: Place[];
   /** подсказка под заголовком по умолчанию — `home.contacts_note` */
   note?: string;
 }
 
-const { settings, note = '' } = Astro.props;
+const { settings, places, note = '' } = Astro.props;
+
+// one number for both venues → one button; different numbers → a button per venue
+// один номер на обе точки → одна кнопка; разные → по кнопке на точку
+const phones =
+  new Set(places.map((place) => place.phone)).size > 1
+    ? places.map((place) => ({ where: place.street, phone: place.phone, href: place.phoneHref }))
+    : [{ where: '', phone: settings.phone, href: settings.phoneHref }];
 ---
 
 <dialog id="book" class="book" aria-labelledby="book-title" data-note={note}>
@@ -36,9 +44,14 @@ const { settings, note = '' } = Astro.props;
 
     <div class="book__actions">
       <MessengerButtons settings={settings} variant="dark" size="lg" />
-      <a class="btn btn--secondary btn--block" href={settings.phoneHref}>
-        Позвонить {settings.phone}
-      </a>
+      {
+        phones.map((tel) => (
+          <a class="btn btn--secondary btn--block" href={tel.href}>
+            {tel.where ? <span class="book__where">{tel.where}</span> : 'Позвонить'}
+            <span class="tnum">{tel.phone}</span>
+          </a>
+        ))
+      }
     </div>
   </div>
 </dialog>
@@ -172,6 +185,11 @@ const { settings, note = '' } = Astro.props;
   .book__actions :global(.messengers) {
     flex-direction: column;
     gap: 8px;
+  }
+
+  /* улица перед номером: серее, чтобы номер читался первым */
+  .book__where {
+    color: var(--text-4);
   }
 
   @media (min-width: 768px) {

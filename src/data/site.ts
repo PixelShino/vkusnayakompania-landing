@@ -133,9 +133,23 @@ export const yandexReviewsUrl = (orgId: string) =>
 // Яндекс отдаёт карточку по адресу без slug и сам указывает его в og:url
 export const yandexOrgUrl = (orgId: string) => `https://yandex.ru/maps/org/${orgId}/`;
 
-/** Iframe-виджет карточки организации */
-export const yandexWidgetUrl = (place: { yandex_org: string; lat: number; lng: number }) =>
-  `https://yandex.ru/map-widget/v1/org/vkusnaya_kompaniya/${place.yandex_org}/?ll=${place.lng}%2C${place.lat}&z=16`;
+type Point = { lat: number; lng: number };
+
+/**
+ * Iframe widget with a pin per venue (`pt`) and no organization card: the org
+ * widget knows one card at a time and opens it over the map. Without `focus`
+ * the view is centred between the venues, with it — on that venue.
+ * Iframe-виджет с меткой на каждую точку (`pt`) и без карточки организации:
+ * виджет организации знает одну карточку и раскрывает её поверх карты. Без
+ * `focus` центр между точками, с ним — на этой точке.
+ */
+export const yandexWidgetUrl = (places: Point[], focus?: Point) => {
+  const mean = (key: keyof Point) =>
+    (places.reduce((sum, point) => sum + point[key], 0) / places.length).toFixed(6);
+  const center = focus ? `${focus.lng}%2C${focus.lat}` : `${mean('lng')}%2C${mean('lat')}`;
+  const pins = places.map((point) => `${point.lng}%2C${point.lat}%2Cpm2rdm`).join('~');
+  return `https://yandex.ru/map-widget/v1/?ll=${center}&z=${focus ? 16 : 12}&pt=${pins}`;
+};
 
 /** Маршрут до точки: первый пункт пустой — Яндекс подставит местоположение гостя */
 export const yandexRouteUrl = (place: { lat: number; lng: number }) =>

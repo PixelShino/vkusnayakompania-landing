@@ -35,6 +35,20 @@ assert.match(
   `settings.phone: «${content.settings.phone}» не похож на телефон`,
 );
 
+// у каждой точки свой номер; пустой в админке подменяется общим
+for (const place of content.places)
+  assert.match(
+    place.phoneHref,
+    /^tel:\+\d{10,}$/,
+    `places «${place.name}»: «${place.phone}» не похож на телефон`,
+  );
+assert.equal(
+  normalize({ ...raw, places: raw.places.map((place) => ({ ...place, phone: null })) }, resolve)
+    .places[1].phone,
+  content.settings.phone,
+  'places: точка без своего телефона берёт общий',
+);
+
 // две точки, у каждой семь строк часов
 assert.equal(content.places.length, 2, 'places: на сайте ровно две точки');
 for (const place of raw.places)

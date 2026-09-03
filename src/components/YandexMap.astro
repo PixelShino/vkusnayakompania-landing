@@ -1,11 +1,11 @@
 ---
 /**
  * Two venues on one map. With `PUBLIC_YANDEX_MAPS_KEY` it is the Yandex JS API
- * 3.0 with a marker per venue; without the key it stays the iframe widget,
- * which knows only one organization card at a time.
+ * 3.0 with a marker per venue; without the key it is the iframe widget with a
+ * plain pin per venue (`pt`), and the contact buttons re-centre it.
  * Карта на две точки. С ключом `PUBLIC_YANDEX_MAPS_KEY` — JS API 3.0 и по метке
- * на точку; без ключа остаётся iframe-виджет, а он показывает карточку только
- * одной организации, и точку переключают кнопки контактов.
+ * на точку; без ключа — iframe-виджет с простой меткой на каждую точку (`pt`),
+ * а кнопки контактов перецентровывают его.
  */
 import { yandexOrgUrl, yandexWidgetUrl } from '../data/site';
 import type { Content } from '../lib/content.ts';
@@ -49,14 +49,14 @@ const points = places.map((place) => ({
     ) : (
       <>
         <p class="map-label">
-          На карте: <b data-frame-label="map">{places[0].name}</b>
+          На карте: <b data-frame-label="map">обе точки</b>
         </p>
 
         <div
           class="map"
           data-frame="map"
           data-frame-title="Карта: «Вкусная компания» в Самаре"
-          data-src={yandexWidgetUrl(places[0])}
+          data-src={yandexWidgetUrl(places)}
         >
           <div class="map__stub">
             <p class="map__stub-label">Загружаем карту…</p>

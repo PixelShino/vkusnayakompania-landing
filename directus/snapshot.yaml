@@ -2858,7 +2858,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 58
+      sort: 59
       special:
         - cast-json
       translations:
@@ -2901,7 +2901,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 59
+      sort: 60
       special: null
       translations:
         - language: ru-RU
@@ -2943,7 +2943,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 60
+      sort: 61
       special: null
       translations:
         - language: ru-RU
@@ -2985,7 +2985,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 61
+      sort: 62
       special: null
       translations:
         - language: ru-RU
@@ -3027,7 +3027,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 62
+      sort: 63
       special: null
       translations:
         - language: ru-RU
@@ -3070,7 +3070,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 63
+      sort: 64
       special:
         - files
       translations:
@@ -3096,7 +3096,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 64
+      sort: 65
       special:
         - date-updated
       translations: null
@@ -3109,6 +3109,49 @@ fields:
       data_type: timestamp with time zone
       default_value: null
       max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: places
+    field: phone
+    type: string
+    meta:
+      collection: places
+      conditions: null
+      display: null
+      display_options: null
+      field: phone
+      group: null
+      hidden: false
+      interface: input
+      note: Пусто — берётся общий телефон из «Настроек»
+      options:
+        placeholder: +7 987 955-25-65
+      readonly: false
+      required: false
+      searchable: true
+      sort: 58
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Телефон точки
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: phone
+      table: places
+      data_type: character varying
+      default_value: null
+      max_length: 255
       numeric_precision: null
       numeric_scale: null
       is_nullable: true

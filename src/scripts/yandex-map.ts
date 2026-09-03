@@ -139,6 +139,12 @@ const build = async (holder: HTMLElement) => {
   });
 };
 
+// widget branch: on a 320 px screen two pins at zoom 12 touch the frame edges
+// ветка виджета: на экране 320 px две метки при зуме 12 упираются в края кадра
+const widget = document.querySelector<HTMLElement>('[data-frame="map"]');
+if (widget && widget.clientWidth < 340 && widget.dataset.src)
+  widget.dataset.src = widget.dataset.src.replace('&z=12&', '&z=11&');
+
 const holder = document.querySelector<HTMLElement>('[data-map]');
 if (holder && KEY) {
   if ('IntersectionObserver' in window) {
