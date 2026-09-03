@@ -24,7 +24,7 @@ services:
     # bound to localhost only: nginx (VPS) or the browser (local) talk to it
     # только localhost: снаружи ходит nginx на VPS или браузер на локали
     ports:
-      - '127.0.0.1:8055:8055'
+      - '127.0.0.1:${DIRECTUS_PORT:-8055}:8055'
     volumes:
       - ./uploads:/directus/uploads
       - ./extensions:/directus/extensions

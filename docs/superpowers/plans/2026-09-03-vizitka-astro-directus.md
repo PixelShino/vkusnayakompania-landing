@@ -710,7 +710,7 @@ if (dialog && title) {
 `deploy/webhook/hooks.json`, `deploy/nginx/vkus-com.ru.conf`,
 `deploy/nginx/admin.vkus-com.ru.conf`.
 
-- [ ] **Шаг 1:** `build.sh`:
+- [x] **Шаг 1:** `build.sh`:
 
 ```bash
 #!/usr/bin/env bash
@@ -734,37 +734,37 @@ ls -1dt "$RELEASES"/* | tail -n +6 | xargs -r rm -rf
 echo "релиз $STAMP"
 ```
 
-- [ ] **Шаг 2:** `hooks.json` для `adnanh/webhook`: id `rebuild`, команда
+- [x] **Шаг 2:** `hooks.json` для `adnanh/webhook`: id `rebuild`, команда
   `/srv/vkus/site/deploy/build.sh`, триггер по заголовку `X-Hook-Secret`,
   `execute-command` через `systemd-run --unit=vkus-build-$$` или напрямую;
   ответ сразу, сборка в фоне (`"response-message": "принято"`).
-- [ ] **Шаг 3:** nginx: сайт — `root /srv/vkus/current`, `gzip`/`brotli` если
+- [x] **Шаг 3:** nginx: сайт — `root /srv/vkus/current`, `gzip`/`brotli` если
   есть, `location /_astro/ { expires 1y; add_header Cache-Control "public,
   immutable"; }`, `location /media/ { expires 7d; }`, `error_page 404
   /404.html`; админка — `location /hooks/ { proxy_pass http://127.0.0.1:9000; }`,
   остальное `proxy_pass http://127.0.0.1:8055` с `client_max_body_size 64m` и
   вебсокет-заголовками; оба с certbot-строками.
-- [ ] **Шаг 4:** `backup.sh` (pg_dump через `docker compose exec -T database`,
+- [x] **Шаг 4:** `backup.sh` (pg_dump через `docker compose exec -T database`,
   tar `uploads/`, хранить 14 дней) и `crontab.txt`:
   `10 0 * * * /srv/vkus/site/deploy/build.sh` и `30 3 * * *
   /srv/vkus/site/deploy/backup.sh`.
-- [ ] **Шаг 5:** `bash -n` на скриптах, `nginx -t` недоступен — проверить
+- [x] **Шаг 5:** `bash -n` на скриптах, `nginx -t` недоступен — проверить
   конфиг глазами. Коммит `feat(deploy): сборка релизов на VPS по вебхуку и крону`.
 
 ### Задача 6.2: GitHub Actions и превью
 
 **Файлы:** `.github/workflows/deploy.yml`.
 
-- [ ] **Шаг 1:** удалить GH Pages workflow; новый: `on: push: branches: [main]`,
+- [x] **Шаг 1:** удалить GH Pages workflow; новый: `on: push: branches: [main]`,
   шаг `webfactory/ssh-agent` с `secrets.VPS_SSH_KEY`, затем
   `ssh deploy@$VPS "cd /srv/vkus/site && git pull --ff-only && deploy/build.sh"`.
   Секреты: `VPS_HOST`, `VPS_SSH_KEY`. Пока VPS нет — workflow с `if:
   ${{ secrets.VPS_HOST != '' }}`.
-- [ ] **Шаг 2:** коммит `feat(ci): выкладка на VPS по пушу в main`.
+- [x] **Шаг 2:** коммит `feat(ci): выкладка на VPS по пушу в main`.
 
 ### Задача 6.3: `docs/DIRECTUS.md`
 
-- [ ] **Шаг 1:** пошагово: установка Docker на Ubuntu, клон репо в
+- [x] **Шаг 1:** пошагово: установка Docker на Ubuntu, клон репо в
   `/srv/vkus/site`, `.env` для Directus и для сайта, `docker compose up -d`,
   `schema apply` из `snapshot.yaml`, `pnpm setup` (роли, сборщик, Flow),
   импорт контента (`pnpm fixture` в обратную сторону не нужен: контент
@@ -772,7 +772,7 @@ echo "релиз $STAMP"
   certbot, crontab, проверка «опубликовать афишу → сайт обновился». Плюс
   эксплуатация: обновление Directus (смена тега), восстановление из бэкапа,
   где лежат логи.
-- [ ] **Шаг 2:** коммит `docs(directus): установка и эксплуатация админки`.
+- [x] **Шаг 2:** коммит `docs(directus): установка и эксплуатация админки`.
 
 ---
 

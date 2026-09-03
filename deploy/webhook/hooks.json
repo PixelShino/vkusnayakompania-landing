@@ -1,0 +1,15 @@
+[
+  {
+    "id": "rebuild",
+    "execute-command": "/srv/vkus/site/deploy/build.sh",
+    "command-working-directory": "/srv/vkus/site",
+    "response-message": "принято, сборка запущена",
+    "trigger-rule": {
+      "match": {
+        "type": "value",
+        "value": "{{ getenv "HOOK_SECRET" | js }}",
+        "parameter": { "source": "header", "name": "X-Hook-Secret" }
+      }
+    }
+  }
+]
