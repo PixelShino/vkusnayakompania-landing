@@ -3,7 +3,8 @@
  * глазами их не проверить. Запуск: `npm test` (Node читает TypeScript сам).
  */
 import assert from 'node:assert/strict';
-import { hoursRows, openState, places, plural, schemaHours } from './site.ts';
+import { hoursRows, openState, places, plural, schemaHours, toSchedule } from './site.ts';
+import type { HoursRow } from './site.ts';
 
 const [sadovaya, armii] = places;
 
@@ -18,6 +19,24 @@ assert.deepEqual(schemaHours(sadovaya.schedule), [
   'Sa 08:30-21:00',
   'Su 09:00-21:00',
 ]);
+
+// строки админки → кортеж по getDay()
+const rows: HoursRow[] = [
+  { day: 'mon', open: '08:00', close: '21:00' },
+  { day: 'tue', open: '08:00', close: '21:00' },
+  { day: 'wed', open: '08:00', close: '21:00' },
+  { day: 'thu', open: '08:00', close: '21:00' },
+  { day: 'fri', open: '08:00', close: '21:00' },
+  { day: 'sat', open: '08:30', close: '21:00' },
+  { day: 'sun', open: '09:00', close: '21:00' },
+];
+assert.deepEqual(toSchedule(rows)[0], ['09:00', '21:00']);
+assert.deepEqual(toSchedule(rows)[6], ['08:30', '21:00']);
+assert.throws(() => toSchedule(rows.slice(1)), /понедельник/);
+assert.throws(
+  () => toSchedule([...rows.slice(0, 6), { day: 'sun', open: '21:00', close: '09:00' }]),
+  /воскресенье/,
+);
 
 // среда: до открытия, в течение дня, после закрытия
 assert.equal(openState(sadovaya.schedule, 3, 7 * 60).label, 'Откроется в 8:00');

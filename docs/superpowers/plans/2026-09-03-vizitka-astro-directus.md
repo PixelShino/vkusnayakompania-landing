@@ -314,7 +314,7 @@ export default defineConfig({
 Бросает `Error` с текстом дня, если не хватает дня или закрытие не позже
 открытия. Дальше всё как раньше: `hoursRows`, `openState`, `schemaHours`.
 
-- [ ] **Шаг 1:** тест в `site.check.ts`:
+- [x] **Шаг 1:** тест в `site.check.ts`:
 
 ```ts
 // строки админки → кортеж по getDay()
@@ -330,8 +330,8 @@ assert.throws(() => toSchedule(rows.slice(1)), /понедельник/);
 assert.throws(() => toSchedule([...rows.slice(0, 6), { day: 'sun', open: '21:00', close: '09:00' }]), /воскресенье/);
 ```
 
-- [ ] **Шаг 2:** запустить, увидеть падение на `toSchedule is not a function`.
-- [ ] **Шаг 3:** реализация в `site.ts`:
+- [x] **Шаг 2:** запустить, увидеть падение на `toSchedule is not a function`.
+- [x] **Шаг 3:** реализация в `site.ts`:
 
 ```ts
 export type HoursRow = { day: 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'; open: string; close: string };
@@ -353,8 +353,8 @@ export const toSchedule = (rows: HoursRow[]): Schedule => {
 };
 ```
 
-- [ ] **Шаг 4:** `node src/data/site.check.ts` зелёный.
-- [ ] **Шаг 5:** коммит `feat(hours): расписание из строк админки`.
+- [x] **Шаг 4:** `node src/data/site.check.ts` зелёный.
+- [x] **Шаг 5:** коммит `feat(hours): расписание из строк админки`.
 
 ### Задача 2.3: Выборки контента
 

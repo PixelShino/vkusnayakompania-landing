@@ -107,6 +107,51 @@ export const schemaHours = (schedule: Schedule) =>
     return `${name} ${hours[0]}-${hours[1]}`;
   });
 
+/** Одна строка часов из админки: день недели и время в 24-часовом формате. */
+export type HoursRow = {
+  day: 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+  open: string;
+  close: string;
+};
+
+const DAY_INDEX: Record<HoursRow['day'], number> = {
+  sun: 0,
+  mon: 1,
+  tue: 2,
+  wed: 3,
+  thu: 4,
+  fri: 5,
+  sat: 6,
+};
+const DAY_NAME: Record<HoursRow['day'], string> = {
+  mon: 'понедельник',
+  tue: 'вторник',
+  wed: 'среда',
+  thu: 'четверг',
+  fri: 'пятница',
+  sat: 'суббота',
+  sun: 'воскресенье',
+};
+const TIME = /^\d{2}:\d{2}$/;
+
+/**
+ * Admin rows (one per day) → schedule tuple indexed like `Date.getDay()`.
+ * Строки из админки (по одной на день) → кортеж расписания по `getDay()`.
+ */
+export const toSchedule = (rows: HoursRow[]): Schedule => {
+  const out: Hours[] = new Array(7);
+  for (const row of rows) {
+    if (!TIME.test(row.open) || !TIME.test(row.close) || toMinutes(row.close) <= toMinutes(row.open))
+      throw new Error(
+        `часы: ${DAY_NAME[row.day]} — закрытие должно быть позже открытия, формат 08:00`,
+      );
+    out[DAY_INDEX[row.day]] = [row.open, row.close];
+  }
+  for (const day of Object.keys(DAY_INDEX) as HoursRow['day'][])
+    if (!out[DAY_INDEX[day]]) throw new Error(`часы: нет строки на ${DAY_NAME[day]}`);
+  return out as Schedule;
+};
+
 /** Одинаковые будни + отдельные суббота и воскресенье. */
 const week = (weekday: Hours, sat: Hours, sun: Hours): Schedule => [
   sun,
