@@ -282,10 +282,14 @@ export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraTo
   };
 };
 
-// Astro puts .env into import.meta.env at build time; plain Node has process.env
-// Astro кладёт .env в import.meta.env на сборке; в голом Node — process.env
-const meta = import.meta as unknown as { env?: Record<string, string | undefined> };
-const env = (key: string) => meta.env?.[key] || process.env[key];
+// Astro exposes .env as import.meta.env, plain Node (checks) has only process.env;
+// keys are static because Vite rejects dynamic `import.meta.env[key]` in dev
+// Astro отдаёт .env через import.meta.env, голый Node (проверки) — только process.env;
+// ключи статические: динамический `import.meta.env[key]` Vite в dev не пропускает
+const env = {
+  url: import.meta.env?.DIRECTUS_URL || process.env.DIRECTUS_URL,
+  token: import.meta.env?.DIRECTUS_TOKEN || process.env.DIRECTUS_TOKEN,
+};
 
 // Vite inlines the glob at build time; plain Node has no `import.meta.glob`
 // Vite подставляет карту файлов при сборке; в голом Node `glob` нет
@@ -326,8 +330,7 @@ const fromDirectus = async (base: string, token: string): Promise<Raw> => {
 };
 
 const load = async (): Promise<Content> => {
-  const base = env('DIRECTUS_URL');
-  const token = env('DIRECTUS_TOKEN');
+  const { url: base, token } = env;
   if (base && token) {
     console.log(`контент: Directus ${base}`);
     return normalize(await fromDirectus(base, token), remoteImage(base, token));
