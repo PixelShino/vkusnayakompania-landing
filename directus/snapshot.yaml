@@ -1,0 +1,5391 @@
+version: 1
+directus: 11.17.0
+vendor: postgres
+collections:
+  - collection: afisha
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: status
+      archive_value: archived
+      collapse: open
+      collection: afisha
+      color: null
+      display_template: '{{title}} · {{date}}'
+      group: null
+      hidden: false
+      icon: event
+      item_duplication_fields: null
+      note: >-
+        На сайте одна текущая афиша: опубликованная, в окне показа, ближайшая по
+        дате
+      preview_url: null
+      singleton: false
+      sort: null
+      sort_field: null
+      translations:
+        - language: ru-RU
+          plural: Афиши
+          singular: Афиша
+          translation: Афиша
+      unarchive_value: draft
+      versioning: false
+    schema:
+      name: afisha
+  - collection: cakes
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: status
+      archive_value: archived
+      collapse: open
+      collection: cakes
+      color: null
+      display_template: '{{title}}'
+      group: null
+      hidden: false
+      icon: cake
+      item_duplication_fields: null
+      note: Витрина работ на заказ, без цен
+      preview_url: null
+      singleton: false
+      sort: null
+      sort_field: sort
+      translations:
+        - language: ru-RU
+          plural: Торты
+          singular: Торт
+          translation: Торты
+      unarchive_value: draft
+      versioning: false
+    schema:
+      name: cakes
+  - collection: directions
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: directions
+      color: null
+      display_template: '{{title}}'
+      group: null
+      hidden: false
+      icon: category
+      item_duplication_fields: null
+      note: >-
+        Пять карточек: кафе, ресторан, кондитерская, кейтеринг, банкеты.
+        Добавлять и удалять нельзя, кнопки зашиты по ключу
+      preview_url: null
+      singleton: false
+      sort: null
+      sort_field: sort
+      translations:
+        - language: ru-RU
+          plural: Направления
+          singular: Направление
+          translation: Направления
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: directions
+  - collection: home
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: home
+      color: null
+      display_template: null
+      group: null
+      hidden: false
+      icon: home
+      item_duplication_fields: null
+      note: Первый экран, SEO и тексты секций
+      preview_url: null
+      singleton: true
+      sort: null
+      sort_field: null
+      translations:
+        - language: ru-RU
+          plural: Главная
+          singular: Главная
+          translation: Главная
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: home
+  - collection: menus
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: status
+      archive_value: archived
+      collapse: open
+      collection: menus
+      color: null
+      display_template: '{{title}}'
+      group: null
+      hidden: false
+      icon: menu_book
+      item_duplication_fields: null
+      note: 'PDF меню по направлению: кафе, ресторан, кондитерская'
+      preview_url: null
+      singleton: false
+      sort: null
+      sort_field: null
+      translations:
+        - language: ru-RU
+          plural: Меню
+          singular: Меню
+          translation: Меню
+      unarchive_value: draft
+      versioning: false
+    schema:
+      name: menus
+  - collection: places
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: places
+      color: null
+      display_template: '{{name}}'
+      group: null
+      hidden: false
+      icon: storefront
+      item_duplication_fields: null
+      note: 'Две точки: адреса, часы, координаты, галерея'
+      preview_url: null
+      singleton: false
+      sort: null
+      sort_field: null
+      translations:
+        - language: ru-RU
+          plural: Точки
+          singular: Точка
+          translation: Точки
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: places
+  - collection: places_files
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: places_files
+      color: null
+      display_template: null
+      group: null
+      hidden: true
+      icon: import_export
+      item_duplication_fields: null
+      note: null
+      preview_url: null
+      singleton: false
+      sort: null
+      sort_field: sort
+      translations:
+        - language: ru-RU
+          plural: Фото точек
+          singular: Фото точки
+          translation: Фото точек
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: places_files
+  - collection: promos
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: status
+      archive_value: archived
+      collapse: open
+      collection: promos
+      color: null
+      display_template: '{{title}}'
+      group: null
+      hidden: false
+      icon: local_offer
+      item_duplication_fields: null
+      note: Карточки акций, сгруппированы по адресу
+      preview_url: null
+      singleton: false
+      sort: null
+      sort_field: sort
+      translations:
+        - language: ru-RU
+          plural: Акции
+          singular: Акция
+          translation: Акции
+      unarchive_value: draft
+      versioning: false
+    schema:
+      name: promos
+  - collection: settings
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: settings
+      color: null
+      display_template: null
+      group: null
+      hidden: false
+      icon: settings
+      item_duplication_fields: null
+      note: Контакты, ссылки, юрлицо, цифры Яндекса
+      preview_url: null
+      singleton: true
+      sort: null
+      sort_field: null
+      translations:
+        - language: ru-RU
+          plural: Настройки
+          singular: Настройки
+          translation: Настройки
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: settings
+fields:
+  - collection: afisha
+    field: id
+    type: integer
+    meta:
+      collection: afisha
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 78
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: afisha
+      data_type: integer
+      default_value: nextval('afisha_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: afisha
+    field: status
+    type: string
+    meta:
+      collection: afisha
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Черновик
+            value: draft
+          - text: Опубликовано
+            value: published
+          - text: Архив
+            value: archived
+      field: status
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Черновик
+            value: draft
+          - text: Опубликовано
+            value: published
+          - text: Архив
+            value: archived
+      readonly: false
+      required: true
+      searchable: true
+      sort: 79
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Статус
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: status
+      table: afisha
+      data_type: character varying
+      default_value: draft
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: afisha
+    field: title
+    type: string
+    meta:
+      collection: afisha
+      conditions: null
+      display: null
+      display_options: null
+      field: title
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 80
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Название
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: title
+      table: afisha
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: afisha
+    field: poster
+    type: uuid
+    meta:
+      collection: afisha
+      conditions: null
+      display: null
+      display_options: null
+      field: poster
+      group: null
+      hidden: false
+      interface: file-image
+      note: Вертикальный 2:3, например 1000×1500
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 81
+      special:
+        - file
+      translations:
+        - language: ru-RU
+          translation: Постер
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: poster
+      table: afisha
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_files
+      foreign_key_column: id
+  - collection: afisha
+    field: date
+    type: date
+    meta:
+      collection: afisha
+      conditions: null
+      display: null
+      display_options: null
+      field: date
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 82
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Дата события
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date
+      table: afisha
+      data_type: date
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: afisha
+    field: time
+    type: time
+    meta:
+      collection: afisha
+      conditions: null
+      display: null
+      display_options: null
+      field: time
+      group: null
+      hidden: false
+      interface: datetime
+      note: Необязательно
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 83
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Время
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: time
+      table: afisha
+      data_type: time without time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: afisha
+    field: place
+    type: integer
+    meta:
+      collection: afisha
+      conditions: null
+      display: null
+      display_options: null
+      field: place
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{name}}'
+      readonly: false
+      required: true
+      searchable: true
+      sort: 84
+      special:
+        - m2o
+      translations:
+        - language: ru-RU
+          translation: Где
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: place
+      table: afisha
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: places
+      foreign_key_column: id
+  - collection: afisha
+    field: text
+    type: text
+    meta:
+      collection: afisha
+      conditions: null
+      display: null
+      display_options: null
+      field: text
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 85
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Пара строк о событии
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: text
+      table: afisha
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: afisha
+    field: link
+    type: string
+    meta:
+      collection: afisha
+      conditions: null
+      display: null
+      display_options: null
+      field: link
+      group: null
+      hidden: false
+      interface: input
+      note: 'Необязательно: пост, билеты'
+      options:
+        placeholder: https://…
+      readonly: false
+      required: false
+      searchable: true
+      sort: 86
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Ссылка «Подробнее»
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: link
+      table: afisha
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: afisha
+    field: show_from
+    type: date
+    meta:
+      collection: afisha
+      conditions: null
+      display: null
+      display_options: null
+      field: show_from
+      group: null
+      hidden: false
+      interface: datetime
+      note: Пусто — сразу
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 87
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Показывать с
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: show_from
+      table: afisha
+      data_type: date
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: afisha
+    field: show_until
+    type: date
+    meta:
+      collection: afisha
+      conditions: null
+      display: null
+      display_options: null
+      field: show_until
+      group: null
+      hidden: false
+      interface: datetime
+      note: Пусто — бессрочно
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 88
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Показывать по
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: show_until
+      table: afisha
+      data_type: date
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: afisha
+    field: date_updated
+    type: timestamp
+    meta:
+      collection: afisha
+      conditions: null
+      display: null
+      display_options: null
+      field: date_updated
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 89
+      special:
+        - date-updated
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_updated
+      table: afisha
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cakes
+    field: id
+    type: integer
+    meta:
+      collection: cakes
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 107
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: cakes
+      data_type: integer
+      default_value: nextval('cakes_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cakes
+    field: status
+    type: string
+    meta:
+      collection: cakes
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Черновик
+            value: draft
+          - text: Опубликовано
+            value: published
+          - text: Архив
+            value: archived
+      field: status
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Черновик
+            value: draft
+          - text: Опубликовано
+            value: published
+          - text: Архив
+            value: archived
+      readonly: false
+      required: true
+      searchable: true
+      sort: 108
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Статус
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: status
+      table: cakes
+      data_type: character varying
+      default_value: draft
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cakes
+    field: photo
+    type: uuid
+    meta:
+      collection: cakes
+      conditions: null
+      display: null
+      display_options: null
+      field: photo
+      group: null
+      hidden: false
+      interface: file-image
+      note: Вертикальное 3:4
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 109
+      special:
+        - file
+      translations:
+        - language: ru-RU
+          translation: Фото
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: photo
+      table: cakes
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_files
+      foreign_key_column: id
+  - collection: cakes
+    field: title
+    type: string
+    meta:
+      collection: cakes
+      conditions: null
+      display: null
+      display_options: null
+      field: title
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 110
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Название
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: title
+      table: cakes
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cakes
+    field: note
+    type: string
+    meta:
+      collection: cakes
+      conditions: null
+      display: null
+      display_options: null
+      field: note
+      group: null
+      hidden: false
+      interface: input
+      note: «Три яруса, 5 кг»
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 111
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Подпись
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: note
+      table: cakes
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cakes
+    field: sort
+    type: integer
+    meta:
+      collection: cakes
+      conditions: null
+      display: null
+      display_options: null
+      field: sort
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 112
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: sort
+      table: cakes
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: cakes
+    field: date_updated
+    type: timestamp
+    meta:
+      collection: cakes
+      conditions: null
+      display: null
+      display_options: null
+      field: date_updated
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 113
+      special:
+        - date-updated
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_updated
+      table: cakes
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directions
+    field: id
+    type: integer
+    meta:
+      collection: directions
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 70
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: directions
+      data_type: integer
+      default_value: nextval('directions_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directions
+    field: key
+    type: string
+    meta:
+      collection: directions
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Кафе
+            value: cafe
+          - text: Ресторан
+            value: restaurant
+          - text: Кондитерская
+            value: confectionery
+          - text: Кейтеринг
+            value: catering
+          - text: Банкеты
+            value: banquets
+      field: key
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: Определяет кнопки карточки, менять нельзя
+      options:
+        choices:
+          - text: Кафе
+            value: cafe
+          - text: Ресторан
+            value: restaurant
+          - text: Кондитерская
+            value: confectionery
+          - text: Кейтеринг
+            value: catering
+          - text: Банкеты
+            value: banquets
+      readonly: true
+      required: true
+      searchable: true
+      sort: 71
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Ключ
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: key
+      table: directions
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directions
+    field: title
+    type: string
+    meta:
+      collection: directions
+      conditions: null
+      display: null
+      display_options: null
+      field: title
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 72
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Заголовок
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: title
+      table: directions
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directions
+    field: text
+    type: text
+    meta:
+      collection: directions
+      conditions: null
+      display: null
+      display_options: null
+      field: text
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 73
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Текст
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: text
+      table: directions
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directions
+    field: photo
+    type: uuid
+    meta:
+      collection: directions
+      conditions: null
+      display: null
+      display_options: null
+      field: photo
+      group: null
+      hidden: false
+      interface: file-image
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 74
+      special:
+        - file
+      translations:
+        - language: ru-RU
+          translation: Фото
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: photo
+      table: directions
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_files
+      foreign_key_column: id
+  - collection: directions
+    field: place
+    type: integer
+    meta:
+      collection: directions
+      conditions: null
+      display: null
+      display_options: null
+      field: place
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: 'Для кафе и ресторана: адрес и часы берутся отсюда'
+      options:
+        template: '{{name}}'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 75
+      special:
+        - m2o
+      translations:
+        - language: ru-RU
+          translation: Точка
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: place
+      table: directions
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: places
+      foreign_key_column: id
+  - collection: directions
+    field: sort
+    type: integer
+    meta:
+      collection: directions
+      conditions: null
+      display: null
+      display_options: null
+      field: sort
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 76
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: sort
+      table: directions
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directions
+    field: date_updated
+    type: timestamp
+    meta:
+      collection: directions
+      conditions: null
+      display: null
+      display_options: null
+      field: date_updated
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 77
+      special:
+        - date-updated
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_updated
+      table: directions
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directus_files
+    field: alt
+    type: string
+    meta:
+      collection: directus_files
+      conditions: null
+      display: null
+      display_options: null
+      field: alt
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Что на картинке, одной фразой. Обязательно для фото, которые идут на
+        сайт
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Alt-текст
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: alt
+      table: directus_files
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: home
+    field: id
+    type: integer
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 33
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: home
+      data_type: integer
+      default_value: nextval('home_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: home
+    field: hero
+    type: alias
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: hero
+      group: null
+      hidden: false
+      interface: group-detail
+      note: null
+      options:
+        start: open
+      readonly: false
+      required: false
+      searchable: true
+      sort: 34
+      special:
+        - alias
+        - no-data
+        - group
+      translations:
+        - language: ru-RU
+          translation: Первый экран
+      validation: null
+      validation_message: null
+      width: full
+  - collection: home
+    field: seo
+    type: alias
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: seo
+      group: null
+      hidden: false
+      interface: group-detail
+      note: null
+      options:
+        start: open
+      readonly: false
+      required: false
+      searchable: true
+      sort: 38
+      special:
+        - alias
+        - no-data
+        - group
+      translations:
+        - language: ru-RU
+          translation: SEO
+      validation: null
+      validation_message: null
+      width: full
+  - collection: home
+    field: texts
+    type: alias
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: texts
+      group: null
+      hidden: false
+      interface: group-detail
+      note: null
+      options:
+        start: closed
+      readonly: false
+      required: false
+      searchable: true
+      sort: 43
+      special:
+        - alias
+        - no-data
+        - group
+      translations:
+        - language: ru-RU
+          translation: Тексты секций
+      validation: null
+      validation_message: null
+      width: full
+  - collection: home
+    field: hero_image
+    type: uuid
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: hero_image
+      group: hero
+      hidden: false
+      interface: file-image
+      note: Горизонтальное, не меньше 2000 px по ширине
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 35
+      special:
+        - file
+      translations:
+        - language: ru-RU
+          translation: Фото первого экрана
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: hero_image
+      table: home
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_files
+      foreign_key_column: id
+  - collection: home
+    field: hero_title
+    type: string
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: hero_title
+      group: hero
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 36
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Заголовок
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: hero_title
+      table: home
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: home
+    field: hero_text
+    type: text
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: hero_text
+      group: hero
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 37
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Подзаголовок
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: hero_text
+      table: home
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: home
+    field: seo_title
+    type: string
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: seo_title
+      group: seo
+      hidden: false
+      interface: input
+      note: До 60 символов
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 39
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Title страницы
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: seo_title
+      table: home
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: home
+    field: seo_description
+    type: text
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: seo_description
+      group: seo
+      hidden: false
+      interface: input-multiline
+      note: До 160 символов
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 40
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Description
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: seo_description
+      table: home
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: home
+    field: og_image
+    type: uuid
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: og_image
+      group: seo
+      hidden: false
+      interface: file-image
+      note: 1200×630, режется при сборке
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 41
+      special:
+        - file
+      translations:
+        - language: ru-RU
+          translation: Картинка для соцсетей
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: og_image
+      table: home
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_files
+      foreign_key_column: id
+  - collection: home
+    field: robots_index
+    type: boolean
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: robots_index
+      group: seo
+      hidden: false
+      interface: boolean
+      note: null
+      options:
+        label: Индексировать страницу
+      readonly: false
+      required: false
+      searchable: true
+      sort: 42
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Разрешить индексацию
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: robots_index
+      table: home
+      data_type: boolean
+      default_value: true
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: home
+    field: about_title
+    type: string
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: about_title
+      group: texts
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 44
+      special: null
+      translations:
+        - language: ru-RU
+          translation: 'О нас: заголовок'
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: about_title
+      table: home
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: home
+    field: about_text
+    type: text
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: about_text
+      group: texts
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 45
+      special: null
+      translations:
+        - language: ru-RU
+          translation: 'О нас: текст'
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: about_text
+      table: home
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: home
+    field: menu_text
+    type: text
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: menu_text
+      group: texts
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 46
+      special: null
+      translations:
+        - language: ru-RU
+          translation: 'Меню: подводка'
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: menu_text
+      table: home
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: home
+    field: cakes_title
+    type: string
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: cakes_title
+      group: texts
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 47
+      special: null
+      translations:
+        - language: ru-RU
+          translation: 'Торты: заголовок'
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: cakes_title
+      table: home
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: home
+    field: cakes_text
+    type: text
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: cakes_text
+      group: texts
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 48
+      special: null
+      translations:
+        - language: ru-RU
+          translation: 'Торты: текст'
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: cakes_text
+      table: home
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: home
+    field: delivery_title
+    type: string
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: delivery_title
+      group: texts
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 49
+      special: null
+      translations:
+        - language: ru-RU
+          translation: 'Доставка: заголовок'
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: delivery_title
+      table: home
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: home
+    field: delivery_text
+    type: text
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: delivery_text
+      group: texts
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 50
+      special: null
+      translations:
+        - language: ru-RU
+          translation: 'Доставка: текст'
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: delivery_text
+      table: home
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: home
+    field: delivery_note
+    type: string
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: delivery_note
+      group: texts
+      hidden: false
+      interface: input
+      note: Например «Скидка 20 % на первый заказ из приложения»
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 51
+      special: null
+      translations:
+        - language: ru-RU
+          translation: 'Доставка: выгода'
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: delivery_note
+      table: home
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: home
+    field: app_screenshot
+    type: uuid
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: app_screenshot
+      group: texts
+      hidden: false
+      interface: file-image
+      note: Вертикальный, экран телефона без рамки
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 52
+      special:
+        - file
+      translations:
+        - language: ru-RU
+          translation: Скриншот приложения для мокапа
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: app_screenshot
+      table: home
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_files
+      foreign_key_column: id
+  - collection: home
+    field: contacts_note
+    type: string
+    meta:
+      collection: home
+      conditions: null
+      display: null
+      display_options: null
+      field: contacts_note
+      group: texts
+      hidden: false
+      interface: input
+      note: Например «Отвечаем с 9:00 до 21:00»
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 53
+      special: null
+      translations:
+        - language: ru-RU
+          translation: 'Контакты: строка «Написать нам»'
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: contacts_note
+      table: home
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: menus
+    field: id
+    type: integer
+    meta:
+      collection: menus
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 100
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: menus
+      data_type: integer
+      default_value: nextval('menus_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: menus
+    field: status
+    type: string
+    meta:
+      collection: menus
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Черновик
+            value: draft
+          - text: Опубликовано
+            value: published
+          - text: Архив
+            value: archived
+      field: status
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Черновик
+            value: draft
+          - text: Опубликовано
+            value: published
+          - text: Архив
+            value: archived
+      readonly: false
+      required: true
+      searchable: true
+      sort: 101
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Статус
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: status
+      table: menus
+      data_type: character varying
+      default_value: draft
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: menus
+    field: direction
+    type: integer
+    meta:
+      collection: menus
+      conditions: null
+      display: null
+      display_options: null
+      field: direction
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{title}}'
+      readonly: false
+      required: true
+      searchable: true
+      sort: 102
+      special:
+        - m2o
+      translations:
+        - language: ru-RU
+          translation: Направление
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: direction
+      table: menus
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directions
+      foreign_key_column: id
+  - collection: menus
+    field: title
+    type: string
+    meta:
+      collection: menus
+      conditions: null
+      display: null
+      display_options: null
+      field: title
+      group: null
+      hidden: false
+      interface: input
+      note: «Меню кафе», «Осеннее меню»
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 103
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Название
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: title
+      table: menus
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: menus
+    field: file
+    type: uuid
+    meta:
+      collection: menus
+      conditions: null
+      display: null
+      display_options: null
+      field: file
+      group: null
+      hidden: false
+      interface: file
+      note: null
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 104
+      special:
+        - file
+      translations:
+        - language: ru-RU
+          translation: Файл PDF
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: file
+      table: menus
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_files
+      foreign_key_column: id
+  - collection: menus
+    field: updated
+    type: date
+    meta:
+      collection: menus
+      conditions: null
+      display: null
+      display_options: null
+      field: updated
+      group: null
+      hidden: false
+      interface: datetime
+      note: 'Показывается на сайте: «обновлено 1 сентября»'
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 105
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Дата обновления
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: updated
+      table: menus
+      data_type: date
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: menus
+    field: date_updated
+    type: timestamp
+    meta:
+      collection: menus
+      conditions: null
+      display: null
+      display_options: null
+      field: date_updated
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 106
+      special:
+        - date-updated
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_updated
+      table: menus
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: places
+    field: id
+    type: integer
+    meta:
+      collection: places
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 54
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: places
+      data_type: integer
+      default_value: nextval('places_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: places
+    field: name
+    type: string
+    meta:
+      collection: places
+      conditions: null
+      display: null
+      display_options: null
+      field: name
+      group: null
+      hidden: false
+      interface: input
+      note: 'Как на вывеске: «Садовая, 212Б»'
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 55
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Адрес
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: name
+      table: places
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: places
+    field: street
+    type: string
+    meta:
+      collection: places
+      conditions: null
+      display: null
+      display_options: null
+      field: street
+      group: null
+      hidden: false
+      interface: input
+      note: 'Для подписей: «Садовая»'
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 56
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Улица коротко
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: street
+      table: places
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: places
+    field: kind
+    type: string
+    meta:
+      collection: places
+      conditions: null
+      display: null
+      display_options: null
+      field: kind
+      group: null
+      hidden: false
+      interface: input
+      note: «Кондитерская и кухня», «Ресторан и кондитерская»
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 57
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Что здесь
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: kind
+      table: places
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: places
+    field: hours
+    type: json
+    meta:
+      collection: places
+      conditions: null
+      display: null
+      display_options: null
+      field: hours
+      group: null
+      hidden: false
+      interface: list
+      note: Семь строк, по одной на день, время в формате 08:00
+      options:
+        addLabel: Добавить день
+        fields:
+          - field: day
+            meta:
+              interface: select-dropdown
+              options:
+                choices:
+                  - text: Понедельник
+                    value: mon
+                  - text: Вторник
+                    value: tue
+                  - text: Среда
+                    value: wed
+                  - text: Четверг
+                    value: thu
+                  - text: Пятница
+                    value: fri
+                  - text: Суббота
+                    value: sat
+                  - text: Воскресенье
+                    value: sun
+              width: third
+            name: День
+            type: string
+          - field: open
+            meta:
+              interface: input
+              options:
+                placeholder: '08:00'
+              width: third
+            name: Открытие
+            type: string
+          - field: close
+            meta:
+              interface: input
+              options:
+                placeholder: '21:00'
+              width: third
+            name: Закрытие
+            type: string
+      readonly: false
+      required: false
+      searchable: true
+      sort: 58
+      special:
+        - cast-json
+      translations:
+        - language: ru-RU
+          translation: Часы работы
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: hours
+      table: places
+      data_type: json
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: places
+    field: lat
+    type: float
+    meta:
+      collection: places
+      conditions: null
+      display: null
+      display_options: null
+      field: lat
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 59
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Широта
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: lat
+      table: places
+      data_type: real
+      default_value: null
+      max_length: null
+      numeric_precision: 24
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: places
+    field: lng
+    type: float
+    meta:
+      collection: places
+      conditions: null
+      display: null
+      display_options: null
+      field: lng
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 60
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Долгота
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: lng
+      table: places
+      data_type: real
+      default_value: null
+      max_length: null
+      numeric_precision: 24
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: places
+    field: yandex_org
+    type: string
+    meta:
+      collection: places
+      conditions: null
+      display: null
+      display_options: null
+      field: yandex_org
+      group: null
+      hidden: false
+      interface: input
+      note: 'Число из адреса карточки: yandex.ru/maps/org/…/154837147598/'
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 61
+      special: null
+      translations:
+        - language: ru-RU
+          translation: ID организации на Яндекс Картах
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: yandex_org
+      table: places
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: places
+    field: rating
+    type: string
+    meta:
+      collection: places
+      conditions: null
+      display: null
+      display_options: null
+      field: rating
+      group: null
+      hidden: false
+      interface: input
+      note: Например 4,8
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 62
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Оценка на Яндекс Картах
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: rating
+      table: places
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: places
+    field: gallery
+    type: alias
+    meta:
+      collection: places
+      conditions: null
+      display: null
+      display_options: null
+      field: gallery
+      group: null
+      hidden: false
+      interface: files
+      note: Фото зала этой точки, подпись у каждого фото
+      options:
+        template: '{{directus_files_id.title}}'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 63
+      special:
+        - files
+      translations:
+        - language: ru-RU
+          translation: Галерея зала
+      validation: null
+      validation_message: null
+      width: full
+  - collection: places
+    field: date_updated
+    type: timestamp
+    meta:
+      collection: places
+      conditions: null
+      display: null
+      display_options: null
+      field: date_updated
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 64
+      special:
+        - date-updated
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_updated
+      table: places
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: places_files
+    field: id
+    type: integer
+    meta:
+      collection: places_files
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 65
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: places_files
+      data_type: integer
+      default_value: nextval('places_files_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: places_files
+    field: places_id
+    type: integer
+    meta:
+      collection: places_files
+      conditions: null
+      display: null
+      display_options: null
+      field: places_id
+      group: null
+      hidden: true
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 66
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: places_id
+      table: places_files
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: places
+      foreign_key_column: id
+  - collection: places_files
+    field: directus_files_id
+    type: uuid
+    meta:
+      collection: places_files
+      conditions: null
+      display: null
+      display_options: null
+      field: directus_files_id
+      group: null
+      hidden: true
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 67
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: directus_files_id
+      table: places_files
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_files
+      foreign_key_column: id
+  - collection: places_files
+    field: sort
+    type: integer
+    meta:
+      collection: places_files
+      conditions: null
+      display: null
+      display_options: null
+      field: sort
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 68
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: sort
+      table: places_files
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: places_files
+    field: caption
+    type: string
+    meta:
+      collection: places_files
+      conditions: null
+      display: null
+      display_options: null
+      field: caption
+      group: null
+      hidden: false
+      interface: input
+      note: Короткая подпись под фото
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 69
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Подпись
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: caption
+      table: places_files
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: promos
+    field: id
+    type: integer
+    meta:
+      collection: promos
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 90
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: promos
+      data_type: integer
+      default_value: nextval('promos_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: promos
+    field: status
+    type: string
+    meta:
+      collection: promos
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Черновик
+            value: draft
+          - text: Опубликовано
+            value: published
+          - text: Архив
+            value: archived
+      field: status
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Черновик
+            value: draft
+          - text: Опубликовано
+            value: published
+          - text: Архив
+            value: archived
+      readonly: false
+      required: true
+      searchable: true
+      sort: 91
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Статус
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: status
+      table: promos
+      data_type: character varying
+      default_value: draft
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: promos
+    field: title
+    type: string
+    meta:
+      collection: promos
+      conditions: null
+      display: null
+      display_options: null
+      field: title
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 92
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Заголовок
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: title
+      table: promos
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: promos
+    field: text
+    type: text
+    meta:
+      collection: promos
+      conditions: null
+      display: null
+      display_options: null
+      field: text
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: Две-три строки, просто текст
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 93
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Условия
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: text
+      table: promos
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: promos
+    field: place
+    type: integer
+    meta:
+      collection: promos
+      conditions: null
+      display: null
+      display_options: null
+      field: place
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: Пусто — действует в обеих точках
+      options:
+        template: '{{name}}'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 94
+      special:
+        - m2o
+      translations:
+        - language: ru-RU
+          translation: Адрес
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: place
+      table: promos
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: places
+      foreign_key_column: id
+  - collection: promos
+    field: cta
+    type: string
+    meta:
+      collection: promos
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Забронировать стол
+            value: book
+          - text: Заказать доставку
+            value: order
+          - text: Без кнопки
+            value: none
+      field: cta
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Забронировать стол
+            value: book
+          - text: Заказать доставку
+            value: order
+          - text: Без кнопки
+            value: none
+      readonly: false
+      required: true
+      searchable: true
+      sort: 95
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Кнопка
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: cta
+      table: promos
+      data_type: character varying
+      default_value: book
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: promos
+    field: show_from
+    type: date
+    meta:
+      collection: promos
+      conditions: null
+      display: null
+      display_options: null
+      field: show_from
+      group: null
+      hidden: false
+      interface: datetime
+      note: Пусто — сразу
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 96
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Показывать с
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: show_from
+      table: promos
+      data_type: date
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: promos
+    field: show_until
+    type: date
+    meta:
+      collection: promos
+      conditions: null
+      display: null
+      display_options: null
+      field: show_until
+      group: null
+      hidden: false
+      interface: datetime
+      note: Пусто — бессрочно
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 97
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Показывать по
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: show_until
+      table: promos
+      data_type: date
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: promos
+    field: sort
+    type: integer
+    meta:
+      collection: promos
+      conditions: null
+      display: null
+      display_options: null
+      field: sort
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 98
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: sort
+      table: promos
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: promos
+    field: date_updated
+    type: timestamp
+    meta:
+      collection: promos
+      conditions: null
+      display: null
+      display_options: null
+      field: date_updated
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 99
+      special:
+        - date-updated
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_updated
+      table: promos
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: id
+    type: integer
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: settings
+      data_type: integer
+      default_value: nextval('settings_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: contacts
+    type: alias
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: contacts
+      group: null
+      hidden: false
+      interface: group-detail
+      note: null
+      options:
+        start: open
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special:
+        - alias
+        - no-data
+        - group
+      translations:
+        - language: ru-RU
+          translation: Контакты
+      validation: null
+      validation_message: null
+      width: full
+  - collection: settings
+    field: links
+    type: alias
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: links
+      group: null
+      hidden: false
+      interface: group-detail
+      note: null
+      options:
+        start: open
+      readonly: false
+      required: false
+      searchable: true
+      sort: 7
+      special:
+        - alias
+        - no-data
+        - group
+      translations:
+        - language: ru-RU
+          translation: Ссылки на сервисы
+      validation: null
+      validation_message: null
+      width: full
+  - collection: settings
+    field: shop
+    type: alias
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: shop
+      group: null
+      hidden: false
+      interface: group-detail
+      note: null
+      options:
+        start: open
+      readonly: false
+      required: false
+      searchable: true
+      sort: 13
+      special:
+        - alias
+        - no-data
+        - group
+      translations:
+        - language: ru-RU
+          translation: Разделы магазина
+      validation: null
+      validation_message: null
+      width: full
+  - collection: settings
+    field: legal
+    type: alias
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: legal
+      group: null
+      hidden: false
+      interface: group-detail
+      note: null
+      options:
+        start: closed
+      readonly: false
+      required: false
+      searchable: true
+      sort: 18
+      special:
+        - alias
+        - no-data
+        - group
+      translations:
+        - language: ru-RU
+          translation: Юрлицо и документы
+      validation: null
+      validation_message: null
+      width: full
+  - collection: settings
+    field: yandex
+    type: alias
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: yandex
+      group: null
+      hidden: false
+      interface: group-detail
+      note: null
+      options:
+        start: closed
+      readonly: false
+      required: false
+      searchable: true
+      sort: 25
+      special:
+        - alias
+        - no-data
+        - group
+      translations:
+        - language: ru-RU
+          translation: Цифры с Яндекс Карт
+      validation: null
+      validation_message: null
+      width: full
+  - collection: settings
+    field: analytics
+    type: alias
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: analytics
+      group: null
+      hidden: false
+      interface: group-detail
+      note: null
+      options:
+        start: closed
+      readonly: false
+      required: false
+      searchable: true
+      sort: 31
+      special:
+        - alias
+        - no-data
+        - group
+      translations:
+        - language: ru-RU
+          translation: Аналитика
+      validation: null
+      validation_message: null
+      width: full
+  - collection: settings
+    field: phone
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: phone
+      group: contacts
+      hidden: false
+      interface: input
+      note: 'Один на обе точки, как на сайте: +7 987 955-25-65'
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 3
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Телефон
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: phone
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: telegram
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: telegram
+      group: contacts
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: https://…
+      readonly: false
+      required: true
+      searchable: true
+      sort: 4
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Telegram
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: telegram
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: max
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: max
+      group: contacts
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: https://…
+      readonly: false
+      required: true
+      searchable: true
+      sort: 5
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Max
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: max
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: vk
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: vk
+      group: contacts
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: https://…
+      readonly: false
+      required: false
+      searchable: true
+      sort: 6
+      special: null
+      translations:
+        - language: ru-RU
+          translation: ВКонтакте
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: vk
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: shop_url
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: shop_url
+      group: links
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: https://…
+      readonly: false
+      required: true
+      searchable: true
+      sort: 8
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Магазин доставки
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: shop_url
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: app_ios
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: app_ios
+      group: links
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: https://…
+      readonly: false
+      required: true
+      searchable: true
+      sort: 9
+      special: null
+      translations:
+        - language: ru-RU
+          translation: App Store
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: app_ios
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: app_android
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: app_android
+      group: links
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: https://…
+      readonly: false
+      required: true
+      searchable: true
+      sort: 10
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Google Play
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: app_android
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: catering_url
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: catering_url
+      group: links
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: https://…
+      readonly: false
+      required: true
+      searchable: true
+      sort: 11
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Сайт кейтеринга
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: catering_url
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: catering_services_url
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: catering_services_url
+      group: links
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: https://…
+      readonly: false
+      required: false
+      searchable: true
+      sort: 12
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Услуги кейтеринга
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: catering_services_url
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: shop_cakes_ready
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: shop_cakes_ready
+      group: shop
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: https://…
+      readonly: false
+      required: false
+      searchable: true
+      sort: 14
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Торты в наличии
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: shop_cakes_ready
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: shop_cakes_custom
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: shop_cakes_custom
+      group: shop
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: https://…
+      readonly: false
+      required: false
+      searchable: true
+      sort: 15
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Праздничные торты
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: shop_cakes_custom
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: shop_pastry
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: shop_pastry
+      group: shop
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: https://…
+      readonly: false
+      required: false
+      searchable: true
+      sort: 16
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Пирожные
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: shop_pastry
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: shop_breakfasts
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: shop_breakfasts
+      group: shop
+      hidden: false
+      interface: input
+      note: null
+      options:
+        placeholder: https://…
+      readonly: false
+      required: false
+      searchable: true
+      sort: 17
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Завтраки
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: shop_breakfasts
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: legal_name
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: legal_name
+      group: legal
+      hidden: false
+      interface: input
+      note: ИП или ООО, как в документах
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 19
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Юрлицо
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: legal_name
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: inn
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: inn
+      group: legal
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 20
+      special: null
+      translations:
+        - language: ru-RU
+          translation: ИНН
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: inn
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: ogrn
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: ogrn
+      group: legal
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 21
+      special: null
+      translations:
+        - language: ru-RU
+          translation: ОГРН / ОГРНИП
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: ogrn
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: legal_address
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: legal_address
+      group: legal
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 22
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Юридический адрес
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: legal_address
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: policy_file
+    type: uuid
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: policy_file
+      group: legal
+      hidden: false
+      interface: file
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 23
+      special:
+        - file
+      translations:
+        - language: ru-RU
+          translation: Политика обработки данных (PDF)
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: policy_file
+      table: settings
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_files
+      foreign_key_column: id
+  - collection: settings
+    field: offer_file
+    type: uuid
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: offer_file
+      group: legal
+      hidden: false
+      interface: file
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 24
+      special:
+        - file
+      translations:
+        - language: ru-RU
+          translation: Оферта (PDF)
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: offer_file
+      table: settings
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_files
+      foreign_key_column: id
+  - collection: settings
+    field: yandex_score
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: yandex_score
+      group: yandex
+      hidden: false
+      interface: input
+      note: Например 4,9
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 26
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Оценка
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: yandex_score
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: yandex_award
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: yandex_award
+      group: yandex
+      hidden: false
+      interface: input
+      note: Например «Хорошее место 2026»
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 27
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Награда
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: yandex_award
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: yandex_ratings
+    type: integer
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: yandex_ratings
+      group: yandex
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 28
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Число оценок
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: yandex_ratings
+      table: settings
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: yandex_reviews
+    type: integer
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: yandex_reviews
+      group: yandex
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 29
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Число отзывов
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: yandex_reviews
+      table: settings
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: yandex_highlights
+    type: json
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: yandex_highlights
+      group: yandex
+      hidden: false
+      interface: list
+      note: Доля положительных отзывов по рубрикам с карточки на Садовой
+      options:
+        addLabel: Добавить рубрику
+        fields:
+          - field: label
+            meta:
+              interface: input
+              width: half
+            name: Рубрика
+            type: string
+          - field: percent
+            meta:
+              interface: input
+              width: half
+            name: Процент
+            type: integer
+      readonly: false
+      required: false
+      searchable: true
+      sort: 30
+      special:
+        - cast-json
+      translations:
+        - language: ru-RU
+          translation: Рубрики отзывов
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: yandex_highlights
+      table: settings
+      data_type: json
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
+    field: metrika_id
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: metrika_id
+      group: analytics
+      hidden: false
+      interface: input
+      note: Только номер. Пусто — счётчик не ставится
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 32
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Счётчик Яндекс Метрики
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: metrika_id
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+systemFields:
+  - collection: directus_activity
+    field: timestamp
+    schema:
+      is_indexed: true
+  - collection: directus_revisions
+    field: activity
+    schema:
+      is_indexed: true
+  - collection: directus_revisions
+    field: parent
+    schema:
+      is_indexed: true
+relations:
+  - collection: afisha
+    field: poster
+    related_collection: directus_files
+    meta:
+      junction_field: null
+      many_collection: afisha
+      many_field: poster
+      one_allowed_collections: null
+      one_collection: directus_files
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: afisha
+      column: poster
+      foreign_key_table: directus_files
+      foreign_key_column: id
+      constraint_name: afisha_poster_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: afisha
+    field: place
+    related_collection: places
+    meta:
+      junction_field: null
+      many_collection: afisha
+      many_field: place
+      one_allowed_collections: null
+      one_collection: places
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: afisha
+      column: place
+      foreign_key_table: places
+      foreign_key_column: id
+      constraint_name: afisha_place_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: cakes
+    field: photo
+    related_collection: directus_files
+    meta:
+      junction_field: null
+      many_collection: cakes
+      many_field: photo
+      one_allowed_collections: null
+      one_collection: directus_files
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: cakes
+      column: photo
+      foreign_key_table: directus_files
+      foreign_key_column: id
+      constraint_name: cakes_photo_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: directions
+    field: photo
+    related_collection: directus_files
+    meta:
+      junction_field: null
+      many_collection: directions
+      many_field: photo
+      one_allowed_collections: null
+      one_collection: directus_files
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: directions
+      column: photo
+      foreign_key_table: directus_files
+      foreign_key_column: id
+      constraint_name: directions_photo_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: directions
+    field: place
+    related_collection: places
+    meta:
+      junction_field: null
+      many_collection: directions
+      many_field: place
+      one_allowed_collections: null
+      one_collection: places
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: directions
+      column: place
+      foreign_key_table: places
+      foreign_key_column: id
+      constraint_name: directions_place_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: home
+    field: hero_image
+    related_collection: directus_files
+    meta:
+      junction_field: null
+      many_collection: home
+      many_field: hero_image
+      one_allowed_collections: null
+      one_collection: directus_files
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: home
+      column: hero_image
+      foreign_key_table: directus_files
+      foreign_key_column: id
+      constraint_name: home_hero_image_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: home
+    field: og_image
+    related_collection: directus_files
+    meta:
+      junction_field: null
+      many_collection: home
+      many_field: og_image
+      one_allowed_collections: null
+      one_collection: directus_files
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: home
+      column: og_image
+      foreign_key_table: directus_files
+      foreign_key_column: id
+      constraint_name: home_og_image_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: home
+    field: app_screenshot
+    related_collection: directus_files
+    meta:
+      junction_field: null
+      many_collection: home
+      many_field: app_screenshot
+      one_allowed_collections: null
+      one_collection: directus_files
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: home
+      column: app_screenshot
+      foreign_key_table: directus_files
+      foreign_key_column: id
+      constraint_name: home_app_screenshot_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: menus
+    field: direction
+    related_collection: directions
+    meta:
+      junction_field: null
+      many_collection: menus
+      many_field: direction
+      one_allowed_collections: null
+      one_collection: directions
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: menus
+      column: direction
+      foreign_key_table: directions
+      foreign_key_column: id
+      constraint_name: menus_direction_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: menus
+    field: file
+    related_collection: directus_files
+    meta:
+      junction_field: null
+      many_collection: menus
+      many_field: file
+      one_allowed_collections: null
+      one_collection: directus_files
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: menus
+      column: file
+      foreign_key_table: directus_files
+      foreign_key_column: id
+      constraint_name: menus_file_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: places_files
+    field: places_id
+    related_collection: places
+    meta:
+      junction_field: directus_files_id
+      many_collection: places_files
+      many_field: places_id
+      one_allowed_collections: null
+      one_collection: places
+      one_collection_field: null
+      one_deselect_action: delete
+      one_field: gallery
+      sort_field: sort
+    schema:
+      table: places_files
+      column: places_id
+      foreign_key_table: places
+      foreign_key_column: id
+      constraint_name: places_files_places_id_foreign
+      on_update: NO ACTION
+      on_delete: CASCADE
+  - collection: places_files
+    field: directus_files_id
+    related_collection: directus_files
+    meta:
+      junction_field: places_id
+      many_collection: places_files
+      many_field: directus_files_id
+      one_allowed_collections: null
+      one_collection: directus_files
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: places_files
+      column: directus_files_id
+      foreign_key_table: directus_files
+      foreign_key_column: id
+      constraint_name: places_files_directus_files_id_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: promos
+    field: place
+    related_collection: places
+    meta:
+      junction_field: null
+      many_collection: promos
+      many_field: place
+      one_allowed_collections: null
+      one_collection: places
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: promos
+      column: place
+      foreign_key_table: places
+      foreign_key_column: id
+      constraint_name: promos_place_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: settings
+    field: policy_file
+    related_collection: directus_files
+    meta:
+      junction_field: null
+      many_collection: settings
+      many_field: policy_file
+      one_allowed_collections: null
+      one_collection: directus_files
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: settings
+      column: policy_file
+      foreign_key_table: directus_files
+      foreign_key_column: id
+      constraint_name: settings_policy_file_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: settings
+    field: offer_file
+    related_collection: directus_files
+    meta:
+      junction_field: null
+      many_collection: settings
+      many_field: offer_file
+      one_allowed_collections: null
+      one_collection: directus_files
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: settings
+      column: offer_file
+      foreign_key_table: directus_files
+      foreign_key_column: id
+      constraint_name: settings_offer_file_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL

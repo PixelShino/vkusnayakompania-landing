@@ -1,0 +1,6 @@
+# runtime state of the local/VPS instance: database, uploads, secrets
+# состояние инстанса: база, загрузки, секреты
+.env
+data/
+uploads/
+extensions/
