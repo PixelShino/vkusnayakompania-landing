@@ -1,0 +1,179 @@
+---
+/**
+ * Live promos in one grid: the «both venues» group first, then venue by venue.
+ * Groups carry no headings — the address is signed at the bottom of a card.
+ * Живые акции одной сеткой: сначала группа «обе точки», затем по точкам.
+ * Заголовков у групп нет — адрес подписан внизу карточки.
+ */
+import { groupByPlace } from '../lib/select';
+import type { Place, Promo, Settings } from '../lib/content';
+
+interface Props {
+  promos: Promo[];
+  places: Place[];
+  settings: Settings;
+}
+
+const { promos, places, settings } = Astro.props;
+
+// groups keep the «both venues» bucket first; the rest follow the venue order
+// группировка ставит «обе точки» первыми, остальные идут в порядке точек
+const groups = groupByPlace(promos.map((promo) => ({ promo, place: promo.place?.id ?? null })));
+const ordered = [null, ...places.map((place) => place.id)]
+  .flatMap((key) => groups.get(key) ?? [])
+  .map((row) => row.promo);
+---
+
+{
+  ordered.length > 0 && (
+    <section class="section" id="promos">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Акции</h2>
+          </div>
+        </div>
+
+        <div class="pr__grid">
+          {ordered.map((promo, i) => (
+            <article class:list={['pr', { 'pr--hi': i === 0 && !promo.place }]}>
+              {i === 0 && !promo.place && <div class="blob" aria-hidden="true" />}
+
+              <h3 class="pr__title">{promo.title}</h3>
+              <p class="pr__text">{promo.text}</p>
+
+              <div class="pr__foot">
+                {promo.cta === 'book' && (
+                  <button
+                    type="button"
+                    class:list={[
+                      'btn',
+                      'btn--md',
+                      i === 0 && !promo.place ? 'btn--light' : 'btn--secondary',
+                    ]}
+                    data-book={
+                      promo.place ? `Бронь стола: ${promo.place.street}` : 'Бронь стола'
+                    }
+                  >
+                    Забронировать стол
+                  </button>
+                )}
+                {promo.cta === 'order' && (
+                  <a
+                    class:list={[
+                      'btn',
+                      'btn--md',
+                      i === 0 && !promo.place ? 'btn--light' : 'btn--secondary',
+                    ]}
+                    href={settings.shop_url}
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    Заказать доставку
+                  </a>
+                )}
+
+                <p class="pr__addr">
+                  <span class="pr__dash" aria-hidden="true" />
+                  {promo.place?.name ?? 'Обе точки'}
+                </p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .pr__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: calc(var(--gap) + 2px);
+    margin-top: 26px;
+    align-items: stretch;
+  }
+
+  .pr {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: calc(var(--gap) + 8px);
+    border: 1px solid var(--line);
+    border-radius: var(--r-xl);
+    background: var(--surface);
+    transition: border-color 0.16s ease;
+  }
+
+  .pr--hi {
+    border-color: var(--olive);
+    background: var(--olive);
+    color: var(--bg);
+  }
+
+  .pr__title {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 8px;
+    font-size: calc(var(--fs-h3) + 1px);
+    line-height: 1.14;
+  }
+
+  .pr__text {
+    position: relative;
+    z-index: 1;
+    font-size: var(--fs-body);
+    color: var(--text-2);
+  }
+
+  /* на оливковой заливке текст только непрозрачный: --surface даёт 4,2:1 */
+  .pr--hi .pr__text {
+    color: var(--bg);
+  }
+
+  .pr__foot {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-top: auto;
+    padding-top: 20px;
+  }
+
+  .pr__addr {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-4);
+  }
+
+  .pr__dash {
+    width: 28px;
+    flex: none;
+    border-top: 2px dashed var(--line);
+  }
+
+  .pr--hi .pr__addr {
+    color: var(--bg);
+  }
+
+  .pr--hi .pr__dash {
+    border-top-color: rgb(255 250 237 / 0.4);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .pr:hover {
+      border-color: var(--line-4);
+    }
+
+    .pr--hi:hover {
+      border-color: var(--olive-dark);
+    }
+  }
+</style>
