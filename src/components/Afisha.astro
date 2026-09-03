@@ -1,0 +1,157 @@
+---
+/**
+ * Current event: poster in its natural ratio plus date, venue and actions.
+ * The caller decides whether to render it — the component always draws.
+ * Текущая афиша: постер в своей пропорции, дата, адрес и кнопки. Решение
+ * «показывать или нет» принимает вызывающий, компонент всегда рисует.
+ */
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { Afisha } from '../lib/content';
+
+interface Props {
+  afisha: Afisha;
+}
+
+const { afisha } = Astro.props;
+
+// dates come as YYYY-MM-DD; UTC keeps the day from sliding on a western builder
+// даты приходят как YYYY-MM-DD; UTC не даёт дню съехать на сборке западнее
+const date = new Date(`${afisha.date}T00:00:00Z`);
+const day = new Intl.DateTimeFormat('ru-RU', {
+  day: 'numeric',
+  month: 'long',
+  timeZone: 'UTC',
+}).format(date);
+const month = new Intl.DateTimeFormat('ru-RU', { month: 'long', timeZone: 'UTC' }).format(date);
+const time = afisha.time?.slice(0, 5);
+// одной строкой: перенос между `<time>` и запятой дал бы «26 сентября , 19:00»
+// as one string: a line break before the comma would render «26 сентября , 19:00»
+const when = time ? `${day}, ${time}` : day;
+const datetime = time ? `${afisha.date}T${time}` : afisha.date;
+---
+
+<section class="section" id="afisha">
+  <div class="container">
+    <div class="af">
+      <figure class="af__poster">
+        <Image
+          src={afisha.poster.src as ImageMetadata}
+          width={afisha.poster.width}
+          height={afisha.poster.height}
+          alt={afisha.poster.alt}
+          widths={[480, 800, 1200, 1600]}
+          sizes="(min-width: 1200px) 480px, (min-width: 768px) 38vw, 92vw"
+          format="avif"
+          quality={52}
+          loading="lazy"
+          decoding="async"
+        />
+      </figure>
+
+      <div class="af__body">
+        <p class="kicker">Афиша · {month}</p>
+        <h2>{afisha.title}</h2>
+
+        <p class="af__meta">
+          <time datetime={datetime} class="tnum">{when}</time><span class="af__dot"> · </span>{
+            afisha.place.name
+          }
+        </p>
+
+        {afisha.text && <p class="lead af__text">{afisha.text}</p>}
+
+        <div class="af__actions">
+          <button
+            type="button"
+            class="btn btn--primary"
+            data-book={`Бронь стола: ${afisha.place.street}`}
+            data-book-note={`${afisha.title}, ${day}${time ? `, ${time}` : ''}`}
+          >
+            Забронировать стол
+          </button>
+          {
+            afisha.link && (
+              <a class="btn btn--secondary" href={afisha.link} target="_blank" rel="noopener">
+                Подробнее
+              </a>
+            )
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .af {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: calc(var(--gap) + 10px);
+    align-items: center;
+  }
+
+  .af__poster {
+    margin: 0;
+    max-width: 480px;
+    border-radius: var(--r-xl);
+    overflow: hidden;
+    background: var(--surface-photo);
+  }
+
+  .af__poster :global(img) {
+    width: 100%;
+    height: auto;
+    outline: 1px solid rgb(0 0 0 / 0.08);
+    outline-offset: -1px;
+  }
+
+  .af__body {
+    min-width: 0;
+  }
+
+  .af__meta {
+    margin-top: 14px;
+    font-size: calc(var(--fs-body) + 1px);
+    font-weight: 600;
+    color: var(--text-3);
+  }
+
+  .af__dot {
+    color: var(--line-4);
+  }
+
+  .af__text {
+    margin-top: 12px;
+  }
+
+  .af__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  /* на телефоне обе кнопки на всю ширину колонки, чтобы не рвать ряд */
+  @media (max-width: 767px) {
+    .af__actions .btn {
+      width: 100%;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .af {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: calc(var(--gap) + 20px);
+    }
+  }
+
+  /* колонка ровно по постеру, вся пара не растягивается на 1296: иначе текст
+     упирается в `max-width` лида и справа остаётся пустая четверть экрана */
+  @media (min-width: 1200px) {
+    .af {
+      grid-template-columns: 440px minmax(0, 1fr);
+      max-width: 1080px;
+    }
+  }
+</style>
