@@ -1,8 +1,11 @@
 ---
 /**
- * Карта одна на две точки: виджет показывает карточку организации по `oid`,
- * а параметр `pt` игнорирует — свои метки умеет только статическое API.
- * Точку выбирают кнопки `[data-frame-target="map"]` в контактах.
+ * Two venues on one map. With `PUBLIC_YANDEX_MAPS_KEY` it is the Yandex JS API
+ * 3.0 with a marker per venue; without the key it stays the iframe widget,
+ * which knows only one organization card at a time.
+ * Карта на две точки. С ключом `PUBLIC_YANDEX_MAPS_KEY` — JS API 3.0 и по метке
+ * на точку; без ключа остаётся iframe-виджет, а он показывает карточку только
+ * одной организации, и точку переключают кнопки контактов.
  */
 import { yandexOrgUrl, yandexWidgetUrl } from '../data/site';
 import type { Content } from '../lib/content.ts';
@@ -12,33 +15,71 @@ interface Props {
 }
 
 const { places } = Astro.props.content;
+// ключ выдают в кабинете Яндекса и ограничивают доменами; пусто — ветка виджета
+const key = import.meta.env.PUBLIC_YANDEX_MAPS_KEY;
+
+const points = places.map((place) => ({
+  id: place.id,
+  n: place.n,
+  name: place.name,
+  lat: place.lat,
+  lng: place.lng,
+  href: yandexOrgUrl(place.yandex_org),
+}));
 ---
 
 <div class="map-block">
-  <p class="map-label">
-    На карте: <b data-frame-label="map">{places[0].name}</b>
-  </p>
+  {
+    key ? (
+      <div class="map" data-map data-places={JSON.stringify(points)}>
+        <div class="map__canvas" data-map-canvas />
+        {/* подложка видна, пока карта не встала: без JS и после таймаута это ссылки */}
+        <div class="map__stub">
+          <p class="map__stub-label" data-map-note>
+            Загружаем карту…
+          </p>
+          <p class="map__stub-hint">Открыть в Яндекс Картах:</p>
+          {places.map((place) => (
+            <a class="map__stub-link" href={yandexOrgUrl(place.yandex_org)} target="_blank" rel="noopener">
+              {place.name}
+            </a>
+          ))}
+        </div>
+      </div>
+    ) : (
+      <>
+        <p class="map-label">
+          На карте: <b data-frame-label="map">{places[0].name}</b>
+        </p>
 
-  <div
-    class="map"
-    data-frame="map"
-    data-frame-title="Карта: «Вкусная компания» в Самаре"
-    data-src={yandexWidgetUrl(places[0])}
-  >
-    <div class="map__stub">
-      <p class="map__stub-label">Загружаем карту…</p>
-    </div>
-    <noscript>
-      <a
-        class="map__fallback"
-        href={yandexOrgUrl(places[0].yandex_org)}
-        target="_blank"
-        rel="noopener"
-      >
-        Открыть на Яндекс.Картах
-      </a>
-    </noscript>
-  </div>
+        <div
+          class="map"
+          data-frame="map"
+          data-frame-title="Карта: «Вкусная компания» в Самаре"
+          data-src={yandexWidgetUrl(places[0])}
+        >
+          <div class="map__stub">
+            <p class="map__stub-label">Загружаем карту…</p>
+          </div>
+          <noscript>
+            <div class="map__stub">
+              <p class="map__stub-hint">Открыть в Яндекс Картах:</p>
+              {places.map((place) => (
+                <a
+                  class="map__stub-link"
+                  href={yandexOrgUrl(place.yandex_org)}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  {place.name}
+                </a>
+              ))}
+            </div>
+          </noscript>
+        </div>
+      </>
+    )
+  }
 </div>
 
 <style>
@@ -68,7 +109,8 @@ const { places } = Astro.props.content;
     background: repeating-linear-gradient(45deg, #efe7da 0 12px, #eae1d2 12px 24px);
   }
 
-  .map :global(iframe) {
+  .map :global(iframe),
+  .map__canvas {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -76,19 +118,23 @@ const { places } = Astro.props.content;
     border: 0;
   }
 
-  .map__stub,
-  .map__fallback {
+  .map__stub {
     position: absolute;
     inset: 0;
-    display: grid;
-    place-items: center;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    padding: var(--gap);
+    text-align: center;
   }
 
   .map__stub-label,
-  .map__fallback {
+  .map__stub-hint {
     font-size: 13px;
     color: var(--text-4);
-    text-decoration: none;
   }
 
   .map__stub-label {
@@ -98,8 +144,31 @@ const { places } = Astro.props.content;
     background: var(--bg);
   }
 
+  .map__stub-hint {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--text-5);
+  }
+
+  .map__stub-link {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 1px solid var(--line-4);
+  }
+
+  .map__stub-link:hover {
+    border-bottom-color: var(--text);
+  }
+
   .map.is-loaded .map__stub {
     display: none;
+  }
+
+  /* полоски читаются как «ещё грузится» — у окончательного отказа фон спокойный */
+  .map.is-failed {
+    background: var(--surface);
   }
 
   /* во всю ширину планшета квадратная карта съедает целый экран */
@@ -108,8 +177,59 @@ const { places } = Astro.props.content;
       aspect-ratio: 16 / 9;
     }
   }
+
+  /* ── метка карты: круг с номером точки и подпись адреса ──────────────────── */
+
+  /* метку ставят левым верхним углом на координату — сдвигаем круг на точку */
+  .map :global(.ymk) {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transform: translate(-14px, -14px);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .map :global(.ymk__dot) {
+    width: 28px;
+    height: 28px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border: 2px solid var(--bg);
+    border-radius: var(--r-pill);
+    /* заливка темнее `--terracotta`: на ней цифра цветом `--bg` даёт 6,3:1 */
+    background: var(--terracotta-text);
+    color: var(--bg);
+    font-weight: var(--fw-heading);
+    font-size: 14px;
+    line-height: 1;
+    transition: background-color 0.16s ease;
+  }
+
+  .map :global(.ymk__label) {
+    padding: 5px 11px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    transition: border-color 0.16s ease;
+  }
+
+  .map :global(.ymk.is-active .ymk__dot) {
+    background: var(--text);
+  }
+
+  .map :global(.ymk.is-active .ymk__label) {
+    border-color: var(--line-4);
+  }
 </style>
 
 <script>
+  // каждая ветка сама проверяет свою разметку: лишний модуль просто ничего не делает
   import '../scripts/lazy-frame';
+  import '../scripts/yandex-map';
 </script>

@@ -2,7 +2,7 @@
 import YandexMap from './YandexMap.astro';
 import MessengerButtons from './MessengerButtons.astro';
 import OpenStatus from './OpenStatus.astro';
-import { hoursRows, yandexRouteUrl, yandexWidgetUrl } from '../data/site';
+import { hoursRows, yandexOrgUrl, yandexRouteUrl, yandexWidgetUrl } from '../data/site';
 import type { Content } from '../lib/content.ts';
 
 interface Props {
@@ -57,19 +57,29 @@ const { places, settings, home } = content;
                   rel="noopener"
                 >
                   Маршрут
-                  <span aria-hidden="true">→</span>
                 </a>
+                {/* обе ветки карты: `data-frame-target` — виджет, `data-map-focus` — JS API */}
                 <button
                   type="button"
                   class="btn btn--secondary btn--md ct__show"
                   data-frame-target="map"
                   data-src={yandexWidgetUrl(place)}
                   data-frame-name={place.name}
+                  data-map-focus={String(place.id)}
                   aria-pressed={i === 0 ? 'true' : 'false'}
                 >
                   Показать на карте
                 </button>
               </div>
+
+              <a
+                class="ct__org"
+                href={yandexOrgUrl(place.yandex_org)}
+                target="_blank"
+                rel="noopener"
+              >
+                Открыть в Яндекс Картах
+              </a>
             </article>
           ))
         }
@@ -188,9 +198,30 @@ const { places, settings, home } = content;
     margin-top: auto;
   }
 
+  .ct__org {
+    align-self: flex-start;
+    margin-top: 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-3);
+    text-decoration: none;
+    border-bottom: 1px solid var(--line-4);
+    transition: color 0.16s ease, border-color 0.16s ease;
+  }
+
+  .ct__org:hover {
+    color: var(--text);
+    border-bottom-color: var(--text);
+  }
+
   .ct__route,
   .ct__show {
     flex: 1 1 150px;
+  }
+
+  /* карта не загрузилась — кнопке некуда вести; `.btn` перебивает `[hidden]` */
+  .ct__show[hidden] {
+    display: none;
   }
 
   .ct__show[aria-pressed='true'] {

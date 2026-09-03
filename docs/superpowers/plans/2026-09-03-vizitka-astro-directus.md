@@ -658,7 +658,7 @@ if (dialog && title) {
 
 **Файлы:** `YandexMap.astro`, `src/scripts/yandex-map.ts`, `Contacts.astro`.
 
-- [ ] **Шаг 1:** при `PUBLIC_YANDEX_MAPS_KEY`: контейнер `data-map` с
+- [x] **Шаг 1:** при `PUBLIC_YANDEX_MAPS_KEY`: контейнер `data-map` с
   `data-places={JSON.stringify(places.map(({id,name,lat,lng,yandex_org})=>…))}`;
   скрипт лениво (IntersectionObserver, 400 px) подключает
   `https://api-maps.yandex.ru/v3/?apikey=KEY&lang=ru_RU`, ждёт `ymaps3.ready`,
@@ -668,12 +668,12 @@ if (dialog && title) {
   → `yandexOrgUrl`. «Показать на карте» → `map.setLocation({ center, zoom: 16,
   duration: 300 })` и подсветка метки. Без ключа — текущий iframe-виджет с
   починкой из 5.2 и комментарием, что нужен ключ.
-- [ ] **Шаг 2:** `Contacts.astro`: карточки точек из `content.places`, «Открыть
+- [x] **Шаг 2:** `Contacts.astro`: карточки точек из `content.places`, «Открыть
   в Яндекс Картах» у каждой точки на её `yandex_org`; блок «Написать нам» с
   `contacts_note`.
-- [ ] **Шаг 3:** если скрипт не загрузился за 8 с — показать ссылки «Открыть в
+- [x] **Шаг 3:** если скрипт не загрузился за 8 с — показать ссылки «Открыть в
   Яндекс Картах» вместо карты.
-- [ ] **Шаг 4:** скриншоты, коммит `feat(map): две точки на карте Яндекса`.
+- [x] **Шаг 4:** скриншоты, коммит `feat(map): две точки на карте Яндекса`.
 
 ### Задача 5.4: Отзывы и подвал из контента
 
