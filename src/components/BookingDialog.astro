@@ -1,0 +1,218 @@
+---
+/**
+ * One booking dialog for the whole page: any `[data-book]` opens it and puts
+ * its value in the title, `[data-book-note]` overrides the hint below.
+ * Один диалог брони на всю страницу: открывает любой элемент с `[data-book]`,
+ * значение атрибута идёт в заголовок, `data-book-note` меняет подсказку.
+ */
+import MessengerButtons from './MessengerButtons.astro';
+import type { Settings } from '../lib/content.ts';
+
+interface Props {
+  settings: Settings;
+  /** подсказка под заголовком по умолчанию — `home.contacts_note` */
+  note?: string;
+}
+
+const { settings, note = '' } = Astro.props;
+---
+
+<dialog id="book" class="book" aria-labelledby="book-title" data-note={note}>
+  <!-- фокус садится на панель, а не на «Закрыть»: скринридер читает заголовок,
+       на экране не загорается кольцо у крестика -->
+  <div class="book__in" tabindex="-1" autofocus>
+    <button type="button" class="book__close" data-close aria-label="Закрыть">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <path
+          d="M5.5 5.5l9 9M14.5 5.5l-9 9"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"></path>
+      </svg>
+    </button>
+
+    <h2 class="book__title" id="book-title">Бронь стола</h2>
+    <p class="book__note" id="book-note" hidden={!note}>{note}</p>
+
+    <div class="book__actions">
+      <MessengerButtons settings={settings} variant="dark" size="lg" />
+      <a class="btn btn--secondary btn--block" href={settings.phoneHref}>
+        Позвонить {settings.phone}
+      </a>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .book {
+    width: 100%;
+    max-width: 100%;
+    max-height: 92dvh;
+    /* лист снизу: `auto auto 0` прижимает его к нижнему краю экрана */
+    margin: auto auto 0;
+    padding: 0;
+    border: 0;
+    border-radius: 24px 24px 0 0;
+    background: var(--bg);
+    color: var(--text);
+    overflow: auto;
+    overscroll-behavior: contain;
+
+    opacity: 0;
+    translate: 0 100%;
+    transition-property: opacity, translate, overlay, display;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-out);
+    transition-behavior: allow-discrete;
+  }
+
+  .book[open] {
+    opacity: 1;
+    translate: 0 0;
+    transition-duration: 200ms;
+  }
+
+  /* стартовое состояние появления: без него вход не анимируется */
+  @starting-style {
+    .book[open] {
+      opacity: 0;
+      translate: 0 100%;
+    }
+  }
+
+  .book::backdrop {
+    background: rgb(44 41 39 / 0.45);
+    opacity: 0;
+    transition-property: opacity, overlay, display;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-out);
+    transition-behavior: allow-discrete;
+  }
+
+  .book[open]::backdrop {
+    opacity: 1;
+    transition-duration: 200ms;
+  }
+
+  @starting-style {
+    .book[open]::backdrop {
+      opacity: 0;
+    }
+  }
+
+  /* паддинг живёт на обёртке: тогда клик по самому `<dialog>` — только фон */
+  .book__in {
+    position: relative;
+    padding: 22px var(--pad) calc(22px + env(safe-area-inset-bottom));
+  }
+
+  .book__close {
+    position: absolute;
+    top: 16px;
+    right: var(--pad);
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+    background: transparent;
+    color: var(--text-2);
+    cursor: pointer;
+    transition-property: scale, background-color, color;
+    transition-duration: 120ms, 0.16s, 0.16s;
+    transition-timing-function: var(--ease-out), ease, ease;
+  }
+
+  /* палец берёт 44 px, рамка остаётся 40 px */
+  .book__close::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+  }
+
+  .book__close:active {
+    scale: 0.96;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .book__close:hover {
+      background: color-mix(in srgb, var(--text) 6%, transparent);
+      color: var(--text);
+    }
+  }
+
+  .book__title {
+    /* потолок 30 px: в панели 420 px секционный H2 в 42 px рвётся на четыре строки */
+    font-size: min(var(--fs-h2), 30px);
+    padding-right: 52px;
+    text-wrap: balance;
+  }
+
+  .book__note {
+    margin-top: 10px;
+    font-size: var(--fs-lead);
+    line-height: 1.5;
+    color: var(--text-2);
+    text-wrap: pretty;
+  }
+
+  .book__note[hidden] {
+    display: none;
+  }
+
+  .book__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 22px;
+  }
+
+  /* класс лежит на корне `MessengerButtons` — отсюда он `:global` */
+  .book__actions :global(.messengers) {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  @media (min-width: 768px) {
+    .book {
+      width: 420px;
+      margin: auto;
+      border-radius: var(--r-2xl);
+      translate: 0 12px;
+    }
+
+    @starting-style {
+      .book[open] {
+        translate: 0 12px;
+      }
+    }
+
+    .book__in {
+      padding: 26px 26px 28px;
+    }
+
+    .book__close {
+      right: 22px;
+      top: 22px;
+    }
+  }
+
+  /* по просьбе системы остаётся только прозрачность, движение уходит */
+  @media (prefers-reduced-motion: reduce) {
+    .book,
+    .book[open] {
+      translate: none;
+    }
+
+    @starting-style {
+      .book[open] {
+        translate: none;
+      }
+    }
+  }
+</style>
+
+<script>
+  import '../scripts/booking-dialog';
+</script>

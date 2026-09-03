@@ -25,6 +25,7 @@ const fontFaces = `
 }
 `;
 import { getImage } from 'astro:assets';
+import BookingDialog from '../components/BookingDialog.astro';
 import { BRAND, schemaHours, yandexOrgUrl } from '../data/site';
 import { HERO_SIZES, widthsFor } from '../lib/hero.ts';
 import type { Content } from '../lib/content.ts';
@@ -168,25 +169,6 @@ const jsonLd = {
       )
     }
 
-    <style is:global>
-      .skip-link {
-        position: absolute;
-        left: 50%;
-        top: 8px;
-        z-index: 100;
-        translate: -50% -200%;
-        padding: 10px 18px;
-        border-radius: var(--r-pill);
-        background: var(--text);
-        color: var(--bg);
-        font-size: 13px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: translate 0.18s ease;
-      }
-      .skip-link:focus-visible {
-        translate: -50% 0;
-      }
-    </style>
+    <BookingDialog settings={settings} note={home.contacts_note} />
   </body>
 </html>
