@@ -23,11 +23,11 @@ const weekday = schedule[1];
 
 {
   mode === 'pill' ? (
-    <span
-      class:list={['card-pill', 'open-pill', className]}
-      data-schedule={JSON.stringify(schedule)}
-      hidden
-    />
+    /* место под плашку занято сразу: пустой `hidden` двигал первый экран
+       на 0,13 CLS, когда скрипт дописывал текст */
+    <span class:list={['card-pill', 'open-pill', className]} data-schedule={JSON.stringify(schedule)}>
+      {`Открыто до ${shortTime(weekday[1])}`}
+    </span>
   ) : (
     <span class={className} data-schedule={JSON.stringify(schedule)} data-today>
       {shortTime(weekday[0])} — {shortTime(weekday[1])}
@@ -36,8 +36,15 @@ const weekday = schedule[1];
 }
 
 <style>
-  .open-pill:not([hidden]) {
+  /* до расчёта плашка держит место, но молчит: время в разметке —
+     будний день, а гость может смотреть в воскресенье */
+  .open-pill {
     display: inline-block;
+    visibility: hidden;
+  }
+
+  .open-pill.is-ready {
+    visibility: visible;
   }
 
   .open-pill.is-open {
@@ -82,7 +89,7 @@ const weekday = schedule[1];
         const state = openState(schedule, day, now);
         node.textContent = state.label;
         node.classList.toggle('is-open', state.isOpen);
-        node.hidden = false;
+        node.classList.add('is-ready');
       });
     }
   }

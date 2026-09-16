@@ -1,12 +1,12 @@
 ---
 /**
- * Three menu cards: cafe, restaurant, confectionery. A card without a published
- * menu keeps its place and says so instead of showing a dead button.
- * Три карточки меню: кафе, ресторан, кондитерская. Карточка без выложенного
- * меню остаётся на месте и пишет об этом вместо мёртвой кнопки.
+ * Menus as three shelf lines on an ink strip: mark, name, honesty pill and the
+ * PDF button in one row. A direction without a published menu keeps its line.
+ * Меню тремя строками-полками на чернильной полосе: метка, название, честная
+ * пилюля и кнопка PDF в одну линию. Направление без меню сохраняет свою строку.
  */
 import { menuFor } from '../lib/select';
-import type { Content, Direction } from '../lib/content';
+import { typo, type Content, type Direction } from '../lib/content';
 import cake from '../assets/icons/cake.svg?raw';
 
 interface Props {
@@ -30,122 +30,215 @@ const cards = KEYS.map((key) => directions.find((item) => item.key === key))
   .map((direction) => ({ direction, menu: menuFor(menus, direction.id) }));
 ---
 
-<section class="section" id="menu">
+<section class="section strip-ink mn" id="menu">
   <div class="container">
-    <div class="section-head">
-      <div>
-        <h2>Меню</h2>
-        {home.menu_text && <p class="lead">{home.menu_text}</p>}
-      </div>
-      <a class="btn btn--primary btn--sm" href={settings.shop_url} target="_blank" rel="noopener">
-        Заказать в приложении
-      </a>
+    <div class="mn__head">
+      <h2>Меню</h2>
+      {home.menu_text && <p class="lead">{typo(home.menu_text)}</p>}
     </div>
 
-    <div class="mn__grid">
+    <ul class="mn__list">
       {
         cards.map(({ direction, menu }) => (
-          <article class="mn">
-            <div class="card-top">
-              <span class="card-mark card-mark--sm">
-                {direction.place ? (
-                  direction.place.n
-                ) : (
-                  <span class="icon" aria-hidden="true">
-                    <Fragment set:html={cake} />
-                  </span>
-                )}
+          <li class="mn__row">
+            {/* круг остаётся только под номером точки: у кондитерской его нет */}
+            {direction.place ? (
+              <span class="card-mark card-mark--sm mn__mark">{direction.place.n}</span>
+            ) : (
+              <span class="mn__mark mn__mark--icon" aria-hidden="true">
+                <Fragment set:html={cake} />
               </span>
-              <span class="card-dash" />
-              <span class="card-pill">
-                {menu ? `обновлено ${day(menu.updated)}` : 'скоро'}
-              </span>
-            </div>
+            )}
 
-            <h3 class="mn__title">{direction.title}</h3>
-            <p class="mn__kind">{direction.place?.kind ?? 'Пирожные, торты, конфеты'}</p>
+            <span class="mn__name">
+              <h3 class="mn__title">{direction.title}</h3>
+              <span class="mn__kind">{direction.place?.kind ?? 'Пирожные, торты, конфеты'}</span>
+            </span>
 
-            <div class="mn__foot">
-              {menu ? (
-                <a class="btn btn--secondary btn--md" href={menu.file.href} target="_blank" rel="noopener">
-                  Смотреть меню
-                </a>
-              ) : (
-                <p class="mn__soon">Меню скоро появится</p>
-              )}
-            </div>
-          </article>
+            <span class="card-pill card-pill--light mn__pill">
+              {/* дата у файла-заглушки соврала бы: под кнопкой пустой лист */}
+              {!menu ? 'скоро' : menu.file.placeholder ? 'образец' : `обновлено ${day(menu.updated)}`}
+            </span>
+
+            {menu ? (
+              <a
+                class="btn btn--secondary btn--sm mn__act"
+                href={menu.file.href}
+                target="_blank"
+                rel="noopener"
+              >
+                Открыть PDF
+              </a>
+            ) : (
+              <span class="mn__act mn__soon">Меню скоро появится</span>
+            )}
+          </li>
         ))
       }
+    </ul>
+
+    <div class="mn__cta">
+      <a class="btn btn--light btn--md" href={settings.shop_url} target="_blank" rel="noopener">
+        Заказать в приложении
+      </a>
     </div>
   </div>
 </section>
 
 <style>
-  .mn__grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: calc(var(--gap) + 2px);
-    margin-top: 26px;
-    align-items: stretch;
-  }
-
+  /* hairline of the strip: derived from the cream text, never a hardcoded colour
+     волосок полосы: считается от кремового текста, без хардкода цвета */
   .mn {
+    --mn-line: color-mix(in srgb, var(--on-ink) 20%, transparent);
+  }
+
+  .mn__head {
     display: flex;
-    flex-direction: column;
-    padding: calc(var(--gap) + 8px);
-    border: 1px solid var(--olive-tint-line);
-    border-radius: var(--r-xl);
-    background: var(--olive-tint);
-    transition: border-color 0.16s ease;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 32px;
   }
 
-  .icon {
-    display: inline-flex;
-    width: 18px;
-    height: 18px;
+  .mn__head .lead {
+    max-width: 34rem;
   }
 
-  .icon > :global(svg) {
-    width: 100%;
-    height: 100%;
+  .mn__list {
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--mn-line);
+  }
+
+  /* Phone: a two-column grid, not a wrapping flex row. On wrap the button fell
+     back to the container edge and the row's left side broke into three steps.
+     Телефон: сетка в две колонки, а не переносимый flex. На переносе кнопка
+     падала к краю контейнера и левый край строки ломался в три ступени. */
+  .mn__row {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--mn-line);
+  }
+
+  /* метка в строке компактнее карточной: круг 36 задавал высоту всей полки */
+  .mn__mark {
+    grid-area: 1 / 1;
+    width: 32px;
+    height: 32px;
+    font-size: 15px;
+  }
+
+  .mn__pill {
+    grid-area: 1 / 3;
+  }
+
+  /* кнопка идёт под названием и в его колонке: левый край строки один */
+  .mn__act {
+    grid-column: 2 / -1;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .mn__mark--icon {
+    display: grid;
+    place-items: center;
+    color: var(--terracotta-on-ink);
+  }
+
+  /* On ink a dark pill is indistinguishable from the strip and reads as a hole:
+     the chip goes lighter. Cream on it keeps 7.2:1.
+     На чернилах тёмная пилюля не отличается от полосы и читается дырой:
+     фишка светлеет. Кремовый на ней держит 7,2:1. */
+  .mn .mn__pill {
+    background: color-mix(in srgb, var(--on-ink) 15%, transparent);
+    color: var(--on-ink);
+  }
+
+  .mn__mark--icon > :global(svg) {
+    width: 22px;
+    height: 22px;
+  }
+
+  .mn__name {
+    grid-area: 1 / 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 12px;
+    min-width: 0;
   }
 
   .mn__title {
-    margin: 18px 0 6px;
-    font-size: calc(var(--fs-h3) + 1px);
-    line-height: 1.14;
+    color: var(--on-ink);
   }
 
   .mn__kind {
     font-size: var(--fs-body);
-    color: var(--text-3);
+    color: var(--on-ink-2);
   }
 
-  .mn__foot {
-    margin-top: auto;
-    padding-top: 20px;
-  }
-
-  /* пустое состояние занимает ту же высоту, что и кнопка: карточки не пляшут */
+  /* пустое состояние держит высоту кнопки: строки не пляшут */
   .mn__soon {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    min-height: 42px;
-    font-size: 13.5px;
+    min-height: 38px;
+    font-size: 13px;
     font-weight: 600;
-    color: var(--text-4);
+    color: var(--on-ink-2);
+  }
+
+  /* обводка кнопки на чернилах кремовая: базовая рамка `--line` там не видна */
+  .mn__row .btn--secondary {
+    border-color: color-mix(in srgb, var(--on-ink) 45%, transparent);
+    color: var(--on-ink);
+  }
+
+  .mn__row .btn--secondary:active {
+    background: color-mix(in srgb, var(--on-ink) 18%, transparent);
+  }
+
+  .mn__cta {
+    display: flex;
+    margin-top: 12px;
+  }
+
+  .mn__cta .btn {
+    flex: 1 1 auto;
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .mn:hover {
-      border-color: color-mix(in srgb, var(--olive) 45%, transparent);
+    .mn__row .btn--secondary:hover {
+      background: color-mix(in srgb, var(--on-ink) 12%, transparent);
+      border-color: var(--on-ink);
     }
   }
 
   @media (min-width: 768px) {
-    .mn__grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+    /* заголовок слева, лид справа — одной строкой, без столбика */
+    .mn__head .lead {
+      margin-top: 0;
+    }
+
+    /* строка укладывается в одну линию — кнопке можно вернуть правый край */
+    .mn__row {
+      grid-template-columns: 32px minmax(0, 1fr) auto auto;
+    }
+
+    .mn__act {
+      grid-area: 1 / 4;
+    }
+
+    .mn__cta {
+      justify-content: flex-start;
+      margin-top: 14px;
+    }
+
+    .mn__cta .btn {
+      flex: none;
     }
   }
 </style>

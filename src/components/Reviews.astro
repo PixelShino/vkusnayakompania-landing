@@ -1,7 +1,9 @@
 ---
 /**
- * Отзывы — официальным виджетом Яндекс.Карт: копировать тексты к себе нельзя
- * (права авторов + условия Карт). Слева — цифры с карточки организации.
+ * Reviews: the score panel and the live Yandex widget stand as one composition.
+ * Texts are never copied over — authors' rights and the Maps terms forbid it.
+ * Отзывы: панель рейтинга и живой виджет Яндекс Карт стоят одной композицией.
+ * Тексты к себе не копируются — права авторов и условия Карт этого не дают.
  */
 import { plural, yandexOrgUrl, yandexReviewsUrl } from '../data/site';
 import type { Content } from '../lib/content.ts';
@@ -16,96 +18,101 @@ const reviews = settings.yandex_reviews ?? 0;
 // оценки в админке ещё нет — виджет остаётся, а придумывать цифру нечем
 const score = settings.yandex_score;
 const highlights = settings.yandex_highlights;
+
+// The panel stands on the score or on the marks: with neither there is nothing to show.
+// Панель держится на оценке или на долях: нет ни того, ни другого — панели нет.
+const hasPanel = Boolean(score) || highlights.length > 0;
+
+const STAR =
+  'M12 2.6l2.9 5.9 6.5.95-4.7 4.6 1.1 6.45L12 17.5l-5.8 3-1.1-6.45L.4 9.45l6.5-.95L12 2.6z';
 ---
 
 <section class="section" id="reviews">
   <div class="container">
-    <div class="rev">
-      <div class="rev__aside">
+    <div class="section-head">
+      <div>
         <p class="kicker">Отзывы</p>
         <h2>Что говорят гости</h2>
-        <p class="lead">
-          Ничего не переписываем и не отбираем — рядом живой виджет Яндекс Карт со всеми отзывами,
-          как есть.
-        </p>
+      </div>
+      <p class="lead">
+        Ничего не переписываем и не отбираем — рядом живой виджет Яндекс Карт со всеми отзывами,
+        как есть.
+      </p>
+    </div>
 
-        {
-          score && (
-            <div class="rev__score">
-              <div class="blob" aria-hidden="true"></div>
-              <div class="card-top">
-                <span class="card-mark card-mark--light">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFFAED" aria-hidden="true">
-                    <path
-                      d="M12 2.6l2.9 5.9 6.5.95-4.7 4.6 1.1 6.45L12 17.5l-5.8 3-1.1-6.45L.4 9.45l6.5-.95L12 2.6z"
-                    ></path>
-                  </svg>
-                </span>
-                <span class="card-dash card-dash--light"></span>
-                {settings.yandex_award && (
-                  <span class="card-pill card-pill--light">{settings.yandex_award}</span>
-                )}
-              </div>
+    <div class:list={['rev', hasPanel && 'rev--split']}>
+      {
+        hasPanel && (
+          <div class="rev__score">
+            <div class="blob" aria-hidden="true" />
 
+            <div class="card-top">
+              <span class="card-mark card-mark--light">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d={STAR} />
+                </svg>
+              </span>
+              {settings.yandex_award && (
+                <span class="card-pill card-pill--light">{settings.yandex_award}</span>
+              )}
+            </div>
+
+            {score && (
               <div class="rev__big-row">
-                <p class="rev__big tnum">{settings.yandex_score}</p>
-                <div class="rev__stars" aria-hidden="true">
-                  {
-                    Array.from({ length: 5 }).map(() => (
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="#FFFAED">
-                        <path d="M12 2.6l2.9 5.9 6.5.95-4.7 4.6 1.1 6.45L12 17.5l-5.8 3-1.1-6.45L.4 9.45l6.5-.95L12 2.6z" />
+                <p class="rev__big display tnum">{score}</p>
+                <div class="rev__big-meta">
+                  <span class="rev__stars" aria-hidden="true">
+                    {Array.from({ length: 5 }).map(() => (
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                        <path d={STAR} />
                       </svg>
-                    ))
-                  }
+                    ))}
+                  </span>
+                  <p class="rev__count tnum">
+                    {ratings} {plural(ratings, 'оценка', 'оценки', 'оценок')} · {reviews}{' '}
+                    {plural(reviews, 'отзыв', 'отзыва', 'отзывов')}
+                  </p>
+                  <p class="rev__src">
+                    Яндекс Карты · {places.length}{' '}
+                    {plural(places.length, 'точка', 'точки', 'точек')}
+                  </p>
                 </div>
               </div>
+            )}
 
-              <p class="rev__score-meta">
-                {ratings} {plural(ratings, 'оценка', 'оценки', 'оценок')} и{' '}
-                {reviews} {plural(reviews, 'отзыв', 'отзыва', 'отзывов')} на
-                Яндекс Картах — по двум точкам
-              </p>
+            {highlights.length > 0 && (
+              <>
+                <ul class="rev__marks">
+                  {highlights.map((mark) => (
+                    <li class="rev__mark">
+                      <span class="rev__mark-label">{mark.label}</span>
+                      <span class="rev__mark-bar" aria-hidden="true">
+                        <span class="rev__mark-fill" style={`width:${mark.percent}%`} />
+                      </span>
+                      <span class="rev__mark-value tnum">{mark.percent}%</span>
+                    </li>
+                  ))}
+                </ul>
+                <p class="rev__marks-note">Доля положительных упоминаний — по данным Яндекса</p>
+              </>
+            )}
 
-              <div class="rev__sources">
-                {
-                  places.map((place) => (
-                    <a
-                      class="rev__source"
-                      href={`${yandexOrgUrl(place.yandex_org)}reviews/`}
-                      target="_blank"
-                      rel="noopener"
-                    >
-                      <span class="rev__source-name">{place.street}</span>
-                      <span class="rev__source-score tnum">{place.rating}</span>
-                    </a>
-                  ))
-                }
-              </div>
+            <div class="rev__sources">
+              {places.map((place) => (
+                <a
+                  class="rev__source"
+                  href={`${yandexOrgUrl(place.yandex_org)}reviews/`}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <span class="rev__source-name">{place.street}</span>
+                  {place.rating && <span class="rev__source-score tnum">{place.rating}</span>}
+                </a>
+              ))}
             </div>
-          )
-        }
-
-        {
-          highlights.length > 0 && (
-            <>
-              <ul class="rev__marks">
-                {highlights.map((mark) => (
-                  <li class="rev__mark">
-                    <span class="rev__mark-label">{mark.label}</span>
-                    <span class="rev__mark-bar" aria-hidden="true">
-                      <span class="rev__mark-fill" style={`width:${mark.percent}%`} />
-                    </span>
-                    <span class="rev__mark-value tnum">{mark.percent}%</span>
-                  </li>
-                ))}
-              </ul>
-              <p class="rev__marks-note">
-                Доля положительных упоминаний в отзывах — по данным Яндекса
-              </p>
-            </>
-          )
-        }
-      </div>
+          </div>
+        )
+      }
 
       <div class="rev__widget">
         <div class="rev__tabs" role="group" aria-label="Отзывы по точкам">
@@ -121,7 +128,7 @@ const highlights = settings.yandex_highlights;
                 aria-pressed={i === 0 ? 'true' : 'false'}
               >
                 {place.name}
-                <span class="rev__tab-score tnum">{place.rating}</span>
+                {place.rating && <span class="rev__tab-score tnum">{place.rating}</span>}
               </button>
             ))
           }
@@ -133,7 +140,7 @@ const highlights = settings.yandex_highlights;
           data-frame-title="Отзывы о «Вкусной компании» на Яндекс Картах"
           data-src={yandexReviewsUrl(places[0].yandex_org)}
         >
-          <p class="rev__frame-stub">Загружаем отзывы…</p>
+          <p class="rev__frame-stub" data-frame-note>Загружаем отзывы…</p>
           <noscript>
             {/* без JS вкладки не работают: по ссылке на каждую точку */}
             <div class="rev__frame-stub rev__frame-links">
@@ -168,10 +175,12 @@ const highlights = settings.yandex_highlights;
 <style>
   .rev {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: calc(var(--gap) + 10px);
-    align-items: start;
-    margin-top: 6px;
+    grid-template-columns: minmax(0, 1fr);
+    /* stretch: the panel and the widget end on one line, no gap under either
+       stretch: панель и виджет кончаются на одной линии, дыры под ними нет */
+    align-items: stretch;
+    gap: var(--gap);
+    margin-top: 18px;
   }
 
   .rev__score {
@@ -179,10 +188,10 @@ const highlights = settings.yandex_highlights;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    margin-top: 22px;
-    padding: calc(var(--gap) + 10px);
+    padding: 20px;
     border-radius: var(--r-xl);
     background: var(--olive);
+    /* на оливковой заливке текст только непрозрачный кремовый: 0,86 даёт 3,9:1 */
     color: var(--bg);
   }
 
@@ -190,30 +199,92 @@ const highlights = settings.yandex_highlights;
     position: relative;
     z-index: 1;
     display: flex;
-    align-items: baseline;
-    gap: 14px;
-    margin: 20px 0 8px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 6px 16px;
+    margin-top: 18px;
   }
 
   .rev__big {
-    font-weight: var(--fw-heading);
-    font-size: 46px;
-    line-height: 0.9;
-    letter-spacing: -0.02em;
+    font-size: clamp(64px, 8.4vw, 88px);
+    line-height: 0.86;
+  }
+
+  .rev__big-meta {
+    flex: 1 1 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 
   .rev__stars {
     display: flex;
     gap: 3px;
+    margin-bottom: 2px;
   }
 
-  .rev__score-meta {
+  .rev__count {
+    font-size: var(--fs-body);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .rev__src {
+    font-size: 12px;
+    line-height: 1.3;
+  }
+
+  /* полоски вместо пилюль: название и доля читаются разом. Список тянется на
+     свободную высоту панели — иначе под ним оставалась пустая зона */
+  .rev__marks {
     position: relative;
     z-index: 1;
-    font-size: calc(var(--fs-body) - 0.5px);
-    line-height: 1.5;
-    /* на оливковой заливке текст только непрозрачный: 0,86 давало 3,9:1 */
-    color: var(--bg);
+    display: grid;
+    flex: 1 1 auto;
+    align-content: space-between;
+    gap: 10px 24px;
+    margin: 20px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .rev__mark {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr) 38px;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .rev__mark-label {
+    font-size: 13.5px;
+  }
+
+  .rev__mark-bar {
+    height: 8px;
+    border-radius: var(--r-pill);
+    /* подложка темнее заливки: светлая полупрозрачная сливалась бы с оливой */
+    background: color-mix(in srgb, var(--text) 26%, transparent);
+    overflow: hidden;
+  }
+
+  .rev__mark-fill {
+    display: block;
+    height: 100%;
+    border-radius: var(--r-pill);
+    background: var(--bg);
+  }
+
+  .rev__mark-value {
+    font-size: 12.5px;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .rev__marks-note {
+    position: relative;
+    z-index: 1;
+    margin-top: 10px;
+    font-size: 11.5px;
   }
 
   .rev__sources {
@@ -223,7 +294,7 @@ const highlights = settings.yandex_highlights;
     flex-wrap: wrap;
     gap: 8px;
     margin-top: auto;
-    padding-top: 18px;
+    padding-top: 20px;
   }
 
   .rev__source {
@@ -238,6 +309,13 @@ const highlights = settings.yandex_highlights;
     border-radius: var(--r-pill);
     background: var(--bg);
     text-decoration: none;
+    transition:
+      scale 120ms var(--ease-out),
+      background-color 0.16s ease;
+  }
+
+  .rev__source:active {
+    scale: 0.96;
   }
 
   .rev__source-name {
@@ -251,57 +329,6 @@ const highlights = settings.yandex_highlights;
     font-size: 15px;
     line-height: 1;
     color: var(--terracotta-text);
-  }
-
-  /* полоски вместо пилюль: цифра и доля читаются разом */
-  .rev__marks {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    /* во всю ширину планшета полоса читается хуже короткой */
-    max-width: 520px;
-    margin: 18px 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .rev__mark {
-    display: grid;
-    grid-template-columns: 74px minmax(0, 1fr) 38px;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .rev__mark-label {
-    font-size: 13px;
-    color: var(--text-2);
-  }
-
-  .rev__mark-bar {
-    height: 6px;
-    border-radius: var(--r-pill);
-    background: var(--line-3);
-    overflow: hidden;
-  }
-
-  .rev__mark-fill {
-    display: block;
-    height: 100%;
-    border-radius: var(--r-pill);
-    background: var(--olive);
-  }
-
-  .rev__mark-value {
-    font-size: 12.5px;
-    font-weight: 600;
-    text-align: right;
-    color: var(--text-3);
-  }
-
-  .rev__marks-note {
-    margin-top: 10px;
-    font-size: 11.5px;
-    color: var(--text-5);
   }
 
   .rev__widget {
@@ -320,17 +347,20 @@ const highlights = settings.yandex_highlights;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 14px;
+    padding: 9px 15px;
     border: 1px solid var(--line);
     border-radius: var(--r-pill);
     background: var(--bg);
     font-size: 12.5px;
     font-weight: 600;
     cursor: pointer;
-    transition:
-      background-color 0.16s ease,
-      border-color 0.16s ease,
-      color 0.16s ease;
+    transition-property: scale, background-color, border-color, color;
+    transition-duration: 120ms, 0.16s, 0.16s, 0.16s;
+    transition-timing-function: var(--ease-out), ease, ease, ease;
+  }
+
+  .rev__tab:active {
+    scale: 0.96;
   }
 
   .rev__tab-score {
@@ -344,19 +374,26 @@ const highlights = settings.yandex_highlights;
   }
 
   .rev__tab[aria-pressed='true'] .rev__tab-score {
-    color: rgba(255, 250, 237, 0.72);
+    color: inherit;
   }
 
   @media (hover: hover) and (pointer: fine) {
     .rev__tab:hover:not([aria-pressed='true']) {
-      background: color-mix(in srgb, var(--text) 6%, transparent);
+      background: var(--surface);
+      border-color: var(--line-4);
+    }
+
+    .rev__source:hover {
+      background: var(--surface);
     }
   }
 
-  /* фиксированная высота: внутри виджета свой скролл, а страница не прыгает при загрузке кадра */
+  /* высота задана снизу: внутри виджета свой скролл, страница не прыгает при
+     загрузке кадра, а `flex: 1` дотягивает кадр до низа панели рейтинга */
   .rev__frame {
     position: relative;
-    height: 460px;
+    flex: 1;
+    min-height: 460px;
     overflow: hidden;
     border: 1px solid var(--line);
     border-radius: var(--r-xl);
@@ -387,6 +424,11 @@ const highlights = settings.yandex_highlights;
     text-align: center;
   }
 
+  /* отказ: полосатая подложка читалась бы как «ещё грузится» */
+  .rev__frame.is-failed {
+    background: var(--surface);
+  }
+
   .rev__frame.is-loaded .rev__frame-stub {
     display: none;
   }
@@ -404,19 +446,43 @@ const highlights = settings.yandex_highlights;
   }
 
   @media (min-width: 768px) {
+    .rev {
+      margin-top: 22px;
+    }
+
+    .rev__score {
+      padding: 24px;
+    }
+
+    /* планшет: панель во всю ширину, доли в две колонки — иначе она вытягивается
+       столбиком и под ней остаётся пустое поле */
+    .rev__marks {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .rev__frame {
-      height: 520px;
+      min-height: 520px;
     }
   }
 
-  @media (min-width: 1000px) {
-    .rev {
-      grid-template-columns: 0.9fr 1.1fr;
-      gap: calc(var(--gap) + 24px);
+  @media (min-width: 1200px) {
+    .rev--split {
+      grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+      gap: calc(var(--gap) + 8px);
     }
 
-    .rev__big {
-      font-size: 58px;
+    .rev__score {
+      padding: 28px;
+    }
+
+    .rev--split .rev__marks {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* кадр ниже планшетного: при 520 колонка виджета перерастала панель и внизу
+       неё зияла пустая зона, а отзывов на экране больше не становилось */
+    .rev--split .rev__frame {
+      min-height: 460px;
     }
   }
 </style>

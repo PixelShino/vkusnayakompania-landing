@@ -1,0 +1,184 @@
+---
+/**
+ * Ink strip of numbers between the directions and the venue gallery: it breaks
+ * the cream monotony. Every figure comes from content — one without data behind
+ * it is dropped, never invented.
+ * Чернильная полоса цифр между направлениями и лентой залов: она разрывает
+ * кремовую монотонность. Каждая цифра берётся из контента — цифра, которой в
+ * данных нет, выкидывается, а не придумывается.
+ */
+import CountUp from '../islands/CountUp.tsx';
+import { plural } from '../data/site';
+import type { Content } from '../lib/content.ts';
+
+interface Props {
+  content: Content;
+}
+
+const { content } = Astro.props;
+const { settings, places } = content;
+
+/**
+ * `value` досчитывается островом, `text` стоит как есть: рейтинг «4,9» — строка
+ * с запятой, счётчик умеет только целые.
+ * `value` is counted by the island, `text` is printed as is: the «4,9» score is
+ * a comma decimal, the counter handles integers only.
+ */
+type Figure = { label: string; accent?: boolean } & ({ value: number } | { text: string });
+
+const { yandex_score: score, yandex_ratings: ratings, yandex_reviews: reviews } = settings;
+
+// 48 hours is the cake lead time, the same one in home.cakes_text and the confectionery card;
+// there is no hall capacity in the data, so that figure is absent instead of guessed
+// 48 часов — срок торта, он же в `home.cakes_text` и в карточке кондитерской;
+// вместимости зала в данных нет, поэтому такой цифры здесь нет, а не выдумана
+const figures: Figure[] = [
+  { value: places.length, label: `${plural(places.length, 'точка', 'точки', 'точек')} в Самаре` },
+  { value: 48, label: 'часов на торт' },
+  ...(score ? [{ text: score, label: 'рейтинг на Картах', accent: true }] : []),
+  ...(ratings ? [{ value: ratings, label: plural(ratings, 'оценка', 'оценки', 'оценок') }] : []),
+  ...(reviews ? [{ value: reviews, label: plural(reviews, 'отзыв', 'отзыва', 'отзывов') }] : []),
+];
+---
+
+<section class="strip-ink nums" aria-label="Вкусная компания в цифрах">
+  <div class="container">
+    <ul class="nums__row" role="list">
+      {
+        figures.map((figure) => (
+          <li class="num">
+            <span class:list={['num__v', 'display', 'tnum', figure.accent && 'num__v--accent']}>
+              {'value' in figure ? (
+                <CountUp client:visible to={figure.value} separator={' '} />
+              ) : (
+                figure.text
+              )}
+            </span>
+            <span class="num__label">{figure.label}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .nums {
+    padding-block: var(--sec-pad);
+  }
+
+  /* Phone: two columns, no rules between cells — a hairline on 136 px of width
+     reads as clutter. An odd last figure takes the whole row instead of a hole.
+     Телефон: две колонки без разделителей — линия на 136 px ширины только сорит.
+     Нечётная последняя цифра занимает всю строку, дыры в ряду не остаётся. */
+  .nums__row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 26px var(--gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .num {
+    min-width: 0;
+  }
+
+  .num:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .num__v {
+    display: block;
+    font-size: 44px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  /* единственный тёплый акцент полосы: осветлённая терракота, 5,5:1 на чернилах */
+  /* the strip's one warm accent: lightened terracotta, 5.5:1 on the ink */
+  .num__v--accent {
+    color: var(--terracotta-on-ink);
+  }
+
+  .num__label {
+    display: block;
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    line-height: 1.35;
+    text-transform: uppercase;
+    color: var(--on-ink-2);
+    text-wrap: balance;
+  }
+
+  /* 2 + 3 on six columns; the hairline is --on-ink at 14 %, drawn on the left of
+     every cell but the first of its row.
+     2 + 3 на шести колонках; волосяная линия — `--on-ink` на 14 %, слева у каждой
+     ячейки, кроме первой в своей строке. */
+  @media (min-width: 768px) {
+    .nums__row {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      column-gap: 0;
+      row-gap: 32px;
+    }
+
+    .num {
+      grid-column: span 2;
+      padding-inline: 22px;
+      border-inline-start: 1px solid color-mix(in srgb, var(--on-ink) 14%, transparent);
+    }
+
+    .num:nth-child(-n + 2) {
+      grid-column: span 3;
+    }
+
+    /* снимает мобильное «на всю строку» у нечётной последней цифры */
+    /* drops the phone full-row rule from an odd last figure */
+    .num:last-child:nth-child(odd) {
+      grid-column: span 2;
+    }
+
+    .num:first-child,
+    .num:nth-child(3) {
+      padding-inline-start: 0;
+      border-inline-start: 0;
+    }
+
+    .num__v {
+      font-size: 56px;
+    }
+
+    /* доминанта верхнего ряда: две широкие ячейки берут крупный кегль, иначе
+       справа от них остаётся мёртвая зона в треть ширины */
+    /* the top row leads: two wide cells take the larger size, otherwise a third
+       of the width next to them stays dead space */
+    .num:nth-child(-n + 2) .num__v {
+      font-size: 72px;
+    }
+  }
+
+  /* пять в ряд: третья цифра перестаёт быть началом строки и получает линию */
+  /* five in a row: the third figure is no longer a row start and gets its rule */
+  @media (min-width: 1200px) {
+    .nums__row {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .num,
+    .num:nth-child(-n + 2),
+    .num:last-child:nth-child(odd) {
+      grid-column: auto;
+    }
+
+    .num:nth-child(3) {
+      padding-inline-start: 22px;
+      border-inline-start: 1px solid color-mix(in srgb, var(--on-ink) 14%, transparent);
+    }
+
+    .num__v {
+      font-size: 72px;
+    }
+  }
+</style>

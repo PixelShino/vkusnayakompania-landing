@@ -7,6 +7,9 @@
 
 const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/** столько ждём ответа Яндекса: столько же держит ветка JS API карты */
+const TIMEOUT = 8000;
+
 const mountFrame = (holder: HTMLElement) => {
   const name = holder.dataset.frame ?? '';
   const label = document.querySelector<HTMLElement>(`[data-frame-label='${name}']`);
@@ -28,7 +31,19 @@ const mountFrame = (holder: HTMLElement) => {
     frame.title = holder.dataset.frameTitle ?? '';
     frame.loading = 'lazy';
     frame.allowFullscreen = true;
-    frame.addEventListener('load', () => holder.classList.add('is-loaded'));
+    // не ответил — показываем отказ: пустая коробка с «Загружаем…» висела вечно
+    const fail = () => {
+      if (holder.classList.contains('is-loaded')) return;
+      holder.classList.add('is-failed');
+      const note = holder.querySelector('[data-frame-note]');
+      if (note) note.textContent = 'Не загрузилось — откройте на Яндекс Картах';
+    };
+    const timer = setTimeout(fail, TIMEOUT);
+    frame.addEventListener('load', () => {
+      clearTimeout(timer);
+      holder.classList.add('is-loaded');
+    });
+    frame.addEventListener('error', fail);
     holder.appendChild(frame);
   };
 

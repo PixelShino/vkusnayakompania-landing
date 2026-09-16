@@ -59,7 +59,7 @@ const points = places.map((place) => ({
           data-src={yandexWidgetUrl(places)}
         >
           <div class="map__stub">
-            <p class="map__stub-label">Загружаем карту…</p>
+            <p class="map__stub-label" data-frame-note>Загружаем карту…</p>
             <p class="map__stub-hint">Открыть в Яндекс Картах:</p>
             {places.map((place) => (
               <a

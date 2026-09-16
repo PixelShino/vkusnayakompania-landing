@@ -12,7 +12,6 @@ const title = document.getElementById('book-title');
 const note = document.getElementById('book-note');
 
 if (dialog && title && note) {
-  const fallback = dialog.dataset.note ?? '';
 
   document.addEventListener('click', (event) => {
     const target = event.target;
@@ -22,7 +21,8 @@ if (dialog && title && note) {
 
     event.preventDefault();
     title.textContent = trigger.dataset.book || 'Бронь стола';
-    const hint = trigger.dataset.bookNote || fallback;
+    // повод от триггера; строка часов ниже стоит своя и не подменяется
+    const hint = trigger.dataset.bookNote ?? '';
     note.textContent = hint;
     note.hidden = !hint;
     dialog.showModal();

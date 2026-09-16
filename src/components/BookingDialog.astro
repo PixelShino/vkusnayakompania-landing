@@ -40,7 +40,10 @@ const phones =
     </button>
 
     <h2 class="book__title" id="book-title">Бронь стола</h2>
-    <p class="book__note" id="book-note" hidden={!note}>{note}</p>
+    {/* повод («Медовик к субботе») и часы ответа — разные строки: повод приходит
+        от триггера, часы стоят всегда */}
+    <p class="book__note" id="book-note" hidden>{}</p>
+    <p class="book__note book__hours" id="book-hours" hidden={!note}>{note}</p>
 
     <div class="book__actions">
       <MessengerButtons settings={settings} variant="dark" size="lg" />
@@ -160,6 +163,13 @@ const phones =
     font-size: min(var(--fs-h2), 30px);
     padding-right: 52px;
     text-wrap: balance;
+  }
+
+  /* часы ответа стоят всегда и тише повода: повод читают первым */
+  .book__hours {
+    margin-top: 6px;
+    font-size: calc(var(--fs-body) - 0.5px);
+    color: var(--text-4);
   }
 
   .book__note {

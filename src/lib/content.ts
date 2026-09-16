@@ -12,9 +12,23 @@ import { QUERIES } from '../../scripts/queries.mjs';
 import fixture from '../data/fixture.json' with { type: 'json' };
 
 /** Картинка для `<Image>`: свой файл или адрес Directus, размеры обязательны. */
+/** Файл-заглушка помечен в админке: с этой пометкой сайт не выдаёт его за готовый. */
+export const isPlaceholder = (title?: string | null) => Boolean(title?.startsWith('[заглушка]'));
+
+/**
+ * A dash never starts a line: the space before it becomes non-breaking. Russian
+ * typography allows a leading dash only in dialogue, and headings wrapped right
+ * on it. Applied on render, so text typed in Directus is covered too.
+ * Тире не начинает строку: пробел перед ним делается неразрывным. В русской
+ * типографике тире с начала строки допустимо только в прямой речи, а заголовки
+ * переносились ровно по нему. Применяется на выводе — значит, действует и на
+ * текст, набранный в админке.
+ */
+export const typo = (text: string) => text.replace(/ ([\u2014\u2013]) /g, '\u00a0$1 ');
+
 export type Img = { src: ImageMetadata | string; width: number; height: number; alt: string };
 /** Документ в `public/media/` — PDF меню, политика, оферта. */
-export type Doc = { href: string; title: string };
+export type Doc = { href: string; title: string; placeholder: boolean };
 
 export type Settings = {
   phone: string;
@@ -203,7 +217,11 @@ const toImg = (file: RawFile | null | undefined, resolve: ResolveImage): Img | u
 
 const toDoc = (file: RawFile | null | undefined): Doc | undefined =>
   file
-    ? { href: `/media/${file.id}.${ext(file)}`, title: file.title || file.filename_download }
+    ? {
+        href: `/media/${file.id}.${ext(file)}`,
+        title: file.title || file.filename_download,
+        placeholder: isPlaceholder(file.title),
+      }
     : undefined;
 
 // toSchedule knows the days but not the venue; the venue name is added here

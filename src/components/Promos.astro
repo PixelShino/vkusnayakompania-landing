@@ -1,12 +1,12 @@
 ---
 /**
- * Live promos in one grid: the «both venues» group first, then venue by venue.
- * A card is text only — conditions plus the address at the bottom, no action.
- * Живые акции одной сеткой: сначала группа «обе точки», затем по точкам.
- * Карточка только текстовая: условия и адрес внизу, без кнопки.
+ * Live promos: one dominant ink card carrying the discount figure in display
+ * type, the rest compact on paper. A card is a heading plus one condition.
+ * Живые акции: доминанта — чернильная карточка с размером скидки антиквой,
+ * остальные компактные на поверхности. Карточка — заголовок и одно условие.
  */
 import { groupByPlace } from '../lib/select';
-import type { Place, Promo } from '../lib/content';
+import { typo, type Place, type Promo } from '../lib/content';
 
 interface Props {
   promos: Promo[];
@@ -21,6 +21,22 @@ const groups = groupByPlace(promos.map((promo) => ({ promo, place: promo.place?.
 const ordered = [null, ...places.map((place) => place.id)]
   .flatMap((key) => groups.get(key) ?? [])
   .map((row) => row.promo);
+
+// card copy is cut to the first sentence: nothing is added, only trimmed
+// текст режется до первого предложения: ничего не дописываем, только убираем
+const oneSentence = (text: string) => text.match(/^[^.!?]*[.!?]/)?.[0] ?? text;
+
+// the dominant card takes the discount figure out of its own title, e.g. «20 %»
+// доминанта вынимает размер скидки из своего же заголовка, например «20 %»
+const [hero, ...rest] = ordered;
+const figure = hero?.title.match(/\d+\s*%/)?.[0] ?? null;
+const heroTitle = figure
+  ? hero.title.replace(figure, ' ').replace(/\s{2,}/g, ' ').replace(/[\s—–-]+$/, '').trim()
+  : (hero?.title ?? '');
+
+// address label: the venue name, or «обе точки» for a network-wide promo
+// подпись адреса: имя точки, у общей акции — «обе точки»
+const addr = (promo: Promo) => promo.place?.name ?? 'Обе точки';
 ---
 
 {
@@ -33,18 +49,24 @@ const ordered = [null, ...places.map((place) => place.id)]
           </div>
         </div>
 
-        <div class="pr__grid">
-          {ordered.map((promo, i) => (
-            <article class:list={['pr', { 'pr--hi': i === 0 && !promo.place }]}>
-              {i === 0 && !promo.place && <div class="blob" aria-hidden="true" />}
+        <div
+          class:list={['pr__grid', { 'pr__grid--solo': rest.length === 0 }]}
+          style={`--pr-span:${Math.max(rest.length, 1)}`}
+        >
+          <article class="pr pr--hi">
+            <div class="blob" aria-hidden="true" />
 
-              <h3 class="pr__title">{promo.title}</h3>
-              <p class="pr__text">{promo.text}</p>
+            {figure && <p class="pr__figure display">{figure}</p>}
+            <h3 class="pr__title pr__title--hi">{heroTitle}</h3>
+            <p class="pr__text">{oneSentence(hero.text)}</p>
+            <p class="pr__addr">{addr(hero)}</p>
+          </article>
 
-              <p class="pr__addr">
-                <span class="pr__dash" aria-hidden="true" />
-                {promo.place?.name ?? 'Обе точки'}
-              </p>
+          {rest.map((promo) => (
+            <article class="pr">
+              <h3 class="pr__title">{typo(promo.title)}</h3>
+              <p class="pr__text">{typo(oneSentence(promo.text))}</p>
+              <p class="pr__addr">{addr(promo)}</p>
             </article>
           ))}
         </div>
@@ -54,38 +76,56 @@ const ordered = [null, ...places.map((place) => place.id)]
 }
 
 <style>
+  /* start-aligned: a short card stays short, no padded-out bottoms */
+  /* выравнивание по верху: короткая карточка остаётся короткой */
   .pr__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: calc(var(--gap) + 2px);
-    margin-top: 26px;
-    align-items: stretch;
+    gap: var(--gap);
+    margin-top: 18px;
+    align-items: start;
   }
 
   .pr {
     position: relative;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
-    padding: calc(var(--gap) + 8px);
+    padding: calc(var(--gap) + 6px) calc(var(--gap) + 8px);
     border: 1px solid var(--line);
-    border-radius: var(--r-xl);
+    border-radius: var(--r-lg);
     background: var(--surface);
     transition: border-color 0.16s ease;
   }
 
   .pr--hi {
-    border-color: var(--olive);
-    background: var(--olive);
-    color: var(--bg);
+    overflow: hidden;
+    padding: calc(var(--gap) + 12px);
+    border-color: var(--ink);
+    border-radius: var(--r-xl);
+    background: var(--ink);
+    color: var(--on-ink);
+  }
+
+  /* the figure leads the card and stays on one line at any width */
+  /* цифра ведёт карточку и не переносится ни на какой ширине */
+  .pr__figure {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 10px;
+    font-size: clamp(56px, 7.2vw, 80px);
+    color: var(--terracotta-on-ink);
+    white-space: nowrap;
   }
 
   .pr__title {
     position: relative;
     z-index: 1;
-    margin-bottom: 8px;
-    font-size: calc(var(--fs-h3) + 1px);
+    margin-bottom: 6px;
+    font-size: var(--fs-h3);
     line-height: 1.14;
+  }
+
+  .pr__title--hi {
+    font-size: calc(var(--fs-h3) + 3px);
   }
 
   .pr__text {
@@ -95,37 +135,60 @@ const ordered = [null, ...places.map((place) => place.id)]
     color: var(--text-2);
   }
 
-  /* на оливковой заливке текст только непрозрачный: --surface даёт 4,2:1 */
+  /* на чернилах светлый текст только `--on-ink` / `--on-ink-2` */
   .pr--hi .pr__text {
-    color: var(--bg);
+    color: var(--on-ink-2);
   }
 
-  /* адрес прижат к низу карточки: у соседних карточек подписи на одной линии */
   .pr__addr {
     position: relative;
     z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: auto;
-    padding-top: 20px;
+    margin-top: 12px;
     font-size: 12.5px;
     font-weight: 600;
+    letter-spacing: 0.02em;
     color: var(--text-4);
   }
 
-  .pr__dash {
-    width: 28px;
-    flex: none;
-    border-top: 2px dashed color-mix(in srgb, var(--olive) 45%, transparent);
-  }
-
   .pr--hi .pr__addr {
-    color: var(--bg);
+    color: var(--on-ink-2);
   }
 
-  .pr--hi .pr__dash {
-    border-top-color: rgb(255 250 237 / 0.4);
+  @media (min-width: 768px) {
+    /* доминанта держит левую колонку на всю высоту стопки справа */
+    /* the dominant card holds the left column for the whole right-hand stack */
+    .pr__grid {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    }
+
+    .pr__grid--solo {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* карточка тянется на всю стопку, поэтому блок текста стоит по центру:
+       иначе высокая заливка расходится пустотой сверху или снизу */
+    /* the card spans the whole stack, so its copy is centred: otherwise the
+       tall fill breaks into dead space above or below */
+    .pr--hi {
+      grid-row: span var(--pr-span, 1);
+      align-self: stretch;
+      justify-content: center;
+      padding: calc(var(--gap) + 16px);
+    }
+
+    .pr__title--hi {
+      font-size: calc(var(--fs-h3) + 6px);
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .pr__grid {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    }
+
+    .pr__grid--solo {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -134,7 +197,7 @@ const ordered = [null, ...places.map((place) => place.id)]
     }
 
     .pr--hi:hover {
-      border-color: var(--olive-dark);
+      border-color: var(--olive);
     }
   }
 </style>

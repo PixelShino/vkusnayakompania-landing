@@ -6,14 +6,17 @@
  */
 import type { Content } from './content.ts';
 
-/** Пункты шапки; «Афиша» появляется только при текущей афише. */
-export const navFor = (content: Content) => [
-  { label: 'Главная', href: '#top' },
-  ...(content.afisha ? [{ label: 'Афиша', href: '#afisha' }] : []),
-  { label: 'Доставка', href: '#delivery' },
-  { label: 'О нас', href: '#about' },
-  { label: 'Меню', href: '#menu' },
-  { label: 'Контакты', href: '#contacts' },
+/**
+ * Пункты шапки; «Афиша» появляется только при текущей афише. `base` — префикс
+ * пути: на главной якорь голый, на 404 он должен вести на главную.
+ */
+export const navFor = (content: Content, base = '') => [
+  { label: 'Главная', href: `${base}#top` },
+  ...(content.afisha ? [{ label: 'Афиша', href: `${base}#afisha` }] : []),
+  { label: 'Доставка', href: `${base}#delivery` },
+  { label: 'О нас', href: `${base}#about` },
+  { label: 'Меню', href: `${base}#menu` },
+  { label: 'Контакты', href: `${base}#contacts` },
 ];
 
 type Link = { label: string; href: string };

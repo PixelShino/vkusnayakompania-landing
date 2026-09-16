@@ -1,15 +1,15 @@
 ---
 /**
- * Five directions of the company as one grid of equal compact cards: circle
- * (venue number or icon) → dashed rule → pill, heading, text, actions. Venue
- * photos moved to the gallery slider below, the cards carry no images.
- * Пять направлений компании одной сеткой одинаковых компактных карточек: круг
- * (номер точки или иконка) → пунктир → пилюля, заголовок, текст, действия.
- * Фото залов уехали в слайдер галереи ниже, в карточках их больше нет.
+ * Five directions as an uneven grid: two dominants (the venues, the first one
+ * ink-filled) take 3 of 6 columns, the three compact cards take 2. The card top
+ * is the circle and the pill — the dashed rule between them is gone.
+ * Пять направлений разноразмерной сеткой: две доминанты (точки, первая — с
+ * чернильной заливкой) занимают 3 колонки из 6, три компактные — по 2. В шапке
+ * карточки круг и пилюля, пунктир между ними убран.
  */
 import OpenStatus from './OpenStatus.astro';
 import { menuFor } from '../lib/select';
-import type { Content, Direction } from '../lib/content';
+import { typo, type Content, type Direction } from '../lib/content';
 import cake from '../assets/icons/cake.svg?raw';
 import cloche from '../assets/icons/cloche.svg?raw';
 import glasses from '../assets/icons/glasses.svg?raw';
@@ -35,6 +35,16 @@ const at = (key: Direction['key']) => directions.find((item) => item.key === key
 
 const menuHref = (direction: Direction) => menuFor(menus, direction.id)?.file.href ?? null;
 
+// Cards keep 1–2 sentences: the section carried 167 words and read as a wall.
+// Nothing is rewritten — only the tail of the admin text is dropped.
+// В карточке остаётся 1–2 предложения: секция несла 167 слов и читалась стеной.
+// Текст не переписывается — отбрасывается только хвост админского поля.
+const sentences = (text: string, keep: number) =>
+  text
+    .split(/(?<=[.!?])\s+/)
+    .slice(0, keep)
+    .join(' ');
+
 // у кафе и ресторана действия одни и те же, адрес уходит в заголовок диалога
 // both venue cards share one pair of actions; the dialog title carries the street
 const venueActions = (direction: Direction): Action[] => [
@@ -49,10 +59,10 @@ const venueActions = (direction: Direction): Action[] => [
 /**
  * Порядок карточек и их шапка: у точек в круге номер, а в пилюле живой статус,
  * у остальных — иконка и короткое слово. `phone` добавляет телефон точки
- * (у кейтеринга и банкетов — общий).
+ * (у кейтеринга и банкетов — общий). Первые две — доминанты сетки.
  * Card order and card top: venues get the venue number and a live status pill,
  * the rest get an icon and a short word. `phone` appends the venue's phone
- * (catering and banquets use the main one).
+ * (catering and banquets use the main one). The first two are the grid dominants.
  */
 const CARDS: {
   key: Direction['key'];
@@ -99,106 +109,157 @@ const cards = CARDS.map((row) => ({ ...row, direction: at(row.key) })).filter(
 
 <section class="section" id="about">
   <div class="container">
-    <div class="section-head">
-      <div>
-        <h2>{home.about_title}</h2>
-        {home.about_text && <p class="lead">{home.about_text}</p>}
-      </div>
+    <div class="section-head dir__head">
+      <h2>{home.about_title}</h2>
+      {home.about_text && <p class="lead dir__lead">{home.about_text}</p>}
     </div>
 
     <div class="dir__grid">
       {
-        cards.map(({ direction, icon, pill, phone, actions }) => (
-          <article class="dir">
-            <div class="card-top">
-              <span class="card-mark card-mark--sm">
-                {icon ? (
-                  <span class="icon" aria-hidden="true">
-                    <Fragment set:html={icon} />
-                  </span>
+        cards.map(({ direction, icon, pill, phone, actions }, i) => {
+          const wide = i < 2;
+          const ink = i === 0;
+          return (
+            <article class:list={['dir', wide && 'dir--wide', ink && 'dir--ink']}>
+              {ink && <div class="blob" aria-hidden="true" />}
+
+              <div class="card-top">
+                <span class="card-mark card-mark--sm">
+                  {icon ? (
+                    <span class="icon" aria-hidden="true">
+                      <Fragment set:html={icon} />
+                    </span>
+                  ) : (
+                    direction.place?.n
+                  )}
+                </span>
+                {pill ? (
+                  <span class="card-pill">{pill}</span>
                 ) : (
-                  direction.place?.n
+                  direction.place && <OpenStatus schedule={direction.place.schedule} />
                 )}
-              </span>
-              <span class="card-dash" />
-              {pill ? (
-                <span class="card-pill">{pill}</span>
-              ) : (
-                direction.place && <OpenStatus schedule={direction.place.schedule} />
+              </div>
+
+              <h3 class:list={['dir__title', wide && 'display']}>{direction.title}</h3>
+              <p class="dir__text">{typo(sentences(direction.text, wide ? 2 : 1))}</p>
+
+              {direction.place && (
+                <p class="dir__meta">
+                  Сегодня <OpenStatus schedule={direction.place.schedule} mode="today" class="tnum" />
+                  <span class="dir__dot" aria-hidden="true"> · </span>
+                  {direction.place.name}
+                </p>
               )}
-            </div>
 
-            <h3 class="dir__title">{direction.title}</h3>
-            <p class="dir__text">{direction.text}</p>
-
-            {direction.place && (
-              <p class="dir__meta">
-                Сегодня <OpenStatus schedule={direction.place.schedule} mode="today" class="tnum" />
-                <span class="dir__dot"> · </span>
-                {direction.place.name}
-              </p>
-            )}
-
-            <div class="dir__actions">
-              {actions(direction).map((action) =>
-                action.book ? (
-                  <button
-                    type="button"
-                    class:list={[
-                      'btn',
-                      'btn--md',
-                      action.primary ? 'btn--primary' : 'btn--secondary',
-                    ]}
-                    data-book={action.book}
-                    data-book-note={action.note}
-                  >
-                    {action.label}
-                  </button>
-                ) : (
-                  <a
-                    class:list={[
-                      'btn',
-                      'btn--md',
-                      action.primary ? 'btn--primary' : 'btn--secondary',
-                    ]}
-                    href={action.href}
-                    target={action.external ? '_blank' : undefined}
-                    rel={action.external ? 'noopener' : undefined}
-                  >
-                    {action.label}
+              <div class="dir__actions">
+                {actions(direction).map((action) =>
+                  action.book ? (
+                    <button
+                      type="button"
+                      class:list={[
+                        'btn',
+                        'btn--md',
+                        action.primary ? (ink ? 'btn--light' : 'btn--primary') : 'btn--secondary',
+                      ]}
+                      data-book={action.book}
+                      data-book-note={action.note}
+                    >
+                      {action.label}
+                    </button>
+                  ) : (
+                    <a
+                      class:list={[
+                        'btn',
+                        'btn--md',
+                        action.primary ? (ink ? 'btn--light' : 'btn--primary') : 'btn--secondary',
+                      ]}
+                      href={action.href}
+                      target={action.external ? '_blank' : undefined}
+                      rel={action.external ? 'noopener' : undefined}
+                    >
+                      {action.label}
+                    </a>
+                  ),
+                )}
+                {phone && (
+                  <a class="dir__phone" href={(direction.place ?? settings).phoneHref}>
+                    {(direction.place ?? settings).phone}
                   </a>
-                ),
-              )}
-              {phone && (
-                <a class="dir__phone" href={(direction.place ?? settings).phoneHref}>
-                  {(direction.place ?? settings).phone}
-                </a>
-              )}
-            </div>
-          </article>
-        ))
+                )}
+              </div>
+            </article>
+          );
+        })
       }
     </div>
   </div>
 </section>
 
 <style>
+  /* h2 слева, лид справа одной строкой: столбиком они оставляли пустым весь
+     правый край секции
+     h2 left, lead right on one line: stacked they left the whole right edge empty */
+  .dir__head h2 {
+    flex: 1 1 18rem;
+    min-width: 0;
+  }
+
+  .dir__lead {
+    flex: 1 1 22rem;
+    max-width: 34rem;
+  }
+
   .dir__grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: calc(var(--gap) + 2px);
-    align-items: stretch;
-    margin-top: 26px;
+    /* карточки не тянутся по высоте ряда: длинная остаётся длинной
+       cards never stretch to the row height: a long card stays long */
+    align-items: start;
+    margin-top: 18px;
   }
 
   .dir {
+    position: relative;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
     padding: calc(var(--gap) + 8px);
     border: 1px solid var(--line);
     border-radius: var(--r-xl);
     background: var(--surface);
     transition: border-color 0.16s ease;
+  }
+
+  /* пилюля уходит вправо сама: раньше её отжимал пунктир, ничего не значивший
+     the pill sits right on its own: the meaningless dashed rule is gone */
+  .card-top {
+    justify-content: space-between;
+  }
+
+  /* чернильная доминанта: палитра полосы на одной карточке, DESIGN.md §4
+     ink dominant: the strip palette applied to a single card, DESIGN.md §4 */
+  .dir--ink {
+    border-color: transparent;
+    background: var(--ink);
+    color: var(--on-ink);
+  }
+
+  .dir--ink .dir__text,
+  .dir--ink .dir__meta,
+  .dir--ink .dir__dot {
+    color: var(--on-ink-2);
+  }
+
+  .dir--ink .dir__phone {
+    color: var(--terracotta-on-ink);
+  }
+
+  /* обводка второй кнопки на чернилах кремовая: тёмная там не видна
+     the outlined button goes cream on ink; the dark border is invisible there */
+  .dir--ink .btn--secondary {
+    border-color: color-mix(in srgb, var(--on-ink) 50%, transparent);
+    color: var(--on-ink);
   }
 
   .icon {
@@ -213,9 +274,16 @@ const cards = CARDS.map((row) => ({ ...row, direction: at(row.key) })).filter(
   }
 
   .dir__title {
-    margin: 18px 0 8px;
+    margin: 14px 0 8px;
     font-size: calc(var(--fs-h3) + 2px);
     line-height: 1.12;
+  }
+
+  /* доминанта берёт дисплейную антикву: 24–28 px, мельче 22 Prata не ставится
+     dominants take the display serif at 24–28px; Prata never goes below 22 */
+  .dir--wide .dir__title {
+    margin-top: 16px;
+    font-size: calc(var(--fs-h3) + 7px);
   }
 
   .dir__text {
@@ -232,8 +300,11 @@ const cards = CARDS.map((row) => ({ ...row, direction: at(row.key) })).filter(
     color: var(--text-3);
   }
 
+  /* точка живёт внутри строки меты и берёт её цвет: на --line-4 она давала
+     1,39:1 и висела призраком между двумя читаемыми кусками
+     the dot lives inside the meta line and takes its colour */
   .dir__dot {
-    color: var(--line-4);
+    color: var(--text-4);
   }
 
   /* один шаг по обеим осям: перенесённый телефон стоит так же, как соседняя кнопка */
@@ -243,7 +314,7 @@ const cards = CARDS.map((row) => ({ ...row, direction: at(row.key) })).filter(
     align-items: center;
     gap: 10px;
     margin-top: auto;
-    padding-top: 20px;
+    padding-top: 16px;
   }
 
   /* поле нажатия остаётся 42 px, но в поток телефон отдаёт только высоту строки:
@@ -268,36 +339,35 @@ const cards = CARDS.map((row) => ({ ...row, direction: at(row.key) })).filter(
       border-color: var(--line-4);
     }
 
+    .dir--ink:hover {
+      border-color: color-mix(in srgb, var(--on-ink) 35%, transparent);
+    }
+
     .dir__phone:hover {
       text-decoration: underline;
       text-underline-offset: 3px;
     }
   }
 
-  /* 2 + 2 + 1: пятая карточка занимает обе колонки, дыры в ряду нет */
+  /* 3 + 3 доминанты над 2 + 2 + 2 компактными: ровного ряда одинаковых нет
+     3 + 3 dominants over 2 + 2 + 2 compacts: no row of identical cards left */
   @media (min-width: 768px) {
-    .dir__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .dir__head .dir__lead {
+      margin-top: 0;
     }
 
-    .dir:last-child {
-      grid-column: 1 / -1;
-    }
-  }
-
-  /* 3 + 2 на шести колонках: пять в ряд дают 17 знаков в строке и рвут кнопки */
-  @media (min-width: 1200px) {
     .dir__grid {
       grid-template-columns: repeat(6, minmax(0, 1fr));
+      margin-top: 22px;
     }
 
     .dir {
       grid-column: span 2;
     }
 
-    .dir:nth-child(n + 4),
-    .dir:last-child {
+    .dir--wide {
       grid-column: span 3;
+      padding: calc(var(--gap) + 14px);
     }
   }
 </style>

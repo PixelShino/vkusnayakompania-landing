@@ -16,15 +16,17 @@ import { navFor } from '../lib/nav.ts';
 import type { Content } from '../lib/content.ts';
 
 interface Props {
+  /** `false` там, где под шапкой нет фото: иначе белые буквы лягут на кремовый */
+  over?: boolean;
   content: Content;
 }
 
-const { content } = Astro.props;
+const { content, over = true } = Astro.props;
 const { settings } = content;
-const nav = navFor(content);
+const nav = navFor(content, over ? '' : '/');
 ---
 
-<header class="header header--over">
+<header class:list={['header', { 'header--over': over, 'is-solid': !over }]}>
   <div class="container header__bar">
     <a class="header__logo" href="#top" aria-label={`${BRAND.name} — на главную`}>
       <Image
@@ -179,8 +181,11 @@ const nav = navFor(content);
   }
 
   /* на телефоне номер живёт в кнопке-трубке слева от бургера */
+  /* цель нажатия 34 px: сам текст 22, паддинг растит зону, не сдвигая строку */
   .header__phone {
     display: none;
+    padding-block: 6px;
+    margin-block: -6px;
     font-size: 14px;
     font-weight: 600;
     color: var(--text);
@@ -266,9 +271,9 @@ const nav = navFor(content);
       display: none;
     }
 
-    /* до 1200 в строку помещаются логотип, навигация и одно действие:
-       телефон и бронь возвращаются, когда контейнер вырастает до 1296 */
-    .header__call,
+    /* до 1200 в строку помещаются логотип, навигация и одно действие,
+       поэтому телефон остаётся трубкой: без неё с ноутбука 1024-1199
+       позвонить из шапки было нечем */
     .header__burger {
       display: none;
     }
@@ -304,6 +309,11 @@ const nav = navFor(content);
     .header__phone {
       display: block;
       margin-right: 6px;
+    }
+
+    /* с 1200 номер стоит текстом — трубка становится лишней */
+    .header__call {
+      display: none;
     }
 
     .header__book {
@@ -415,7 +425,25 @@ const nav = navFor(content);
       // страница под раскрытым меню не должна уезжать
       // the page must not scroll under the open menu
       document.body.style.overflow = open ? 'hidden' : '';
+      // панель лежит в DOM до бургера: без переноса фокуса Tab пролетает мимо неё
+      if (open) panel.querySelector<HTMLElement>('a, button')?.focus();
+      else burger.focus();
     };
+
+    // пока меню раскрыто, Tab ходит по кругу внутри панели и бургера
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Tab' || !header.classList.contains('is-open')) return;
+      const stops = [
+        ...panel.querySelectorAll<HTMLElement>('a[href], button:not([disabled])'),
+      ].filter((node) => node.offsetParent !== null);
+      if (!stops.length) return;
+      const ring = [burger, ...stops];
+      const i = ring.indexOf(document.activeElement as HTMLElement);
+      if (i < 0) return;
+      const next = ring[(i + (event.shiftKey ? -1 : 1) + ring.length) % ring.length];
+      event.preventDefault();
+      next.focus();
+    });
 
     burger.addEventListener('click', () => setOpen(!header.classList.contains('is-open')));
 

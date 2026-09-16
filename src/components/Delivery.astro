@@ -1,13 +1,13 @@
 ---
 /**
- * Olive panel for the app and the shop: text on the left, a phone mockup cut
- * off by the panel edge on the right. No screenshot — no mockup column.
- * Оливковая панель про приложение и магазин: слева текст, справа мокап
- * телефона, срезанный краем панели. Нет скриншота — нет и колонки с мокапом.
+ * Ink strip for the app and the shop: the pitch on the left, the store block in
+ * the middle, a phone mockup cut off by the bottom edge of the strip.
+ * Чернильная полоса про приложение и магазин: слева суть, в середине блок с
+ * кнопками магазинов, справа мокап телефона, срезанный нижним краем полосы.
  */
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
-import type { Content } from '../lib/content';
+import { typo, type Content } from '../lib/content';
 import appstore from '../assets/icons/appstore.svg?raw';
 import googleplay from '../assets/icons/googleplay.svg?raw';
 
@@ -25,97 +25,82 @@ const STORES = [
 ].filter((store) => Boolean(store.href));
 ---
 
-<section class="section" id="delivery">
-  <div class="container">
-    <div class:list={['dl', { 'dl--solo': !shot }]}>
-      <div class="blob" aria-hidden="true"></div>
-
-      <div class="dl__col">
-        <h2 class="dl__title">{home.delivery_title}</h2>
-        {home.delivery_text && <p class="dl__text">{home.delivery_text}</p>}
-        {home.delivery_note && <p class="dl__note">{home.delivery_note}</p>}
-
-        <div class="dl__actions">
-          {
-            STORES.map((store) => (
-              <a class="btn btn--light btn--md dl__store" href={store.href} target="_blank" rel="noopener">
-                <span class="icon" aria-hidden="true">
-                  <Fragment set:html={store.icon} />
-                </span>
-                {store.label}
-              </a>
-            ))
-          }
-          <a class="btn btn--md dl__ghost" href={settings.shop_url} target="_blank" rel="noopener">
-            Открыть магазин
-          </a>
-        </div>
-      </div>
-
-      {
-        shot && (
-          <div class="dl__phone">
-            <Image
-              class="dl__screen"
-              src={shot.src as ImageMetadata}
-              width={shot.width}
-              height={shot.height}
-              alt={shot.alt}
-              widths={[240, 480, 640]}
-              sizes="260px"
-              format="avif"
-              quality={52}
-              loading="lazy"
-              decoding="async"
-            />
-          </div>
-        )
-      }
+<section class="section strip-ink dl-strip" id="delivery">
+  <div class:list={['container', 'dl', { 'dl--solo': !shot }]}>
+    <div class="dl__lead">
+      <p class="kicker">Доставка</p>
+      <h2>{home.delivery_title}</h2>
+      {home.delivery_text && <p class="dl__text">{typo(home.delivery_text)}</p>}
     </div>
+
+    <div class="dl__cta">
+      {home.delivery_note && <p class="dl__note display">{home.delivery_note}</p>}
+
+      <div class="dl__actions">
+        {
+          STORES.map((store) => (
+            <a class="btn btn--light btn--md dl__store" href={store.href} target="_blank" rel="noopener">
+              <span class="icon" aria-hidden="true">
+                <Fragment set:html={store.icon} />
+              </span>
+              {store.label}
+            </a>
+          ))
+        }
+        <a class="btn btn--md dl__ghost" href={settings.shop_url} target="_blank" rel="noopener">
+          Открыть магазин
+        </a>
+      </div>
+    </div>
+
+    {
+      shot && (
+        <div class="dl__phone">
+          <Image
+            class="dl__screen"
+            src={shot.src as ImageMetadata}
+            width={shot.width}
+            height={shot.height}
+            alt={shot.alt}
+            widths={[240, 480, 640]}
+            sizes="(min-width: 1200px) 250px, (min-width: 768px) 220px, 200px"
+            format="avif"
+            quality={52}
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+      )
+    }
   </div>
 </section>
 
 <style>
-  .dl {
-    --dl-pad: calc(var(--gap) + 12px);
-    position: relative;
+  /* the strip bleeds edge to edge and clips the mockup: no inner rounded panel
+     полоса идёт от края до края и режет мокап: внутренней панели с радиусом нет */
+  .dl-strip {
     overflow: hidden;
+  }
+
+  .dl {
     display: grid;
     grid-template-columns: 1fr;
-    gap: calc(var(--gap) + 8px);
-    padding: var(--dl-pad);
-    border-radius: var(--r-2xl);
-    background: var(--olive);
-    color: var(--bg);
+    gap: 20px;
+    align-items: start;
   }
 
-  /* круг-декорация уходит в нижний угол под кнопки: поверх текста он крал бы контраст */
-  .dl .blob {
-    right: auto;
-    left: -80px;
-    bottom: -90px;
-  }
-
-  .dl__col {
-    position: relative;
-    z-index: 1;
-    min-width: 0;
-  }
-
-  /* на оливковой заливке текст только `--bg`: `--surface` даёт 4,2:1 */
+  /* `--on-ink-2` на чернилах — 6,5:1, тело секции идёт им */
   .dl__text {
-    margin-top: 12px;
+    margin-top: 10px;
     font-size: var(--fs-body);
-    color: var(--bg);
     max-width: 52ch;
   }
 
+  /* выгода — оттиск печати: антиква от 22 px и осветлённая терракота, 5,5:1 */
   .dl__note {
-    margin-top: 16px;
-    font-size: var(--fs-lead);
-    font-weight: 600;
-    line-height: 1.4;
-    color: var(--bg);
+    font-size: clamp(22px, 5.4vw, 27px);
+    line-height: 1.14;
+    color: var(--terracotta-on-ink);
     text-wrap: balance;
   }
 
@@ -123,7 +108,7 @@ const STORES = [
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    margin-top: 24px;
+    margin-top: 18px;
   }
 
   /* иконка слева: паддинг с её стороны на 2 px меньше — оптическая балансировка */
@@ -143,25 +128,26 @@ const STORES = [
     height: 100%;
   }
 
-  /* заливка `.btn--ghost-light` на оливковом роняет текст до 3,5:1 — только обводка */
+  /* на чернилах вторая кнопка держится обводкой: заливка спорила бы с полосой */
   .dl__ghost {
     background: transparent;
-    border-color: rgb(255 250 237 / 0.55);
-    color: var(--bg);
+    border-color: color-mix(in srgb, var(--on-ink) 55%, transparent);
+    color: var(--on-ink);
   }
 
   .dl__phone {
     position: relative;
-    z-index: 1;
     width: 200px;
     height: 415px;
     padding: 8px;
     border-radius: 32px;
     background: var(--text);
+    /* корпус `--text` почти сливается с чернилами — отделяем волоском в 1 px */
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--on-ink) 26%, transparent);
     justify-self: center;
     align-self: end;
-    /* отрицательный отступ решает, насколько мокап срежется нижним краем панели */
-    margin-bottom: calc(var(--dl-pad) * -1 - 110px);
+    /* отрицательный отступ решает, насколько мокап срежется нижним краем полосы */
+    margin-bottom: calc(var(--sec-pad) * -1 - 100px);
   }
 
   .dl__phone :global(img) {
@@ -175,28 +161,40 @@ const STORES = [
   @media (hover: hover) and (pointer: fine) {
     .dl__ghost:hover {
       background: transparent;
-      border-color: var(--bg);
+      border-color: var(--on-ink);
     }
   }
 
   @media (min-width: 768px) {
     .dl {
-      --dl-pad: calc(var(--gap) + 20px);
-      grid-template-columns: 7fr 5fr;
-      gap: calc(var(--gap) + 16px);
-      align-items: center;
+      grid-template-columns: minmax(0, 1fr) 260px;
+      grid-template-areas:
+        'lead phone'
+        'cta phone';
+      column-gap: calc(var(--gap) + 16px);
+      row-gap: 22px;
     }
 
     .dl--solo {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas: 'lead cta';
+    }
+
+    .dl__lead {
+      grid-area: lead;
+    }
+
+    .dl__cta {
+      grid-area: cta;
     }
 
     .dl__phone {
+      grid-area: phone;
       width: 220px;
       height: 460px;
       border-radius: 36px;
-      margin-bottom: calc(var(--dl-pad) * -1 - 110px);
-      transform: rotate(-6deg) translateY(24px);
+      margin-bottom: calc(var(--sec-pad) * -1 - 120px);
+      transform: rotate(-6deg);
     }
 
     .dl__phone :global(img) {
@@ -206,20 +204,33 @@ const STORES = [
 
   @media (min-width: 1200px) {
     .dl {
-      --dl-pad: 40px;
-      /* колонка по ширине наклонённого мокапа: `5fr` от 1296 оставляет пустоту */
-      grid-template-columns: minmax(0, 1fr) 340px;
+      /* три занятые колонки вместо двух: пустоты рядом с текстом не остаётся */
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 300px;
+      grid-template-areas: 'lead cta phone';
+      column-gap: calc(var(--gap) + 20px);
     }
 
+    /* без скриншота колонка мокапа не резервируется — иначе справа дыра 300 px */
     .dl--solo {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas: 'lead cta';
+    }
+
+    /* первая строка врезки встаёт вровень с первой строкой h2, а не с кикером */
+    .dl__cta {
+      margin-top: 30px;
+    }
+
+    .dl__note {
+      font-size: clamp(24px, 2.1vw, 28px);
     }
 
     .dl__phone {
-      width: 260px;
-      height: 540px;
+      width: 250px;
+      height: 520px;
       border-radius: 40px;
-      margin-bottom: calc(var(--dl-pad) * -1 - 150px);
+      /* глубже: мокап задавал высоту полосы и оставлял под текстом мёртвую зону */
+      margin-bottom: calc(var(--sec-pad) * -1 - 205px);
     }
 
     .dl__phone :global(img) {

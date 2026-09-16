@@ -30,7 +30,6 @@ const { places, settings, home } = content;
             <article class="ct__card" data-place>
               <div class="card-top">
                 <span class="card-mark card-mark--sm">{place.n}</span>
-                <span class="card-dash" />
                 <OpenStatus schedule={place.schedule} />
               </div>
 
@@ -93,7 +92,7 @@ const { places, settings, home } = content;
         <div class="ct__write">
           <div class="blob" aria-hidden="true"></div>
           <div class="ct__write-col">
-            <p class="ct__write-title">Написать нам</p>
+            <h3 class="ct__write-title">Написать нам</h3>
             <p class="ct__write-sub">{home.contacts_note}</p>
           </div>
           <MessengerButtons settings={settings} variant="light" size="lg" />

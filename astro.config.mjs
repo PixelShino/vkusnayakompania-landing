@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import react from '@astrojs/react';
 import { loadEnv } from './scripts/env.mjs';
 
 // Astro fills import.meta.env from .env, but not process.env this config reads
@@ -16,7 +17,7 @@ export default defineConfig({
   // SITE/BASE_PATH из окружения: превью живёт на другом хосте
   site: process.env.SITE ?? 'https://vkus-com.ru',
   base: process.env.BASE_PATH,
-  integrations: [sitemap()],
+  integrations: [sitemap(), react()],
   build: { inlineStylesheets: 'always' },
   image: {
     remotePatterns: directus

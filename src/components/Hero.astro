@@ -1,11 +1,11 @@
 ---
 /**
- * First screen: the photo fills the viewport, everything else sits on top of
- * the scrim in the bottom-left corner — a poster with two actions under the
- * thumb, as `docs/PRODUCT.md` asks.
- * Первый экран: фото на весь экран, остальное лежит поверх скрима в левом
- * нижнем углу — афиша с двумя кнопками под пальцем, как просит
- * `docs/PRODUCT.md`.
+ * First screen: the photo stays visible on the right, the scrim runs as a
+ * column down the left, and the empty right half carries the «today» card —
+ * both venues' status, the nearest event and the venue phone.
+ * Первый экран: фото справа остаётся видно, скрим идёт колонкой слева, а
+ * пустовавшая правая половина занята карточкой «сегодня» — статус обеих
+ * точек, ближайшее событие афиши и телефон точки.
  */
 import Photo from './Photo.astro';
 import OpenStatus from './OpenStatus.astro';
@@ -36,42 +36,52 @@ const afishaDate = afisha ? dayMonth.format(new Date(afisha.date)) : '';
   <div class="hero__veil">
     <div class="container hero__in">
       <div class="hero__box">
-      {
-        afisha && (
-          <a class="hero__afisha" href="#afisha">
-            Афиша<span class="hero__sep" aria-hidden="true">·</span>
-            <time datetime={afisha.date}>{afishaDate}</time>
-            <span class="hero__sep" aria-hidden="true">·</span>
-            {afisha.title}
+        <h1>{home.hero_title}</h1>
+        {home.hero_text && <p class="lead hero__lead">{home.hero_text}</p>}
+
+        <div class="hero__cta">
+          <a class="btn btn--light" href={settings.shop_url} target="_blank" rel="noopener">
+            Заказать доставку
           </a>
-        )
-      }
-
-      <h1>{home.hero_title}</h1>
-      {home.hero_text && <p class="lead hero__lead">{home.hero_text}</p>}
-
-      <div class="hero__cta">
-        <a class="btn btn--light" href={settings.shop_url} target="_blank" rel="noopener">
-          Заказать доставку
-        </a>
-        <button type="button" class="btn btn--ghost-light" data-book="Бронь стола">
-          Забронировать стол
-        </button>
+          <button type="button" class="btn btn--ghost-light" data-book="Бронь стола">
+            Забронировать стол
+          </button>
+        </div>
       </div>
 
-      <div class="hero__foot">
-        <a class="hero__phone" href={settings.phoneHref}>{settings.phone}</a>
-        <div class="hero__places">
+      <div class="hero__today">
+        <p class="hero__today-t">Сегодня</p>
+        <ul class="hero__points">
           {
             places.map((place) => (
-              <a class="hero__place" href="#contacts">
-                {place.name}
-                <OpenStatus schedule={place.schedule} class="hero__status" />
-              </a>
+              <li class="hero__point">
+                <span class="hero__point-head">
+                  <a class="hero__point-name" href="#contacts">
+                    {place.name}
+                  </a>
+                  <OpenStatus schedule={place.schedule} class="hero__status" />
+                </span>
+                <a class="hero__tel" href={place.phoneHref}>
+                  {place.phone}
+                </a>
+              </li>
             ))
           }
-        </div>
-        </div>
+        </ul>
+
+        {
+          afisha && (
+            <a class="hero__event" href="#afisha">
+              <span class="hero__event-m">
+                Афиша<span class="hero__sep" aria-hidden="true">
+                  ·
+                </span>
+                <time datetime={afisha.date}>{afishaDate}</time>
+              </span>
+              <span class="hero__event-t">{afisha.title}</span>
+            </a>
+          )
+        }
       </div>
     </div>
   </div>
@@ -98,12 +108,11 @@ const afishaDate = afisha ? dayMonth.format(new Date(afisha.date)) : '';
     object-position: center 40%;
   }
 
-  /* Скрим привязан к тексту, а не к экрану: на телефоне блок занимает три
-     четверти кадра, и градиент «от низа экрана» отдаёт заголовку 0,13 альфы —
-     белое по светлой витрине — 2,1:1. Здесь верхние 160 px гасят переход, а
-     под текстом держится 0,58…0,88.
-     The scrim is tied to the text, not to the viewport: a screen-anchored
-     gradient leaves the headline at 0.13 alpha over a bright display case. */
+  /* До 1200 карточка стоит под текстом, колонка занимает всю ширину — скрим
+     тут вертикальный и привязан к тексту, а не к экрану: градиент «от низа
+     экрана» отдаёт заголовку 0,13 альфы, то есть 2,1:1 на светлой витрине.
+     Below 1200 the text spans the full column, so the scrim stays vertical
+     and text-anchored: a screen-anchored ramp leaves the headline at 0.13. */
   .hero__veil {
     position: relative;
     z-index: 1;
@@ -121,38 +130,6 @@ const afishaDate = afisha ? dayMonth.format(new Date(afisha.date)) : '';
   .hero__in {
     padding-block: 0 34px;
     color: var(--bg);
-  }
-
-  .hero__afisha {
-    display: inline-block;
-    max-width: 100%;
-    margin-bottom: 16px;
-    padding: 7px 13px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    border: 1px solid rgb(255 250 237 / 0.32);
-    border-radius: var(--r-pill);
-    /* подложка темнее фона, а не светлее: светлая на белом кадре роняет
-       контраст подписи до 2,1:1 (`docs/DESIGN.md`, раздел «Цвет») */
-    background: rgb(28 25 22 / 0.38);
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--bg);
-    text-decoration: none;
-    vertical-align: bottom;
-    transition-property: scale, background-color;
-    transition-duration: 120ms, 0.16s;
-    transition-timing-function: var(--ease-out), ease;
-  }
-
-  .hero__afisha:active {
-    scale: 0.96;
-  }
-
-  .hero__sep {
-    margin-inline: 6px;
-    opacity: 0.6;
   }
 
   .hero h1 {
@@ -176,83 +153,141 @@ const afishaDate = afisha ? dayMonth.format(new Date(afisha.date)) : '';
     font-size: 14.5px;
   }
 
-  .hero__foot {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px 18px;
-    margin-top: 24px;
-    padding-top: 18px;
-    border-top: 1px solid rgb(255 250 237 / 0.22);
+  .hero__box {
+    max-width: 620px;
   }
 
-  .hero__phone {
-    font-size: 26px;
-    font-weight: 700;
+  /* Карточка «сегодня»: полупрозрачные чернила поверх кадра. 0,86 держит
+     `--on-ink` 7,0:1 и `--on-ink-2` 4,7:1 даже на белом пикселе витрины;
+     терракота там даёт 3,6:1 и не берётся.
+     Translucent ink over the frame: 0.86 keeps the cream text at 7.0:1 even
+     over the brightest pixel of the photo. */
+  .hero__today {
+    margin-top: 24px;
+    padding: 16px;
+    border: 1px solid color-mix(in srgb, var(--on-ink) 18%, transparent);
+    border-radius: var(--r-xl);
+    background: color-mix(in srgb, var(--ink) 86%, transparent);
+    color: var(--on-ink);
+  }
+
+  .hero__today-t {
+    margin-bottom: 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--on-ink-2);
+  }
+
+  .hero__points {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .hero__point + .hero__point {
+    padding-top: 12px;
+    border-top: 1px solid color-mix(in srgb, var(--on-ink) 14%, transparent);
+  }
+
+  /* Grid, not wrapping flex: a long name pushed the pill onto its own line and
+     left-aligned it, so the two venues lined up differently in one card.
+     Сетка, а не переносимый flex: длинное название сбрасывало пилюлю на свою
+     строку и прижимало её влево — две точки в одной карточке шли по-разному. */
+  .hero__point-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px 10px;
+  }
+
+  .hero__point-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--on-ink);
+    text-decoration: none;
+    /* «Советской Армии, 177» в две строки не должно оставлять висячее «177» */
+    text-wrap: pretty;
+  }
+
+  /* Pill never shrinks: its text is nowrap and a squeezed one overflows. The
+     side padding is tighter than the shared pill's 13px, because at 390 the
+     six pixels it frees are exactly what keeps «Советской Армии, 177» on one
+     line next to it.
+     Пилюля `OpenStatus` не сжимается: её текст `nowrap`, ужатая — вылезает.
+     Боковой отступ тут меньше общих 13 px: на 390 освободившиеся шесть
+     пикселей — ровно то, что оставляет «Советской Армии, 177» в одну строку. */
+  .hero__point-head :global(.hero__status) {
+    flex: none;
+    padding-inline: 9px;
+  }
+
+  .hero__tel {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 18px;
+    font-weight: 600;
     letter-spacing: -0.01em;
-    color: var(--bg);
+    color: var(--on-ink);
     text-decoration: none;
     white-space: nowrap;
   }
 
-  .hero__places {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .hero__place {
-    display: inline-flex;
-    align-items: center;
-    padding: 7px 13px;
-    border: 1px solid rgb(255 250 237 / 0.32);
-    border-radius: var(--r-pill);
-    /* подложка темнее фона, а не светлее: светлая на белом кадре роняет
-       контраст подписи до 2,1:1 (`docs/DESIGN.md`, раздел «Цвет») */
-    background: rgb(28 25 22 / 0.38);
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--bg);
+  .hero__event {
+    display: block;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid color-mix(in srgb, var(--on-ink) 14%, transparent);
+    color: var(--on-ink);
     text-decoration: none;
-    transition-property: scale, background-color;
-    transition-duration: 120ms, 0.16s;
-    transition-timing-function: var(--ease-out), ease;
   }
 
-  .hero__place:active {
-    scale: 0.96;
+  .hero__event-m {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--on-ink-2);
   }
 
-  /* пилюля `OpenStatus` внутри нашей — четыре класса против трёх у неё */
-  .hero__place :global(.hero__status.card-pill) {
-    padding: 0;
-    border: 0;
-    background: none;
-    color: inherit;
-    font: inherit;
+  .hero__event-t {
+    display: block;
+    margin-top: 5px;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.3;
   }
 
-  /* точка живёт на самом статусе: пока он скрыт до расчёта, её тоже нет */
-  .hero__place :global(.hero__status)::before {
-    content: '·';
+  .hero__sep {
     margin-inline: 6px;
     opacity: 0.6;
   }
 
-  @media (hover: hover) and (pointer: fine) {
-    .hero__afisha:hover,
-    .hero__place:hover {
-      background: rgb(28 25 22 / 0.5);
+  /* тач: ссылки карточки растут до зоны нажатия 44 px, строка не съезжает */
+  @media (pointer: coarse) {
+    .hero__point-name {
+      display: inline-block;
+      padding-block: 11px;
+      margin-block: -11px;
     }
 
-    .hero__phone:hover {
-      text-decoration: underline;
-      text-underline-offset: 4px;
+    .hero__tel {
+      padding-block: 11px;
+      margin-block: -5px -11px;
     }
   }
 
-  .hero__box {
-    max-width: 640px;
+  @media (hover: hover) and (pointer: fine) {
+    .hero__point-name:hover,
+    .hero__tel:hover,
+    .hero__event:hover .hero__event-t {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
   }
 
   @media (min-width: 768px) {
@@ -286,10 +321,6 @@ const afishaDate = afisha ? dayMonth.format(new Date(afisha.date)) : '';
       padding-block: 0 54px;
     }
 
-    .hero__afisha {
-      font-size: 13px;
-    }
-
     .hero__cta {
       flex-direction: row;
       flex-wrap: wrap;
@@ -300,13 +331,73 @@ const afishaDate = afisha ? dayMonth.format(new Date(afisha.date)) : '';
       padding-inline: 26px;
     }
 
-    .hero__foot {
-      gap: 12px 22px;
-      margin-top: 28px;
+    /* карточка во всю ширину колонки: точки встают рядом, справа от них не
+       остаётся пустой зоны */
+    .hero__today {
+      padding: 18px 20px;
     }
 
-    .hero__phone {
-      font-size: 30px;
+    .hero__points {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 22px;
+    }
+
+    .hero__point + .hero__point {
+      padding-top: 0;
+      border-top: 0;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    /* Скрим — колонкой слева во всю высоту, правая часть витрины остаётся
+       видна. Верхнее плато рисует `.hero::before` поверх — цвет тот же.
+       The scrim becomes a full-height left column; the right half of the
+       frame stays visible, the header plateau still comes from `::before`. */
+    .hero__veil {
+      display: flex;
+      align-items: flex-end;
+      align-self: stretch;
+      padding-top: 0;
+      background: linear-gradient(
+        to right,
+        rgb(44 41 39 / 0.86) 0%,
+        rgb(44 41 39 / 0.72) 38%,
+        rgb(44 41 39 / 0) 68%
+      );
+    }
+
+    .hero__in {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+      align-items: end;
+      gap: 48px;
+      padding-block: 0 64px;
+    }
+
+    /* Не шире 620, но и не шире зоны, где скрим держит 0,66 альфы: правее
+       кремовый текст на светлом пикселе кадра падает ниже 4,5:1.
+       Capped by the scrim: past ~40 % of the viewport the cream text drops
+       under 4.5:1 over a bright pixel. */
+    .hero__box {
+      max-width: min(620px, 34vw);
+    }
+
+    .hero__today {
+      margin-top: 0;
+      padding: 20px 22px;
+      /* размывает только на десктопе: на телефоне карточка лежит в потоке
+         и `blur` там зря греет GPU */
+      backdrop-filter: blur(10px);
+    }
+
+    .hero__points {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .hero__point + .hero__point {
+      padding-top: 12px;
+      border-top: 1px solid color-mix(in srgb, var(--on-ink) 14%, transparent);
     }
   }
 </style>

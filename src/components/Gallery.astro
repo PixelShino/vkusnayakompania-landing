@@ -1,16 +1,16 @@
 ---
 /**
- * One long horizontal strip over the photos of every venue: three frames on a
- * desktop, two on a tablet, one and a peek on a phone; swipe on touch, drag with
- * the mouse, arrows and keys page by one frame. Frames of the second venue
- * follow the first — the guest picks nothing, the address is in every caption.
- * Одна длинная горизонтальная лента по фото всех точек: три кадра на десктопе,
- * два на планшете, кадр с краешком следующего на телефоне; свайп на таче,
- * перетаскивание мышью, стрелки и клавиши листают по кадру. Кадры второй точки
- * идут за первой — выбирать гостю нечего, адрес стоит в подписи каждого кадра.
+ * One long horizontal strip over the photos of every venue: the lead frame is
+ * twice as wide, then three per screen on a desktop, two on a tablet, one and a
+ * peek on a phone; swipe on touch, drag with the mouse, arrows and keys page by
+ * frame. A frame with no photo yet becomes a filled plaque of the same ratio.
+ * Одна длинная горизонтальная лента по фото всех точек: первый кадр вдвое шире,
+ * дальше три на десктопе, два на планшете, кадр с краешком следующего на
+ * телефоне; свайп, перетаскивание мышью, стрелки и клавиши листают по кадру.
+ * Кадр без фото становится залитой плашкой той же пропорции.
  */
 import Photo from './Photo.astro';
-import type { Content } from '../lib/content.ts';
+import { isPlaceholder, type Content } from '../lib/content.ts';
 
 interface Props {
   content: Content;
@@ -28,12 +28,41 @@ const SIZES = [
   '78vw',
 ].join(', ');
 
+// первый кадр шире прочих — источник ему нужен крупнее
+// the lead frame is wider than the rest and needs a larger source
+const SIZES_LEAD = [
+  '(min-width: 1440px) 858px',
+  '(min-width: 1200px) calc((100vw - 184px) / 3 * 2 + 20px)',
+  '(min-width: 834px) 507px',
+  '(min-width: 768px) calc((100vw - 88px) * 0.68)',
+  '88vw',
+].join(', ');
+
+// The admin marks a stand-in in the file title, but only `alt` reaches the
+// strip: both wordings are checked so a real photo is never hidden by a plaque.
+// В админке заглушка помечена в заголовке файла, до ленты доходит только `alt`:
+// проверяются обе формулировки, чтобы плашка не закрыла настоящее фото.
+const isStub = (alt: string) => isPlaceholder(alt) || alt.includes('фото появится позже');
+
 const shots = places.flatMap((place) =>
-  place.gallery.map((shot) => ({
-    photo: shot.image,
-    caption: [place.name, shot.caption].filter(Boolean).join(' · '),
-  })),
+  place.gallery.map((shot) => {
+    const stub = isStub(shot.image.alt);
+    return {
+      photo: shot.image,
+      n: place.n,
+      title: shot.caption || place.name,
+      // на плашке предмет кадра уже стоит крупно: под ней остаётся один адрес
+      // the plaque already carries the subject: only the address stays below it
+      caption: stub ? place.name : [place.name, shot.caption].filter(Boolean).join(' · '),
+      stub,
+    };
+  }),
 );
+
+// числительное берётся из данных: с третьей точкой заголовок не должен врать
+// the numeral comes from the data: with a third venue the heading must not lie
+const COUNT = ['', 'Один зал', 'Два зала', 'Три зала', 'Четыре зала'];
+const heading = `${COUNT[places.length] || 'Залы'} в Самаре`;
 
 // один кадр листать некуда: стрелок нет
 // nothing to page through with a single frame: no arrows
@@ -44,13 +73,11 @@ const many = shots.length > 1;
   shots.length > 0 && (
     <section class="section" id="gallery" aria-labelledby="gallery-title">
       <div class="container">
-        <div class="section-head">
-          <div>
-            <h2 id="gallery-title">О заведении</h2>
-            <p class="lead">
-              Два зала в Самаре: кафе на Садовой и ресторан на Советской Армии.
-            </p>
-          </div>
+        <div class="section-head gl__head">
+          <h2 id="gallery-title">{heading}</h2>
+          <p class="lead gl__lead">
+            Кафе на Садовой и ресторан на Советской Армии — кадры обеих точек идут подряд.
+          </p>
 
           {many && (
             <div class="gl__nav">
@@ -104,15 +131,27 @@ const many = shots.length > 1;
         >
           {shots.map((shot, i) => (
             <div class="gl__slide">
-              <Photo
-                photo={shot.photo}
-                ratio="4 / 3"
-                radius="var(--r-lg)"
-                sizes={SIZES}
-                class="gl__media"
-                eager={i < 2}
-                priority="low"
-              />
+              {shot.stub ? (
+                <div class:list={['gl__stub', i % 2 ? 'gl__stub--warm' : 'gl__stub--ink']}>
+                  <span class="card-mark card-mark--sm" aria-hidden="true">
+                    {shot.n}
+                  </span>
+                  <span class="gl__stub-text">
+                    <span class="gl__stub-title display">{shot.title}</span>
+                    <span class="gl__stub-meta">заглушка · заменяется в админке</span>
+                  </span>
+                </div>
+              ) : (
+                <Photo
+                  photo={shot.photo}
+                  ratio="4 / 3"
+                  radius="var(--r-lg)"
+                  sizes={i === 0 ? SIZES_LEAD : SIZES}
+                  class="gl__media"
+                  eager={i < 2}
+                  priority="low"
+                />
+              )}
               <p class="gl__caption">{shot.caption}</p>
             </div>
           ))}
@@ -123,6 +162,13 @@ const many = shots.length > 1;
 }
 
 <style>
+  /* заголовок слева, лид справа: столбик оставлял пустой всю правую половину
+     heading left, lead right: the stacked pair left the whole right half empty */
+  .gl__head h2,
+  .gl__lead {
+    flex: 1 1 100%;
+  }
+
   .gl__nav {
     display: flex;
     align-items: center;
@@ -165,9 +211,10 @@ const many = shots.length > 1;
      the strip bleeds past the padding to the container edge, frames snap to the left padding */
   .gl__rail {
     --slide: 78%;
+    --slide-lead: 88%;
     display: flex;
     gap: var(--gap);
-    margin-top: 26px;
+    margin-top: 22px;
     margin-inline: calc(-1 * var(--pad));
     padding-inline: var(--pad);
     scroll-padding-inline: var(--pad);
@@ -199,10 +246,102 @@ const many = shots.length > 1;
     scroll-snap-align: start;
   }
 
+  /* доминанта: лента из одинаковых прямоугольников читается как заглушка целиком
+     the dominant frame: a strip of equal rectangles reads as one big placeholder */
+  .gl__slide:first-child {
+    flex-basis: var(--slide-lead);
+  }
+
+  /* Wider, never taller: a taller lead breaks the row and leaves a dead band
+     under its neighbours. The lead keeps the ordinary frame's height, so its
+     ratio is (lead width / ordinary width) x 4/3 — recomputed per breakpoint,
+     because those widths are percentages of the rail, not fixed pixels.
+     Шире, но не выше: высокая доминанта рвёт ряд и оставляет под соседними
+     кадрами пустую полосу. Доминанта держит высоту обычного кадра, поэтому её
+     соотношение — (ширина доминанты / ширина обычного) x 4/3, и оно своё на
+     каждом брейкпоинте: ширины заданы процентами ленты, а не пикселями. */
+  .gl__slide:first-child .gl__stub,
+  .gl__slide:first-child :global(.gl__media) {
+    /* телефон: 88 / 78 x 4/3 */
+    aspect-ratio: 3 / 2;
+  }
+
+  .gl__slide:first-child :global(.gl__media img) {
+    height: 100%;
+    object-fit: cover;
+  }
+
   /* `:global` — кадр рисует `Photo.astro`, метки области у него нет */
   .gl__rail :global(.gl__media img) {
     outline: 1px solid rgb(0 0 0 / 0.08);
     outline-offset: -1px;
+  }
+
+  /* Plaque instead of a frame: a fill, not a dashed outline. The ratio repeats
+     the `ratio` prop of <Photo>, so a real shot drops in without shifting a pixel.
+     Плашка вместо кадра: заливка, а не пунктирная рамка. Пропорция повторяет
+     проп `ratio` у <Photo> — настоящий кадр встанет на место без сдвига. */
+  .gl__stub {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+    aspect-ratio: 4 / 3;
+    padding: 14px;
+    border-radius: var(--r-lg);
+    overflow: hidden;
+  }
+
+  /* через одну: сплошная лента чернил монотонна не меньше сплошного крема
+     every other one: a solid ink strip is as monotone as a solid cream one */
+  .gl__stub--ink {
+    background-color: var(--ink);
+    background-image: var(--hatch-ink);
+  }
+
+  .gl__stub--warm {
+    background-color: var(--surface-warm);
+    background-image: var(--hatch);
+    border: 1px solid var(--line-warm);
+  }
+
+  .gl__stub-text {
+    display: block;
+  }
+
+  .gl__stub-title {
+    display: block;
+    font-size: clamp(20px, 4.6vw, 23px);
+    text-wrap: balance;
+  }
+
+  .gl__slide:first-child .gl__stub-title {
+    font-size: clamp(22px, 5vw, 26px);
+  }
+
+  .gl__stub--ink .gl__stub-title {
+    color: var(--on-ink);
+  }
+
+  .gl__stub--warm .gl__stub-title {
+    color: var(--text);
+  }
+
+  .gl__stub-meta {
+    display: block;
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .gl__stub--ink .gl__stub-meta {
+    color: var(--on-ink-2);
+  }
+
+  .gl__stub--warm .gl__stub-meta {
+    color: var(--text-4);
   }
 
   .gl__caption {
@@ -223,9 +362,30 @@ const many = shots.length > 1;
   }
 
   @media (min-width: 768px) {
+    .gl__head h2 {
+      flex: 0 1 auto;
+    }
+
+    .gl__lead {
+      flex: 1 1 20rem;
+      max-width: 34rem;
+      margin-top: 0;
+    }
+
     .gl__rail {
       --slide: calc((100% - var(--gap)) / 2);
-      margin-top: 30px;
+      --slide-lead: calc((100% - var(--gap)) * 0.68);
+    }
+
+    /* 0,68 ленты против половины: 1,36 x 4/3 */
+    .gl__slide:first-child .gl__stub,
+    .gl__slide:first-child :global(.gl__media) {
+      aspect-ratio: 16 / 9;
+      margin-top: 26px;
+    }
+
+    .gl__stub {
+      padding: 18px;
     }
 
     .gl__caption {
@@ -237,6 +397,17 @@ const many = shots.length > 1;
   @media (min-width: 1200px) {
     .gl__rail {
       --slide: calc((100% - 2 * var(--gap)) / 3);
+      --slide-lead: calc((100% - 2 * var(--gap)) * 2 / 3 + var(--gap));
+    }
+
+    /* две колонки с зазором против одной: 2,05 x 4/3 */
+    .gl__slide:first-child .gl__stub,
+    .gl__slide:first-child :global(.gl__media) {
+      aspect-ratio: 2.73;
+    }
+
+    .gl__stub {
+      padding: 20px;
     }
   }
 </style>
@@ -259,10 +430,6 @@ const many = shots.length > 1;
     button?.getAttribute('aria-disabled') === 'true';
 
   if (rail) {
-    const step = () =>
-      (rail.firstElementChild?.getBoundingClientRect().width ?? rail.clientWidth) +
-      (parseFloat(getComputedStyle(rail).columnGap) || 0);
-
     const sync = () => {
       // пока секцию пропускает `content-visibility`, кадры не разложены и обе
       // ширины равны: по ним обе стрелки погасли бы навсегда
@@ -274,9 +441,24 @@ const many = shots.length > 1;
       next?.setAttribute('aria-disabled', String(rail.scrollLeft >= max));
     };
 
+    // The step is measured against the neighbouring frame, not one fixed width:
+    // the lead frame is wider, so a single constant would overshoot after it.
+    // Шаг считается по соседнему кадру, а не по одной ширине: первый кадр шире,
+    // и одна константа промахивалась бы после него.
     const go = (direction: number) => {
       if (direction < 0 ? off(prev) : off(next)) return;
-      rail.scrollBy({ left: direction * step(), behavior: smooth ? 'smooth' : 'auto' });
+      const snap =
+        rail.getBoundingClientRect().left +
+        rail.clientLeft +
+        (parseFloat(getComputedStyle(rail).paddingLeft) || 0);
+      const frames = Array.from(rail.children) as HTMLElement[];
+      if (direction < 0) frames.reverse();
+      const target = frames.find((frame) => {
+        const shift = frame.getBoundingClientRect().left - snap;
+        return direction > 0 ? shift > 1 : shift < -1;
+      });
+      const left = target ? target.getBoundingClientRect().left - snap : direction * rail.clientWidth;
+      rail.scrollBy({ left, behavior: smooth ? 'smooth' : 'auto' });
     };
 
     prev?.addEventListener('click', () => go(-1));

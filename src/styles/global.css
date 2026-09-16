@@ -24,6 +24,12 @@
   --line-4: #d6cbb8;
   --line-warm: #f4d6bd;
 
+  /* чернила: глубокая олива для полос во всю ширину, кремовый на ней 10,8:1 */
+  --ink: #333721;
+  --ink-2: #3f4429;
+  --on-ink: #f7f1e2;
+  --on-ink-2: rgb(247 241 226 / 0.74);
+
   /* акценты; оливковый затемнён с `#868C56` ради контраста белого текста */
   --olive: #6f7546;
   --olive-dark: #5f6439;
@@ -31,19 +37,36 @@
   --olive-tint-line: #dce2c6;
   --terracotta: #c67139;
   --terracotta-text: #8c4c24;
+  /* базовая терракота на чернилах даёт 3,2:1 — для текста осветляем до 5,5:1 */
+  --terracotta-on-ink: #e2a066;
 
-  /* типографика */
+  /* типографика: антиква несёт характер, гротеск — интерфейс */
   --font: 'Montserrat Variable', 'Montserrat', system-ui, sans-serif;
+  --font-display: 'Prata', 'Georgia', 'Times New Roman', serif;
   --fw-heading: 800;
   --ls-heading: -0.02em;
+  --ls-display: -0.005em;
 
   /* движение: одна кривая на вход диалога, полосы и нажатие кнопки */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 
+  /* Hatch for placeholder plates: a flat fill at this size reads as a hole in
+     the layout, the hatch reads as a slot reserved for a photo. Alpha is low
+     enough that the caption on top keeps its full contrast.
+     Штриховка плашек-заглушек: ровная заливка такого размера читается дырой
+     в вёрстке, штриховка — местом, оставленным под фото. Альфа мала настолько,
+     что подпись поверх не теряет контраста. */
+  --hatch: repeating-linear-gradient(135deg, rgb(44 41 39 / 0.05) 0 1px, transparent 1px 10px);
+  --hatch-ink: repeating-linear-gradient(
+    135deg,
+    rgb(247 241 226 / 0.07) 0 1px,
+    transparent 1px 10px
+  );
+
   /* ритм — мобильные значения (390) */
   --pad: 18px;
   --gap: 12px;
-  --sec-pad: 44px;
+  --sec-pad: 36px;
   --content: 354px;
 
   --fs-h1: clamp(30px, 8.72vw, 40px);
@@ -68,7 +91,7 @@
   :root {
     --pad: 36px;
     --gap: 16px;
-    --sec-pad: 64px;
+    --sec-pad: 52px;
     --content: 762px;
     --fs-h1: clamp(44px, 5.64vw, 58px);
     --fs-h2: clamp(30px, 3.96vw, 40px);
@@ -83,7 +106,7 @@
   :root {
     --pad: 72px;
     --gap: 20px;
-    --sec-pad: 92px;
+    --sec-pad: 72px;
     --content: 1296px;
     --fs-h1: clamp(56px, 4.58vw, 66px);
     --fs-h2: clamp(38px, 2.92vw, 42px);
@@ -109,12 +132,21 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* мягче, а не «ноль»: цвет и прозрачность остаются, уезжает движение.
+   Полное глушение перебивало аккуратные правила диалога и липкой полосы,
+   и диалог у такого гостя не всплывал, а мигал. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    /* overlay и display держат переход верхнего слоя у <dialog>: без них
+       лист брони появляется рывком */
+    transition-property: opacity, color, background-color, border-color, fill, stroke,
+      overlay, display !important;
+    transition-duration: 150ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
@@ -194,17 +226,6 @@ button {
 }
 
 /* видно только скринридеру: подписи у icon-only кнопок и пояснения к спискам */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  clip-path: inset(50%);
-}
-
 /* первая цель Tab: выезжает сверху и уводит на контент мимо шапки */
 .skip-link {
   position: absolute;
@@ -381,11 +402,24 @@ h3 {
   font-size: 13px;
 }
 
-/* on touch screens the small button grows to a 42 px target
-   на тач-экранах мелкая кнопка растёт до зоны нажатия 42 px */
+/* on touch screens every button grows to a 44 px target
+   на тач-экранах любая кнопка растёт до зоны нажатия 44 px */
 @media (pointer: coarse) {
-  .btn--sm {
-    height: 42px;
+  .btn--sm,
+  .btn--md {
+    height: 44px;
+  }
+
+  /* ссылки-телефоны и подписи под кадром — те же 44 px по вертикали,
+     отрицательный margin держит строку на месте */
+  .ct__tel,
+  .ct__org,
+  .footer__tel,
+  .footer__list a,
+  .footer__links a,
+  .map__stub-link {
+    padding-block: 11px;
+    margin-block: -11px;
   }
 }
 
@@ -435,15 +469,6 @@ h3 {
   font-size: 16px;
 }
 
-.card-dash {
-  flex: 1;
-  border-top: 2px dashed color-mix(in srgb, var(--olive) 45%, transparent);
-}
-
-.card-dash--light {
-  border-top-color: rgba(255, 250, 237, 0.32);
-}
-
 .card-pill {
   padding: 7px 13px;
   border: 1px solid var(--line-2);
@@ -473,32 +498,6 @@ h3 {
   pointer-events: none;
 }
 
-/* ── горизонтальные рельсы ───────────────────────────────────────────────── */
-
-.rail {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-padding-left: var(--pad);
-  overscroll-behavior-x: contain;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  -webkit-overflow-scrolling: touch;
-  width: calc(100% + var(--pad) * 2);
-  margin-inline: calc(var(--pad) * -1);
-  padding-inline: var(--pad);
-  padding-bottom: 4px;
-}
-
-.rail::-webkit-scrollbar {
-  display: none;
-}
-
-.rail > * {
-  scroll-snap-align: start;
-}
-
 /* ── медиа ───────────────────────────────────────────────────────────────── */
 
 .media {
@@ -523,3 +522,63 @@ h3 {
   object-fit: cover;
 }
 
+
+/* ── дисплейная антиква ───────────────────────────────────────────────────
+   Prata несёт заголовки и крупные цифры. Один вес 400: иерархия внутри неё
+   строится размером, не начертанием.
+   Prata carries headings and large numbers. Single weight — size is hierarchy. */
+h1,
+h2,
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.06;
+  letter-spacing: var(--ls-display);
+}
+
+/* ── полосы во всю ширину ─────────────────────────────────────────────────
+   Ink strips break the cream monotony; they bleed edge to edge, never as a card.
+   Чернильные полосы рвут кремовую монотонность и идут от края до края. */
+.strip-ink {
+  background: var(--ink);
+  color: var(--on-ink);
+}
+
+.strip-ink :where(h1, h2, h3, .display) {
+  color: var(--on-ink);
+}
+
+.strip-ink :where(p, li, dd) {
+  color: var(--on-ink-2);
+}
+
+.strip-ink .kicker {
+  color: var(--terracotta-on-ink);
+}
+
+.strip-paper {
+  background: var(--surface);
+}
+
+/* ── появление секции ─────────────────────────────────────────────────────
+   Один оркестрованный вход на секцию, не на каждый элемент внутри.
+   One orchestrated entrance per section, never per element. */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.6s var(--ease-out),
+    transform 0.6s var(--ease-out);
+}
+
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}

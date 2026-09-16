@@ -1,13 +1,13 @@
 ---
 /**
- * Current event: poster in its natural ratio plus date, venue and actions.
- * The caller decides whether to render it — the component always draws.
- * Текущая афиша: постер в своей пропорции, дата, адрес и кнопки. Решение
- * «показывать или нет» принимает вызывающий, компонент всегда рисует.
+ * Current event: an ink strip with a compact poster, a structural date and the
+ * booking action. The caller decides whether to render it — the component draws.
+ * Текущая афиша: чернильная полоса, компактный постер, структурная дата и бронь.
+ * Решение «показывать или нет» принимает вызывающий, компонент всегда рисует.
  */
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
-import type { Afisha } from '../lib/content';
+import { typo, type Afisha } from '../lib/content';
 
 interface Props {
   afisha: Afisha;
@@ -23,60 +23,88 @@ const day = new Intl.DateTimeFormat('ru-RU', {
   month: 'long',
   timeZone: 'UTC',
 }).format(date);
+const dayNumber = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', timeZone: 'UTC' }).format(date);
+// the long form minus the number leaves the month in the case the numeral needs
+// «26 сентября» минус число — родительный падеж месяца рядом с крупной цифрой
+const dayMonth = day.slice(dayNumber.length).trim();
 const month = new Intl.DateTimeFormat('ru-RU', { month: 'long', timeZone: 'UTC' }).format(date);
 const time = afisha.time?.slice(0, 5);
-// одной строкой: перенос между `<time>` и запятой дал бы «26 сентября , 19:00»
-// as one string: a line break before the comma would render «26 сентября , 19:00»
-const when = time ? `${day}, ${time}` : day;
 const datetime = time ? `${afisha.date}T${time}` : afisha.date;
+
+// a stub file is marked in the admin, and the mark reaches the page through alt
+// файл-заглушку помечают в админке, до страницы пометка доходит через `alt`
+const stub = /заглушк/i.test(afisha.poster.alt);
 ---
 
-<section class="section" id="afisha">
+<section class="section strip-ink" id="afisha">
   <div class="container">
     <div class="af">
       <figure class="af__poster">
-        <Image
-          src={afisha.poster.src as ImageMetadata}
-          width={afisha.poster.width}
-          height={afisha.poster.height}
-          alt={afisha.poster.alt}
-          widths={[480, 800, 1200, 1600]}
-          sizes="(min-width: 1200px) 480px, (min-width: 768px) 38vw, 92vw"
-          format="avif"
-          quality={52}
-          loading="lazy"
-          decoding="async"
-        />
+        {
+          stub ? (
+            <div class="af__stub">
+              <span class="af__stub-n" aria-hidden="true">
+                {afisha.place.n}
+              </span>
+              <span class="af__stub-title display">Постер афиши</span>
+              <span class="af__stub-meta">заглушка · заменяется в админке</span>
+            </div>
+          ) : (
+            <Image
+              src={afisha.poster.src as ImageMetadata}
+              width={afisha.poster.width}
+              height={afisha.poster.height}
+              alt={afisha.poster.alt}
+              widths={[260, 440, 520, 800]}
+              sizes="(min-width: 1200px) 253px, (min-width: 768px) 220px, 92vw"
+              format="avif"
+              quality={52}
+              loading="lazy"
+              decoding="async"
+            />
+          )
+        }
       </figure>
 
       <div class="af__body">
         <p class="kicker">Афиша · {month}</p>
         <h2>{afisha.title}</h2>
 
-        <p class="af__meta">
-          <time datetime={datetime} class="tnum">{when}</time><span class="af__dot"> · </span>{
-            afisha.place.name
-          }
-        </p>
+        <div class="af__when">
+          <time datetime={datetime} class="af__date">
+            <span class="af__day display">{dayNumber}</span>
+            <span class="af__dm">
+              <span class="af__month">{dayMonth}</span>
+              {time && <span class="af__time tnum">{time}</span>}
+            </span>
+          </time>
 
-        {afisha.text && <p class="lead af__text">{afisha.text}</p>}
+          <p class="af__place">
+            {afisha.place.name}
+            <span class="af__kind">{afisha.place.kind}</span>
+          </p>
+        </div>
 
-        <div class="af__actions">
-          <button
-            type="button"
-            class="btn btn--primary"
-            data-book={`Бронь стола: ${afisha.place.street}`}
-            data-book-note={`${afisha.title}, ${day}${time ? `, ${time}` : ''}`}
-          >
-            Забронировать стол
-          </button>
-          {
-            afisha.link && (
-              <a class="btn btn--secondary" href={afisha.link} target="_blank" rel="noopener">
-                Подробнее
-              </a>
-            )
-          }
+        <div class="af__rest">
+          {afisha.text && <p class="lead af__text">{typo(afisha.text)}</p>}
+
+          <div class="af__actions">
+            <button
+              type="button"
+              class="btn btn--light"
+              data-book={`Бронь стола: ${afisha.place.street}`}
+              data-book-note={`${afisha.title}, ${day}${time ? `, ${time}` : ''}`}
+            >
+              Забронировать стол
+            </button>
+            {
+              afisha.link && (
+                <a class="btn btn--ghost-light" href={afisha.link} target="_blank" rel="noopener">
+                  Подробнее
+                </a>
+              )
+            }
+          </div>
         </div>
       </div>
     </div>
@@ -84,21 +112,17 @@ const datetime = time ? `${afisha.date}T${time}` : afisha.date;
 </section>
 
 <style>
-  /* полоса во всю ширину: зелёный отбивает афишу от кремовых соседей */
-  #afisha {
-    background: var(--olive-tint);
-  }
-
   .af {
     display: grid;
     grid-template-columns: 1fr;
-    gap: calc(var(--gap) + 10px);
+    gap: var(--gap);
     align-items: center;
   }
 
+  /* the poster keeps its natural ratio, so a real shot drops in without a shift */
+  /* постер идёт в своей пропорции: подстановка кадра ничего не сдвинет */
   .af__poster {
     margin: 0;
-    max-width: 480px;
     border-radius: var(--r-xl);
     overflow: hidden;
     background: var(--surface-photo);
@@ -107,39 +131,131 @@ const datetime = time ? `${afisha.date}T${time}` : afisha.date;
   .af__poster :global(img) {
     width: 100%;
     height: auto;
-    outline: 1px solid var(--olive-tint-line);
+    outline: 1px solid rgb(0 0 0 / 0.08);
     outline-offset: -1px;
+  }
+
+  /* the stub is a finished 2:3 plate with a caption, never an empty frame */
+  /* заглушка — оформленная плашка 2:3 с надписью, а не пустая рамка */
+  .af__stub {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 6px;
+    aspect-ratio: 2 / 3;
+    padding: 20px;
+    background-color: var(--surface-warm);
+    background-image: var(--hatch);
+  }
+
+  .af__stub-title {
+    font-size: clamp(24px, 5.2vw, 32px);
+    line-height: 1.06;
+    color: var(--text);
+    text-wrap: balance;
+  }
+
+  .af__stub-meta {
+    font-size: 11px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    line-height: 1.3;
+    color: var(--text-3);
+  }
+
+  /* venue number in the corner: the same circle the page cards already use */
+  /* номер точки в углу — тот же круг, что держит карточки страницы */
+  .af__stub-n {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--r-pill);
+    background: var(--olive);
+    color: var(--bg);
+    font-size: 13px;
+    font-weight: 600;
   }
 
   .af__body {
     min-width: 0;
   }
 
-  .af__meta {
-    margin-top: 14px;
-    font-size: calc(var(--fs-body) + 1px);
-    font-weight: 600;
-    color: var(--text-3);
+  /* the date as a panel: numeral in the display face, month and time beside it */
+  /* дата панелью: число антиквой, рядом месяц и время, ниже точка */
+  .af__when {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 18px;
+    margin-top: 16px;
+    padding: 14px 18px 16px;
+    border-radius: var(--r-lg);
+    background: var(--ink-2);
   }
 
-  .af__dot {
-    color: var(--line-4);
+  .af__date {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .af__day {
+    font-size: clamp(40px, 9vw, 48px);
+    line-height: 1;
+    color: var(--on-ink);
+  }
+
+  .af__dm {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: var(--fs-body);
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .af__month {
+    color: var(--on-ink);
+  }
+
+  /* терракота на чернилах только осветлённая: базовая даёт 3,2:1 */
+  .af__time {
+    color: var(--terracotta-on-ink);
+  }
+
+  /* адрес всегда своей строкой: на 320 px он иначе рвал ряд с датой */
+  .af__place {
+    flex: 1 1 100%;
+    padding-top: 12px;
+    border-top: 1px solid color-mix(in srgb, var(--on-ink) 22%, transparent);
+    font-size: var(--fs-body);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--on-ink);
+  }
+
+  .af__kind {
+    display: block;
+    margin-top: 2px;
+    font-weight: 400;
+    font-size: 12.5px;
+    color: var(--on-ink-2);
   }
 
   .af__text {
-    margin-top: 12px;
+    margin-top: 14px;
   }
 
   .af__actions {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    margin-top: 24px;
-  }
-
-  /* тёплая `--line` на оливковой подложке пропадает — рамка берёт её тон */
-  .af__actions .btn--secondary {
-    border-color: var(--olive-tint-line);
+    margin-top: 18px;
   }
 
   /* на телефоне обе кнопки на всю ширину колонки, чтобы не рвать ряд */
@@ -149,19 +265,53 @@ const datetime = time ? `${afisha.date}T${time}` : afisha.date;
     }
   }
 
+  /* poster and copy sit tight: a narrow poster column, copy takes the rest */
+  /* пара «постер + текст» стоит вплотную: постер узкий, текст занимает остальное */
   @media (min-width: 768px) {
     .af {
-      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-      gap: calc(var(--gap) + 20px);
+      grid-template-columns: 220px minmax(0, 1fr);
+      gap: calc(var(--gap) + 12px);
+    }
+
+    /* panel becomes a bar: date on the left, venue on the right, no empty middle */
+    /* панель разворачивается полосой: дата слева, точка справа, середина занята */
+    .af__when {
+      justify-content: space-between;
+      padding: 16px 22px;
+    }
+
+    /* длинное имя точки переносится на свою строку — рамка уходит наверх */
+    .af__place {
+      flex: 0 1 auto;
+      padding-top: 0;
+      padding-left: 22px;
+      border-top: 0;
+      border-left: 1px solid color-mix(in srgb, var(--on-ink) 22%, transparent);
     }
   }
 
-  /* колонка ровно по постеру, вся пара не растягивается на 1296: иначе текст
-     упирается в `max-width` лида и справа остаётся пустая четверть экрана */
   @media (min-width: 1200px) {
     .af {
-      grid-template-columns: 440px minmax(0, 1fr);
-      max-width: 1080px;
+      grid-template-columns: 253px minmax(0, 1fr);
+      gap: calc(var(--gap) + 20px);
+    }
+
+    /* copy and action share one row: the button holds the right half of the strip */
+    /* текст и действие в одном ряду: кнопка держит правую половину полосы */
+    .af__rest {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px 40px;
+    }
+
+    .af__text {
+      flex: 0 1 auto;
+    }
+
+    .af__actions {
+      margin-top: 0;
     }
   }
 </style>

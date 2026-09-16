@@ -8,6 +8,8 @@ import Promos from '../components/Promos.astro';
 import Menus from '../components/Menus.astro';
 import Cakes from '../components/Cakes.astro';
 import Gallery from '../components/Gallery.astro';
+import Numbers from '../components/Numbers.astro';
+import Marquee from '../components/Marquee.astro';
 import Delivery from '../components/Delivery.astro';
 import Reviews from '../components/Reviews.astro';
 import Contacts from '../components/Contacts.astro';
@@ -20,16 +22,18 @@ const { afisha, promos, places } = content;
 
 <BaseLayout content={content}>
   <Header content={content} />
-  <main id="main">
+  <main id="main" tabindex="-1">
     <Hero content={content} />
     <Directions content={content} />
+    <Numbers content={content} />
     <Gallery content={content} />
     {afisha && <Afisha afisha={afisha} />}
     <Promos promos={promos} places={places} />
     <Menus content={content} />
-    <Cakes content={content} />
+    {content.cakes.length > 0 && <Cakes content={content} />}
     <Delivery content={content} />
     <Reviews content={content} />
+    <Marquee />
     <Contacts content={content} />
   </main>
   <Footer content={content} />
