@@ -32,3 +32,6 @@ public/media/
 
 # настройки Claude Code
 .claude/
+
+# лог dev-сервера, запущенного отдельным процессом
+.astro-dev.log*
