@@ -4,7 +4,7 @@
 
 One-page business-card site for a café, a restaurant, a confectionery, catering and
 banquets — two locations in Samara, Russia.<br>
-**Astro 5** static build, content managed in **Directus**, no UI framework.
+**Astro 5** static build, content managed in **Directus**, two React islands and nothing else hydrated.
 
 [![Astro](https://img.shields.io/badge/Astro-5.18-FF5D01?logo=astro&logoColor=white)](https://astro.build)
 [![Directus](https://img.shields.io/badge/Directus-11-6644FF?logo=directus&logoColor=white)](https://directus.io)
@@ -30,12 +30,14 @@ banquets — two locations in Samara, Russia.<br>
 
 ### What it is
 
-Ten sections, one scroll: hero, five directions (café, restaurant, confectionery,
-catering, banquets), a photo slider of both rooms, poster of the month, text-only
-promos per location, PDF menus, cake showcase, app and delivery, reviews, contacts
-with both locations on one map. The actions are the same everywhere: book a table
-(Telegram, Max or a call), order delivery in the app, open the catering site. No
-forms, no cart, no prices.
+Thirteen sections, one scroll: hero, five directions (café, restaurant,
+confectionery, catering, banquets), a strip of figures, a photo slider of both rooms,
+poster of the month, text-only promos per location, PDF menus, cake showcase, app and
+delivery, reviews, a marquee of occasions, contacts with both locations on one map.
+Light and ink sections alternate, never more than two light ones in a row. The actions
+are the same everywhere: book a table (Telegram, Max or a call), order delivery in the
+app, open the catering site. No forms, no cart, no prices. A 404 page carries the same
+two actions.
 
 Editors change posters, promos, menus, photos, texts and contacts in Directus; a save
 triggers a rebuild and the static site updates within a minute.
@@ -49,10 +51,15 @@ triggers a rebuild and the static site updates within a minute.
 - **The build refuses bad content.** Missing phone, a location without seven rows of
   hours, an image without `alt`, an over-long SEO title — the build fails with the
   field name instead of shipping a broken page.
-- **No UI framework.** Interactive pieces — a header that is transparent over the
-  hero and turns solid on scroll, booking dialog, sticky bottom bar, room slider,
-  "show more", two lazy Yandex widgets — are covered by the platform (`<dialog>`,
-  scroll-snap, `IntersectionObserver`).
+- **Two islands, everything else on the platform.** A header that is transparent over
+  the hero and turns solid on scroll, booking dialog, sticky bottom bar, room slider,
+  "show more" and two lazy Yandex widgets are covered by `<dialog>`, scroll-snap and
+  `IntersectionObserver`. Only the marquee and the counting figures hydrate, from
+  `src/islands/`.
+- **Placeholders are designed plates, not dashed frames.** A photo that has not
+  arrived yet gets a filled plate with a diagonal hatch, the future subject in the
+  display serif and a `заглушка · заменяется в админке` caption. The aspect ratio
+  matches the future photo, so dropping in the real shot shifts nothing.
 - **Opening status computed in the browser** against `Europe/Samara`, never baked
   into HTML. Business hours come from the admin as seven rows per location and feed the
   table, the status pill and schema.org `openingHours`.
@@ -65,11 +72,11 @@ triggers a rebuild and the static site updates within a minute.
 
 | | |
 |---|---|
-| Framework | [Astro 5](https://astro.build) — static output, zero hydration |
+| Framework | [Astro 5](https://astro.build) — static output, two React islands |
 | Content | [Directus 11](https://directus.io) in Docker (`directus/`), REST at build time |
 | Language | TypeScript (strict), plain CSS with custom properties |
 | Images | `astro:assets` → AVIF, `<Image />` + `getImage()` for the LCP preload |
-| Fonts | Montserrat Variable, self-hosted, Cyrillic and Latin subsets only |
+| Fonts | Prata for display, Montserrat Variable for UI — self-hosted, Cyrillic and Latin subsets only |
 | SEO | title/description/OG from the admin, JSON-LD `@graph`, sitemap, `robots.txt` |
 | Tests | `node:assert` — no runner, Node reads the TypeScript directly |
 | Hosting | own VPS: nginx + release symlink, rebuilt by webhook and nightly cron |
@@ -110,6 +117,7 @@ Full install, roles and operations: [docs/DIRECTUS.md](docs/DIRECTUS.md).
 | `src/data/site.ts` | schedule helpers, opening status, Yandex URL builders |
 | `src/data/fixture.json` | content snapshot for dev and tests (`pnpm fixture`) |
 | `src/components/` | one component per section, booking dialog, sticky bar |
+| `src/islands/` | the only hydrated code: `ScrollVelocity` marquee, `CountUp` figures |
 | `src/layouts/BaseLayout.astro` | meta, OpenGraph, JSON-LD, fonts, LCP preload, Metrika |
 | `src/scripts/` | booking dialog, sticky bar, header, lazy frames, map |
 | `src/styles/global.css` | design tokens, buttons, shared patterns |
@@ -138,7 +146,7 @@ that switch at `768px` and `1200px`:
 | side padding | 18 | 36 | 72 |
 | content width | 354 | 762 | 1296 |
 | H1 / H2 | 34 / 25 | 47 / 33 | 66 / 42 |
-| section padding | 44 | 64 | 92 |
+| section padding | 36 | 52 | 72 |
 
 ### Tests
 
@@ -165,12 +173,13 @@ Directus. Step by step: [docs/DIRECTUS.md](docs/DIRECTUS.md).
 
 ### Что это
 
-Десять секций одним скроллом: первый экран, пять направлений (кафе, ресторан,
-кондитерская, кейтеринг, банкеты), слайдер фото обоих залов, афиша месяца, акции по
-адресам текстом, PDF меню, витрина тортов, приложение и доставка, отзывы, контакты с
-обеими точками на одной карте. Действия везде одни: забронировать стол (Telegram, Max
-или звонок), заказать доставку в приложении, перейти на сайт кейтеринга. Без форм,
-корзины и цен.
+Тринадцать секций одним скроллом: первый экран, пять направлений (кафе, ресторан,
+кондитерская, кейтеринг, банкеты), полоса цифр, слайдер фото обоих залов, афиша
+месяца, акции по адресам текстом, PDF меню, витрина тортов, приложение и доставка,
+отзывы, бегущая строка поводов, контакты с обеими точками на одной карте. Светлые и
+чернильные секции чередуются, подряд светлых не больше двух. Действия везде одни:
+забронировать стол (Telegram, Max или звонок), заказать доставку в приложении, перейти
+на сайт кейтеринга. Без форм, корзины и цен. У страницы 404 те же два действия.
 
 Редакторы меняют афишу, акции, меню, фото, тексты и контакты в Directus; сохранение
 запускает пересборку, и статический сайт обновляется в пределах минуты.
@@ -183,10 +192,15 @@ Directus. Step by step: [docs/DIRECTUS.md](docs/DIRECTUS.md).
 - **Сборка не пропускает плохой контент.** Нет телефона, у точки не семь строк часов,
   у картинки нет `alt`, длинный SEO-заголовок — сборка падает с именем поля, а не
   выкладывает сломанную страницу.
-- **Без UI-фреймворка.** Интерактив — шапка, прозрачная над первым экраном и
-  непрозрачная после прокрутки, диалог брони, нижняя полоса, слайдер зала, «показать
-  ещё», два ленивых виджета Яндекса — закрывает платформа (`<dialog>`, scroll-snap,
-  `IntersectionObserver`).
+- **Два острова, остальное на платформе.** Шапку, прозрачную над первым экраном и
+  непрозрачную после прокрутки, диалог брони, нижнюю полосу, слайдер зала, «показать
+  ещё» и два ленивых виджета Яндекса закрывают `<dialog>`, scroll-snap и
+  `IntersectionObserver`. Гидратируются только бегущая строка и считающиеся цифры —
+  из `src/islands/`.
+- **Заглушка — оформленная плашка, а не пунктирная рамка.** Пока фото нет, стоит
+  заливка с косой штриховкой, будущий предмет дисплейной антиквой и пометка
+  «заглушка · заменяется в админке». Пропорция совпадает с будущим кадром, поэтому
+  подстановка настоящего фото ничего не сдвигает.
 - **Статус «Открыто до 21:00» считается в браузере** по `Europe/Samara`, а не
   вшивается в HTML. Часы приходят из админки семью строками на точку и разворачиваются
   в таблицу, плашку статуса и `openingHours` schema.org.
@@ -198,11 +212,11 @@ Directus. Step by step: [docs/DIRECTUS.md](docs/DIRECTUS.md).
 
 | | |
 |---|---|
-| Фреймворк | [Astro 5](https://astro.build) — статическая сборка, без гидратации |
+| Фреймворк | [Astro 5](https://astro.build) — статическая сборка, два React-острова |
 | Контент | [Directus 11](https://directus.io) в Docker (`directus/`), REST при сборке |
 | Язык | TypeScript (strict), обычный CSS на кастомных свойствах |
 | Картинки | `astro:assets` → AVIF, `<Image />` и `getImage()` для preload |
-| Шрифт | Montserrat Variable, свой хостинг, только кириллица и латиница |
+| Шрифты | Prata на заголовках, Montserrat Variable на интерфейсе — свой хостинг, только кириллица и латиница |
 | SEO | title/description/OG из админки, JSON-LD `@graph`, sitemap, `robots.txt` |
 | Тесты | `node:assert` — без раннера, Node читает TypeScript сам |
 | Хостинг | свой VPS: nginx + симлинк на релиз, пересборка по вебхуку и ночному крону |
@@ -243,6 +257,7 @@ pnpm fixture                  # выгрузка Directus → src/data/fixture.j
 | `src/data/site.ts` | расписание, статус точки, ссылки на Яндекс |
 | `src/data/fixture.json` | снимок контента для разработки и тестов (`pnpm fixture`) |
 | `src/components/` | по компоненту на секцию, диалог брони, нижняя полоса |
+| `src/islands/` | единственный гидратируемый код: бегущая строка `ScrollVelocity`, цифры `CountUp` |
 | `src/layouts/BaseLayout.astro` | мета, OpenGraph, JSON-LD, шрифт, preload, Метрика |
 | `src/scripts/` | диалог, полоса, шапка, ленивые кадры, карта |
 | `src/styles/global.css` | токены, кнопки, общие паттерны |
@@ -271,7 +286,7 @@ pnpm fixture                  # выгрузка Directus → src/data/fixture.j
 | боковой отступ | 18 | 36 | 72 |
 | контент | 354 | 762 | 1296 |
 | H1 / H2 | 34 / 25 | 47 / 33 | 66 / 42 |
-| отступ секции | 44 | 64 | 92 |
+| отступ секции | 36 | 52 | 72 |
 
 ### Тесты
 
