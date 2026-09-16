@@ -17,13 +17,13 @@ banquets — two locations in Samara, Russia.<br>
 
 ## Screenshots · Скриншоты
 
-| Showcase · Витрина | Contacts · Контакты |
+| Directions · Направления | Contacts · Контакты |
 |---|---|
-| <img src="docs/screenshots/cakes.webp" alt="Cake showcase" width="440"> | <img src="docs/screenshots/contacts.webp" alt="Contacts with schedule and Yandex map" width="440"> |
+| <img src="docs/screenshots/directions.webp" alt="Five directions: an ink card among light ones" width="440"> | <img src="docs/screenshots/contacts.webp" alt="Contacts with schedule and Yandex map" width="440"> |
 
-| Mobile — hero | Mobile — showcase | Mobile — contacts |
+| Mobile — hero | Mobile — directions | Mobile — contacts |
 |---|---|---|
-| <img src="docs/screenshots/mobile-hero.webp" alt="Mobile hero" width="240"> | <img src="docs/screenshots/mobile-cakes.webp" alt="Mobile showcase" width="240"> | <img src="docs/screenshots/mobile-contacts.webp" alt="Mobile contacts" width="240"> |
+| <img src="docs/screenshots/mobile-hero.webp" alt="Mobile hero" width="240"> | <img src="docs/screenshots/mobile-directions.webp" alt="Mobile directions" width="240"> | <img src="docs/screenshots/mobile-contacts.webp" alt="Mobile contacts" width="240"> |
 
 <details open>
 <summary><b>🇬🇧 English</b> — documentation</summary>
