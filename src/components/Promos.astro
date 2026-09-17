@@ -1,11 +1,19 @@
 ---
 /**
- * Live promos as an even grid of squared panels with centred text (Everest):
- * the first carries the discount figure in display type on ink, the rest sit
- * on paper. A panel is a caps heading, one condition and the venue as a label.
- * Живые акции ровной сеткой квадратных панелей с текстом по центру (Everest):
- * первая несёт размер скидки антиквой на чернилах, остальные стоят на бумаге.
- * Панель — заголовок прописными, одно условие и точка подписью.
+ * Live promos as a printed sheet, not a grid of equal boxes: the first promo
+ * is a stamp — a paper panel with a double rule, the discount figure pulled
+ * out of its title in display type — and the rest run beside it as a ledger
+ * of numbered lines (Tidescape's «01. …», Da Maria's specials column). The
+ * editor types only a title and a text in Directus; the figure, the ordinal,
+ * the first-sentence cut and the line clamps are all done here, so any copy
+ * keeps the shape (see docs/DIRECTUS.md → «Акции»).
+ * Живые акции печатным листом, а не сеткой одинаковых коробок: первая акция —
+ * оттиск, бумажная панель с двойной линией и размером скидки, вынутым из её
+ * заголовка, дисплейной антиквой; остальные идут рядом реестром нумерованных
+ * строк («01. …» у Tidescape, колонка specials у Da Maria). Редактор набирает
+ * в Directus только заголовок и текст; цифру, номер, обрезку до первого
+ * предложения и ограничение строк делает эта страница, так что любой текст
+ * держит форму (см. docs/DIRECTUS.md → «Акции»).
  */
 import { groupByPlace } from '../lib/select';
 import { typo, type Place, type Promo } from '../lib/content';
@@ -28,43 +36,64 @@ const ordered = [null, ...places.map((place) => place.id)]
 // текст режется до первого предложения: ничего не дописываем, только убираем
 const oneSentence = (text: string) => text.match(/^[^.!?]*[.!?]/)?.[0] ?? text;
 
-// the ink panel takes the discount figure out of its own title, e.g. «20 %»
-// чернильная панель вынимает размер скидки из своего же заголовка, например «20 %»
+// the stamp takes the discount figure out of its own title, e.g. «20 %»
+// оттиск вынимает размер скидки из своего же заголовка, например «20 %»
 const [hero, ...rest] = ordered;
-const figure = hero?.title.match(/\d+\s*%/)?.[0] ?? null;
+const figure = hero?.title.match(/\d+\s*%/)?.[0].replace(/\s*%/, ' %') ?? null;
 const heroTitle = figure
-  ? hero.title.replace(figure, ' ').replace(/\s{2,}/g, ' ').replace(/[\s—–-]+$/, '').trim()
+  ? hero.title
+      .replace(/\d+\s*%/, ' ')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/[\s—–-]+$/, '')
+      .trim()
   : (hero?.title ?? '');
 
 // address label: the venue name, or «обе точки» for a network-wide promo
 // подпись адреса: имя точки, у общей акции — «обе точки»
 const addr = (promo: Promo) => promo.place?.name ?? 'Обе точки';
+const ordinal = (i: number) => String(i).padStart(2, '0');
 ---
 
 {
   ordered.length > 0 && (
     <section class="section" id="promos">
       <div class="container">
-        <div class="head">
+        <div class="head" data-reveal>
           <span class="mark" aria-hidden="true" />
           <h2 class="display-caps">Акции</h2>
         </div>
 
-        <div class="pr__grid">
-          <article class="pr pr--ink">
-            {figure && <p class="pr__figure display">{figure}</p>}
-            <h3 class="pr__title">{heroTitle}</h3>
-            <p class="pr__text">{typo(oneSentence(hero.text))}</p>
-            <p class="tag pr__addr">{addr(hero)}</p>
+        <div class:list={['pr', rest.length === 0 && 'pr--solo']}>
+          <article class="pr__stamp" data-reveal>
+            <p class="tag pr__stamp-addr">{addr(hero)}</p>
+            {figure ? (
+              <p class="pr__figure display">{figure}</p>
+            ) : (
+              <p class="pr__figure pr__figure--word display">{typo(hero.title)}</p>
+            )}
+            {figure && <h3 class="pr__stamp-title">{typo(heroTitle)}</h3>}
+            <p class="pr__stamp-text">{typo(oneSentence(hero.text))}</p>
+            <p class="whiskers pr__stamp-n">
+              <span class="tag tnum">{ordinal(1)}</span>
+            </p>
           </article>
 
-          {rest.map((promo) => (
-            <article class="pr">
-              <h3 class="pr__title">{typo(promo.title)}</h3>
-              <p class="pr__text">{typo(oneSentence(promo.text))}</p>
-              <p class="tag pr__addr">{addr(promo)}</p>
-            </article>
-          ))}
+          {rest.length > 0 && (
+            <ol class="pr__ledger" data-reveal>
+              {rest.map((promo, i) => (
+                <li class="pr__row">
+                  <span class="pr__n display tnum" aria-hidden="true">
+                    {ordinal(i + 2)}
+                  </span>
+                  <div class="pr__row-in">
+                    <h3 class="pr__title">{typo(promo.title)}</h3>
+                    <p class="pr__text">{typo(oneSentence(promo.text))}</p>
+                    <p class="tag pr__addr">{addr(promo)}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
         </div>
       </div>
     </section>
@@ -72,61 +101,66 @@ const addr = (promo: Promo) => promo.place?.name ?? 'Обе точки';
 }
 
 <style>
-  /* equal panels: the grid stretches every row to its tallest panel
-     ровные панели: сетка тянет каждый ряд до самой высокой панели */
-  .pr__grid {
+  .pr {
     display: grid;
-    gap: var(--gap);
-    margin-top: 30px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+    margin-top: 28px;
   }
 
-  /* text on the central axis of the panel, the label pushed to the bottom
-     текст по центральной оси панели, подпись прижата к низу */
-  .pr {
+  /* The stamp: a paper panel with a hairline and, 8 px inside it, a second one
+     — the double rule of a printed coupon. Content on the central axis.
+     Оттиск: бумажная панель с волосяной линией и второй в 8 px внутри —
+     двойная линия печатного купона. Содержимое по центральной оси. */
+  .pr__stamp {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 30px 24px 26px;
-    border: 1px solid var(--line);
+    padding: 30px 26px 24px;
+    border: 1px solid var(--line-4);
     border-radius: var(--r-sq);
     background: var(--surface);
     text-align: center;
   }
 
-  /* ink is set here, not via `.strip-ink`: the scoped `.pr` background would
-     win over the global class and leave cream text on cream
-     чернила заданы здесь, а не через `.strip-ink`: скоуповый фон `.pr`
-     перебил бы глобальный класс и оставил бы кремовый текст на креме */
-  .pr--ink {
-    border-color: var(--ink);
-    background: var(--ink);
-    color: var(--on-ink);
+  .pr__stamp::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border: 1px solid var(--line-4);
+    border-radius: 1px;
+    pointer-events: none;
   }
 
-  .pr--ink .pr__text {
-    color: var(--on-ink-2);
-  }
-
-  .pr--ink .pr__addr {
-    color: var(--on-ink-2);
-  }
-
-  /* the figure leads the panel and stays on one line at any width
-     цифра ведёт панель и не переносится ни на какой ширине */
+  /* The figure leads the stamp: display antiqua in terracotta. At this size the
+     base terracotta on paper (3,3:1) is well over the 3:1 a large numeral needs.
+     Цифра ведёт оттиск: дисплейная антиква терракотой. На таком кегле базовая
+     терракота на бумаге (3,3:1) с запасом выше 3:1, нужных крупной цифре. */
   .pr__figure {
-    margin-bottom: 8px;
-    font-size: clamp(56px, 12vw, 64px);
-    line-height: 1;
-    color: var(--terracotta-on-ink);
+    margin-top: 18px;
+    font-size: clamp(88px, 26vw, 120px);
+    line-height: 0.9;
+    color: var(--terracotta);
     white-space: nowrap;
   }
 
-  /* caps grotesque with tracking, one weight: the title is a label, the
-     antiqua is kept for the figure and the section heading
-     гротеск прописными вразрядку, один вес: заголовок — подпись, антиква
-     остаётся цифре и заголовку секции */
-  .pr__title {
-    max-width: 24ch;
+  /* a promo without a percent: its title stands in place of the figure
+     акция без процента: вместо цифры стоит её заголовок */
+  .pr__figure--word {
+    max-width: 14ch;
+    font-size: clamp(26px, 7vw, 34px);
+    line-height: 1.1;
+    color: var(--text);
+    white-space: normal;
+    text-wrap: balance;
+  }
+
+  /* caps grotesque with tracking, one weight: the title is a label
+     гротеск прописными вразрядку, один вес: заголовок — подпись */
+  .pr__stamp-title {
+    max-width: 22ch;
+    margin-top: 16px;
     font-size: 14px;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -134,26 +168,113 @@ const addr = (promo: Promo) => promo.place?.name ?? 'Обе точки';
     text-transform: uppercase;
   }
 
-  .pr__text {
-    max-width: 38ch;
+  .pr__stamp-text {
+    max-width: 34ch;
     margin-top: 10px;
     font-size: var(--fs-body);
     color: var(--text-2);
   }
 
-  .pr__addr {
+  /* the venue label at the top and the ordinal at the foot are pinned; the
+     figure block floats in the middle of whatever height the ledger sets
+     подпись точки сверху и номер у низа закреплены; блок с цифрой стоит по
+     центру той высоты, что задаёт реестр */
+  .pr__stamp-addr {
+    margin-bottom: auto;
+  }
+
+  .pr__stamp-n {
+    width: 100%;
     margin-top: auto;
-    padding-top: 18px;
+    padding-top: 22px;
+    color: var(--text-4);
+  }
+
+  /* The ledger: one hairline over each line, the ordinal in display type in
+     its own column, the text beside it. Long copy is clamped, not overflowed.
+     Реестр: волосяная линия над каждой строкой, номер антиквой в своей колонке,
+     текст рядом. Длинный текст обрезается по строкам, а не вылезает. */
+  .pr__ledger {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .pr__row {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 14px;
+    padding: 18px 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .pr__n {
+    font-size: 26px;
+    line-height: 1;
+    color: var(--terracotta-text);
+  }
+
+  .pr__row-in {
+    min-width: 0;
+  }
+
+  .pr__title {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    line-height: 1.35;
+    text-transform: uppercase;
+    text-wrap: pretty;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+
+  .pr__text {
+    margin-top: 6px;
+    font-size: var(--fs-body);
+    color: var(--text-2);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+
+  .pr__addr {
+    margin-top: 8px;
   }
 
   @media (min-width: 768px) {
-    .pr__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* stamp and ledger side by side: the stamp narrower, both from one top line
+       оттиск и реестр рядом: оттиск уже, оба от одной верхней линии */
+    .pr {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      align-items: stretch;
+      gap: 32px;
       margin-top: 36px;
     }
 
-    .pr {
-      padding: 40px 32px 32px;
+    /* the only promo: the stamp alone, centred and no wider than a column
+       единственная акция: один оттиск по центру, не шире колонки */
+    .pr--solo {
+      grid-template-columns: minmax(0, 520px);
+      justify-content: center;
+    }
+
+    .pr__stamp {
+      padding: 36px 30px 28px;
+    }
+
+    .pr__row {
+      grid-template-columns: 64px minmax(0, 1fr);
+      gap: 18px;
+      padding: 22px 0;
+    }
+
+    .pr__n {
+      font-size: 30px;
     }
 
     .pr__title {
@@ -163,7 +284,25 @@ const addr = (promo: Promo) => promo.place?.name ?? 'Обе точки';
 
   @media (min-width: 1200px) {
     .pr {
-      padding: 48px 40px 36px;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      gap: 56px;
+    }
+
+    .pr__stamp {
+      padding: 44px 40px 32px;
+    }
+
+    .pr__row {
+      grid-template-columns: 80px minmax(0, 1fr);
+      padding: 26px 0;
+    }
+
+    .pr__n {
+      font-size: 34px;
+    }
+
+    .pr__text {
+      max-width: 52ch;
     }
   }
 </style>
