@@ -668,9 +668,10 @@ h2,
   text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
   text-underline-offset: 5px;
   cursor: pointer;
-  transition-property: color, text-decoration-color;
-  transition-duration: 0.16s;
-  transition-timing-function: ease;
+  transition-property: color, text-decoration-color, text-underline-offset,
+    text-decoration-thickness;
+  transition-duration: 0.16s, 0.16s, 0.24s, 0.24s;
+  transition-timing-function: ease, ease, var(--ease-out), var(--ease-out);
 }
 
 /* The circled arrow the owner's references hang on every text link (Ballena
@@ -721,9 +722,15 @@ h2,
 }
 
 @media (hover: hover) and (pointer: fine) {
+  /* подчёркивание подходит к строке и наливается: ссылка отвечает движением,
+     а не только цветом
+     the underline steps up to the line and fills in: the link answers with
+     motion, not colour alone */
   .tlink:hover {
     color: var(--terracotta-text);
     text-decoration-color: currentColor;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1.5px;
   }
 
   /* знак делает шаг туда, куда показывает: вперёд у внутренней, вбок у внешней */

@@ -236,6 +236,9 @@ const many = shots.length > 1;
      Кремовый круг на краю кадра, по вертикали — в центре кадра (подпись под
      ним не считается): высота кадра — 10/16 его ширины. */
   .gl__arrow {
+    transition-property: background-color, translate, scale;
+    transition-duration: 200ms;
+    transition-timing-function: var(--ease-out);
     position: absolute;
     top: calc(var(--frame) * 10 / 16 / 2);
     z-index: 1;
@@ -332,8 +335,20 @@ const many = shots.length > 1;
   }
 
   @media (hover: hover) and (pointer: fine) {
+    /* кружок делает шаг в ту сторону, куда листает: подсказка направления
+       раньше, чем взгляд дойдёт до значка внутри
+       the circle steps the way it scrolls: the direction is read before the
+       eye reaches the glyph inside it */
     .gl__arrow:not([aria-disabled='true']):hover {
       background: var(--surface);
+    }
+
+    .gl__arrow--prev:not([aria-disabled='true']):hover {
+      translate: -3px 0;
+    }
+
+    .gl__arrow--next:not([aria-disabled='true']):hover {
+      translate: 3px 0;
     }
 
     .gl__rail {
