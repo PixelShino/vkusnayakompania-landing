@@ -1,12 +1,15 @@
 ---
 /**
- * Five directions as an uneven grid: two dominants (the venues, the first one
- * ink-filled) take 3 of 6 columns, the three compact cards take 2. The card top
- * is the circle and the pill — the dashed rule between them is gone.
- * Пять направлений разноразмерной сеткой: две доминанты (точки, первая — с
- * чернильной заливкой) занимают 3 колонки из 6, три компактные — по 2. В шапке
- * карточки круг и пилюля, пунктир между ними убран.
+ * Directions as a spread, not a grid of cards. The two venues are the only
+ * entities worth comparing, so each gets a full-bleed frame to its own edge of
+ * the screen and text pressed to the other side (Everest). The three services
+ * follow as one paper strip with hairlines between them — no boxes, no pills.
+ * Направления разворотом, а не сеткой карточек. Две точки — единственные
+ * сущности, которые есть смысл сравнивать: у каждой кадр под обрез своего края
+ * экрана и текст, прижатый к другой стороне (Everest). Три услуги идут одной
+ * бумажной полосой с волосяными линиями между ними — без рамок и пилюль.
  */
+import Photo from './Photo.astro';
 import OpenStatus from './OpenStatus.astro';
 import { menuFor } from '../lib/select';
 import { typo, type Content, type Direction } from '../lib/content';
@@ -21,23 +24,22 @@ interface Props {
 const { content } = Astro.props;
 const { settings, home, directions, menus } = content;
 
-/** Кнопка карточки: либо ссылка, либо триггер диалога брони (`book`). */
+/** Действие услуги: ссылка или триггер диалога брони (`book`). */
 type Action = {
   label: string;
   href?: string;
   book?: string;
   note?: string;
   external?: boolean;
-  primary?: boolean;
 };
 
 const at = (key: Direction['key']) => directions.find((item) => item.key === key);
 
 const menuHref = (direction: Direction) => menuFor(menus, direction.id)?.file.href ?? null;
 
-// Cards keep 1–2 sentences: the section carried 167 words and read as a wall.
+// Keep 1–2 sentences: the section carried 167 words and read as a wall.
 // Nothing is rewritten — only the tail of the admin text is dropped.
-// В карточке остаётся 1–2 предложения: секция несла 167 слов и читалась стеной.
+// Остаётся 1–2 предложения: секция несла 167 слов и читалась стеной.
 // Текст не переписывается — отбрасывается только хвост админского поля.
 const sentences = (text: string, keep: number) =>
   text
@@ -45,329 +47,500 @@ const sentences = (text: string, keep: number) =>
     .slice(0, keep)
     .join(' ');
 
-// у кафе и ресторана действия одни и те же, адрес уходит в заголовок диалога
-// both venue cards share one pair of actions; the dialog title carries the street
-const venueActions = (direction: Direction): Action[] => [
-  {
-    label: 'Забронировать',
-    book: direction.place ? `Бронь стола: ${direction.place.street}` : 'Бронь стола',
-    primary: true,
-  },
-  { label: 'Приложение', href: '#delivery' },
-];
+// A stub is marked in the admin file title: it is drawn as a hatched plate,
+// never passed off as a photo.
+// Заглушка помечена в заголовке файла в админке: рисуется штрихованной
+// плашкой, за фото не выдаётся.
+const isStub = (direction: Direction) => !direction.photo || direction.photo.placeholder;
+
+const venues = (['cafe', 'restaurant'] as const)
+  .map(at)
+  .filter((d): d is Direction & { place: NonNullable<Direction['place']> } => Boolean(d?.place));
 
 /**
- * Порядок карточек и их шапка: у точек в круге номер, а в пилюле живой статус,
- * у остальных — иконка и короткое слово. `phone` добавляет телефон точки
- * (у кейтеринга и банкетов — общий). Первые две — доминанты сетки.
- * Card order and card top: venues get the venue number and a live status pill,
- * the rest get an icon and a short word. `phone` appends the venue's phone
- * (catering and banquets use the main one). The first two are the grid dominants.
+ * The three services: an icon, one sentence and text links instead of buttons.
+ * `phone` adds the main number — catering and the confectionery answer on it.
+ * Три услуги: иконка, одно предложение и текстовые ссылки вместо кнопок.
+ * `phone` добавляет общий номер — по нему отвечают кейтеринг и кондитерская.
  */
-const CARDS: {
-  key: Direction['key'];
-  icon?: string;
-  pill?: string;
-  phone?: boolean;
-  actions: (direction: Direction) => Action[];
-}[] = [
-  { key: 'cafe', phone: true, actions: venueActions },
-  { key: 'restaurant', phone: true, actions: venueActions },
+const SERVICES: { key: Direction['key']; icon: string; phone?: boolean; actions: (d: Direction) => Action[] }[] = [
   {
     key: 'confectionery',
     icon: cake,
-    pill: '48 часов',
     phone: true,
     actions: (direction) => [
-      ...(menuHref(direction)
-        ? [{ label: 'Меню', href: menuHref(direction)!, external: true }]
-        : []),
+      ...(menuHref(direction) ? [{ label: 'Меню', href: menuHref(direction)!, external: true }] : []),
       { label: 'В приложении', href: settings.shop_url, external: true },
     ],
   },
   {
     key: 'catering',
     icon: cloche,
-    pill: 'выезд',
     phone: true,
-    actions: () => [{ label: 'На сайт', href: settings.catering_url, external: true }],
+    actions: () => [{ label: 'На сайт кейтеринга', href: settings.catering_url, external: true }],
   },
   {
     key: 'banquets',
     icon: glasses,
-    pill: 'от 10 гостей',
     actions: () => [
       { label: 'Обсудить банкет', book: 'Банкет', note: 'Скажите дату, число гостей и повод' },
     ],
   },
 ];
 
-const cards = CARDS.map((row) => ({ ...row, direction: at(row.key) })).filter(
+const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).filter(
   (row): row is typeof row & { direction: Direction } => row.direction !== undefined,
 );
 ---
 
-<section class="section" id="about">
-  <div class="container">
-    <div class="section-head dir__head">
-      <h2>{home.about_title}</h2>
-      {home.about_text && <p class="lead dir__lead">{home.about_text}</p>}
-    </div>
+<section class="section dir" id="about">
+  <div class="container dir__head">
+    <span class="mark" aria-hidden="true"></span>
+    <h2 class="display-caps">{home.about_title}</h2>
+    {home.about_text && <p class="lead dir__lead">{typo(home.about_text)}</p>}
+  </div>
 
-    <div class="dir__grid">
-      {
-        cards.map(({ direction, icon, pill, phone, actions }, i) => {
-          const wide = i < 2;
-          const ink = i === 0;
-          return (
-            <article class:list={['dir', wide && 'dir--wide', ink && 'dir--ink']}>
-              {ink && <div class="blob" aria-hidden="true" />}
-
-              <div class="card-top">
-                <span class="card-mark card-mark--sm">
-                  {icon ? (
-                    <span class="icon" aria-hidden="true">
-                      <Fragment set:html={icon} />
-                    </span>
-                  ) : (
-                    direction.place?.n
-                  )}
-                </span>
-                {pill ? (
-                  <span class="card-pill">{pill}</span>
-                ) : (
-                  direction.place && <OpenStatus schedule={direction.place.schedule} />
-                )}
-              </div>
-
-              <h3 class:list={['dir__title', wide && 'display']}>{direction.title}</h3>
-              <p class="dir__text">{typo(sentences(direction.text, wide ? 2 : 1))}</p>
-
-              {direction.place && (
-                <p class="dir__meta">
-                  Сегодня <OpenStatus schedule={direction.place.schedule} mode="today" class="tnum" />
-                  <span class="dir__dot" aria-hidden="true"> · </span>
-                  {direction.place.name}
-                </p>
+  <div class="venues">
+    {
+      venues.map((direction, i) => {
+        const { place } = direction;
+        const menu = menuHref(direction);
+        const stub = isStub(direction);
+        return (
+          <article class:list={['venue', i % 2 === 1 && 'venue--flip']}>
+            <div class="venue__frame">
+              {stub || !direction.photo ? (
+                <div class:list={['venue__stub', i % 2 ? 'venue__stub--warm' : 'venue__stub--ink']}>
+                  <span class="venue__stub-title display">
+                    {direction.photo?.alt ?? direction.title}
+                  </span>
+                  <span class="venue__stub-meta">заглушка · заменяется в админке</span>
+                </div>
+              ) : (
+                <Photo
+                  photo={direction.photo}
+                  ratio="16 / 10"
+                  ratioMd="16 / 10"
+                  radius="0"
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                  class="venue__photo"
+                />
               )}
+            </div>
 
-              <div class="dir__actions">
-                {actions(direction).map((action) =>
-                  action.book ? (
-                    <button
-                      type="button"
-                      class:list={[
-                        'btn',
-                        'btn--md',
-                        action.primary ? (ink ? 'btn--light' : 'btn--primary') : 'btn--secondary',
-                      ]}
-                      data-book={action.book}
-                      data-book-note={action.note}
-                    >
-                      {action.label}
-                    </button>
-                  ) : (
-                    <a
-                      class:list={[
-                        'btn',
-                        'btn--md',
-                        action.primary ? (ink ? 'btn--light' : 'btn--primary') : 'btn--secondary',
-                      ]}
-                      href={action.href}
-                      target={action.external ? '_blank' : undefined}
-                      rel={action.external ? 'noopener' : undefined}
-                    >
-                      {action.label}
-                    </a>
-                  ),
-                )}
-                {phone && (
-                  <a class="dir__phone" href={(direction.place ?? settings).phoneHref}>
-                    {(direction.place ?? settings).phone}
+            <div class="venue__body">
+              <h3 class="venue__title display">{direction.title}</h3>
+              <p class="venue__addr">
+                <a href="#contacts">{place.name}</a>
+                <span class="venue__dot" aria-hidden="true">
+                  {' · '}
+                </span>
+                {place.kind}
+              </p>
+              <p class="venue__text">{typo(sentences(direction.text, 2))}</p>
+              <p class="venue__meta">
+                Сегодня <OpenStatus schedule={place.schedule} mode="today" class="tnum" />
+                <span class="venue__dot" aria-hidden="true">
+                  {' · '}
+                </span>
+                <OpenStatus schedule={place.schedule} class="venue__status" />
+              </p>
+
+              <div class="venue__actions">
+                <button
+                  type="button"
+                  class="btn btn--sq btn--primary"
+                  data-book={`Бронь стола: ${place.street}`}
+                >
+                  Забронировать
+                </button>
+                {menu && (
+                  <a class="btn btn--sq btn--secondary" href={menu} target="_blank" rel="noopener">
+                    Меню
                   </a>
                 )}
+                <a class="venue__tel" href={place.phoneHref}>
+                  {place.phone}
+                </a>
               </div>
-            </article>
-          );
-        })
+            </div>
+          </article>
+        );
+      })
+    }
+  </div>
+
+  <div class="services">
+    <ul class="container services__row" role="list">
+      {
+        services.map(({ direction, icon, phone, actions }) => (
+          <li class="service">
+            <span class="service__icon" aria-hidden="true">
+              <Fragment set:html={icon} />
+            </span>
+            <h3 class="service__title display">{direction.title}</h3>
+            <p class="service__text">{typo(sentences(direction.text, 1))}</p>
+            <p class="service__links">
+              {actions(direction).map((action) =>
+                action.book ? (
+                  <button
+                    type="button"
+                    class="tlink"
+                    data-book={action.book}
+                    data-book-note={action.note}
+                  >
+                    {action.label}
+                  </button>
+                ) : (
+                  <a
+                    class="tlink"
+                    href={action.href}
+                    target={action.external ? '_blank' : undefined}
+                    rel={action.external ? 'noopener' : undefined}
+                  >
+                    {action.label}
+                  </a>
+                ),
+              )}
+              {phone && (
+                <a class="tlink service__tel" href={settings.phoneHref}>
+                  {settings.phone}
+                </a>
+              )}
+            </p>
+          </li>
+        ))
       }
-    </div>
+    </ul>
   </div>
 </section>
 
 <style>
-  /* h2 слева, лид справа одной строкой: столбиком они оставляли пустым весь
-     правый край секции
-     h2 left, lead right on one line: stacked they left the whole right edge empty */
+  /* the paper strip closes the section: the ink strip of numbers follows it
+     without a cream gap
+     бумажная полоса закрывает секцию: чернильная полоса цифр идёт сразу за ней */
+  .dir {
+    padding-bottom: 0;
+  }
+
+  /* Heading on the central axis: the mark, caps antiqua, the lead as one line.
+     Заголовок по центральной оси: марка, прописная антиква, лид одной строкой. */
+  .dir__head {
+    text-align: center;
+  }
+
   .dir__head h2 {
-    flex: 1 1 18rem;
-    min-width: 0;
+    max-width: 22ch;
+    margin: 18px auto 0;
   }
 
   .dir__lead {
-    flex: 1 1 22rem;
-    max-width: 34rem;
+    max-width: 46ch;
+    margin-inline: auto;
   }
 
-  .dir__grid {
+  .venues {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: calc(var(--gap) + 2px);
-    /* карточки не тянутся по высоте ряда: длинная остаётся длинной
-       cards never stretch to the row height: a long card stays long */
-    align-items: start;
-    margin-top: 18px;
+    gap: 40px;
+    margin-top: 32px;
   }
 
-  .dir {
-    position: relative;
+  .venue {
+    display: grid;
+  }
+
+  /* Plate instead of a frame, the ratio repeats the `ratio` of <Photo>: the
+     real shot drops in without moving a pixel. Ink and warm through one.
+     Плашка вместо кадра, пропорция повторяет `ratio` у <Photo>: настоящий
+     кадр встанет без сдвига. Чернила и тёплая — через одну. */
+  .venue__stub {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    padding: calc(var(--gap) + 8px);
-    border: 1px solid var(--line);
-    border-radius: var(--r-xl);
-    background: var(--surface);
-    transition: border-color 0.16s ease;
+    justify-content: flex-end;
+    aspect-ratio: 16 / 10;
+    padding: 22px var(--pad);
   }
 
-  /* пилюля уходит вправо сама: раньше её отжимал пунктир, ничего не значивший
-     the pill sits right on its own: the meaningless dashed rule is gone */
-  .card-top {
-    justify-content: space-between;
-  }
-
-  /* чернильная доминанта: палитра полосы на одной карточке, DESIGN.md §4
-     ink dominant: the strip palette applied to a single card, DESIGN.md §4 */
-  .dir--ink {
-    border-color: transparent;
-    background: var(--ink);
+  .venue__stub--ink {
+    background-color: var(--ink);
+    background-image: var(--hatch-ink);
     color: var(--on-ink);
   }
 
-  .dir--ink .dir__text,
-  .dir--ink .dir__meta,
-  .dir--ink .dir__dot {
+  .venue__stub--warm {
+    background-color: var(--surface-warm);
+    background-image: var(--hatch);
+    color: var(--text);
+  }
+
+  .venue__stub-title {
+    display: block;
+    font-size: clamp(22px, 5.6vw, 30px);
+    text-wrap: balance;
+  }
+
+  .venue__stub-meta {
+    display: block;
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  .venue__stub--ink .venue__stub-meta {
     color: var(--on-ink-2);
+    opacity: 1;
   }
 
-  .dir--ink .dir__phone {
-    color: var(--terracotta-on-ink);
+  .venue__body {
+    padding: 22px var(--pad) 0;
   }
 
-  /* обводка второй кнопки на чернилах кремовая: тёмная там не видна
-     the outlined button goes cream on ink; the dark border is invisible there */
-  .dir--ink .btn--secondary {
-    border-color: color-mix(in srgb, var(--on-ink) 50%, transparent);
-    color: var(--on-ink);
+  .venue__title {
+    font-size: clamp(26px, 6.6vw, 30px);
+    line-height: 1.1;
   }
 
-  .icon {
-    display: inline-flex;
-    width: 18px;
-    height: 18px;
+  .venue__addr {
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-2);
   }
 
-  .icon > :global(svg) {
-    width: 100%;
-    height: 100%;
+  .venue__addr a {
+    color: var(--text);
+    text-decoration: none;
   }
 
-  .dir__title {
-    margin: 14px 0 8px;
-    font-size: calc(var(--fs-h3) + 2px);
-    line-height: 1.12;
+  .venue__dot {
+    color: var(--text-4);
   }
 
-  /* доминанта берёт дисплейную антикву: 24–28 px, мельче 22 Prata не ставится
-     dominants take the display serif at 24–28px; Prata never goes below 22 */
-  .dir--wide .dir__title {
-    margin-top: 16px;
-    font-size: calc(var(--fs-h3) + 7px);
-  }
-
-  .dir__text {
+  .venue__text {
+    max-width: 46ch;
+    margin-top: 14px;
     font-size: var(--fs-body);
     color: var(--text-2);
-    /* широкие карточки нижнего ряда не должны тянуть строку до края */
-    max-width: 46ch;
   }
 
-  .dir__meta {
+  .venue__meta {
     margin-top: 12px;
     font-size: 13px;
     font-weight: 600;
     color: var(--text-3);
   }
 
-  /* точка живёт внутри строки меты и берёт её цвет: на --line-4 она давала
-     1,39:1 и висела призраком между двумя читаемыми кусками
-     the dot lives inside the meta line and takes its colour */
-  .dir__dot {
-    color: var(--text-4);
+  /* status as words in the meta line, not a pill; `:global` — child component
+     статус словами в строке меты, не пилюлей; `:global` — дочерний компонент */
+  .venue__meta :global(.venue__status),
+  .venue__meta :global(.venue__status.is-open) {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
   }
 
-  /* один шаг по обеим осям: перенесённый телефон стоит так же, как соседняя кнопка */
-  .dir__actions {
+  .venue__meta :global(.venue__status.is-open) {
+    color: var(--olive-dark);
+  }
+
+  .venue__actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 10px;
-    margin-top: auto;
-    padding-top: 16px;
+    gap: 10px 14px;
+    margin-top: 20px;
   }
 
-  /* поле нажатия остаётся 42 px, но в поток телефон отдаёт только высоту строки:
-     иначе перенесённый на свою строку он отбивается вдвое сильнее, чем кнопки
-     the 42 px hit area stays, yet only the text height goes into the flex line:
-     otherwise the wrapped phone sits twice as far away as the buttons do */
-  .dir__phone {
+  .venue__actions .btn {
+    height: 44px;
+    padding-inline: 20px;
+  }
+
+  /* 44 px hit area; only the text height goes into the flex line
+     зона нажатия 44 px; в строку flex уходит только высота текста */
+  .venue__tel {
     display: inline-flex;
     align-items: center;
-    min-height: 42px;
+    min-height: 44px;
     margin-block: -10px;
     padding-inline: 4px;
-    font-size: 13.5px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--terracotta-text);
     text-decoration: none;
     white-space: nowrap;
   }
 
+  /* Paper strip across the screen: three services under one hairline, no
+     boxes. Centred like a menu card; the ink strip of numbers follows.
+     Бумажная полоса на весь экран: три услуги под одной волосяной линией, без
+     рамок. По центру, как карточка меню; дальше идёт чернильная полоса цифр. */
+  .services {
+    margin-top: 40px;
+    padding-block: 8px 12px;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+  }
+
+  .services__row {
+    display: grid;
+    margin: 0 auto;
+    padding-block: 0;
+    list-style: none;
+  }
+
+  .service {
+    padding-block: 30px;
+    text-align: center;
+  }
+
+  .service + .service {
+    border-top: 1px solid var(--line);
+  }
+
+  .service__icon {
+    display: inline-flex;
+    width: 26px;
+    height: 26px;
+    color: var(--olive-dark);
+  }
+
+  .service__icon > :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .service__title {
+    margin-top: 12px;
+    font-size: 24px;
+  }
+
+  .service__text {
+    max-width: 36ch;
+    margin: 10px auto 0;
+    font-size: var(--fs-body);
+    color: var(--text-2);
+  }
+
+  .service__links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 22px;
+    margin-top: 18px;
+  }
+
+  .service__tel {
+    color: var(--terracotta-text);
+    text-decoration-color: transparent;
+    white-space: nowrap;
+  }
+
   @media (hover: hover) and (pointer: fine) {
-    .dir:hover {
-      border-color: var(--line-4);
-    }
-
-    .dir--ink:hover {
-      border-color: color-mix(in srgb, var(--on-ink) 35%, transparent);
-    }
-
-    .dir__phone:hover {
+    .venue__addr a:hover,
+    .venue__tel:hover {
       text-decoration: underline;
-      text-underline-offset: 3px;
+      text-underline-offset: 4px;
     }
   }
 
-  /* 3 + 3 доминанты над 2 + 2 + 2 компактными: ровного ряда одинаковых нет
-     3 + 3 dominants over 2 + 2 + 2 compacts: no row of identical cards left */
+  /* The spread: the frame takes its half of the screen to the very edge, the
+     text sits in the other half, pressed to the container edge on its side.
+     Rows alternate with no gap — a chequerboard of frame and text.
+     Разворот: кадр занимает свою половину экрана до самого края, текст стоит в
+     другой половине, прижатый к краю контейнера со своей стороны. Ряды
+     чередуются без зазора — шахматка из кадра и текста. */
   @media (min-width: 768px) {
-    .dir__head .dir__lead {
+    .venues {
+      gap: 0;
+      margin-top: 40px;
+    }
+
+    .venue {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: center;
+    }
+
+    .venue__stub {
+      padding: 28px 36px;
+    }
+
+    .venue__body {
+      max-width: 520px;
+      padding: 36px var(--pad) 36px 40px;
+    }
+
+    .venue--flip .venue__frame {
+      order: 2;
+    }
+
+    .venue--flip .venue__body {
+      justify-self: end;
+      padding: 36px 40px 36px var(--pad);
+      text-align: right;
+    }
+
+    .venue--flip .venue__text {
+      margin-left: auto;
+    }
+
+    .venue--flip .venue__actions {
+      justify-content: flex-end;
+    }
+
+    .services {
       margin-top: 0;
+      padding-block: 16px;
     }
 
-    .dir__grid {
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      margin-top: 22px;
+    .services__row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
-    .dir {
-      grid-column: span 2;
+    .service {
+      padding: 28px 24px;
     }
 
-    .dir--wide {
-      grid-column: span 3;
-      padding: calc(var(--gap) + 14px);
+    .service + .service {
+      border-top: 0;
+      border-left: 1px solid var(--line);
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .venue__body {
+      max-width: 560px;
+      padding: 48px var(--pad) 48px 64px;
+    }
+
+    .venue--flip .venue__body {
+      padding: 48px 64px 48px var(--pad);
+    }
+
+    .venue__title {
+      font-size: 36px;
+    }
+
+    .venue__stub-title {
+      font-size: 34px;
+    }
+
+    .services {
+      padding-block: 24px;
+    }
+
+    .service {
+      padding: 32px 36px;
+    }
+
+    .service__title {
+      font-size: 26px;
     }
   }
 </style>

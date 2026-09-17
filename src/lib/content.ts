@@ -26,7 +26,14 @@ export const isPlaceholder = (title?: string | null) => Boolean(title?.startsWit
  */
 export const typo = (text: string) => text.replace(/ ([\u2014\u2013]) /g, '\u00a0$1 ');
 
-export type Img = { src: ImageMetadata | string; width: number; height: number; alt: string };
+/** `placeholder` — файл помечен в админке как заглушка: страница обязана сказать об этом. */
+export type Img = {
+  src: ImageMetadata | string;
+  width: number;
+  height: number;
+  alt: string;
+  placeholder: boolean;
+};
 /** Документ в `public/media/` — PDF меню, политика, оферта. */
 export type Doc = { href: string; title: string; placeholder: boolean };
 
@@ -212,7 +219,13 @@ const toImg = (file: RawFile | null | undefined, resolve: ResolveImage): Img | u
   const name = file.title || file.id;
   if (!file.alt?.trim()) throw new Error(`alt пуст у файла ${name}`);
   if (!file.width || !file.height) throw new Error(`нет размеров у файла ${name}`);
-  return { src: resolve(file), width: file.width, height: file.height, alt: file.alt };
+  return {
+    src: resolve(file),
+    width: file.width,
+    height: file.height,
+    alt: file.alt,
+    placeholder: isPlaceholder(file.title),
+  };
 };
 
 const toDoc = (file: RawFile | null | undefined): Doc | undefined =>

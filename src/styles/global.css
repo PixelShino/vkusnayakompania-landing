@@ -582,3 +582,100 @@ h2,
     transform: none;
   }
 }
+
+/* ── печатные формы ───────────────────────────────────────────────────────
+   Taste pass on the first screen and the directions: the pill and the numbered
+   circle read as a page builder, a squared stamp-like button, an ornament over
+   the heading and caps antiqua read as a restaurant. The rest of the page still
+   carries the pill until the pass is rolled out.
+   Вкусовой проход по первому экрану и направлениям: пилюля и кружок-номер
+   читаются конструктором, квадратная кнопка-оттиск, марка над заголовком и
+   прописная антиква — заведением. Остальные секции несут пилюлю до раскатки. */
+:root {
+  --r-sq: 3px;
+}
+
+.btn--sq {
+  height: 48px;
+  padding-inline: 26px;
+  border-radius: var(--r-sq);
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Caps antiqua with a little tracking: size and spacing do the work, one weight
+   is enough (Green Park, Matsoni). Never on text under 22 px.
+   Прописная антиква с лёгкой разрядкой: работу делают размер и трекинг, веса
+   хватает одного (Green Park, Мацони). Не берётся на текст мельче 22 px. */
+.display-caps {
+  text-transform: uppercase;
+  letter-spacing: 0.045em;
+  line-height: 1.12;
+}
+
+/* Section mark instead of a kicker: a diamond between two whiskers, the same on
+   every heading. It holds the rhythm and never pretends to be information.
+   Марка вместо кикера: ромб между двумя усами, один и тот же над каждым
+   заголовком. Держит ритм и не притворяется информацией. */
+.mark {
+  position: relative;
+  display: block;
+  width: 76px;
+  height: 12px;
+  margin-inline: auto;
+  color: var(--terracotta);
+}
+
+.mark::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.6;
+  background:
+    linear-gradient(currentColor, currentColor) left center / 28px 1px no-repeat,
+    linear-gradient(currentColor, currentColor) right center / 28px 1px no-repeat;
+}
+
+.mark::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  translate: -50% -50%;
+  rotate: 45deg;
+  background: currentColor;
+}
+
+/* Text link in place of a third button: underlined, the same colour as the
+   copy, terracotta on hover. A `<button>` gets it too — the reset is inside.
+   Текстовая ссылка вместо третьей кнопки: подчёркнута, цветом текста, на
+   hover терракота. Годится и `<button>` — сброс внутри. */
+.tlink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-block: -10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  text-underline-offset: 5px;
+  cursor: pointer;
+  transition-property: color, text-decoration-color;
+  transition-duration: 0.16s;
+  transition-timing-function: ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tlink:hover {
+    color: var(--terracotta-text);
+    text-decoration-color: currentColor;
+  }
+}
