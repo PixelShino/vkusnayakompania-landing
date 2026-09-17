@@ -1,13 +1,18 @@
 ---
 /**
- * Menus as three shelf lines on an ink strip under a centred head: name in the
- * display serif, kind beside it, the honesty tag and the PDF button at the
- * right. No numbered circles — the line itself is the row's mark. A direction
+ * Menus as a split spread (Ballena): the left half is an olive panel with the
+ * head pressed to its top-left corner and the shop stamp at its foot, the
+ * right half a paper panel that carries the three menus as a printed carte —
+ * name in the display face, the kind beside it, the honesty tag and the PDF
+ * as an underlined text link. Both halves bleed to the viewport edge; their
+ * inner padding lines the content up with the page container. A direction
  * without a published menu keeps its line.
- * Меню тремя строками-полками на чернильной полосе под заголовком по оси:
- * название антиквой, рядом тип, справа честный ярлык и кнопка PDF. Без
- * кружков-номеров — метка строки сама линия. Направление без меню сохраняет
- * свою строку.
+ * Меню разворотом из двух половин (Ballena): слева оливковая панель с
+ * заголовком, прижатым к верхнему левому углу, и оттиском магазина у низа,
+ * справа бумажная панель с тремя меню печатной картой — название антиквой,
+ * рядом тип, честный ярлык и PDF подчёркнутой текстовой ссылкой. Обе половины
+ * идут до края окна; внутренний отступ выравнивает содержимое по контейнеру
+ * страницы. Направление без меню сохраняет свою строку.
  */
 import { menuFor } from '../lib/select';
 import { typo, type Content, type Direction } from '../lib/content';
@@ -33,90 +38,128 @@ const cards = KEYS.map((key) => directions.find((item) => item.key === key))
   .map((direction) => ({ direction, menu: menuFor(menus, direction.id) }));
 ---
 
-<section class="section strip-ink mn" id="menu">
-  <div class="container">
-    <div class="head">
-      <span class="mark" aria-hidden="true"></span>
-      <h2 class="display-caps">Меню</h2>
-      {home.menu_text && <p class="lead mn__lead">{typo(home.menu_text)}</p>}
-    </div>
-
-    <ul class="mn__list">
-      {
-        cards.map(({ direction, menu }) => (
-          <li class="mn__row">
-            <span class="mn__name">
-              <h3 class="mn__title display">{direction.title}</h3>
-              <span class="mn__kind">{direction.place?.kind ?? 'Пирожные, торты, конфеты'}</span>
-            </span>
-
-            <span class="tag mn__tag">
-              {/* дата у файла-заглушки соврала бы: под кнопкой пустой лист
-                  a date on a stub file would lie: the sheet under the button is blank */}
-              {!menu ? 'скоро' : menu.file.placeholder ? 'образец' : `обновлено ${day(menu.updated)}`}
-            </span>
-
-            {menu ? (
-              <a
-                class="btn btn--ghost-light btn--md mn__act"
-                href={menu.file.href}
-                target="_blank"
-                rel="noopener"
-              >
-                Открыть PDF
-              </a>
-            ) : (
-              <span class="mn__act mn__soon">Меню скоро появится</span>
-            )}
-          </li>
-        ))
-      }
-    </ul>
-
+<section class="section mn" id="menu">
+  <div class="mn__side" data-reveal>
+    <span class="mark mn__mark" aria-hidden="true"></span>
+    <h2 class="display-caps mn__h">Меню</h2>
+    {home.menu_text && <p class="mn__lead">{typo(home.menu_text)}</p>}
     <div class="mn__cta">
       <a class="btn btn--light" href={settings.shop_url} target="_blank" rel="noopener">
         Заказать в приложении
       </a>
     </div>
   </div>
+
+  <div class="mn__sheet">
+    <ul class="mn__list" data-reveal>
+      {
+        cards.map(({ direction, menu }) => (
+          <li class="mn__row">
+            <div class="mn__name">
+              <h3 class="mn__title display">{direction.title}</h3>
+              <span class="mn__kind">{direction.place?.kind ?? 'Пирожные, торты, конфеты'}</span>
+            </div>
+
+            <div class="mn__side-col">
+              <span class="tag mn__tag">
+                {/* дата у файла-заглушки соврала бы: под кнопкой пустой лист
+                    a date on a stub file would lie: the sheet under the link is blank */}
+                {!menu ? 'скоро' : menu.file.placeholder ? 'образец' : `обновлено ${day(menu.updated)}`}
+              </span>
+
+              {menu ? (
+                <a class="tlink mn__act" href={menu.file.href} target="_blank" rel="noopener">
+                  Открыть PDF
+                </a>
+              ) : (
+                <span class="mn__soon">Меню скоро появится</span>
+              )}
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
 </section>
 
 <style>
-  /* hairline of the strip: derived from the cream text, never a hardcoded colour
-     волосок полосы: считается от кремового текста, без хардкода цвета */
+  /* Two halves edge to edge. `--edge` is the distance from the section's edge
+     to the page container: each half pads by it so the copy sits on the grid.
+     `cqw` — the section is the container, so the unit is its own width and not
+     `100vw`, which counts the scrollbar in.
+     Две половины от края до края. `--edge` — расстояние от края секции до
+     контейнера страницы: каждая половина отступает на него, и текст стоит по
+     сетке. `cqw` — контейнер сама секция, единица равна её ширине, а не
+     `100vw`, который считает и полосу прокрутки. */
   .mn {
-    --mn-line: color-mix(in srgb, var(--on-ink) 20%, transparent);
+    --edge: max(var(--pad), calc((100cqw - var(--content)) / 2));
+    container-type: inline-size;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    padding-block: 0;
   }
 
-  /* лид на чернилах идёт вторым тоном кремового, а не серым с бумаги
-     the lead on ink takes the second cream tone, not the paper grey */
+  /* the olive panel: the client's olive as one large surface, cream on it 4,65:1
+     оливковая панель: олива заказчика одной большой плоскостью, крем на ней 4,65:1 */
+  .mn__side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--sec-pad) var(--pad);
+    background: var(--olive);
+    color: var(--bg);
+    text-align: center;
+  }
+
+  .mn__mark {
+    color: var(--bg);
+  }
+
+  .mn__h {
+    margin-top: 18px;
+    color: var(--bg);
+  }
+
   .mn__lead {
-    color: var(--on-ink-2);
+    max-width: 44ch;
+    margin-top: 12px;
+    font-size: var(--fs-lead);
+    line-height: 1.5;
+    color: var(--bg);
+  }
+
+  .mn__cta {
+    margin-top: 24px;
+  }
+
+  /* the paper sheet with the carte; its hairline is the surface's own line
+     бумажный лист с картой; волосок — линия самой поверхности */
+  .mn__sheet {
+    display: flex;
+    align-items: center;
+    padding: calc(var(--sec-pad) - 8px) var(--pad) var(--sec-pad);
+    background: var(--surface);
   }
 
   .mn__list {
-    max-width: 880px;
-    margin: 28px auto 0;
+    width: 100%;
+    margin: 0;
     padding: 0;
     list-style: none;
-    border-top: 1px solid var(--mn-line);
+    border-top: 1px solid var(--line-4);
   }
 
-  /* Phone: name and kind stack, the tag and the button share the second line.
-     A grid, not a wrapping flex — on wrap the button fell to the container edge.
-     Телефон: название и тип столбиком, ярлык и кнопка делят вторую строку.
-     Сетка, а не переносимый flex — на переносе кнопка падала к краю. */
+  /* Phone: name and kind stack, the tag and the link share the second line.
+     Телефон: название и тип столбиком, ярлык и ссылка делят вторую строку. */
   .mn__row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 12px 16px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
     padding: 18px 0;
-    border-bottom: 1px solid var(--mn-line);
+    border-bottom: 1px solid var(--line-4);
   }
 
   .mn__name {
-    grid-column: 1 / -1;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -128,72 +171,105 @@ const cards = KEYS.map((key) => directions.find((item) => item.key === key))
   .mn__title {
     font-size: 22px;
     line-height: 1.15;
-    color: var(--on-ink);
   }
 
   .mn__kind {
     font-size: var(--fs-body);
-    color: var(--on-ink-2);
+    color: var(--text-2);
   }
 
-  .mn__tag {
-    justify-self: start;
-  }
-
-  .mn__act {
-    justify-self: end;
-  }
-
-  /* пустое состояние держит высоту кнопки: строки не пляшут
-     the empty state keeps the button's height: rows do not jump */
-  .mn__soon {
-    display: inline-flex;
+  .mn__side-col {
+    display: flex;
     align-items: center;
-    min-height: 44px;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  /* the empty state keeps the link's line height: rows do not jump
+     пустое состояние держит высоту строки ссылки: строки не пляшут */
+  .mn__soon {
     font-size: 13px;
     font-weight: 600;
-    color: var(--on-ink-2);
-  }
-
-  .mn__cta {
-    display: flex;
-    justify-content: center;
-    margin-top: 28px;
+    color: var(--text-3);
   }
 
   @media (min-width: 768px) {
-    /* one line per menu: name and kind on a baseline, tag and button at the right
-       одна строка на меню: название и тип по базовой линии, ярлык и кнопка справа */
-    .mn__row {
-      grid-template-columns: minmax(0, 1fr) auto auto;
-      gap: 24px;
-      padding: 20px 0;
+    /* the spread: olive 5 parts, paper 7; the olive copy pressed to its corner
+       разворот: олива 5 частей, бумага 7; текст на оливе прижат к своему углу */
+    .mn {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
     }
 
-    .mn__name {
-      grid-column: auto;
-      flex-direction: row;
-      flex-wrap: wrap;
-      align-items: baseline;
-      gap: 2px 14px;
+    .mn__side {
+      align-items: flex-start;
+      padding: var(--sec-pad) 40px var(--sec-pad) var(--edge);
+      text-align: left;
+    }
+
+    .mn__mark {
+      margin-inline: 0;
+    }
+
+    .mn__h {
+      margin-top: 16px;
+    }
+
+    .mn__lead {
+      max-width: 30ch;
+    }
+
+    /* the stamp at the foot of the panel: what is left of the height goes above it
+       оттиск у низа панели: остаток высоты уходит над ним */
+    .mn__cta {
+      margin-top: auto;
+      padding-top: 40px;
+    }
+
+    .mn__sheet {
+      padding: var(--sec-pad) var(--edge) var(--sec-pad) 40px;
+    }
+
+    /* one line per menu: name and kind on a baseline, the tag and the link right
+       одна строка на меню: название и тип по базовой линии, ярлык и ссылка справа */
+    .mn__row {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 20px;
+      padding: 20px 0;
     }
 
     .mn__title {
       font-size: 24px;
     }
 
-    .mn__tag {
-      justify-self: auto;
+    .mn__side-col {
+      justify-content: flex-end;
+      gap: 22px;
     }
   }
 
   @media (min-width: 1200px) {
-    .mn__list {
-      margin-top: 36px;
+    .mn__side {
+      padding-right: 64px;
+    }
+
+    .mn__sheet {
+      padding-left: 64px;
+    }
+
+    .mn__row {
+      padding: 24px 0;
     }
 
     .mn__title {
       font-size: 26px;
+    }
+
+    .mn__name {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 2px 14px;
     }
   }
 </style>
