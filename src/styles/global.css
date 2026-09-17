@@ -612,6 +612,51 @@ h2,
   }
 }
 
+/* ── отклик кадров на курсор ────────────────────────────────────────────────
+   The page answered the pointer only on buttons and links: photo frames and
+   hatched plates were as dead under the cursor as print on paper. A frame
+   answers the way a frame can — it shows more of its picture; a plate has no
+   picture, so its hatch drifts instead. Both are `scale` and
+   `background-position`, nothing that costs layout. Touch is left out: there
+   is no hover there and the state would stick after a tap.
+   Страница отвечала курсору только кнопками и ссылками: кадры и штрихованные
+   плашки были под курсором такими же мёртвыми, как оттиск на бумаге. Кадр
+   отвечает тем, чем может, — показывает больше своей картинки; у плашки
+   картинки нет, поэтому уезжает её штриховка. И то и другое — `scale` и
+   `background-position`, вёрстку это не трогает. Тач исключён: ховера там
+   нет, а состояние залипало бы после касания. */
+.media img,
+.stub,
+.venue__stub {
+  transition-property: scale, background-position;
+  transition-duration: 620ms;
+  transition-timing-function: var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cake-card:hover .media img,
+  .gl__slide:hover .media img,
+  .venue__frame:hover img {
+    scale: 1.045;
+  }
+
+  /* `.venue__stub` не носит общий класс `.stub`: у него своя заливка */
+  .cake-card:hover .stub,
+  .gl__slide:hover .stub,
+  .venue__frame:hover .stub,
+  .venue__frame:hover .venue__stub {
+    background-position: 26px 26px;
+  }
+
+  /* имя торта уходит в терракоту вместе с кадром: отклик читается и там,
+     где вместо фото пока плашка
+     the cake's name goes terracotta with its frame: the answer reads even
+     where the photo is still a plate */
+  .cake-card:hover .cake__name {
+    color: var(--terracotta-text);
+  }
+}
+
 /* ── заголовок секции по оси ──────────────────────────────────────────────
    The mark, caps antiqua and one lead line on the central axis (Green Park,
    Matsoni). Replaces `.section-head` + `.kicker` everywhere below the fold.
@@ -861,6 +906,42 @@ h2,
 
 .js [data-reveal].is-in .mark::before {
   transform: none;
+}
+
+/* A grid reveals tile by tile: the eye runs along the row instead of meeting
+   a block that is already finished. The step is short and capped, so the last
+   tile never waits half a second for its turn. Only `opacity` and `transform`,
+   and the base rule above still supplies both.
+   Сетка появляется плитка за плиткой: взгляд идёт по ряду, а не встречает
+   готовый блок. Шаг короткий и с потолком, поэтому последняя плитка не ждёт
+   своей очереди полсекунды. Только `opacity` и `transform` — оба берутся из
+   базового правила выше. */
+.js [data-reveal='grid'] > :nth-child(2) {
+  transition-delay: 0.055s;
+}
+
+.js [data-reveal='grid'] > :nth-child(3) {
+  transition-delay: 0.11s;
+}
+
+.js [data-reveal='grid'] > :nth-child(4) {
+  transition-delay: 0.165s;
+}
+
+.js [data-reveal='grid'] > :nth-child(5) {
+  transition-delay: 0.22s;
+}
+
+.js [data-reveal='grid'] > :nth-child(6) {
+  transition-delay: 0.275s;
+}
+
+.js [data-reveal='grid'] > :nth-child(7) {
+  transition-delay: 0.33s;
+}
+
+.js [data-reveal='grid'] > :nth-child(n + 8) {
+  transition-delay: 0.385s;
 }
 
 /* a single element that reveals on its own (the poster): the block itself moves

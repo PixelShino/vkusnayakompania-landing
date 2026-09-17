@@ -100,7 +100,7 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
     {home.about_text && <p class="lead dir__lead">{typo(home.about_text)}</p>}
   </div>
 
-  <div class="venues">
+  <div class="venues" data-reveal="grid">
     {
       venues.map((direction, i) => {
         const { place } = direction;
