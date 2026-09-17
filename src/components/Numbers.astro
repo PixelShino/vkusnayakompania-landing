@@ -26,18 +26,18 @@ const { settings, places } = content;
  */
 type Figure = { label: string; accent?: boolean } & ({ value: number } | { text: string });
 
-const { yandex_score: score, yandex_ratings: ratings, yandex_reviews: reviews } = settings;
+const { yandex_score: score } = settings;
 
 // 48 hours is the cake lead time, the same one in home.cakes_text and the confectionery card;
-// there is no hall capacity in the data, so that figure is absent instead of guessed
+// there is no hall capacity in the data, so that figure is absent instead of guessed.
+// The ratings and reviews counts are not here: the reviews section says them.
 // 48 часов — срок торта, он же в `home.cakes_text` и в карточке кондитерской;
-// вместимости зала в данных нет, поэтому такой цифры здесь нет, а не выдумана
+// вместимости зала в данных нет, поэтому такой цифры здесь нет, а не выдумана.
+// Числа оценок и отзывов сюда не идут: их называет секция отзывов.
 const figures: Figure[] = [
   { value: places.length, label: `${plural(places.length, 'точка', 'точки', 'точек')} в Самаре` },
   { value: 48, label: 'часов на торт' },
   ...(score ? [{ text: score, label: 'рейтинг на Картах', accent: true }] : []),
-  ...(ratings ? [{ value: ratings, label: plural(ratings, 'оценка', 'оценки', 'оценок') }] : []),
-  ...(reviews ? [{ value: reviews, label: plural(reviews, 'отзыв', 'отзыва', 'отзывов') }] : []),
 ];
 ---
 
@@ -118,70 +118,53 @@ const figures: Figure[] = [
     text-wrap: balance;
   }
 
-  /* 2 + 3 on six columns; the hairline is --on-ink at 14 %, drawn on the left of
-     every cell but the first of its row.
-     2 + 3 на шести колонках; волосяная линия — `--on-ink` на 14 %, слева у каждой
-     ячейки, кроме первой в своей строке. */
+  /* under 360 «точки в Самаре» wrapped while its neighbour did not
+     до 360 «точки в Самаре» переносилось, а сосед — нет */
+  @media (max-width: 359px) {
+    .num__label {
+      font-size: 11px;
+      letter-spacing: 0.06em;
+    }
+  }
+
+  /* Three in a row from 768: equal cells, a hairline between them, the figure
+     larger. `--on-ink` at 14 % for the rule.
+     С 768 три в ряд: равные ячейки, волосяная линия между ними, цифра крупнее.
+     Линия — `--on-ink` на 14 %. */
   @media (min-width: 768px) {
     .nums__row {
-      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       column-gap: 0;
-      row-gap: 32px;
     }
 
     .num {
-      grid-column: span 2;
       padding-inline: 22px;
       border-inline-start: 1px solid color-mix(in srgb, var(--on-ink) 14%, transparent);
-    }
-
-    .num:nth-child(-n + 2) {
-      grid-column: span 3;
     }
 
     /* снимает мобильное «на всю строку» у нечётной последней цифры */
     /* drops the phone full-row rule from an odd last figure */
     .num:last-child:nth-child(odd) {
-      grid-column: span 2;
+      grid-column: auto;
     }
 
-    .num:first-child,
-    .num:nth-child(3) {
+    .num:first-child {
       border-inline-start: 0;
     }
 
     .num__v {
-      font-size: 56px;
-    }
-
-    /* доминанта верхнего ряда: две широкие ячейки берут крупный кегль, иначе
-       справа от них остаётся мёртвая зона в треть ширины */
-    /* the top row leads: two wide cells take the larger size, otherwise a third
-       of the width next to them stays dead space */
-    .num:nth-child(-n + 2) .num__v {
-      font-size: 72px;
+      font-size: 64px;
     }
   }
 
-  /* пять в ряд: третья цифра перестаёт быть началом строки и получает линию */
-  /* five in a row: the third figure is no longer a row start and gets its rule */
   @media (min-width: 1200px) {
-    .nums__row {
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-    }
-
-    .num,
-    .num:nth-child(-n + 2),
-    .num:last-child:nth-child(odd) {
-      grid-column: auto;
-    }
-
-    .num:nth-child(3) {
-      border-inline-start: 1px solid color-mix(in srgb, var(--on-ink) 14%, transparent);
-    }
-
     .num__v {
-      font-size: 72px;
+      font-size: 76px;
+    }
+
+    .num__label {
+      margin-top: 12px;
+      font-size: 12.5px;
     }
   }
 </style>

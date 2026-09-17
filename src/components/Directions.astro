@@ -111,9 +111,10 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
             <div class="venue__frame">
               {stub || !direction.photo ? (
                 <div class:list={['venue__stub', i % 2 ? 'venue__stub--warm' : 'venue__stub--ink']}>
-                  <span class="venue__stub-title display">
-                    {direction.photo?.alt ?? direction.title}
-                  </span>
+                  {/* a fixed word, not the alt: the alt repeats the venue's name that
+                      stands right under the plate / фиксированное слово, не alt: alt
+                      повторял имя точки, которое стоит прямо под плашкой */}
+                  <span class="venue__stub-title display">Фото зала</span>
                   <span class="venue__stub-meta">заглушка · заменяется в админке</span>
                 </div>
               ) : (
@@ -138,12 +139,12 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
                 {place.kind}
               </p>
               <p class="venue__text">{typo(sentences(direction.text, 2))}</p>
+              {/* today's hours only: the open/closed status and the number are on
+                  the strip of the first screen, in the contacts and in the footer
+                  только часы сегодня: статус и номер стоят на полосе первого
+                  экрана, в контактах и в подвале */}
               <p class="venue__meta">
                 Сегодня <OpenStatus schedule={place.schedule} mode="today" class="tnum" />
-                <span class="venue__dot" aria-hidden="true">
-                  {' · '}
-                </span>
-                <OpenStatus schedule={place.schedule} class="venue__status" />
               </p>
 
               <div class="venue__actions">
@@ -159,9 +160,6 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
                     Меню
                   </a>
                 )}
-                <a class="venue__tel" href={place.phoneHref}>
-                  {place.phone}
-                </a>
               </div>
             </div>
           </article>
@@ -315,6 +313,16 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
     text-decoration: none;
   }
 
+  /* the address link is an 18 px line: on touch it grows to 44 px in place
+     ссылка адреса — строка 18 px: на таче растёт до 44 px на месте */
+  @media (pointer: coarse) {
+    .venue__addr a {
+      display: inline-block;
+      padding-block: 13px;
+      margin-block: -13px;
+    }
+  }
+
   .venue__dot {
     color: var(--text-4);
   }
@@ -333,21 +341,6 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
     color: var(--text-3);
   }
 
-  /* status as words in the meta line, not a pill; `:global` — child component
-     статус словами в строке меты, не пилюлей; `:global` — дочерний компонент */
-  .venue__meta :global(.venue__status),
-  .venue__meta :global(.venue__status.is-open) {
-    padding: 0;
-    border: 0;
-    border-radius: 0;
-    background: none;
-    font: inherit;
-    color: inherit;
-  }
-
-  .venue__meta :global(.venue__status.is-open) {
-    color: var(--olive-dark);
-  }
 
   .venue__actions {
     display: flex;
@@ -362,20 +355,16 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
     padding-inline: 20px;
   }
 
-  /* 44 px hit area; only the text height goes into the flex line
-     зона нажатия 44 px; в строку flex уходит только высота текста */
-  .venue__tel {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    margin-block: -10px;
-    padding-inline: 4px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--terracotta-text);
-    text-decoration: none;
-    white-space: nowrap;
+  /* under 360 «Забронировать» and «Меню» no longer share a row: each takes
+     the full width instead of a ragged pair
+     до 360 «Забронировать» и «Меню» в строку не входят: каждая во всю ширину
+     вместо рваной пары */
+  @media (max-width: 359px) {
+    .venue__actions .btn {
+      width: 100%;
+    }
   }
+
 
   /* Paper strip across the screen: three services under one hairline, no
      boxes. Centred like a menu card; the ink strip of numbers follows.
@@ -443,8 +432,7 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .venue__addr a:hover,
-    .venue__tel:hover {
+    .venue__addr a:hover {
       text-decoration: underline;
       text-underline-offset: 4px;
     }
@@ -471,9 +459,23 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
       padding: 28px 36px;
     }
 
+    /* The text sits on a paper panel that rides 64 px onto the frame: the one
+       thing laid over the photo (Everest, Green Park's panel on a shot), done
+       in our own print language — no brush, no torn edge. The panel is page
+       cream, so only the part over the frame reads as a panel; the outer
+       padding stays `--pad`, and the copy keeps the container edge.
+       Текст стоит на бумажной панели, которая на 64 px заезжает на кадр: то
+       самое «поверх фото» (Everest, панель на снимке у Green Park), но нашим
+       печатным языком — без мазка и рваного края. Панель кремовая, как
+       страница, поэтому панелью читается только часть над кадром; внешнее
+       поле остаётся `--pad`, и текст держит край контейнера. */
     .venue__body {
-      max-width: 520px;
-      padding: 36px var(--pad) 36px 40px;
+      position: relative;
+      z-index: 1;
+      max-width: 584px;
+      margin-left: -64px;
+      padding: 36px var(--pad) 36px 48px;
+      background: var(--bg);
     }
 
     .venue--flip .venue__frame {
@@ -482,7 +484,18 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
 
     .venue--flip .venue__body {
       justify-self: end;
-      padding: 36px 40px 36px var(--pad);
+      margin-left: 0;
+      margin-right: -64px;
+      padding: 36px 48px 36px var(--pad);
+      text-align: right;
+    }
+
+    /* the plate's caption moves to the frame's outer corner on the flipped
+       row — the panel rides over the inner one
+       подпись плашки в перевёрнутом ряду уходит в наружный угол кадра — на
+       внутренний заезжает панель */
+    .venue--flip .venue__stub {
+      align-items: flex-end;
       text-align: right;
     }
 
@@ -515,12 +528,14 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
 
   @media (min-width: 1200px) {
     .venue__body {
-      max-width: 560px;
-      padding: 48px var(--pad) 48px 64px;
+      max-width: 632px;
+      margin-left: -72px;
+      padding: 48px var(--pad) 48px 56px;
     }
 
     .venue--flip .venue__body {
-      padding: 48px 64px 48px var(--pad);
+      margin-right: -72px;
+      padding: 48px 56px 48px var(--pad);
     }
 
     .venue__title {

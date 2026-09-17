@@ -227,10 +227,14 @@ const stickerExternal = cakes.length === 0;
      tracking do the work. Its own scale, not `--fs-h1` — caps run wider.
      Прописная антиква в две строки на две трети экрана: работу делают размер и
      разрядка. Своя шкала, не `--fs-h1` — прописные шире. */
+  /* floor 24 px: at 320 the 27 px caps broke «И КОНДИТЕРСКАЯ» and gave four
+     lines; 24 px keeps three
+     пол 24 px: на 320 прописные 27 px рвали «И КОНДИТЕРСКАЯ» и давали четыре
+     строки; 24 px держит три */
   .hero__title {
     max-width: 22ch;
     margin-top: 22px;
-    font-size: clamp(27px, 7.4vw, 34px);
+    font-size: clamp(24px, 7.4vw, 34px);
     color: var(--bg);
   }
 
@@ -284,7 +288,9 @@ const stickerExternal = cakes.length === 0;
     align-items: center;
     gap: 10px;
     margin: 0 auto;
-    padding-block: 18px 22px;
+    /* 30 px below: the stub tag sits in the bottom corner under the last number
+       снизу 30 px: ярлык заглушки стоит в нижнем углу под последним номером */
+    padding-block: 18px 30px;
     list-style: none;
     border-top: 1px solid rgb(255 250 237 / 0.22);
     font-size: 13px;
@@ -386,11 +392,13 @@ const stickerExternal = cakes.length === 0;
     scale: 0.96;
   }
 
+  /* 13 px on each side of an 18 px line: a 44 px target that leaves the row
+     где стоит / 13 px сверху и снизу строки 18 px: цель 44 px, строка на месте */
   @media (pointer: coarse) {
     .hero__place-name,
     .hero__tel {
-      padding-block: 10px;
-      margin-block: -10px;
+      padding-block: 13px;
+      margin-block: -13px;
     }
   }
 

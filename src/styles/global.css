@@ -410,18 +410,12 @@ h3 {
     height: 44px;
   }
 
-  /* ссылки-телефоны и подписи под кадром — те же 44 px по вертикали,
-     отрицательный margin держит строку на месте */
-  .ct__tel,
-  .ct__org,
-  .footer__tel,
-  .footer__list a,
-  .footer__links a,
-  .map__stub-link {
-    padding-block: 11px;
-    margin-block: -11px;
-  }
 }
+
+/* Text links grow to 44 px on touch inside their own components: a bare
+   global class loses to the scoped selector that sets their padding.
+   Текстовые ссылки растут до 44 px на таче внутри своих компонентов: голый
+   глобальный класс проигрывает скоуповому селектору, задающему их поля. */
 
 .btn--md {
   height: 44px;
@@ -581,7 +575,10 @@ h2,
   align-items: center;
   min-height: 44px;
   margin-block: -10px;
-  padding: 0;
+  /* 2 px each side: a four-letter link («Меню») is otherwise 43 px wide
+     по 2 px с боков: ссылка из четырёх букв («Меню») иначе 43 px шириной */
+  margin-inline: -2px;
+  padding: 0 2px;
   border: 0;
   background: none;
   font-size: 13.5px;
@@ -679,6 +676,7 @@ h2,
 }
 
 .tab[aria-selected='true'],
+.tab[aria-pressed='true'],
 .tab.is-active {
   color: var(--text);
   border-bottom-color: var(--terracotta);

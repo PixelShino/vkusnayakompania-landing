@@ -151,6 +151,23 @@ const SIZES = '(min-width: 1200px) 309px, (min-width: 768px) 243px, 45vw';
     color: var(--plate-meta, inherit);
   }
 
+  /* a 136 px tile on a 320 screen: «Шоколадный» ran past the edge at 20 px
+     with 20 px padding — 16 px on 10 px padding fits the longest name whole;
+     `anywhere` is not used: it cut «Шоколадны/й» before hyphenation could
+     плитка 136 px на экране 320: «Шоколадный» вылезал за край при 20 px и
+     полях 20 px — 16 px на полях 10 px вмещает самое длинное имя целиком;
+     `anywhere` не берётся: оно резало «Шоколадны/й» раньше переноса */
+  @media (max-width: 359px) {
+    .cake-stub {
+      padding: 14px 10px;
+    }
+
+    .cake-stub .stub__title {
+      font-size: 16px;
+      hyphens: auto;
+    }
+  }
+
   /* Ink plates step diagonally — one per row, never a column. An index from
      the markup lined them up on three columns, so the rhythm is set per column
      count, each in its own width range: 2nd and 3rd of four on two columns,

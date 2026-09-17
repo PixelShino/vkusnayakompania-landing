@@ -66,9 +66,6 @@ const many = shots.length > 1;
         <h2 id="gallery-title" class="display-caps">
           {heading}
         </h2>
-        <p class="lead">
-          Кафе на Садовой и ресторан на Советской Армии — кадры обеих точек идут подряд.
-        </p>
       </div>
 
       <div class="gl__strip">
@@ -321,6 +318,29 @@ const many = shots.length > 1;
 
   .gl__dot[aria-current='true']::before {
     background: var(--olive-dark);
+  }
+
+  /* a finger gets 44 px: the arrow grows, each dot is a 30 × 44 target with
+     the same 8 px mark inside
+     палец получает 44 px: стрелка растёт, каждая точка — цель 30 × 44 с той же
+     меткой 8 px внутри */
+  @media (pointer: coarse) {
+    .gl__arrow {
+      width: 44px;
+      height: 44px;
+    }
+
+    /* 40 wide: seven dots make 280 px and still fit a 320 screen
+       40 в ширину: семь точек дают 280 px и входят в экран 320 */
+    .gl__dot {
+      width: 40px;
+      height: 44px;
+    }
+
+    .gl__dots {
+      gap: 0;
+      margin-top: 8px;
+    }
   }
 
   @media (hover: hover) and (pointer: fine) {

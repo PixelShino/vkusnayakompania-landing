@@ -93,21 +93,6 @@ const STAR =
               </>
             )}
 
-            <div class="rev__sources">
-              {places.map((place) => (
-                <a
-                  class="rev__source"
-                  href={`${yandexOrgUrl(place.yandex_org)}reviews/`}
-                  target="_blank"
-                  rel="noopener"
-                >
-                  {/* figure first: a wrapped street name no longer pushes it down
-                      цифра первой: перенёсшаяся улица её больше не сдвигает */}
-                  {place.rating && <span class="rev__source-score tnum">{place.rating}</span>}
-                  <span class="rev__source-name">{place.street}</span>
-                </a>
-              ))}
-            </div>
           </div>
         )
       }
@@ -296,47 +281,6 @@ const STAR =
     font-size: 11.5px;
   }
 
-  /* Per-venue scores as one line under a hairline: two columns, a rule
-     between them, the figure in the antiqua — no buttons inside the panel.
-     Оценки точек одной строкой под волосяной линией: две колонки, линия между
-     ними, цифра антиквой — кнопок внутри панели нет. */
-  .rev__sources {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    margin-top: auto;
-    padding-top: 18px;
-  }
-
-  .rev__source {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 14px 0 2px;
-    border-top: 1px solid rgb(255 250 237 / 0.35);
-    color: var(--bg);
-    text-decoration: none;
-  }
-
-  .rev__source + .rev__source {
-    padding-left: 18px;
-    border-left: 1px solid rgb(255 250 237 / 0.35);
-  }
-
-  .rev__source-name {
-    align-self: flex-start;
-    font-size: 12.5px;
-    font-weight: 600;
-    text-decoration: underline;
-    text-decoration-color: rgb(255 250 237 / 0.4);
-    text-underline-offset: 4px;
-    transition: text-decoration-color 0.16s ease;
-  }
-
-  .rev__source-score {
-    font-family: var(--font-display);
-    font-size: 30px;
-    line-height: 1;
-  }
 
   .rev__widget {
     display: flex;
@@ -344,10 +288,9 @@ const STAR =
     gap: 10px;
   }
 
-  /* the switch is driven by `aria-pressed` (lazy-frame), the global `.tab`
-     styles `aria-selected` — the active line is wired here
-     переключение ведёт `aria-pressed` (lazy-frame), глобальный `.tab` красит
-     `aria-selected` — активная линия подключается здесь */
+  /* the switch is driven by `aria-pressed` (lazy-frame); the global `.tab`
+     draws the active line for it / переключение ведёт `aria-pressed`
+     (lazy-frame); активную линию по нему рисует глобальный `.tab` */
   .rev__tab {
     gap: 8px;
   }
@@ -356,16 +299,6 @@ const STAR =
     color: var(--terracotta-text);
   }
 
-  .rev__tab[aria-pressed='true'] {
-    color: var(--text);
-    border-bottom-color: var(--terracotta);
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .rev__source:hover .rev__source-name {
-      text-decoration-color: var(--bg);
-    }
-  }
 
   /* высота задана снизу: внутри виджета свой скролл, страница не прыгает при
      загрузке кадра, а `flex: 1` дотягивает кадр до низа панели рейтинга */
@@ -417,11 +350,19 @@ const STAR =
     color: var(--text-5);
   }
 
-  /* the link keeps its line but gets a 30 px tap target / ссылка остаётся в строке, зона нажатия 30 px */
+  /* the link keeps its line; the tap target is 44 px on touch
+     ссылка остаётся в строке; зона нажатия на таче 44 px */
   .rev__frame-note a {
     display: inline-block;
     padding-block: 8px;
     margin-block: -8px;
+  }
+
+  @media (pointer: coarse) {
+    .rev__frame-note a {
+      padding-block: 13px;
+      margin-block: -13px;
+    }
   }
 
   @media (min-width: 768px) {
@@ -454,9 +395,6 @@ const STAR =
       padding: 28px 30px;
     }
 
-    .rev__source-score {
-      font-size: 34px;
-    }
 
     .rev--split .rev__marks {
       grid-template-columns: minmax(0, 1fr);
