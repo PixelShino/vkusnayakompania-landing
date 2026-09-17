@@ -126,13 +126,17 @@ const STAR =
     flex: none;
   }
 
-  /* the widget on the axis, as wide as the menu list — one column, no split
-     виджет по оси, шириной как список меню — одна колонка, без раздвоения */
+  /* The widget on the axis, one column, no split. 762 px is the widget's own
+     card: given more, Yandex keeps the card and fills the rest with its grey
+     page, and the strip read as a hole beside our cream.
+     Виджет по оси, одна колонка, без раздвоения. 762 px — карточка самого
+     виджета: дай больше, и Яндекс оставит карточку, а остаток зальёт своей
+     серой страницей — полоса читалась дырой рядом с нашим кремом. */
   .rev {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    max-width: 880px;
+    max-width: 762px;
     margin: 22px auto 0;
   }
 
