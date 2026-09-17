@@ -231,7 +231,11 @@ const toImg = (file: RawFile | null | undefined, resolve: ResolveImage): Img | u
 const toDoc = (file: RawFile | null | undefined): Doc | undefined =>
   file
     ? {
-        href: `/media/${file.id}.${ext(file)}`,
+        // `BASE_URL` вместо корня: на GitHub Pages сайт живёт в подпапке, и
+        // абсолютный `/media/...` там ведёт в 404
+        // `BASE_URL`, not the root: on GitHub Pages the site lives in a
+        // subfolder and an absolute `/media/...` lands on a 404 there
+        href: `${import.meta.env?.BASE_URL ?? '/'}media/${file.id}.${ext(file)}`,
         title: file.title || file.filename_download,
         placeholder: isPlaceholder(file.title),
       }

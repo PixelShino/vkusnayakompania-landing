@@ -1,0 +1,61 @@
+name: Превью на GitHub Pages
+
+# Push to main → the site is rebuilt and published to Pages. Content comes from
+# the checked-in fixture: the workflow has no access to Directus and needs none.
+# Пуш в main → сайт пересобирается и уезжает на Pages. Контент берётся из
+# зафиксированной фикстуры: доступа к Directus у воркфлоу нет и не нужно.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Pages разрешает одну выкладку за раз; новая отменяет очередь, но не текущую
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # `--frozen-lockfile` держит те же версии, что и локально; `sharp`
+      # собирается благодаря `pnpm.onlyBuiltDependencies` в `package.json`
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm test
+
+      # Pages отдаёт сайт из подпапки репозитория, поэтому `base` обязателен:
+      # без него все ссылки на ассеты ведут в корень домена и дают 404
+      - name: Сборка под подпапку Pages
+        env:
+          SITE: https://pixelshino.github.io
+          BASE_PATH: /vkusnayakompania-landing
+        run: pnpm build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
