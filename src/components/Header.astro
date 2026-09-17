@@ -328,9 +328,13 @@ const nav = navFor(content, over ? '' : '/');
       width: 132px;
     }
 
+    /* Own left margin, not the row gap: at 1200 the row tightens and the number
+       runs straight into «Контакты», reading as one string.
+       Собственный отступ слева, а не зазор строки: на 1200 строка ужимается и
+       номер упирается в «Контакты», читаясь с ним одной строкой. */
     .header__phone {
       display: block;
-      margin-right: 6px;
+      margin-inline: 22px 6px;
     }
 
     /* с 1200 номер стоит текстом — трубка становится лишней */
