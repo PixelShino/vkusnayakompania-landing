@@ -98,12 +98,38 @@ const stickerExternal = cakes.length === 0;
         href={stickerHref}
         target={stickerExternal ? '_blank' : undefined}
         rel={stickerExternal ? 'noopener' : undefined}
+        aria-label="Торт на заказ за 48 часов — к витрине тортов"
       >
-        <span class="hero__sticker-in">
-          Торт на заказ
-          <br />
-          за 48 часов
-        </span>
+        {/* The promise runs round the seal and turns slowly; the arrow in the
+            middle says where the sticker leads — down the page to the cakes.
+            The name of the link is on the `a`, so the ring and the arrow are
+            decoration for a screen reader.
+            Обещание идёт по кругу печати и медленно поворачивается; стрелка в
+            середине говорит, куда стикер ведёт, — вниз по странице, к витрине
+            тортов. Имя ссылки стоит на `a`, поэтому кольцо и стрелка для
+            скринридера — украшение. */}
+        <svg class="hero__seal" viewBox="0 0 128 128" aria-hidden="true" focusable="false">
+          <defs>
+            <path id="hero-seal-ring" d="M64 64m-46 0a46 46 0 1 1 92 0a46 46 0 1 1-92 0"></path>
+          </defs>
+          <text class="hero__seal-text">
+            <textPath href="#hero-seal-ring" startOffset="0"
+              >ТОРТ НА ЗАКАЗ · ЗА 48 ЧАСОВ · </textPath
+            >
+          </text>
+        </svg>
+        <svg
+          class="hero__sticker-arrow"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 5v13M6.5 12.5 12 18l5.5-5.5"></path>
+        </svg>
       </a>
     )
   }
@@ -436,21 +462,46 @@ const stickerExternal = cakes.length === 0;
       inset 0 0 0 5px var(--olive-dark),
       inset 0 0 0 6px rgb(255 250 237 / 0.55);
     color: var(--bg);
-    font-size: 11.5px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    line-height: 1.35;
-    text-align: center;
-    text-transform: uppercase;
     text-decoration: none;
     transition-property: scale, rotate;
     transition-duration: 120ms, 240ms;
     transition-timing-function: var(--ease-out);
   }
 
-  .hero__sticker-in {
-    display: block;
-    padding: 8px;
+  /* The ring is the only thing on the page that moves by itself all the time.
+     One such thing is the budget: it is the page's mark, it is rare on the
+     screen (the first screen only) and it stops for reduced motion. `rotate`
+     alone, so it never leaves the compositor.
+     Кольцо — единственное на странице, что движется само по себе постоянно.
+     Одна такая вещь — это и есть весь бюджет: это марка страницы, она редко
+     на экране (только первый экран) и останавливается при reduced motion.
+     Только `rotate`, поэтому кольцо не сходит с композитора. */
+  .hero__seal {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    animation: seal-turn 26s linear infinite;
+  }
+
+  .hero__seal-text {
+    fill: currentColor;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+  }
+
+  @keyframes seal-turn {
+    to {
+      rotate: 360deg;
+    }
+  }
+
+  .hero__sticker-arrow {
+    width: 22px;
+    height: 22px;
+    transition: translate 240ms var(--ease-out);
   }
 
   .hero__sticker:active {
@@ -474,8 +525,8 @@ const stickerExternal = cakes.length === 0;
       text-underline-offset: 4px;
     }
 
-    .hero__sticker:hover {
-      rotate: -6deg;
+    .hero__sticker:hover .hero__sticker-arrow {
+      translate: 0 3px;
     }
 
     .hero__cta .btn--ghost-light:hover {
@@ -484,8 +535,8 @@ const stickerExternal = cakes.length === 0;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .hero__sticker:hover {
-      rotate: 0deg;
+    .hero__seal {
+      animation: none;
     }
   }
 
@@ -614,7 +665,11 @@ const stickerExternal = cakes.length === 0;
       width: 148px;
       height: 148px;
       bottom: 118px;
-      font-size: 12.5px;
+    }
+
+    .hero__sticker-arrow {
+      width: 25px;
+      height: 25px;
     }
   }
 </style>
