@@ -300,6 +300,17 @@ const { places, settings, home } = content;
       margin-top: 34px;
     }
 
+    /* One venue keeps three rows of hours and the other one, so their buttons
+       landed on different lines across the divider. The row is pushed to the
+       foot of the column instead, and the cards share a bottom line.
+       У одной точки три строки часов, у другой одна, и кнопки вставали на
+       разных уровнях по обе стороны линии. Строка прижата к низу колонки —
+       низ у карточек общий. */
+    .ct__actions {
+      margin-top: auto;
+      padding-top: 22px;
+    }
+
     .ct__card + .ct__card {
       padding-top: 0;
       padding-left: 32px;

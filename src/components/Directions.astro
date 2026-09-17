@@ -517,7 +517,23 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
     }
 
     .service {
+      display: flex;
+      flex-direction: column;
+      /* the column is flex only to pin the links; without this the icon stops
+         following `text-align` and hangs on the left edge
+         колонка стала flex только ради прижатия ссылок; без этого значок
+         перестаёт слушать `text-align` и виснет у левого края */
+      align-items: center;
       padding: 28px 24px;
+    }
+
+    /* the middle column runs to three lines and pushed its links below the
+       others'; the row goes to the foot of the column instead
+       у средней колонки текст в три строки, и её ссылки уезжали ниже соседних;
+       строка уходит к низу колонки */
+    .service__links {
+      margin-top: auto;
+      padding-top: 18px;
     }
 
     .service + .service {
