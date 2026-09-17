@@ -89,6 +89,9 @@ const nav = navFor(content, over ? '' : '/');
       aria-expanded="false"
       aria-controls="header-menu"
     >
+      {/* three separate lines, not one `path`: only then do the outer two turn
+          into a cross and the middle one leave / три отдельные линии, а не один
+          `path`: только так крайние складываются в крест, а средняя уходит */}
       <svg
         width="20"
         height="20"
@@ -99,7 +102,9 @@ const nav = navFor(content, over ? '' : '/');
         stroke-linecap="round"
         aria-hidden="true"
       >
-        <path d="M4 7h16M4 12h16M4 17h16"></path>
+        <line x1="4" y1="7" x2="20" y2="7"></line>
+        <line x1="4" y1="12" x2="20" y2="12"></line>
+        <line x1="4" y1="17" x2="20" y2="17"></line>
       </svg>
     </button>
   </div>
@@ -213,6 +218,33 @@ const nav = navFor(content, over ? '' : '/');
   .header__call:active,
   .header__burger:active {
     scale: 0.96;
+  }
+
+  /* Open: the outer lines meet in the middle and cross, the middle one goes.
+     `transform-box` pins the origin to the `viewBox`, not to each line's own
+     bounding box, which is a hairline and would turn them around themselves.
+     Раскрыто: крайние линии сходятся в середину и складываются крестом,
+     средняя уходит. `transform-box` привязывает начало координат к `viewBox`,
+     а не к рамке самой линии — та толщиной в волосок, и линии крутились бы
+     вокруг себя. */
+  .header__burger line {
+    transform-box: view-box;
+    transform-origin: 12px 12px;
+    transition-property: transform, opacity;
+    transition-duration: 220ms;
+    transition-timing-function: var(--ease-out);
+  }
+
+  .header.is-open .header__burger line:first-child {
+    transform: translateY(5px) rotate(45deg);
+  }
+
+  .header.is-open .header__burger line:nth-child(2) {
+    opacity: 0;
+  }
+
+  .header.is-open .header__burger line:last-child {
+    transform: translateY(-5px) rotate(-45deg);
   }
 
   @media (hover: hover) and (pointer: fine) {
