@@ -143,12 +143,19 @@ const ordinal = (i: number) => String(i).padStart(2, '0');
     line-height: 0.9;
     color: var(--terracotta);
     white-space: nowrap;
+    /* «20 %» keeps its space by the rules, but at 120 px a word space is a
+       finger wide and the sign drifts away from the number — tightened to a
+       typographic thin space.
+       «20 %» по правилам сохраняет пробел, но на 120 px словесный пробел
+       шириной в палец, и знак отрывается от числа — ужат до тонкого. */
+    word-spacing: -0.1em;
   }
 
   /* a promo without a percent: its title stands in place of the figure
      акция без процента: вместо цифры стоит её заголовок */
   .pr__figure--word {
     max-width: 14ch;
+    word-spacing: normal;
     font-size: clamp(26px, 7vw, 34px);
     line-height: 1.1;
     color: var(--text);
