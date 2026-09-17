@@ -68,8 +68,13 @@ const cards = KEYS.map((key) => directions.find((item) => item.key === key))
               </span>
 
               {menu ? (
-                <a class="tlink mn__act" href={menu.file.href} target="_blank" rel="noopener">
-                  Открыть PDF
+                <a
+                  class="tlink tlink--go tlink--out mn__act"
+                  href={menu.file.href}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <span>Открыть PDF</span>
                 </a>
               ) : (
                 <span class="mn__soon">Меню скоро появится</span>

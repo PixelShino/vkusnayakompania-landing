@@ -10,6 +10,9 @@
  * про торт свисает через край в следующую секцию.
  */
 import Photo from './Photo.astro';
+import pinIcon from '../assets/icons/pin.svg?raw';
+import clockIcon from '../assets/icons/clock.svg?raw';
+import phoneIcon from '../assets/icons/phone.svg?raw';
 import OpenStatus from './OpenStatus.astro';
 import { HERO_SIZES } from '../lib/hero.ts';
 import { typo, type Content } from '../lib/content.ts';
@@ -67,17 +70,20 @@ const stickerExternal = cakes.length === 0;
     {
       places.map((place) => (
         <li class="hero__place">
+          {/* Glyphs instead of the middle dots: the row had read «А · Б · В»,
+              a chain that says nothing, and the same three facts now name
+              themselves — address, hours, number.
+              Глифы вместо срединных точек: строка читалась цепочкой «А · Б · В»,
+              которая ничего не сообщает, а те же три факта теперь называют
+              себя сами — адрес, часы, номер. */}
           <a class="hero__place-name" href="#contacts">
+            <span class="hero__ico" aria-hidden="true" set:html={pinIcon} />
             {place.name}
           </a>
-          <span class="hero__dot" aria-hidden="true">
-            ·
-          </span>
+          <span class="hero__ico hero__ico--own" aria-hidden="true" set:html={clockIcon} />
           <OpenStatus schedule={place.schedule} class="hero__status" />
-          <span class="hero__dot hero__dot--tel" aria-hidden="true">
-            ·
-          </span>
           <a class="hero__tel" href={place.phoneHref}>
+            <span class="hero__ico" aria-hidden="true" set:html={phoneIcon} />
             {place.phone}
           </a>
         </li>
@@ -403,10 +409,34 @@ const stickerExternal = cakes.length === 0;
 
   .hero__place-name,
   .hero__tel {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     font-weight: 600;
     color: var(--bg);
     text-decoration: none;
     white-space: nowrap;
+  }
+
+  /* 14 px при строке 13–14 px: знак весит столько же, сколько буква рядом
+     14 px against a 13–14 px line: the glyph weighs what the letter beside it does */
+  .hero__ico {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    opacity: 0.72;
+  }
+
+  .hero__ico > :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* часы стоят своей ячейкой сетки, а не внутри ссылки — их подпись рисует
+     `OpenStatus` / the clock is its own grid cell: its label is drawn by
+     `OpenStatus`, a child component */
+  .hero__ico--own {
+    align-self: center;
   }
 
   /* номер своей строкой под адресом и статусом, до 1200 — там строке тесно
@@ -414,16 +444,6 @@ const stickerExternal = cakes.length === 0;
      row has no room for it */
   .hero__tel {
     grid-column: 1 / -1;
-  }
-
-  .hero__dot {
-    opacity: 0.55;
-  }
-
-  /* on the phone the number takes its own line: no dot left hanging at the end
-     на телефоне номер уходит на свою строку: точка в конце строки не висит */
-  .hero__dot--tel {
-    display: none;
   }
 
   /* The status is `OpenStatus`, which draws a pill; here it is plain text in
@@ -642,14 +662,8 @@ const stickerExternal = cakes.length === 0;
       font-size: 14px;
     }
 
-    /* до 1200 строка точки не вмещает номер — он идёт своей строкой без точки
-       under 1200 the venue line has no room for the number — it takes its own line */
-    .hero__dot--tel {
-      display: inline;
-    }
-
     .hero__place {
-      grid-template-columns: repeat(5, max-content);
+      grid-template-columns: repeat(4, max-content);
     }
 
     .hero__tel {

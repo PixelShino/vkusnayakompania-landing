@@ -605,10 +605,68 @@ h2,
   transition-timing-function: ease;
 }
 
+/* The circled arrow the owner's references hang on every text link (Ballena
+   «VIEW FULL MENU», Pulso's slider chevrons): a hairline ring with an arrow
+   inside, drawn as one mask so the ring and the arrow are a single glyph in
+   `currentColor` and follow the link into hover and onto ink. `--go-turn`
+   points it: 0 goes forward, -45deg goes out of the site.
+   Стрелка в кружке, которую референсы владельца вешают на каждую текстовую
+   ссылку (Ballena «VIEW FULL MENU», шевроны слайдера Pulso): волосяное кольцо
+   со стрелкой внутри, нарисованное одной маской, — кольцо и стрелка один знак
+   в `currentColor`, уходят за ссылкой и в ховер, и на чернила. `--go-turn`
+   задаёт направление: 0 — вперёд, -45deg — наружу с сайта. */
+.tlink--go {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration-line: none;
+}
+
+.tlink--go > span {
+  text-decoration-line: underline;
+  text-decoration-color: inherit;
+  text-underline-offset: 4px;
+}
+
+.tlink--go::after {
+  content: '';
+  flex: none;
+  width: 19px;
+  height: 19px;
+  background-color: currentColor;
+  rotate: var(--go-turn, 0deg);
+  transition-property: translate, rotate;
+  transition-duration: 240ms;
+  transition-timing-function: var(--ease-out);
+  -webkit-mask: var(--go-glyph) center / 100% no-repeat;
+  mask: var(--go-glyph) center / 100% no-repeat;
+}
+
+/* один знак: кольцо волоском и стрелка внутри него */
+:root {
+  --go-glyph: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10.6" stroke-width="1.3"/><path d="M8.2 12h7.6M12.6 8.8 15.8 12l-3.2 3.2" stroke-width="1.6"/></svg>');
+}
+
+/* наружу с сайта — тот же знак, повёрнутый на 45° */
+.tlink--out {
+  --go-turn: -45deg;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .tlink:hover {
     color: var(--terracotta-text);
     text-decoration-color: currentColor;
+  }
+
+  /* знак делает шаг туда, куда показывает: вперёд у внутренней, вбок у внешней */
+  .tlink--go:hover::after {
+    translate: 3px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tlink--go:hover::after {
+    translate: 0;
   }
 }
 

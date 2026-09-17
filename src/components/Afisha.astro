@@ -114,8 +114,13 @@ const stub = /заглушк/i.test(afisha.poster.alt);
         </button>
         {
           afisha.link && (
-            <a class="tlink af__more" href={afisha.link} target="_blank" rel="noopener">
-              Подробнее
+            <a
+              class="tlink tlink--go tlink--out af__more"
+              href={afisha.link}
+              target="_blank"
+              rel="noopener"
+            >
+              <span>Подробнее</span>
             </a>
           )
         }
