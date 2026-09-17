@@ -58,19 +58,26 @@ const STORES = [
     {
       shot && (
         <div class="dl__phone">
-          <Image
-            class="dl__screen"
-            src={shot.src as ImageMetadata}
-            width={shot.width}
-            height={shot.height}
-            alt={shot.alt}
-            widths={[240, 480, 640]}
-            sizes="(min-width: 1200px) 250px, (min-width: 768px) 220px, 200px"
-            format="avif"
-            quality={52}
-            loading="lazy"
-            decoding="async"
-          />
+          {/* the window is the screen inside the body: its own radius, its own
+              overflow, so the shot's square corners never show through the
+              rounded case
+              окно — это экран внутри корпуса: свой радиус и своё обрезание,
+              поэтому прямые углы снимка не вылезают из скруглённого корпуса */}
+          <div class="dl__screen-win">
+            <Image
+              class="dl__screen"
+              src={shot.src as ImageMetadata}
+              width={shot.width}
+              height={shot.height}
+              alt={shot.alt}
+              widths={[240, 480, 640]}
+              sizes="(min-width: 1200px) 250px, (min-width: 768px) 220px, 200px"
+              format="avif"
+              quality={52}
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
           {shot.placeholder && <span class="tag dl__stub-tag">заглушка · заменяется в админке</span>}
         </div>
       )
@@ -173,25 +180,63 @@ const STORES = [
     height: 100%;
   }
 
-  /* The screen as a squared frame with a cream hairline, cut by the strip's
-     bottom edge; the negative margin sets how deep the cut is.
-     Экран квадратным кадром с кремовым волоском, срезанный нижним краем полосы;
-     отрицательный отступ задаёт глубину среза. */
+  /* The body around the screen, cut by the strip's bottom edge; the negative
+     margin sets how deep the cut is. A bare screenshot with a status bar and
+     no device read as an image pasted on the strip — the phone is the object
+     the section is about. `--text` is the body colour: the warmest dark we
+     have, so it separates from the olive ink around it.
+     Корпус вокруг экрана, срезанный нижним краем полосы; отрицательный отступ
+     задаёт глубину среза. Голый скриншот со строкой состояния и без корпуса
+     читался картинкой, приклеенной к полосе, — а секция именно про телефон.
+     Цвет корпуса `--text`: самый тёплый тёмный из наших, поэтому он отделяется
+     от оливковых чернил вокруг. */
   .dl__phone {
     position: relative;
     width: 200px;
-    border-radius: var(--r-sq);
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--on-ink) 30%, transparent);
+    padding: 6px;
+    border-radius: 32px;
+    background: var(--text);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--on-ink) 22%, transparent);
     justify-self: center;
     align-self: end;
     overflow: hidden;
     margin-bottom: calc(var(--sec-pad) * -1 - 120px);
   }
 
+  /* внутренний радиус концентричен внешнему: 32 − 6 = 26 */
+  .dl__screen-win {
+    overflow: hidden;
+    border-radius: 26px;
+    background: var(--bg);
+  }
+
   .dl__phone :global(img) {
+    display: block;
     width: 100%;
     height: auto;
-    border-radius: var(--r-sq);
+  }
+
+  /* The device answers the scroll instead of drifting on its own: while the
+     strip crosses the screen the phone rises by a finger's width, so the
+     section is alive exactly when it is being looked at and dead when it is
+     not. Scroll-driven, `translate` only; where the timeline is unsupported
+     the phone simply stands still, and reduced motion keeps it there too.
+     A loop inside the screen was tried first and dropped: the frame cuts only
+     the last hundred pixels of the shot, so there is nothing to scroll to.
+     Корпус отвечает на прокрутку, а не дрейфует сам: пока полоса идёт через
+     экран, телефон поднимается на ширину пальца — секция живёт ровно тогда,
+     когда на неё смотрят. Привязка к прокрутке, только `translate`; где
+     таймлайн не поддержан, телефон просто стоит, и при reduced motion тоже.
+     Бегущий внутри экрана снимок пробовали первым и сняли: кадр срезает у него
+     последнюю сотню пикселей, ехать некуда. */
+  @keyframes phone-rise {
+    from {
+      translate: 0 30px;
+    }
+
+    to {
+      translate: 0 -20px;
+    }
   }
 
   .dl__stub-tag {
@@ -227,7 +272,23 @@ const STORES = [
     .dl__phone {
       grid-area: phone;
       width: 220px;
+      padding: 7px;
+      border-radius: 36px;
       margin-bottom: calc(var(--sec-pad) * -1 - 160px);
+    }
+
+    .dl__screen-win {
+      border-radius: 29px;
+    }
+
+    @supports (animation-timeline: view()) {
+      @media (prefers-reduced-motion: no-preference) {
+        .dl__phone {
+          animation: phone-rise linear both;
+          animation-timeline: view();
+          animation-range: entry 15% exit 15%;
+        }
+      }
     }
   }
 
@@ -259,9 +320,15 @@ const STORES = [
 
     .dl__phone {
       width: 260px;
+      padding: 8px;
+      border-radius: 40px;
       /* глубже: экран задавал высоту полосы и оставлял под текстом мёртвую зону
          deeper: the screen set the strip's height and left dead space under the text */
       margin-bottom: calc(var(--sec-pad) * -1 - 260px);
+    }
+
+    .dl__screen-win {
+      border-radius: 32px;
     }
   }
 </style>
