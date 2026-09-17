@@ -1,252 +1,423 @@
 ---
+/**
+ * Contacts as a ledger of two venues, then the map band with the messenger
+ * panel standing over its top edge. A venue is a spread of labelled facts —
+ * the address in caps antiqua, the kind and the status, then «телефон · часы» under small
+ * caps labels (Mavericks' address / hours / phone bar, Da Maria's contact
+ * column) — closed by a framed route button and an underlined link to the
+ * venue's card on Maps (Pulso's framed button + text link pair). The map runs
+ * edge to edge under it with no frame and no bar: the links that lived on the
+ * bar now stand at each venue.
+ * Контакты реестром двух точек, ниже полоса карты с панелью мессенджеров,
+ * стоящей на её верхнем крае. Точка — разворот подписанных фактов: адрес
+ * прописной антиквой, тип и статус, затем «телефон · часы» под мелкими прописными
+ * подписями (планка address / hours / phone у Mavericks, колонка контактов у
+ * Da Maria) — и в конце кнопка маршрута в рамке с подчёркнутой ссылкой на
+ * карточку точки в Картах (пара «кнопка в рамке + текстовая ссылка» у Pulso).
+ * Карта идёт под этим от края до края без рамки и без планки: ссылки, что
+ * жили на планке, теперь стоят у каждой точки.
+ */
 import YandexMap from './YandexMap.astro';
 import MessengerButtons from './MessengerButtons.astro';
 import OpenStatus from './OpenStatus.astro';
-import { site, places, hoursRows, yandexRouteUrl, yandexWidgetUrl } from '../data/site';
+import { hoursRows, yandexOrgUrl, yandexRouteUrl } from '../data/site';
+import yandexPin from '../assets/icons/yandex-maps.svg?raw';
+import phoneIcon from '../assets/icons/phone.svg?raw';
+import clockIcon from '../assets/icons/clock.svg?raw';
+import type { Content } from '../lib/content.ts';
+
+interface Props {
+  content: Content;
+}
+
+const { content } = Astro.props;
+const { places, settings, home } = content;
 ---
 
-<section class="section" id="contacts">
+<section class="section ct-sec" id="contacts">
   <div class="container">
-    <div class="section-head">
-      <div>
-        <p class="kicker">Две точки в городе</p>
-        <h2>Контакты</h2>
-      </div>
-      <a class="ct__phone" href={site.phoneHref}>
-        <span class="ct__phone-label">Один номер на обе точки</span>
-        <span class="ct__phone-num">{site.phone}</span>
-      </a>
+    <div class="head" data-reveal>
+      <span class="mark" aria-hidden="true"></span>
+      <h2 class="display-caps">Контакты</h2>
+      <p class="lead">Две точки в городе</p>
     </div>
 
     <div class="ct">
-      <div class="ct__col">
-        {
-          places.map((place, i) => (
-            <article class:list={['ct__card', { 'is-shown': i === 0 }]} data-place>
-              <div class="card-top">
-                <span class="card-mark card-mark--sm">{place.n}</span>
-                <span class="card-dash" />
-                <OpenStatus schedule={place.schedule} />
+      {
+        places.map((place) => (
+          <article class="ct__card" data-reveal>
+            <h3 class="ct__name display display-caps">{place.name}</h3>
+            {/* the kind and the status as two short lines, the status olive when
+                open / тип и статус двумя короткими строками, статус оливой,
+                когда открыто */}
+            <p class="ct__note">{place.kind}</p>
+            <OpenStatus schedule={place.schedule} class="ct__status" />
+
+            {/* the facts under labels: one column on the phone, two from 768
+                факты под подписями: одна колонка на телефоне, две с 768 */}
+            <dl class="ct__facts">
+              <div class="ct__fact">
+                {/* the glyph names the fact so the caps label is not the only
+                    way in: a ledger is scanned, not read
+                    знак называет факт, и прописная подпись перестаёт быть
+                    единственным входом: реестр просматривают, а не читают */}
+                <dt class="label ct__label">
+                  <span class="ct__ico" aria-hidden="true" set:html={phoneIcon} />
+                  Телефон
+                </dt>
+                <dd>
+                  <a class="ct__tel display" href={place.phoneHref}>
+                    {place.phone}
+                  </a>
+                </dd>
               </div>
-
-              <h3 class="ct__name">{place.addr}</h3>
-              <p class="ct__note">{place.note}</p>
-
-              <dl class="ct__hours">
-                {hoursRows(place.schedule).map((row) => (
-                  <div class="ct__hours-row">
-                    <dt>{row.days}</dt>
-                    <dd class="tnum">{row.hours}</dd>
-                  </div>
-                ))}
-              </dl>
-
-              <div class="ct__actions">
-                <a
-                  class="btn btn--primary btn--md ct__route"
-                  href={yandexRouteUrl(place)}
-                  target="_blank"
-                  rel="noopener"
-                >
-                  Маршрут
-                  <span aria-hidden="true">→</span>
-                </a>
-                <button
-                  type="button"
-                  class="btn btn--secondary btn--md ct__show"
-                  data-frame-target="map"
-                  data-src={yandexWidgetUrl(place)}
-                  data-frame-name={place.addr}
-                  aria-pressed={i === 0 ? 'true' : 'false'}
-                >
-                  Показать на карте
-                </button>
+              <div class="ct__fact ct__fact--hours">
+                <dt class="label ct__label">
+                  <span class="ct__ico" aria-hidden="true" set:html={clockIcon} />
+                  Часы
+                </dt>
+                <dd>
+                  {hoursRows(place.schedule).map((row) => (
+                    <span class="ct__hours-row">
+                      <span class="ct__days">{row.days}</span>
+                      <span class="tnum">{row.hours}</span>
+                    </span>
+                  ))}
+                </dd>
               </div>
-            </article>
-          ))
-        }
-      </div>
+            </dl>
 
-      <div class="ct__right">
-        <YandexMap />
-
-        <div class="ct__write">
-          <div class="blob" aria-hidden="true"></div>
-          <div class="ct__write-col">
-            <p class="ct__write-title">Написать нам</p>
-            <p class="ct__write-sub">Отвечаем с 9:00 до 21:00, обычно за пару минут</p>
-          </div>
-          <MessengerButtons variant="light" size="lg" />
-        </div>
-      </div>
+            <div class="ct__actions">
+              {/* the route opens Maps from the guest's location; the card on Maps
+                  carries photos and reviews / маршрут открывает Карты от места
+                  гостя; карточка в Картах несёт фото и отзывы */}
+              <a
+                class="btn btn--secondary btn--md ct__route"
+                href={yandexRouteUrl(place)}
+                target="_blank"
+                rel="noopener"
+              >
+                <span class="ct__ya" aria-hidden="true">
+                  <Fragment set:html={yandexPin} />
+                </span>
+                Построить маршрут
+              </a>
+              <a
+                class="tlink tlink--go tlink--out"
+                href={yandexOrgUrl(place.yandex_org)}
+                target="_blank"
+                rel="noopener"
+              >
+                <span>На Яндекс Картах</span>
+              </a>
+            </div>
+          </article>
+        ))
+      }
     </div>
+  </div>
+
+  {/* the map band with the messenger panel over its top edge (Green Park: a
+      panel on the photo) / полоса карты с панелью мессенджеров на её верхнем
+      крае (Green Park: панель на фото) */}
+  <div class="ct__band">
+    <div class="ct__write" data-reveal data-map-panel>
+      <h3 class="ct__write-title display">Написать нам</h3>
+      <p class="ct__write-sub">{home.contacts_note}</p>
+      <MessengerButtons settings={settings} variant="dark" size="md" class="ct__msg" />
+    </div>
+    <YandexMap content={content} />
   </div>
 </section>
 
 <style>
-  .ct__phone {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    text-decoration: none;
-  }
-
-  .ct__phone-label {
-    font-size: 12px;
-    color: var(--text-5);
-  }
-
-  .ct__phone-num {
-    font-weight: var(--fw-heading);
-    font-size: calc(var(--fs-h3) + 2px);
-    letter-spacing: var(--ls-heading);
-    font-variant-numeric: tabular-nums;
+  /* the map band closes the section and meets the footer with no cream gap;
+     the section is the container for the panel's edge offset (`cqw`)
+     полоса карты закрывает секцию и встречает подвал без кремового зазора;
+     секция — контейнер для отступа панели от края (`cqw`) */
+  .ct-sec {
+    --edge: max(var(--pad), calc((100cqw - var(--content)) / 2));
+    container-type: inline-size;
+    padding-bottom: 0;
   }
 
   .ct {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: calc(var(--gap) + 6px);
-    align-items: start;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 26px;
     margin-top: 26px;
   }
 
-  .ct__col,
-  .ct__right {
-    display: flex;
-    flex-direction: column;
-    gap: calc(var(--gap) + 2px);
-  }
-
+  /* venue blocks without a frame: text on paper, a hairline between them
+     блоки точек без рамки: текст на бумаге, между ними волосяная линия */
   .ct__card {
     display: flex;
     flex-direction: column;
-    padding: calc(var(--gap) + 4px);
-    border: 1px solid var(--line);
-    border-radius: var(--r-lg);
-    background: var(--bg);
-    transition: border-color 0.16s ease;
+    align-items: flex-start;
+    min-width: 0;
   }
 
-  /* точка, которую сейчас показывает карта */
-  .ct__card.is-shown {
-    border-color: var(--line-4);
+  .ct__card + .ct__card {
+    padding-top: 26px;
+    border-top: 1px solid var(--line);
   }
 
   .ct__name {
-    margin: 14px 0 4px;
-    font-size: calc(var(--fs-h3) + 1px);
-    line-height: 1.12;
+    font-size: clamp(22px, 5.6vw, 26px);
+    line-height: 1.15;
   }
 
   .ct__note {
+    margin-top: 6px;
     font-size: calc(var(--fs-body) - 0.5px);
-    color: var(--text-4);
+    color: var(--text-3);
   }
 
-  .ct__hours {
-    margin: 12px 0 16px;
-    padding: 12px 0 0;
+  .ct__facts {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px 24px;
+    width: 100%;
+    margin: 18px 0 0;
+    padding-top: 16px;
     border-top: 1px solid var(--line-3);
+  }
+
+  .ct__label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* 13 px при подписи 11 px: знак чуть крупнее буквы, но легче её по весу
+     13 px against an 11 px label: a touch larger than the letter, lighter in weight */
+  .ct__ico {
+    flex: none;
+    width: 13px;
+    height: 13px;
+    opacity: 0.66;
+  }
+
+  .ct__ico > :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .ct__fact dd {
+    margin: 4px 0 0;
+  }
+
+  /* the number in the display face: a headline, not a line of meta
+     номер антиквой: заголовок, а не строка меты */
+  .ct__tel {
+    display: inline-block;
+    font-size: 24px;
+    line-height: 1.15;
+    text-decoration: none;
+  }
+
+  /* `:global` — the class sits on the child component's root
+     `:global` — класс лежит на корне дочернего компонента */
+  .ct__card :global(.ct__status) {
+    margin-top: 2px;
+    font-size: calc(var(--fs-body) - 0.5px);
+    font-weight: 400;
+    color: var(--text-3);
+  }
+
+  .ct__card :global(.ct__status.is-open) {
+    color: var(--olive-dark);
   }
 
   .ct__hours-row {
     display: flex;
-    align-items: baseline;
     gap: 10px;
+    align-items: baseline;
+    font-size: var(--fs-body);
+    font-weight: 600;
+    white-space: nowrap;
   }
 
-  .ct__hours-row + .ct__hours-row {
-    margin-top: 4px;
-  }
-
-  .ct__hours dt {
-    flex: 0 0 auto;
-    min-width: 62px;
+  .ct__days {
+    min-width: 72px;
     font-size: 12px;
+    font-weight: 400;
     color: var(--text-5);
   }
 
-  .ct__hours dd {
-    margin: 0;
-    font-size: calc(var(--fs-body) - 0.5px);
-    font-weight: 600;
+  /* the number is a 28 px line: on touch it grows to 44 px without moving
+     номер — строка 28 px: на таче растёт до 44 px, не сдвигаясь */
+  @media (pointer: coarse) {
+    .ct__tel {
+      padding-block: 8px;
+      margin-block: -8px;
+    }
   }
 
+  @media (hover: hover) and (pointer: fine) {
+    .ct__tel:hover {
+      text-decoration: underline;
+      text-underline-offset: 5px;
+      text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+    }
+  }
+
+  /* the framed button and the text link on one line (Pulso)
+     кнопка в рамке и текстовая ссылка в одну строку (Pulso) */
   .ct__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-top: auto;
+    align-items: center;
+    gap: 12px 22px;
+    margin-top: 22px;
   }
 
-  .ct__route,
-  .ct__show {
-    flex: 1 1 150px;
-  }
-
-  .ct__show[aria-pressed='true'] {
+  .ct__route {
     border-color: var(--line-4);
-    background: color-mix(in srgb, var(--text) 5%, transparent);
+  }
+
+  /* логотип Яндекс Карт — единственный цветной значок на кнопке; кремовый
+     кружок держит красный пин читаемым и на рамочной кнопке */
+  .ct__ya {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 24px;
+    height: 24px;
+    margin-left: -8px;
+    border-radius: var(--r-pill);
+    background: var(--surface);
+  }
+
+  .ct__ya :global(svg) {
+    width: 15px;
+    height: 15px;
+  }
+
+  /* the band: the panel first, the map under it on the phone
+     полоса: на телефоне сначала панель, под ней карта */
+  .ct__band {
+    position: relative;
+    margin-top: 32px;
   }
 
   .ct__write {
-    position: relative;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding: calc(var(--gap) + 10px);
-    border-radius: var(--r-xl);
-    background: var(--olive);
-  }
-
-  .ct__write-col {
-    position: relative;
-    z-index: 1;
+    gap: 12px;
+    margin-inline: var(--pad);
+    margin-bottom: 20px;
+    padding: 22px 22px 24px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-sq);
+    background: var(--bg);
   }
 
   .ct__write-title {
-    margin-bottom: 6px;
-    font-weight: var(--fw-heading);
-    font-size: calc(var(--fs-h3) + 2px);
+    font-size: 24px;
     line-height: 1.12;
-    letter-spacing: var(--ls-heading);
-    color: var(--bg);
   }
 
   .ct__write-sub {
     font-size: calc(var(--fs-body) - 0.5px);
     line-height: 1.5;
-    color: var(--bg);
+    color: var(--text-2);
   }
 
-  .ct__write :global(.messengers) {
-    position: relative;
-    z-index: 1;
+  .ct__write :global(.ct__msg) {
+    margin-top: 4px;
   }
 
-  /* карточки в две колонки: иначе карта уезжает на второй экран */
-  @media (min-width: 700px) and (max-width: 999px) {
-    .ct__col {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      align-items: start;
-    }
-
-    .ct__card {
-      height: 100%;
-    }
-  }
-
-  /* карта помещается рядом с карточками */
-  @media (min-width: 1000px) {
+  @media (min-width: 768px) {
+    /* the two venues side by side with a rule between; facts in three columns
+       две точки рядом с линией между ними; факты в три колонки */
     .ct {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 28px 32px;
+      margin-top: 34px;
     }
 
-    .ct__phone {
-      align-items: flex-end;
+    /* One venue keeps three rows of hours and the other one, so their buttons
+       landed on different lines across the divider. The row is pushed to the
+       foot of the column instead, and the cards share a bottom line.
+       У одной точки три строки часов, у другой одна, и кнопки вставали на
+       разных уровнях по обе стороны линии. Строка прижата к низу колонки —
+       низ у карточек общий. */
+    .ct__actions {
+      margin-top: auto;
+      padding-top: 22px;
+    }
+
+    .ct__card + .ct__card {
+      padding-top: 0;
+      padding-left: 32px;
+      border-top: 0;
+      border-left: 1px solid var(--line);
+    }
+
+    .ct__name {
+      font-size: 24px;
+    }
+
+    .ct__facts {
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 14px 32px;
+    }
+
+    /* The panel stands over the map's top edge, pressed to the right: cream on
+       the map like a panel on a photo. The band gets the panel's overhang as
+       top margin, so it never touches the venues above.
+       Панель стоит на верхнем крае карты, прижата вправо: крем на карте, как
+       панель на фото. Полоса получает выступ панели верхним отступом, чтобы не
+       касаться точек выше. */
+    .ct__band {
+      margin-top: calc(40px + 64px);
+    }
+
+    .ct__write {
+      position: absolute;
+      top: -64px;
+      right: var(--edge);
+      z-index: 2;
+      width: 340px;
+      margin: 0;
+      padding: 26px 26px 28px;
+      border-color: var(--line-4);
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .ct {
+      gap: 40px 56px;
+      margin-top: 40px;
+    }
+
+    .ct__card + .ct__card {
+      padding-left: 56px;
+    }
+
+    .ct__name {
+      font-size: 28px;
+    }
+
+    .ct__facts {
+      gap: 16px 44px;
+      margin-top: 22px;
+      padding-top: 18px;
+    }
+
+    .ct__tel {
+      font-size: 26px;
+    }
+
+    .ct__band {
+      margin-top: calc(48px + 72px);
+    }
+
+    .ct__write {
+      top: -72px;
+      width: 380px;
+      padding: 30px 30px 32px;
     }
   }
 </style>

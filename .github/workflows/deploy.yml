@@ -1,37 +1,30 @@
-name: Превью на GitHub Pages
+name: Выкладка на VPS
 
+# Push to main → the VPS pulls the code and rebuilds the site.
+# Content changes never go through here: Directus calls the webhook directly.
+# Пуш в main → VPS забирает код и пересобирает сайт.
+# Изменения контента сюда не ходят: Directus дёргает вебхук напрямую.
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# новый пуш отменяет незавершённую выкладку предыдущего
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: deploy
+  cancel-in-progress: false
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: withastro/action@v6
-        env:
-          # сайт живёт в подкаталоге репозитория, а не в корне домена
-          SITE: 'https://pixelshino.github.io'
-          BASE_PATH: '/vkusnayakompania-landing'
-
   deploy:
-    needs: build
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    # skipped until the VPS secrets exist / пропуск, пока нет секретов VPS
+    if: ${{ vars.VPS_HOST != '' }}
     steps:
-      - id: deployment
-        uses: actions/deploy-pages@v5
+      - uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+      - name: Известный хост
+        run: ssh-keyscan -H "${{ vars.VPS_HOST }}" >> ~/.ssh/known_hosts
+      - name: Сборка на сервере
+        run: |
+          ssh "deploy@${{ vars.VPS_HOST }}" \
+            'cd /srv/vkus/site && git pull --ff-only && deploy/build.sh'

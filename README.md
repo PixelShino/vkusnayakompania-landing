@@ -1,15 +1,15 @@
 <div align="center">
 
-# Vkusnaya Kompaniya — bakery landing page
+# Vkusnaya Kompaniya — company site
 
-Single-page site for a bakery and kitchen with two locations in Samara, Russia.<br>
-Built with **Astro 5**, no UI framework, ~5 kB of JavaScript on the wire.
+One-page business-card site for a café, a restaurant, a confectionery, catering and
+banquets — two locations in Samara, Russia.<br>
+**Astro 5** static build, content managed in **Directus**, two React islands and nothing else hydrated.
 
 [![Astro](https://img.shields.io/badge/Astro-5.18-FF5D01?logo=astro&logoColor=white)](https://astro.build)
+[![Directus](https://img.shields.io/badge/Directus-11-6644FF?logo=directus&logoColor=white)](https://directus.io)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-![JS shipped](https://img.shields.io/badge/JS%20shipped-5.4%20kB-6f7546)
-![Lighthouse mobile](https://img.shields.io/badge/Lighthouse%20mobile-99%20·%20100%20·%20100%20·%20100-brightgreen)
-![Lighthouse desktop](https://img.shields.io/badge/Lighthouse%20desktop-100%20·%20100%20·%20100%20·%20100-brightgreen)
+[![pnpm](https://img.shields.io/badge/pnpm-10-F69220?logo=pnpm&logoColor=white)](https://pnpm.io)
 
 <img src="docs/screenshots/hero.webp" alt="Hero section on desktop" width="900">
 
@@ -17,56 +17,92 @@ Built with **Astro 5**, no UI framework, ~5 kB of JavaScript on the wire.
 
 ## Screenshots · Скриншоты
 
-| Showcase · Витрина | Contacts · Контакты |
+| Directions · Направления | Contacts · Контакты |
 |---|---|
-| <img src="docs/screenshots/cakes.webp" alt="Cake showcase with filters" width="440"> | <img src="docs/screenshots/contacts.webp" alt="Contacts with schedule and Yandex map" width="440"> |
+| <img src="docs/screenshots/directions.webp" alt="Five directions: an ink card among light ones" width="440"> | <img src="docs/screenshots/contacts.webp" alt="Contacts with schedule and Yandex map" width="440"> |
 
-| Mobile — hero | Mobile — showcase | Mobile — contacts |
+| Mobile — hero | Mobile — directions | Mobile — contacts |
 |---|---|---|
-| <img src="docs/screenshots/mobile-hero.webp" alt="Mobile hero" width="240"> | <img src="docs/screenshots/mobile-cakes.webp" alt="Mobile showcase" width="240"> | <img src="docs/screenshots/mobile-contacts.webp" alt="Mobile contacts" width="240"> |
+| <img src="docs/screenshots/mobile-hero.webp" alt="Mobile hero" width="240"> | <img src="docs/screenshots/mobile-directions.webp" alt="Mobile directions" width="240"> | <img src="docs/screenshots/mobile-contacts.webp" alt="Mobile contacts" width="240"> |
 
 <details open>
 <summary><b>🇬🇧 English</b> — documentation</summary>
 
+### What it is
+
+Thirteen sections, one scroll: hero, five directions (café, restaurant,
+confectionery, catering, banquets), a strip of figures, a photo slider of both rooms,
+poster of the month, text-only promos per location, PDF menus, cake showcase, app and
+delivery, reviews, a marquee of occasions, contacts with both locations on one map.
+Light and ink sections alternate, never more than two light ones in a row. The actions
+are the same everywhere: book a table (Telegram, Max or a call), order delivery in the
+app, open the catering site. No forms, no cart, no prices. A 404 page carries the same
+two actions.
+
+Editors change posters, promos, menus, photos, texts and contacts in Directus; a save
+triggers a rebuild and the static site updates within a minute.
+
 ### Highlights
 
-- **No UI framework.** The page has four interactive pieces — a sticky menu, showcase
-  filters, "show more", and two lazy iframes. All four are covered by the platform, so
-  React would only add weight.
-- **Opening status computed in the browser** against `Europe/Samara`, not baked into the
-  HTML at build time — a static "Open now" would lie to everyone visiting at night.
-- **Business hours live in one place.** A `Schedule` tuple in `src/data/site.ts` renders
-  the human-readable table, the status pill and the `openingHours` field of the
-  schema.org markup, and it is covered by tests.
-- **Reviews come from the official Yandex Maps widget.** Review texts belong to their
-  authors and cannot be copied onto a third-party site; only the aggregate numbers are
-  quoted, with a link to the source.
-- **Images are content, not decoration.** AVIF via `astro:assets`, explicit `srcset`,
-  the LCP frame preloaded from the same origin.
-- **Accessible by default.** Every text step holds ≥4.5:1 contrast, focus is visible,
-  the map and reviews have `noscript` fallbacks, and the page has a skip link.
+- **Content is data, layout is code.** `src/lib/content.ts` fetches Directus at build
+  time (or reads `src/data/fixture.json` when Directus is not configured) and
+  normalizes everything into one typed `Content` object. Components never know the
+  source.
+- **The build refuses bad content.** Missing phone, a location without seven rows of
+  hours, an image without `alt`, an over-long SEO title — the build fails with the
+  field name instead of shipping a broken page.
+- **Two islands, everything else on the platform.** A header that is transparent over
+  the hero and turns solid on scroll, booking dialog, sticky bottom bar, room slider,
+  "show more" and two lazy Yandex widgets are covered by `<dialog>`, scroll-snap and
+  `IntersectionObserver`. Only the marquee and the counting figures hydrate, from
+  `src/islands/`.
+- **Placeholders are designed plates, not dashed frames.** A photo that has not
+  arrived yet gets a filled plate with a diagonal hatch, the future subject in the
+  display serif and a `заглушка · заменяется в админке` caption. The aspect ratio
+  matches the future photo, so dropping in the real shot shifts nothing.
+- **Opening status computed in the browser** against `Europe/Samara`, never baked
+  into HTML. Business hours come from the admin as seven rows per location and feed the
+  table, the status pill and schema.org `openingHours`.
+- **Images are content.** Every photo goes through `astro:assets` (AVIF, explicit
+  `srcset`); the Directus access token never reaches the HTML.
+- **Reviews come from the official Yandex Maps widget**, only aggregate numbers are
+  quoted next to it.
 
 ### Tech stack
 
 | | |
 |---|---|
-| Framework | [Astro 5](https://astro.build) — static output, zero hydration |
+| Framework | [Astro 5](https://astro.build) — static output, two React islands |
+| Content | [Directus 11](https://directus.io) in Docker (`directus/`), REST at build time |
 | Language | TypeScript (strict), plain CSS with custom properties |
-| Images | `astro:assets` → AVIF, `<Image />` + `getImage()` for the preload |
-| Fonts | Montserrat Variable, self-hosted, only Cyrillic and Latin subsets |
-| SEO | JSON-LD `@graph` of two `Bakery` nodes, OpenGraph, sitemap, `robots.txt` |
-| Tests | `node:assert` — no test runner, Node reads the TypeScript directly |
+| Images | `astro:assets` → AVIF, `<Image />` + `getImage()` for the LCP preload |
+| Fonts | Prata for display, Montserrat Variable for UI — self-hosted, Cyrillic and Latin subsets only |
+| SEO | title/description/OG from the admin, JSON-LD `@graph`, sitemap, `robots.txt` |
+| Tests | `node:assert` — no runner, Node reads the TypeScript directly |
+| Hosting | own VPS: nginx + release symlink, rebuilt by webhook and nightly cron |
 
 ### Getting started
 
 ```bash
-npm install
-npm run dev      # http://localhost:4321
-npm run build    # static output in dist/
-npm run preview  # serve the built site
-npm run check    # types and .astro diagnostics
-npm test         # schedule and opening-status logic
+pnpm install
+cp .env.example .env          # DIRECTUS_URL / DIRECTUS_TOKEN / PUBLIC_YANDEX_MAPS_KEY / SITE
+pnpm dev                      # http://127.0.0.1:4321
+pnpm build                    # static output in dist/ (runs content checks first)
+pnpm preview                  # serve the built site
+pnpm check                    # types and .astro diagnostics
+pnpm test                     # schedule, selections and content checks
 ```
+
+Without `DIRECTUS_URL` the site builds from the fixture. To develop against real
+content run the admin locally:
+
+```bash
+cd directus && cp .env.example .env && docker compose up -d   # http://localhost:8055
+pnpm setup                    # editor role, builder token, rebuild flow (needs DIRECTUS_ADMIN_TOKEN)
+pnpm fixture                  # dump Directus → src/data/fixture.json + fixture-files/
+```
+
+Full install, roles and operations: [docs/DIRECTUS.md](docs/DIRECTUS.md).
 
 > **Windows note.** Run from a path that matches the on-disk letter case
 > (`D:\Code\Projects\…`, not `D:\code\projects\…`). On a mismatch Astro loses compile
@@ -76,116 +112,137 @@ npm test         # schedule and opening-status logic
 
 | Path | What lives there |
 |---|---|
-| `src/data/site.ts` | contacts, business hours, addresses, every outbound link |
-| `src/data/catalog.ts` | cakes, desserts, room photos, order steps, `srcset` helpers |
-| `src/data/site.check.ts` | assertions for the schedule and status logic |
-| `src/components/` | one component per section of the page |
-| `src/layouts/BaseLayout.astro` | meta, OpenGraph, JSON-LD, fonts, LCP preload |
-| `src/scripts/lazy-frame.ts` | lazy iframes for the map and reviews, location switching |
+| `src/lib/content.ts` | `getContent()`: Directus or fixture → typed `Content` |
+| `src/lib/select.ts` | current poster, live promos, menu per direction |
+| `src/data/site.ts` | schedule helpers, opening status, Yandex URL builders |
+| `src/data/fixture.json` | content snapshot for dev and tests (`pnpm fixture`) |
+| `src/components/` | one component per section, booking dialog, sticky bar |
+| `src/islands/` | the only hydrated code: `ScrollVelocity` marquee, `CountUp` figures |
+| `src/layouts/BaseLayout.astro` | meta, OpenGraph, JSON-LD, fonts, LCP preload, Metrika |
+| `src/scripts/` | booking dialog, sticky bar, header, lazy frames, map |
 | `src/styles/global.css` | design tokens, buttons, shared patterns |
-| `docs/` | [design system](docs/DESIGN.md), [product notes](docs/PRODUCT.md), screenshots |
-| `handoff/` | original design handoff — reference only, never shipped |
-
-Content changes go into `src/data/`. Section copy lives in the components; everything
-enumerable (showcase items, locations, links) lives in the data files.
+| `scripts/` | Directus setup, fixture export/import, document download |
+| `directus/` | `docker-compose.yml`, schema snapshot, `.env.example` |
+| `deploy/` | `build.sh`, nginx configs, webhook hook, crontab, backup |
+| `docs/` | [design system](docs/DESIGN.md), [product notes](docs/PRODUCT.md), [Directus](docs/DIRECTUS.md) |
 
 ### How it stays fast
 
 - **CSS is inlined** into the document — no render-blocking stylesheet request.
-- **`@font-face` is declared by hand** for the Cyrillic and Latin subsets only. Importing
-  the font package pulled in `latin-ext`, `cyrillic-ext` and `vietnamese` — 100+ kB of
-  subsets the page never renders a glyph from.
-- **The LCP image is preloaded** with the same `srcset`/`sizes` the markup uses, so the
-  browser starts the fetch before it parses the page.
-- **Sections below the fold are skipped** until they are scrolled into view
-  (`content-visibility: auto`). The trade-off is documented in the CSS: anchor jumps are
-  instant instead of smooth, because unrendered sections only estimate their height.
+- **`@font-face` is declared by hand** for the Cyrillic and Latin subsets only.
+- **The LCP image is preloaded** with the same `srcset`/`sizes` the markup uses.
+- **Sections below the fold are skipped** until scrolled into view
+  (`content-visibility: auto`).
 - **Third-party widgets are deferred.** Yandex Maps and the reviews widget mount through
   an `IntersectionObserver` and never touch the critical path.
 
-Measured with Lighthouse 12 against a gzip-serving production build: mobile
-99 / 100 / 100 / 100 (median of five runs), desktop 100 / 100 / 100 / 100.
-
 ### Responsive scale
 
-The design was drawn for three fixed widths — 390 / 834 / 1440. In production those are
-custom properties that switch at `768px` and `1200px`:
+The design was drawn for 390 / 834 / 1440. In production those are custom properties
+that switch at `768px` and `1200px`:
 
 | | mobile | tablet | desktop |
 |---|---|---|---|
 | side padding | 18 | 36 | 72 |
 | content width | 354 | 762 | 1296 |
 | H1 / H2 | 34 / 25 | 47 / 33 | 66 / 42 |
-| section padding | 44 | 64 | 92 |
-| columns: cakes / desserts | 2 / 2 | 3 / 3 | 4 / 3 |
-
-At the three reference widths the numbers match the design to the pixel; in between they
-interpolate with `clamp()`.
+| section padding | 36 | 52 | 72 |
 
 ### Tests
 
-`npm test` runs `src/data/site.check.ts` — the only logic on the page that cannot be
-verified by looking at it, since it depends on the weekday, the time of day and the
-Samara time zone:
+`pnpm test` runs three assertion files, no runner:
 
-- schedule → human-readable rows and schema.org `openingHours`
-- opening and closing boundaries (open at exactly 08:00, closed at exactly 21:00)
-- Saturday's later opening, and midnight rollover into the next day's hours
-- Russian plural forms for the rating counters
-
-No runner and no dependencies: `node:assert` plus Node's native TypeScript support.
+- `src/data/site.check.ts` — hours rows → schedule, human-readable table, schema.org
+  `openingHours`, open/closed boundaries, Samara time zone, plural forms
+- `src/lib/select.check.ts` — display windows, current poster, promo order, menu per
+  direction
+- `src/data/content.check.ts` — the fixture passes every rule the build enforces
 
 ### Deployment
 
-A push to `main` builds the site and publishes a preview to GitHub Pages
-(`.github/workflows/deploy.yml`). The preview is served from a subdirectory, so `site`
-and `base` come from the `SITE` and `BASE_PATH` environment variables, and it is marked
-`noindex` so it never competes with the production domain in search.
+Production runs on the client's VPS: nginx serves `/srv/vkus/current`, a symlink to the
+latest release. Directus calls `deploy/build.sh` through a webhook after every save; a
+nightly cron rebuilds so date windows take effect; a push to `main` deploys code via
+`.github/workflows/deploy.yml`. Vercel builds the branch as a preview from the same
+Directus. Step by step: [docs/DIRECTUS.md](docs/DIRECTUS.md).
 
 </details>
 
 <details>
 <summary><b>🇷🇺 Русский</b> — документация</summary>
 
+### Что это
+
+Тринадцать секций одним скроллом: первый экран, пять направлений (кафе, ресторан,
+кондитерская, кейтеринг, банкеты), полоса цифр, слайдер фото обоих залов, афиша
+месяца, акции по адресам текстом, PDF меню, витрина тортов, приложение и доставка,
+отзывы, бегущая строка поводов, контакты с обеими точками на одной карте. Светлые и
+чернильные секции чередуются, подряд светлых не больше двух. Действия везде одни:
+забронировать стол (Telegram, Max или звонок), заказать доставку в приложении, перейти
+на сайт кейтеринга. Без форм, корзины и цен. У страницы 404 те же два действия.
+
+Редакторы меняют афишу, акции, меню, фото, тексты и контакты в Directus; сохранение
+запускает пересборку, и статический сайт обновляется в пределах минуты.
+
 ### Коротко
 
-- **Без UI-фреймворка.** Интерактива на странице четыре штуки — липкое меню, фильтры
-  витрины, «показать ещё» и два ленивых iframe. Всё четыре закрывает платформа, React
-  здесь только добавил бы вес.
-- **Статус «Открыто / Откроется в 8:00» считается в браузере** по `Europe/Samara`, а не
-  вшивается в HTML на сборке: статичная плашка врала бы всем, кто зашёл ночью.
-- **Часы работы живут в одном месте.** Кортеж `Schedule` в `src/data/site.ts`
-  разворачивается и в человеческую таблицу, и в плашку статуса, и в `openingHours`
-  разметки schema.org — и покрыт тестами.
-- **Отзывы — официальный виджет Яндекс Карт.** Тексты чужих отзывов принадлежат авторам,
-  переносить их на свой сайт нельзя; рядом только цифры с карточки организации — они
-  факты и ведут на источник.
-- **Фотографии — контент, а не украшение.** AVIF через `astro:assets`, явный `srcset`,
-  LCP-кадр предзагружается со своего домена.
-- **Доступность из коробки.** Все ступени текста держат контраст ≥4,5:1, фокус виден,
-  у карты и отзывов есть `noscript`-запасной вариант, в начале страницы — skip-ссылка.
+- **Контент — данные, вёрстка — код.** `src/lib/content.ts` забирает Directus при
+  сборке (или читает `src/data/fixture.json`, если Directus не настроен) и приводит
+  всё к одному типизированному объекту `Content`. Компоненты не знают источник.
+- **Сборка не пропускает плохой контент.** Нет телефона, у точки не семь строк часов,
+  у картинки нет `alt`, длинный SEO-заголовок — сборка падает с именем поля, а не
+  выкладывает сломанную страницу.
+- **Два острова, остальное на платформе.** Шапку, прозрачную над первым экраном и
+  непрозрачную после прокрутки, диалог брони, нижнюю полосу, слайдер зала, «показать
+  ещё» и два ленивых виджета Яндекса закрывают `<dialog>`, scroll-snap и
+  `IntersectionObserver`. Гидратируются только бегущая строка и считающиеся цифры —
+  из `src/islands/`.
+- **Заглушка — оформленная плашка, а не пунктирная рамка.** Пока фото нет, стоит
+  заливка с косой штриховкой, будущий предмет дисплейной антиквой и пометка
+  «заглушка · заменяется в админке». Пропорция совпадает с будущим кадром, поэтому
+  подстановка настоящего фото ничего не сдвигает.
+- **Статус «Открыто до 21:00» считается в браузере** по `Europe/Samara`, а не
+  вшивается в HTML. Часы приходят из админки семью строками на точку и разворачиваются
+  в таблицу, плашку статуса и `openingHours` schema.org.
+- **Фотографии — контент.** Каждое фото идёт через `astro:assets` (AVIF, явный
+  `srcset`); токен Directus в HTML не попадает.
+- **Отзывы — официальный виджет Яндекс Карт**, рядом только цифры с карточки.
 
 ### Стек
 
 | | |
 |---|---|
-| Фреймворк | [Astro 5](https://astro.build) — статическая сборка, без гидратации |
+| Фреймворк | [Astro 5](https://astro.build) — статическая сборка, два React-острова |
+| Контент | [Directus 11](https://directus.io) в Docker (`directus/`), REST при сборке |
 | Язык | TypeScript (strict), обычный CSS на кастомных свойствах |
 | Картинки | `astro:assets` → AVIF, `<Image />` и `getImage()` для preload |
-| Шрифт | Montserrat Variable, свой хостинг, только кириллица и латиница |
-| SEO | JSON-LD `@graph` из двух `Bakery`, OpenGraph, sitemap, `robots.txt` |
+| Шрифты | Prata на заголовках, Montserrat Variable на интерфейсе — свой хостинг, только кириллица и латиница |
+| SEO | title/description/OG из админки, JSON-LD `@graph`, sitemap, `robots.txt` |
 | Тесты | `node:assert` — без раннера, Node читает TypeScript сам |
+| Хостинг | свой VPS: nginx + симлинк на релиз, пересборка по вебхуку и ночному крону |
 
 ### Запуск
 
 ```bash
-npm install
-npm run dev      # http://localhost:4321
-npm run build    # статика в dist/
-npm run preview  # посмотреть собранное
-npm run check    # типы и диагностика .astro
-npm test         # расписание и статус точек
+pnpm install
+cp .env.example .env          # DIRECTUS_URL / DIRECTUS_TOKEN / PUBLIC_YANDEX_MAPS_KEY / SITE
+pnpm dev                      # http://127.0.0.1:4321
+pnpm build                    # статика в dist/ (сначала проверки контента)
+pnpm preview                  # посмотреть собранное
+pnpm check                    # типы и диагностика .astro
+pnpm test                     # расписание, выборки и проверки контента
 ```
+
+Без `DIRECTUS_URL` сайт собирается из фикстуры. Чтобы работать с живым контентом,
+поднимите админку локально:
+
+```bash
+cd directus && cp .env.example .env && docker compose up -d   # http://localhost:8055
+pnpm setup                    # роль редактора, токен сборщика, Flow пересборки (нужен DIRECTUS_ADMIN_TOKEN)
+pnpm fixture                  # выгрузка Directus → src/data/fixture.json + fixture-files/
+```
+
+Установка, роли и эксплуатация: [docs/DIRECTUS.md](docs/DIRECTUS.md).
 
 > **Windows-грабли.** Запускать из пути с тем же регистром, что и на диске
 > (`D:\Code\Projects\…`, не `D:\code\projects\…`). При расхождении Astro теряет
@@ -195,71 +252,60 @@ npm test         # расписание и статус точек
 
 | Путь | Что это |
 |---|---|
-| `src/data/site.ts` | контакты, часы, адреса точек, все внешние ссылки |
-| `src/data/catalog.ts` | торты, десерты, фото зала, шаги заказа, сборка `srcset` |
-| `src/data/site.check.ts` | проверки расписания и статуса |
-| `src/components/` | по компоненту на секцию страницы |
-| `src/layouts/BaseLayout.astro` | мета, OpenGraph, JSON-LD, шрифт, preload первого экрана |
-| `src/scripts/lazy-frame.ts` | ленивые iframe карты и отзывов, переключение точек |
+| `src/lib/content.ts` | `getContent()`: Directus или фикстура → типизированный `Content` |
+| `src/lib/select.ts` | текущая афиша, живые акции, меню направления |
+| `src/data/site.ts` | расписание, статус точки, ссылки на Яндекс |
+| `src/data/fixture.json` | снимок контента для разработки и тестов (`pnpm fixture`) |
+| `src/components/` | по компоненту на секцию, диалог брони, нижняя полоса |
+| `src/islands/` | единственный гидратируемый код: бегущая строка `ScrollVelocity`, цифры `CountUp` |
+| `src/layouts/BaseLayout.astro` | мета, OpenGraph, JSON-LD, шрифт, preload, Метрика |
+| `src/scripts/` | диалог, полоса, шапка, ленивые кадры, карта |
 | `src/styles/global.css` | токены, кнопки, общие паттерны |
-| `docs/` | [дизайн-система](docs/DESIGN.md), [продукт](docs/PRODUCT.md), скриншоты |
-| `handoff/` | исходная выгрузка макета — эталон, в прод не идёт |
-
-Контент меняется в `src/data/`. Тексты секций живут в компонентах, всё перечислимое
-(позиции витрины, точки, ссылки) — в данных.
+| `scripts/` | настройка Directus, выгрузка и импорт фикстуры, скачивание документов |
+| `directus/` | `docker-compose.yml`, снапшот схемы, `.env.example` |
+| `deploy/` | `build.sh`, конфиги nginx, вебхук, крон, бэкап |
+| `docs/` | [дизайн-система](docs/DESIGN.md), [продукт](docs/PRODUCT.md), [Directus](docs/DIRECTUS.md) |
 
 ### За счёт чего быстро
 
 - **CSS инлайнится** в документ — нет блокирующего запроса за стилями.
-- **`@font-face` объявлен вручную** только для кириллицы и латиницы. Импорт пакета
-  тянул ещё `latin-ext`, `cyrillic-ext` и `vietnamese` — 100+ КБ подмножеств, из которых
-  на странице нет ни одного символа.
-- **LCP-кадр предзагружается** с тем же `srcset`/`sizes`, что и в разметке: браузер
-  начинает качать его, не дожидаясь разбора страницы.
+- **`@font-face` объявлен вручную** только для кириллицы и латиницы.
+- **LCP-кадр предзагружается** с тем же `srcset`/`sizes`, что и в разметке.
 - **Секции ниже первого экрана не считаются**, пока до них не долистали
-  (`content-visibility: auto`). Плата описана прямо в CSS: переход по якорю стал
-  мгновенным вместо плавного — у неотрисованной секции высота лишь оценка.
+  (`content-visibility: auto`).
 - **Сторонние виджеты отложены.** Карта и отзывы Яндекса монтируются через
   `IntersectionObserver` и не попадают в критический путь.
 
-Замерено `Lighthouse 12` на продакшен-сборке с gzip: мобильный 99 / 100 / 100 / 100
-(медиана из пяти прогонов), десктоп 100 / 100 / 100 / 100.
-
 ### Адаптив
 
-Макет нарисован под три фиксированные ширины — 390 / 834 / 1440. В проде это
-CSS-переменные, переключающиеся на `768px` и `1200px`:
+Макет нарисован под 390 / 834 / 1440. В проде это CSS-переменные, переключающиеся на
+`768px` и `1200px`:
 
 | | телефон | планшет | десктоп |
 |---|---|---|---|
 | боковой отступ | 18 | 36 | 72 |
 | контент | 354 | 762 | 1296 |
 | H1 / H2 | 34 / 25 | 47 / 33 | 66 / 42 |
-| отступ секции | 44 | 64 | 92 |
-| колонки: торты / десерты | 2 / 2 | 3 / 3 | 4 / 3 |
-
-В контрольных ширинах цифры совпадают с макетом до пикселя, между ними тянутся
-через `clamp()`.
+| отступ секции | 36 | 52 | 72 |
 
 ### Тесты
 
-`npm test` прогоняет `src/data/site.check.ts` — единственную логику на странице, которую
-нельзя проверить глазами: она зависит от дня недели, времени суток и часового пояса
-Самары.
+`pnpm test` прогоняет три файла проверок, без раннера:
 
-- расписание → человеческие строки и `openingHours` для schema.org
-- границы открытия и закрытия (в 8:00 уже открыто, в 21:00 уже нет)
-- субботнее «с 8:30» и переход через полночь в часы следующего дня
-- склонение числительных в счётчиках оценок
-
-Ни раннера, ни зависимостей: `node:assert` и встроенная поддержка TypeScript в Node.
+- `src/data/site.check.ts` — строки часов → расписание, человеческая таблица,
+  `openingHours` schema.org, границы открытия и закрытия, часовой пояс Самары,
+  склонение числительных
+- `src/lib/select.check.ts` — окна показа, текущая афиша, порядок акций, меню
+  направления
+- `src/data/content.check.ts` — фикстура проходит все правила, которые требует сборка
 
 ### Выкладка
 
-Пуш в `main` собирает сайт и выкладывает превью на GitHub Pages
-(`.github/workflows/deploy.yml`). Превью живёт в подкаталоге, поэтому `site` и `base`
-приходят из переменных `SITE` и `BASE_PATH`, а сама страница помечена `noindex` — чтобы
-не конкурировать в поиске с боевым доменом.
+Прод живёт на VPS клиента: nginx раздаёт `/srv/vkus/current` — симлинк на свежий
+релиз. Directus дёргает `deploy/build.sh` вебхуком после каждого сохранения; ночной
+крон пересобирает сайт, чтобы сработали окна дат; пуш в `main` выкладывает код через
+`.github/workflows/deploy.yml`. Vercel собирает ветку как превью из того же Directus.
+По шагам: [docs/DIRECTUS.md](docs/DIRECTUS.md).
 
 </details>
 

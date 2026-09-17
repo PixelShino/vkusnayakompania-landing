@@ -1,275 +1,278 @@
 ---
+/**
+ * Cake showcase as an even grid under a centred head: every frame is the same
+ * 4:5 plate, a pending photo stands as a hatched plaque with the name on it.
+ * The uneven grid with a two-row lead tile made one placeholder 1200 px tall.
+ * Витрина тортов ровной сеткой под заголовком по оси: каждый кадр — одна
+ * плашка 4:5, неснятое фото стоит штрихованной плашкой с названием. Неровная
+ * сетка с доминантой в две строки растягивала одну заглушку до 1200 px.
+ */
 import Photo from './Photo.astro';
-import CustomCake from './CustomCake.astro';
-import { cakes, cakeFilters } from '../data/catalog';
-import { site } from '../data/site';
+import Icon from './Icon.astro';
+import { isPlaceholder, type Cake, type Content } from '../lib/content.ts';
 
-// Фильтры и «показать ещё» — на классах, без перерисовки DOM.
+interface Props {
+  content: Content;
+}
+
+const { cakes, settings, home } = Astro.props.content;
+const shop = settings.shop_cakes_ready ?? settings.shop_url;
+
+// The admin marks a pending file in its title; normalization keeps only `alt`,
+// so the same mark is read from there — a real shot never carries it.
+// В админке пометка стоит в заголовке файла, нормализация оставляет только
+// `alt`, поэтому она читается оттуда — на настоящем кадре её нет.
+const stub = (cake: Cake) =>
+  isPlaceholder(cake.photo.alt) || cake.photo.alt.includes('фото появится позже');
+
+const SIZES = '(min-width: 1200px) 309px, (min-width: 768px) 243px, 45vw';
 ---
 
 <section class="section" id="cakes">
   <div class="container">
-    <div class="section-head">
-      <div>
-        <h2>Торты</h2>
-        <p class="lead">
-          Двенадцать моделей в постоянном меню, каждая — за 48 часов. Цвет и надпись меняем под
-          повод, остальное как на фото.
-        </p>
+    <div class="head" data-reveal>
+      <span class="mark" aria-hidden="true"></span>
+      <h2 class="display-caps">{home.cakes_title}</h2>
+      {home.cakes_text && <p class="lead">{home.cakes_text}</p>}
+
+      <div class="cakes__actions">
+        <button
+          type="button"
+          class="btn btn--primary"
+          data-book="Торт на заказ"
+          data-book-note="Пришлите картинку, посчитаем в тот же день"
+        >
+          Торт на заказ
+        </button>
+        <a class="btn btn--secondary" href={shop} target="_blank" rel="noopener">
+          Торты в наличии
+        </a>
       </div>
-      <a class="btn btn--secondary btn--sm" href="#custom-cake">Свой торт по картинке</a>
     </div>
 
-    <div class="cakes__filters rail" role="group" aria-label="Фильтр по видам тортов">
+    <div class="cakes__grid" id="cakes-grid" data-cakes-grid data-reveal="grid">
       {
-        cakeFilters.map((filter, i) => (
-          <button
-            type="button"
-            class="chip"
-            data-filter={filter}
-            aria-pressed={i === 0 ? 'true' : 'false'}
-          >
-            {filter}
-          </button>
-        ))
-      }
-    </div>
+        cakes.map((cake) => (
+          <article class="cake-card">
+            {stub(cake) ? (
+              <figure class="stub cake-stub">
+                {/* название несёт плашка: под кадром у заглушки остаются только вес и срок
+                    the plaque carries the name; the caption below keeps weight and lead time */}
+                <span class="stub__title">{cake.title}</span>
+                <span class="stub__meta">заглушка · заменяется в админке</span>
+              </figure>
+            ) : (
+              <Photo photo={cake.photo} ratio="4 / 5" sizes={SIZES} />
+            )}
 
-    <div class="cakes__grid" data-cakes-grid>
-      {
-        cakes.map((cake, i) => (
-          <article class="cake" data-tags={[cake.name, ...(cake.tags ?? [])].join('|')}>
-            <Photo
-              photo={cake.photo}
-              ratio="3 / 4"
-              eager={i < 4}
-              sizes="(min-width: 1200px) 310px, (min-width: 768px) 240px, 45vw"
-            >
-              <figcaption class="cake__caption">
-                <span class="cake__name">{cake.name}</span>
-                <span class="cake__meta">{cake.meta}</span>
-              </figcaption>
-            </Photo>
+            <div class="cake__cap">
+              {!stub(cake) && <span class="cake__name">{cake.title}</span>}
+              {cake.note && <span class="tag tnum">{cake.note}</span>}
+            </div>
           </article>
         ))
       }
     </div>
 
-    <p class="cakes__empty" data-cakes-empty hidden>
-      В этой подборке пока пусто. Напишите нам — соберём под ваш повод.
-    </p>
-
     <div class="cakes__more">
-      <button type="button" class="btn btn--secondary" data-cakes-toggle aria-expanded="false">
+      <button
+        type="button"
+        class="btn btn--secondary"
+        data-cakes-toggle
+        aria-expanded="false"
+        aria-controls="cakes-grid"
+      >
+        <Icon name="chevron-down" class="ico--down" />
         Показать ещё
       </button>
-      <p class="cakes__count" data-cakes-count>В витрине {cakes.length} тортов</p>
-      <a class="cakes__shop" href={site.shopSections.cakesReady} target="_blank" rel="noopener">
-        Торты, которые можно забрать сегодня →
-      </a>
     </div>
-
-    <CustomCake />
   </div>
 </section>
 
 <style>
-  .cakes__filters {
+  /* the section's two buttons on the axis, like the first screen
+     две кнопки секции по оси, как на первом экране */
+  .cakes__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 12px;
     margin-top: 22px;
-    padding-bottom: 6px;
-    gap: 8px;
-    scroll-snap-type: none;
-  }
-
-  .chip {
-    flex: none;
-    padding: 9px 16px;
-    border: 1px solid var(--line);
-    border-radius: var(--r-pill);
-    background: var(--bg);
-    font-size: 12.5px;
-    font-weight: 600;
-    color: #4c463d;
-    white-space: nowrap;
-    cursor: pointer;
-    transition:
-      background-color 0.16s ease,
-      border-color 0.16s ease,
-      color 0.16s ease;
-  }
-
-  .chip:hover {
-    border-color: var(--text);
-  }
-
-  .chip[aria-pressed='true'] {
-    background: var(--text);
-    border-color: var(--text);
-    color: var(--surface);
   }
 
   .cakes__grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--gap);
-    margin-top: 20px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px var(--gap);
+    /* карточка не тянется по высоте ряда: длинная подпись остаётся длинной
+       cards never stretch to the row height: a long caption stays long */
+    align-items: start;
+    margin-top: 32px;
   }
 
-  /* свёрнутая витрина: два ряда, низ уходит в фейд */
-  .cakes__grid:not(.is-expanded) > :nth-child(n + 7) {
+  .cake-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  /* лимит витрины живёт только здесь: свёрнутая показывает целые ряды — восемь
+     на двух и четырёх колонках, шесть на трёх
+     the shelf limit lives here alone: collapsed shows whole rows — eight on two
+     and four columns, six on three */
+  .cakes__grid:not(.is-open) > .cake-card:nth-child(n + 9) {
     display: none;
   }
 
-  .cakes__grid:not(.is-expanded) {
-    -webkit-mask-image: linear-gradient(
-      to bottom,
-      #000 62%,
-      rgba(0, 0, 0, 0.32) 88%,
-      transparent 100%
-    );
-    mask-image: linear-gradient(to bottom, #000 62%, rgba(0, 0, 0, 0.32) 88%, transparent 100%);
-  }
-
-  /* правило сильнее счётчика выше: отфильтрованное скрыто всегда */
-  .cakes__grid > .cake.is-hidden {
-    display: none !important;
-  }
-
-  .cake__caption {
-    position: absolute;
-    inset: auto 0 0 0;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 38px 14px 13px;
-    pointer-events: none;
-    background: linear-gradient(to top, rgba(28, 25, 22, 0.82), rgba(28, 25, 22, 0));
-  }
-
-  .cake__name {
-    font-weight: var(--fw-heading);
-    font-size: calc(var(--fs-h3) - 1px);
-    line-height: 1.2;
-    letter-spacing: var(--ls-heading);
-    color: var(--bg);
-    text-wrap: balance;
-  }
-
-  .cake__meta {
-    font-size: 12px;
-    color: rgba(255, 250, 237, 0.76);
-  }
-
-  .cakes__empty {
-    margin-top: 20px;
-    font-size: var(--fs-body);
-    color: var(--text-4);
+  /* тортов не больше, чем видно — раскрывать нечего, кнопки нет
+     no more cakes than shown — nothing to unfold, no button */
+  .cakes__grid:not(:has(> :nth-child(9))) + .cakes__more {
+    display: none;
   }
 
   .cakes__more {
     display: flex;
-    gap: 14px;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-top: 24px;
+    justify-content: center;
+    margin-top: 28px;
   }
 
-  .cakes__count {
-    font-size: 12.5px;
-    color: var(--text-4);
+  /* The plate reads its fill from two properties so the ink rhythm below can
+     switch it without repeating the stub styles.
+     Плашка берёт заливку из двух свойств: ритм чернил ниже переключает её,
+     не повторяя стили заглушки. */
+  .cake-stub {
+    aspect-ratio: 4 / 5;
+    margin: 0;
+    background-color: var(--plate, var(--surface-warm));
+    background-image: var(--plate-hatch, var(--hatch));
+    color: var(--plate-ink, var(--text));
   }
 
-  .cakes__shop {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--terracotta-text);
-    text-decoration: none;
-    border-bottom: 1px solid color-mix(in srgb, var(--terracotta) 40%, transparent);
+  .cake-stub .stub__meta {
+    color: var(--plate-meta, inherit);
   }
 
-  .cakes__shop:hover {
-    border-bottom-color: var(--terracotta);
-  }
-
-  @media (min-width: 768px) {
-    .cakes__grid {
-      grid-template-columns: repeat(3, 1fr);
+  /* a 136 px tile on a 320 screen: «Шоколадный» ran past the edge at 20 px
+     with 20 px padding — 16 px on 10 px padding fits the longest name whole;
+     `anywhere` is not used: it cut «Шоколадны/й» before hyphenation could
+     плитка 136 px на экране 320: «Шоколадный» вылезал за край при 20 px и
+     полях 20 px — 16 px на полях 10 px вмещает самое длинное имя целиком;
+     `anywhere` не берётся: оно резало «Шоколадны/й» раньше переноса */
+  @media (max-width: 359px) {
+    .cake-stub {
+      padding: 14px 10px;
     }
 
-    .cakes__shop {
-      margin-left: auto;
+    .cake-stub .stub__title {
+      font-size: 16px;
+      hyphens: auto;
+    }
+  }
+
+  /* Ink plates step diagonally — one per row, never a column. An index from
+     the markup lined them up on three columns, so the rhythm is set per column
+     count, each in its own width range: 2nd and 3rd of four on two columns,
+     2nd and 6th of six on three, 2nd and 7th of eight on four.
+     Чернильные плашки идут по диагонали — по одной в ряду, никогда столбцом.
+     Индекс из разметки выстраивал их в колонку на трёх столбцах, поэтому ритм
+     задаётся на каждое число колонок в своём диапазоне ширин: 2-я и 3-я из
+     четырёх на двух, 2-я и 6-я из шести на трёх, 2-я и 7-я из восьми на четырёх. */
+  @media (max-width: 767.98px) {
+    .cake-card:nth-child(4n + 2) > .cake-stub,
+    .cake-card:nth-child(4n + 3) > .cake-stub {
+      --plate: var(--ink);
+      --plate-hatch: var(--hatch-ink);
+      --plate-ink: var(--on-ink);
+      --plate-meta: var(--on-ink-2);
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1199.98px) {
+    .cake-card:nth-child(6n + 2) > .cake-stub,
+    .cake-card:nth-child(6n + 6) > .cake-stub {
+      --plate: var(--ink);
+      --plate-hatch: var(--hatch-ink);
+      --plate-ink: var(--on-ink);
+      --plate-meta: var(--on-ink-2);
     }
   }
 
   @media (min-width: 1200px) {
+    .cake-card:nth-child(8n + 2) > .cake-stub,
+    .cake-card:nth-child(8n + 7) > .cake-stub {
+      --plate: var(--ink);
+      --plate-hatch: var(--hatch-ink);
+      --plate-ink: var(--on-ink);
+      --plate-meta: var(--on-ink-2);
+    }
+  }
+
+  .cake__cap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .cake__name {
+    font-size: var(--fs-body);
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--text);
+    text-wrap: balance;
+  }
+
+  @media (min-width: 768px) {
     .cakes__grid {
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px var(--gap);
+      margin-top: 36px;
     }
 
-    /* четыре колонки — два полных ряда в свёрнутом виде */
-    .cakes__grid:not(.is-expanded) > :nth-child(-n + 8) {
-      display: block;
-    }
-
-    .cakes__grid:not(.is-expanded) > :nth-child(n + 9) {
+    .cakes__grid:not(.is-open) > .cake-card:nth-child(n + 7) {
       display: none;
     }
+
+    .cakes__grid:not(:has(> :nth-child(7))) + .cakes__more {
+      display: none;
+    }
+
+  }
+
+  @media (min-width: 1200px) {
+    .cakes__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin-top: 40px;
+    }
+
+    .cakes__grid:not(.is-open) > .cake-card:nth-child(n + 7) {
+      display: revert;
+    }
+
+    .cakes__grid:not(.is-open) > .cake-card:nth-child(n + 9) {
+      display: none;
+    }
+
+    .cakes__grid:not(:has(> :nth-child(7))) + .cakes__more {
+      display: revert;
+    }
+
+    .cakes__grid:not(:has(> :nth-child(9))) + .cakes__more {
+      display: none;
+    }
+
   }
 </style>
 
 <script>
   const grid = document.querySelector<HTMLElement>('[data-cakes-grid]');
   const toggle = document.querySelector<HTMLButtonElement>('[data-cakes-toggle]');
-  const count = document.querySelector<HTMLElement>('[data-cakes-count]');
-  const empty = document.querySelector<HTMLElement>('[data-cakes-empty]');
-  const chips = [...document.querySelectorAll<HTMLButtonElement>('[data-filter]')];
 
-  if (grid && toggle && count) {
-    const cards = [...grid.children] as HTMLElement[];
-    const total = cards.length;
-    let filter = chips[0]?.dataset.filter ?? 'Все';
-
-    const visible = () => cards.filter((card) => !card.classList.contains('is-hidden')).length;
-
-    const sync = () => {
-      const shown = visible();
-      const expanded = grid.classList.contains('is-expanded');
-      const collapsedLimit = window.matchMedia('(min-width: 1200px)').matches ? 8 : 6;
-      const hasMore = shown > collapsedLimit;
-
-      toggle.hidden = !hasMore;
-      toggle.textContent = expanded ? 'Свернуть' : 'Показать ещё';
-      toggle.setAttribute('aria-expanded', String(expanded));
-
-      if (filter === 'Все') {
-        count.textContent = expanded ? `Показаны все ${total}` : `В витрине ${total} тортов`;
-      } else {
-        count.textContent = `${shown} из ${total} подходят`;
-      }
-
-      if (empty) empty.hidden = shown > 0;
-    };
-
+  if (grid && toggle) {
     toggle.addEventListener('click', () => {
-      grid.classList.toggle('is-expanded');
-      sync();
+      const open = grid.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.textContent = open ? 'Свернуть' : 'Показать ещё';
     });
-
-    chips.forEach((chip) => {
-      chip.addEventListener('click', () => {
-        filter = chip.dataset.filter ?? 'Все';
-        chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
-        cards.forEach((card) => {
-          const tags = card.dataset.tags ?? '';
-          card.classList.toggle('is-hidden', filter !== 'Все' && !tags.includes(filter));
-        });
-        // подборку короче двух рядов не сворачиваем
-        grid.classList.toggle('is-expanded', filter !== 'Все');
-        sync();
-      });
-    });
-
-    sync();
   }
 </script>

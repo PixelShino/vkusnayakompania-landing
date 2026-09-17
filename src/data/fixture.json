@@ -1,0 +1,711 @@
+{
+  "exportedAt": "2026-09-04T09:54:06.899Z",
+  "settings": {
+    "id": 1,
+    "phone": "+7 987 955-25-65",
+    "telegram": "https://t.me/vkusnayakompania",
+    "max": "https://max.ru/",
+    "vk": "https://vk.ru/vkusnayakompania",
+    "shop_url": "https://vkusdostavka.shop/",
+    "app_ios": "https://apps.apple.com/app/id6477568088",
+    "app_android": "https://play.google.com/store/apps/details?id=com.foodpicasso.cateringvkusnaya&hl=ru",
+    "catering_url": "https://vkusnayakompania.ru/",
+    "catering_services_url": "https://vkusnayakompania.ru/services/",
+    "shop_cakes_ready": "https://vkusdostavka.shop/s/torty-v-nalichii_31",
+    "shop_cakes_custom": "https://vkusdostavka.shop/s/prazdnichnye-torty_26",
+    "shop_pastry": "https://vkusdostavka.shop/s/pirojnye_30",
+    "shop_breakfasts": "https://vkusdostavka.shop/s/zavtraki_1",
+    "legal_name": "ИП Стрельникова Екатерина Александровна",
+    "inn": "631895460666",
+    "ogrn": "319631300064539",
+    "legal_address": null,
+    "yandex_score": "4,9",
+    "yandex_award": "Хорошее место 2026",
+    "yandex_ratings": 1085,
+    "yandex_reviews": 463,
+    "yandex_highlights": [
+      {
+        "label": "Еда",
+        "percent": 87
+      },
+      {
+        "label": "Десерты",
+        "percent": 82
+      },
+      {
+        "label": "Персонал",
+        "percent": 78
+      },
+      {
+        "label": "Кофе",
+        "percent": 71
+      },
+      {
+        "label": "Напитки",
+        "percent": 68
+      }
+    ],
+    "metrika_id": null,
+    "policy_file": null,
+    "offer_file": null
+  },
+  "home": {
+    "id": 1,
+    "hero_title": "Кафе, ресторан и кондитерская в Самаре",
+    "hero_text": "Завтраки и обеды в зале, торты на заказ за 48 часов, доставка по городу и банкеты под ключ. Две точки: Садовая и Советской Армии.",
+    "seo_title": "Вкусная компания — кафе, ресторан и кондитерская в Самаре",
+    "seo_description": "Кафе на Садовой, ресторан на Советской Армии, торты на заказ за 48 часов, доставка по Самаре, кейтеринг и банкеты. Телефон +7 987 955-25-65.",
+    "robots_index": true,
+    "about_title": "Одна кухня, пять поводов зайти",
+    "about_text": "Две точки в Самаре и всё, что вокруг них: кафе, ресторан, кондитерская, выездные праздники и банкеты.",
+    "menu_text": "Меню в PDF, чтобы посмотреть заранее. Заказать на доставку — в приложении.",
+    "cakes_title": "Торты на заказ",
+    "cakes_text": "Двенадцать моделей в постоянном меню, каждая за 48 часов. Цвет и надпись меняем под повод, остальное как на фото.",
+    "delivery_title": "Приложение и интернет-магазин",
+    "delivery_text": "История заказов, любимые позиции и статус доставки — в приложении «Вкусная компания». Завтраки, супы, паста, торты в наличии и пирожные с доставкой по Самаре или самовывозом.",
+    "delivery_note": "Скидка 20 % на первый заказ из приложения",
+    "contacts_note": "Отвечаем с 9:00 до 21:00, обычно за пару минут",
+    "hero_image": {
+      "id": "5db28cbf-4517-4580-b2f8-a57a45ddcb89",
+      "filename_download": "hero-tall.jpg",
+      "title": "[заглушка] Витрина кондитерской — сток, заменить своим фото",
+      "alt": "Витрина кондитерской",
+      "width": 1600,
+      "height": 2400,
+      "type": "image/jpeg"
+    },
+    "og_image": null,
+    "app_screenshot": {
+      "id": "34f5cdba-2efe-4f93-a348-eb4226f216ef",
+      "filename_download": "app-screen.png",
+      "title": "Экран приложения «Вкусная компания»",
+      "alt": "Экран приложения «Вкусная компания»",
+      "width": 920,
+      "height": 1993,
+      "type": "image/png"
+    }
+  },
+  "places": [
+    {
+      "id": 1,
+      "name": "Садовая, 212Б",
+      "street": "Садовая",
+      "kind": "Кондитерская и кухня",
+      "hours": [
+        {
+          "day": "mon",
+          "open": "08:00",
+          "close": "21:00"
+        },
+        {
+          "day": "tue",
+          "open": "08:00",
+          "close": "21:00"
+        },
+        {
+          "day": "wed",
+          "open": "08:00",
+          "close": "21:00"
+        },
+        {
+          "day": "thu",
+          "open": "08:00",
+          "close": "21:00"
+        },
+        {
+          "day": "fri",
+          "open": "08:00",
+          "close": "21:00"
+        },
+        {
+          "day": "sat",
+          "open": "08:30",
+          "close": "21:00"
+        },
+        {
+          "day": "sun",
+          "open": "09:00",
+          "close": "21:00"
+        }
+      ],
+      "lat": 53.195877,
+      "lng": 50.1002,
+      "yandex_org": "154837147598",
+      "rating": "4,8",
+      "date_updated": "2026-09-03T12:59:17.177Z",
+      "phone": "+7 987 955-25-65",
+      "gallery": [
+        {
+          "id": 1,
+          "sort": 1,
+          "caption": "Зал",
+          "directus_files_id": {
+            "id": "15255a49-a669-4652-8c62-e782576069ed",
+            "filename_download": "zal-sadovaya-1.jpg",
+            "title": "[заглушка] Общий план зала на Садовой",
+            "alt": "Общий план зала на Садовой — фото появится позже",
+            "width": 1600,
+            "height": 1200,
+            "type": "image/jpeg"
+          }
+        },
+        {
+          "id": 2,
+          "sort": 2,
+          "caption": "Витрина",
+          "directus_files_id": {
+            "id": "a734de6f-f41c-4be2-ae5b-a362e67f47f1",
+            "filename_download": "zal-sadovaya-2.jpg",
+            "title": "[заглушка] Витрина кондитерской на Садовой",
+            "alt": "Витрина кондитерской на Садовой — фото появится позже",
+            "width": 1600,
+            "height": 1200,
+            "type": "image/jpeg"
+          }
+        },
+        {
+          "id": 3,
+          "sort": 3,
+          "caption": "Столик у окна",
+          "directus_files_id": {
+            "id": "bd972842-8988-4b0e-966e-67ab566dadba",
+            "filename_download": "zal-sadovaya-3.jpg",
+            "title": "[заглушка] Столик у окна на Садовой",
+            "alt": "Столик у окна на Садовой — фото появится позже",
+            "width": 1600,
+            "height": 1200,
+            "type": "image/jpeg"
+          }
+        },
+        {
+          "id": 4,
+          "sort": 4,
+          "caption": "Барная стойка",
+          "directus_files_id": {
+            "id": "1631ed3c-618f-4298-bbcb-09c381a651da",
+            "filename_download": "zal-sadovaya-4.jpg",
+            "title": "[заглушка] Барная стойка на Садовой",
+            "alt": "Барная стойка на Садовой — фото появится позже",
+            "width": 1600,
+            "height": 1200,
+            "type": "image/jpeg"
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Советской Армии, 177",
+      "street": "Советской Армии",
+      "kind": "Ресторан и кондитерская",
+      "hours": [
+        {
+          "day": "mon",
+          "open": "09:00",
+          "close": "22:30"
+        },
+        {
+          "day": "tue",
+          "open": "09:00",
+          "close": "22:30"
+        },
+        {
+          "day": "wed",
+          "open": "09:00",
+          "close": "22:30"
+        },
+        {
+          "day": "thu",
+          "open": "09:00",
+          "close": "22:30"
+        },
+        {
+          "day": "fri",
+          "open": "09:00",
+          "close": "22:30"
+        },
+        {
+          "day": "sat",
+          "open": "09:00",
+          "close": "22:30"
+        },
+        {
+          "day": "sun",
+          "open": "09:00",
+          "close": "22:30"
+        }
+      ],
+      "lat": 53.22257,
+      "lng": 50.202187,
+      "yandex_org": "243452895564",
+      "rating": "5,0",
+      "date_updated": "2026-09-03T12:59:17.204Z",
+      "phone": "+7 937 999-66-33",
+      "gallery": [
+        {
+          "id": 5,
+          "sort": 1,
+          "caption": "Основной зал",
+          "directus_files_id": {
+            "id": "b7372c33-d50b-4c62-8af9-6e95ec1ee051",
+            "filename_download": "zal-sovetskoy-1.jpg",
+            "title": "[заглушка] Зал ресторана на Советской Армии",
+            "alt": "Зал ресторана на Советской Армии — фото появится позже",
+            "width": 1600,
+            "height": 1200,
+            "type": "image/jpeg"
+          }
+        },
+        {
+          "id": 6,
+          "sort": 2,
+          "caption": "Витрина десертов",
+          "directus_files_id": {
+            "id": "715543ba-1801-4042-b06f-3cc8d4e326a8",
+            "filename_download": "zal-sovetskoy-2.jpg",
+            "title": "[заглушка] Витрина десертов на Советской Армии",
+            "alt": "Витрина десертов на Советской Армии — фото появится позже",
+            "width": 1600,
+            "height": 1200,
+            "type": "image/jpeg"
+          }
+        },
+        {
+          "id": 7,
+          "sort": 3,
+          "caption": "Десерт дня",
+          "directus_files_id": {
+            "id": "be9f5f6d-6281-4bdd-a4c1-d1d8b51dbb45",
+            "filename_download": "zal-sovetskoy-3.jpg",
+            "title": "[заглушка] Десерты в ресторане на Советской Армии",
+            "alt": "Десерты в ресторане на Советской Армии — фото появится позже",
+            "width": 1600,
+            "height": 1200,
+            "type": "image/jpeg"
+          }
+        }
+      ]
+    }
+  ],
+  "directions": [
+    {
+      "id": 1,
+      "key": "cafe",
+      "title": "Кафе на Садовой",
+      "text": "Завтраки с восьми утра, супы и паста днём, витрина кондитерской весь день. Столики у окна, можно с ноутбуком.",
+      "place": 1,
+      "sort": 1,
+      "date_updated": null,
+      "photo": {
+        "id": "5157fa5c-3ddd-4ca7-a93d-b0ae21ef93bc",
+        "filename_download": "dir-cafe.jpg",
+        "title": "[заглушка] Зал кафе на Садовой",
+        "alt": "Зал кафе на Садовой",
+        "width": 1600,
+        "height": 900,
+        "type": "image/jpeg"
+      }
+    },
+    {
+      "id": 2,
+      "key": "restaurant",
+      "title": "Ресторан на Советской Армии",
+      "text": "Зал на шестьдесят гостей, кухня до 22:30, семейные ужины и детские праздники. Кондитерская витрина у входа.",
+      "place": 2,
+      "sort": 2,
+      "date_updated": null,
+      "photo": {
+        "id": "1e3608fe-ab30-4731-aa71-3bcb88d4ae71",
+        "filename_download": "dir-restaurant.jpg",
+        "title": "[заглушка] Зал ресторана на Советской Армии",
+        "alt": "Зал ресторана на Советской Армии",
+        "width": 1600,
+        "height": 900,
+        "type": "image/jpeg"
+      }
+    },
+    {
+      "id": 3,
+      "key": "confectionery",
+      "title": "Кондитерская",
+      "text": "Торты на заказ за 48 часов, пирожные и конфеты с собственного цеха. Всё своё, всё с одной кухни.",
+      "place": null,
+      "sort": 3,
+      "date_updated": null,
+      "photo": {
+        "id": "09a2d691-5c68-418d-b1a8-df21ff79647d",
+        "filename_download": "dir-confectionery.jpg",
+        "title": "[заглушка] Витрина кондитерской",
+        "alt": "Витрина кондитерской",
+        "width": 1600,
+        "height": 900,
+        "type": "image/jpeg"
+      }
+    },
+    {
+      "id": 4,
+      "key": "catering",
+      "title": "Кейтеринг",
+      "text": "Фуршет, банкет или праздник под ключ: блюда, обслуживание, оформление и программа. Шесть лет и сотни мероприятий.",
+      "place": null,
+      "sort": 4,
+      "date_updated": null,
+      "photo": {
+        "id": "2f672072-14e4-4785-8ee8-46eea78ef7c4",
+        "filename_download": "dir-catering.jpg",
+        "title": "[заглушка] Фуршетный стол",
+        "alt": "Фуршетный стол",
+        "width": 1600,
+        "height": 900,
+        "type": "image/jpeg"
+      }
+    },
+    {
+      "id": 5,
+      "key": "banquets",
+      "title": "Банкеты",
+      "text": "Залы на обеих точках, своё меню под событие и торт с той же кухни. Дата, число гостей и повод — и мы посчитаем.",
+      "place": null,
+      "sort": 5,
+      "date_updated": null,
+      "photo": {
+        "id": "e06d7bec-ac23-4cf4-90e1-1fb809d7beee",
+        "filename_download": "dir-banquets.jpg",
+        "title": "[заглушка] Накрытый стол в зале",
+        "alt": "Накрытый стол в зале",
+        "width": 1600,
+        "height": 900,
+        "type": "image/jpeg"
+      }
+    }
+  ],
+  "afisha": [
+    {
+      "id": 1,
+      "status": "published",
+      "title": "Название события",
+      "date": "2026-09-26",
+      "time": "19:00:00",
+      "place": 2,
+      "text": "Текст-заглушка: здесь будет описание события — программа, время, условия. Заменяется в админке в разделе «Афиша».",
+      "link": null,
+      "show_from": null,
+      "show_until": null,
+      "date_updated": "2026-09-03T12:33:08.493Z",
+      "poster": {
+        "id": "5e2bec84-4ca4-48dc-80b0-23e581b295c8",
+        "filename_download": "afisha-poster-placeholder.jpg",
+        "title": "[заглушка] Фото афиши",
+        "alt": "Фото афиши (заглушка)",
+        "width": 1000,
+        "height": 1500,
+        "type": "image/jpeg"
+      }
+    }
+  ],
+  "promos": [
+    {
+      "id": 1,
+      "status": "published",
+      "title": "Скидка 20 % на первый заказ",
+      "text": "При первом заказе из приложения «Вкусная компания». Промокод не нужен, скидка считается сама.",
+      "place": null,
+      "show_from": null,
+      "show_until": null,
+      "sort": 1,
+      "date_updated": null
+    },
+    {
+      "id": 2,
+      "status": "published",
+      "title": "Именинникам — торт со скидкой 10 %",
+      "text": "В день рождения и три дня после при заказе торта от 2 кг. Покажите паспорт при получении.",
+      "place": null,
+      "show_from": null,
+      "show_until": null,
+      "sort": 2,
+      "date_updated": null
+    },
+    {
+      "id": 3,
+      "status": "published",
+      "title": "Завтрак до 11:00 — кофе в подарок",
+      "text": "По будням к любому завтраку из меню капучино или американо бесплатно.",
+      "place": 1,
+      "show_from": null,
+      "show_until": null,
+      "sort": 3,
+      "date_updated": null
+    },
+    {
+      "id": 4,
+      "status": "published",
+      "title": "Компании от 8 человек — десерт от шефа",
+      "text": "При бронировании стола на компанию от восьми гостей — тарелка пирожных в подарок.",
+      "place": 2,
+      "show_from": null,
+      "show_until": null,
+      "sort": 4,
+      "date_updated": null
+    }
+  ],
+  "menus": [
+    {
+      "id": 1,
+      "status": "published",
+      "direction": 1,
+      "title": "Меню кафе",
+      "updated": "2026-09-01",
+      "date_updated": "2026-09-03T12:33:08.540Z",
+      "file": {
+        "id": "d64b343a-b876-45eb-8a02-5b0e5260ee7d",
+        "filename_download": "menu-cafe.pdf",
+        "title": "[заглушка] Меню кафе",
+        "alt": "Меню кафе",
+        "width": null,
+        "height": null,
+        "type": "application/pdf"
+      }
+    },
+    {
+      "id": 2,
+      "status": "published",
+      "direction": 2,
+      "title": "Меню ресторана",
+      "updated": "2026-09-01",
+      "date_updated": null,
+      "file": {
+        "id": "464ad813-22e4-4940-9f5c-8c59435a533b",
+        "filename_download": "menu-restaurant.pdf",
+        "title": "[заглушка] Меню ресторана",
+        "alt": "Меню ресторана",
+        "width": null,
+        "height": null,
+        "type": "application/pdf"
+      }
+    },
+    {
+      "id": 3,
+      "status": "published",
+      "direction": 3,
+      "title": "Меню кондитерской",
+      "updated": "2026-09-01",
+      "date_updated": null,
+      "file": {
+        "id": "f31d45e6-4adf-4646-b0e9-96623e21fe2e",
+        "filename_download": "menu-confectionery.pdf",
+        "title": "[заглушка] Меню кондитерской",
+        "alt": "Меню кондитерской",
+        "width": null,
+        "height": null,
+        "type": "application/pdf"
+      }
+    }
+  ],
+  "cakes": [
+    {
+      "id": 1,
+      "status": "published",
+      "title": "Медовик",
+      "note": "1,5 кг · 48 часов",
+      "sort": 1,
+      "date_updated": "2026-09-04T09:42:30.419Z",
+      "photo": {
+        "id": "338517b8-8e27-4f65-a82c-f503faecbc99",
+        "filename_download": "cake-1.jpg",
+        "title": "[заглушка] Торт «Медовик»",
+        "alt": "Торт «Медовик» — фото появится позже",
+        "width": 1200,
+        "height": 1600,
+        "type": "image/jpeg"
+      }
+    },
+    {
+      "id": 2,
+      "status": "published",
+      "title": "Наполеон",
+      "note": "2 кг · 48 часов",
+      "sort": 2,
+      "date_updated": "2026-09-04T09:42:31.123Z",
+      "photo": {
+        "id": "19e1d0a0-bcc4-49ec-a197-60a6e7b2ff9c",
+        "filename_download": "cake-2.jpg",
+        "title": "[заглушка] Торт «Наполеон»",
+        "alt": "Торт «Наполеон» — фото появится позже",
+        "width": 1200,
+        "height": 1600,
+        "type": "image/jpeg"
+      }
+    },
+    {
+      "id": 3,
+      "status": "published",
+      "title": "Красный бархат",
+      "note": "2,5 кг · 48 часов",
+      "sort": 3,
+      "date_updated": "2026-09-04T09:42:31.410Z",
+      "photo": {
+        "id": "6a9c8e92-b099-4c10-ba86-7ffd20c5c471",
+        "filename_download": "cake-3.jpg",
+        "title": "[заглушка] Торт «Красный бархат»",
+        "alt": "Торт «Красный бархат» — фото появится позже",
+        "width": 1200,
+        "height": 1600,
+        "type": "image/jpeg"
+      }
+    },
+    {
+      "id": 4,
+      "status": "published",
+      "title": "Фисташка и малина",
+      "note": "2 кг · 48 часов",
+      "sort": 4,
+      "date_updated": "2026-09-04T09:42:31.718Z",
+      "photo": {
+        "id": "08e81e35-df19-4284-9977-925dfea233bc",
+        "filename_download": "cake-4.jpg",
+        "title": "[заглушка] Торт «Фисташка и малина»",
+        "alt": "Торт «Фисташка и малина» — фото появится позже",
+        "width": 1200,
+        "height": 1600,
+        "type": "image/jpeg"
+      }
+    },
+    {
+      "id": 5,
+      "status": "published",
+      "title": "Морковный с чизкремом",
+      "note": "1,8 кг · 48 часов",
+      "sort": 5,
+      "date_updated": "2026-09-04T09:42:32.185Z",
+      "photo": {
+        "id": "69e2109c-d429-42fd-9d3c-0c629835cd30",
+        "filename_download": "cake-5.jpg",
+        "title": "[заглушка] Торт «Морковный с чизкремом»",
+        "alt": "Торт «Морковный с чизкремом» — фото появится позже",
+        "width": 1200,
+        "height": 1600,
+        "type": "image/jpeg"
+      }
+    },
+    {
+      "id": 6,
+      "status": "published",
+      "title": "Сметанник",
+      "note": "1,5 кг · 48 часов",
+      "sort": 6,
+      "date_updated": "2026-09-04T09:42:32.783Z",
+      "photo": {
+        "id": "e552197b-c514-458d-b955-4dc409a26ea4",
+        "filename_download": "cake-6.jpg",
+        "title": "[заглушка] Торт «Сметанник»",
+        "alt": "Торт «Сметанник» — фото появится позже",
+        "width": 1200,
+        "height": 1600,
+        "type": "image/jpeg"
+      }
+    },
+    {
+      "id": 7,
+      "status": "published",
+      "title": "Шоколадный трюфель",
+      "note": "2,2 кг · 48 часов",
+      "sort": 7,
+      "date_updated": "2026-09-04T09:42:33.117Z",
+      "photo": {
+        "id": "234d4fea-d541-4bf6-b8c1-eeba43913316",
+        "filename_download": "cake-7.jpg",
+        "title": "[заглушка] Торт «Шоколадный трюфель»",
+        "alt": "Торт «Шоколадный трюфель» — фото появится позже",
+        "width": 1200,
+        "height": 1600,
+        "type": "image/jpeg"
+      }
+    },
+    {
+      "id": 8,
+      "status": "published",
+      "title": "Птичье молоко",
+      "note": "1,6 кг · 48 часов",
+      "sort": 8,
+      "date_updated": "2026-09-04T09:42:33.788Z",
+      "photo": {
+        "id": "ca0b7ea0-483f-44b6-b098-90dc7f6c389a",
+        "filename_download": "cake-8.jpg",
+        "title": "[заглушка] Торт «Птичье молоко»",
+        "alt": "Торт «Птичье молоко» — фото появится позже",
+        "width": 1200,
+        "height": 1600,
+        "type": "image/jpeg"
+      }
+    },
+    {
+      "id": 9,
+      "status": "published",
+      "title": "Чизкейк Нью-Йорк",
+      "note": "1,4 кг · 48 часов",
+      "sort": 9,
+      "date_updated": "2026-09-04T09:42:34.286Z",
+      "photo": {
+        "id": "5a1f4aae-571c-49b3-8372-28d494a8d908",
+        "filename_download": "cake-9.jpg",
+        "title": "[заглушка] Торт «Чизкейк Нью-Йорк»",
+        "alt": "Торт «Чизкейк Нью-Йорк» — фото появится позже",
+        "width": 1200,
+        "height": 1600,
+        "type": "image/jpeg"
+      }
+    },
+    {
+      "id": 10,
+      "status": "published",
+      "title": "Три шоколада",
+      "note": "2 кг · 48 часов",
+      "sort": 10,
+      "date_updated": "2026-09-04T09:42:34.986Z",
+      "photo": {
+        "id": "176adb7d-c57a-481c-bef8-4c1ce3b71d17",
+        "filename_download": "cake-10.jpg",
+        "title": "[заглушка] Торт «Три шоколада»",
+        "alt": "Торт «Три шоколада» — фото появится позже",
+        "width": 1200,
+        "height": 1600,
+        "type": "image/jpeg"
+      }
+    },
+    {
+      "id": 11,
+      "status": "published",
+      "title": "Лимонный тарт",
+      "note": "1,2 кг · 48 часов",
+      "sort": 11,
+      "date_updated": "2026-09-04T09:42:35.438Z",
+      "photo": {
+        "id": "a5443418-ecc7-4093-854d-9bb0c30adb4b",
+        "filename_download": "cake-11.jpg",
+        "title": "[заглушка] Торт «Лимонный тарт»",
+        "alt": "Торт «Лимонный тарт» — фото появится позже",
+        "width": 1200,
+        "height": 1600,
+        "type": "image/jpeg"
+      }
+    },
+    {
+      "id": 12,
+      "status": "published",
+      "title": "Свадебный, два яруса",
+      "note": "от 4 кг · 5 дней",
+      "sort": 12,
+      "date_updated": "2026-09-04T09:42:36.333Z",
+      "photo": {
+        "id": "3e8e43ed-2a06-460e-b01f-ffdf0504207a",
+        "filename_download": "cake-12.jpg",
+        "title": "[заглушка] Торт «Свадебный, два яруса»",
+        "alt": "Торт «Свадебный, два яруса» — фото появится позже",
+        "width": 1200,
+        "height": 1600,
+        "type": "image/jpeg"
+      }
+    }
+  ]
+}

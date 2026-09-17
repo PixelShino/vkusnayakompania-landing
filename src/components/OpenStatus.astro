@@ -12,7 +12,7 @@ import { shortTime } from '../data/site';
 
 interface Props {
   schedule: Schedule;
-  /** `pill` — плашка статуса, `today` — часы сегодняшнего дня */
+  /** `pill` — строка статуса («Открыто до 21:00»), `today` — часы сегодняшнего дня */
   mode?: 'pill' | 'today';
   class?: string;
 }
@@ -23,11 +23,11 @@ const weekday = schedule[1];
 
 {
   mode === 'pill' ? (
-    <span
-      class:list={['card-pill', 'open-pill', className]}
-      data-schedule={JSON.stringify(schedule)}
-      hidden
-    />
+    /* место под строку занято сразу: пустой `hidden` двигал первый экран
+       на 0,13 CLS, когда скрипт дописывал текст */
+    <span class:list={['open-pill', className]} data-schedule={JSON.stringify(schedule)}>
+      {`Открыто до ${shortTime(weekday[1])}`}
+    </span>
   ) : (
     <span class={className} data-schedule={JSON.stringify(schedule)} data-today>
       {shortTime(weekday[0])} — {shortTime(weekday[1])}
@@ -36,13 +36,24 @@ const weekday = schedule[1];
 }
 
 <style>
-  .open-pill:not([hidden]) {
+  /* Plain words, not a pill: the status sits in a meta line in the text's own
+     colour, «open» turns olive. Hero and Directions recolour it themselves.
+     Слова, а не пилюля: статус стоит в строке меты цветом текста, «открыто»
+     уходит в оливу. Первый экран и направления перекрашивают его сами. */
+  .open-pill {
     display: inline-block;
+    font-weight: 600;
+    white-space: nowrap;
+    /* до расчёта строка держит место, но молчит: время в разметке —
+       будний день, а гость может смотреть в воскресенье */
+    visibility: hidden;
+  }
+
+  .open-pill.is-ready {
+    visibility: visible;
   }
 
   .open-pill.is-open {
-    background: var(--olive-tint);
-    border-color: var(--olive-tint-line);
     color: var(--olive-dark);
   }
 </style>
@@ -82,7 +93,7 @@ const weekday = schedule[1];
         const state = openState(schedule, day, now);
         node.textContent = state.label;
         node.classList.toggle('is-open', state.isOpen);
-        node.hidden = false;
+        node.classList.add('is-ready');
       });
     }
   }

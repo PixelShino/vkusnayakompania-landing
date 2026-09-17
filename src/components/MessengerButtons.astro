@@ -2,9 +2,10 @@
 import { Image } from 'astro:assets';
 import tg from '../assets/tg.svg';
 import max from '../assets/max.png';
-import { site } from '../data/site';
+import type { Settings } from '../lib/content.ts';
 
 interface Props {
+  settings: Settings;
   variant?: 'dark' | 'light' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   labels?: [string, string];
@@ -12,6 +13,7 @@ interface Props {
 }
 
 const {
+  settings,
   variant = 'dark',
   size = 'md',
   labels = ['Telegram', 'Max'],
@@ -30,7 +32,7 @@ const sizeClass = size === 'sm' ? 'btn--sm' : size === 'lg' ? '' : 'btn--md';
 <div class:list={['messengers', className]}>
   <a
     class:list={['btn', variantClass, sizeClass]}
-    href={site.links.telegram}
+    href={settings.telegram}
     target="_blank"
     rel="noopener"
   >
@@ -39,7 +41,7 @@ const sizeClass = size === 'sm' ? 'btn--sm' : size === 'lg' ? '' : 'btn--md';
   </a>
   <a
     class:list={['btn', variantClass, sizeClass]}
-    href={site.links.max}
+    href={settings.max}
     target="_blank"
     rel="noopener"
   >

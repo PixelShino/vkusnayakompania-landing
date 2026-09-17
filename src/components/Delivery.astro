@@ -1,0 +1,334 @@
+---
+/**
+ * Ink strip for the app and the shop: the pitch pressed to the left under its
+ * own mark, the store block beside it, the real app screen in a squared frame
+ * cut off by the bottom edge of the strip — no tilted rounded phone body.
+ * Чернильная полоса про приложение и магазин: суть прижата влево под своей
+ * маркой, рядом блок магазинов, настоящий экран приложения в квадратном кадре,
+ * срезанном нижним краем полосы — без наклонённого скруглённого корпуса.
+ */
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import { typo, type Content } from '../lib/content';
+import appstore from '../assets/icons/appstore.svg?raw';
+import googleplay from '../assets/icons/googleplay.svg?raw';
+
+interface Props {
+  content: Content;
+}
+
+const { content } = Astro.props;
+const { settings, home } = content;
+const shot = home.app_screenshot;
+
+const STORES = [
+  { label: 'App Store', href: settings.app_ios, icon: appstore },
+  { label: 'Google Play', href: settings.app_android, icon: googleplay },
+].filter((store) => Boolean(store.href));
+---
+
+<section class="section strip-ink dl-strip" id="delivery">
+  <div class:list={['container', 'dl', { 'dl--solo': !shot }]}>
+    <div class="dl__lead" data-reveal>
+      <span class="mark dl__mark" aria-hidden="true"></span>
+      <h2 class="display-caps dl__title">{home.delivery_title}</h2>
+      {home.delivery_text && <p class="dl__text">{typo(home.delivery_text)}</p>}
+    </div>
+
+    <div class="dl__cta">
+      {home.delivery_note && <p class="dl__note display">{home.delivery_note}</p>}
+
+      <div class="dl__actions">
+        {
+          STORES.map((store) => (
+            <a class="btn btn--light dl__store" href={store.href} target="_blank" rel="noopener">
+              <span class="icon" aria-hidden="true">
+                <Fragment set:html={store.icon} />
+              </span>
+              {store.label}
+            </a>
+          ))
+        }
+        <a class="btn btn--ghost-light" href={settings.shop_url} target="_blank" rel="noopener">
+          Открыть магазин
+        </a>
+      </div>
+    </div>
+
+    {
+      shot && (
+        <div class="dl__phone">
+          {/* the window is the screen inside the body: its own radius, its own
+              overflow, so the shot's square corners never show through the
+              rounded case
+              окно — это экран внутри корпуса: свой радиус и своё обрезание,
+              поэтому прямые углы снимка не вылезают из скруглённого корпуса */}
+          <div class="dl__screen-win">
+            <Image
+              class="dl__screen"
+              src={shot.src as ImageMetadata}
+              width={shot.width}
+              height={shot.height}
+              alt={shot.alt}
+              widths={[240, 480, 640]}
+              sizes="(min-width: 1200px) 250px, (min-width: 768px) 220px, 200px"
+              format="avif"
+              quality={52}
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          {shot.placeholder && <span class="tag dl__stub-tag">заглушка · заменяется в админке</span>}
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  /* the strip bleeds edge to edge and clips the screen: no inner panel
+     полоса идёт от края до края и режет экран: внутренней панели нет */
+  .dl-strip {
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* The cut is meant, but a clean rectangle across a photo reads as a crop
+     gone wrong. The strip's own colour is laid over its last centimetre, so
+     the screen sinks into the ink instead of being guillotined by it. It is
+     ink over ink everywhere else and therefore invisible there.
+     Срез задуман, но ровный прямоугольник поперёк фотографии читается как
+     сбившаяся обрезка. На последний сантиметр полосы положен её собственный
+     цвет: экран уходит в чернила, а не отрезается ими. Везде, кроме экрана,
+     это чернила по чернилам — то есть ничего. */
+  .dl-strip::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 56px;
+    background: linear-gradient(to top, var(--ink), transparent);
+    pointer-events: none;
+  }
+
+  @media (min-width: 1200px) {
+    .dl-strip::after {
+      height: 72px;
+    }
+  }
+
+  .dl {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* the mark sits over its column, not on the page axis: the text is pressed
+     to its side of the spread (Everest)
+     марка стоит над своей колонкой, а не на оси страницы: текст прижат к своей
+     стороне разворота (Everest) */
+  .dl__mark {
+    margin-inline: 0;
+    color: var(--terracotta-on-ink);
+  }
+
+  .dl__title {
+    max-width: 16ch;
+    margin-top: 18px;
+  }
+
+  /* `--on-ink-2` на чернилах — 6,5:1, тело секции идёт им
+     `--on-ink-2` on ink is 6.5:1, the section body takes it */
+  .dl__text {
+    max-width: 52ch;
+    margin-top: 14px;
+    font-size: var(--fs-body);
+  }
+
+  /* выгода — оттиск печати: антиква от 22 px и осветлённая терракота, 5,5:1
+     the offer is a stamp: the serif from 22 px in lightened terracotta, 5.5:1 */
+  .dl__note {
+    max-width: 20ch;
+    font-size: clamp(22px, 5.4vw, 27px);
+    line-height: 1.14;
+    color: var(--terracotta-on-ink);
+    text-wrap: balance;
+  }
+
+  .dl__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  /* иконка слева: паддинг с её стороны на 2 px меньше — оптическая балансировка
+     the icon on the left: 2 px less padding on its side — optical balance */
+  .dl__store {
+    padding-inline: 20px 22px;
+  }
+
+  .icon {
+    display: inline-flex;
+    flex: none;
+    width: 18px;
+    height: 18px;
+  }
+
+  .icon > :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* The body around the screen, cut by the strip's bottom edge; the negative
+     margin sets how deep the cut is. A bare screenshot with a status bar and
+     no device read as an image pasted on the strip — the phone is the object
+     the section is about. `--text` is the body colour: the warmest dark we
+     have, so it separates from the olive ink around it.
+     Корпус вокруг экрана, срезанный нижним краем полосы; отрицательный отступ
+     задаёт глубину среза. Голый скриншот со строкой состояния и без корпуса
+     читался картинкой, приклеенной к полосе, — а секция именно про телефон.
+     Цвет корпуса `--text`: самый тёплый тёмный из наших, поэтому он отделяется
+     от оливковых чернил вокруг. */
+  .dl__phone {
+    position: relative;
+    width: 200px;
+    padding: 6px;
+    border-radius: 32px;
+    background: var(--text);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--on-ink) 22%, transparent);
+    justify-self: center;
+    align-self: end;
+    overflow: hidden;
+    margin-bottom: calc(var(--sec-pad) * -1 - 120px);
+  }
+
+  /* внутренний радиус концентричен внешнему: 32 − 6 = 26 */
+  .dl__screen-win {
+    overflow: hidden;
+    border-radius: 26px;
+    background: var(--bg);
+  }
+
+  .dl__phone :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* The device answers the scroll instead of drifting on its own: while the
+     strip crosses the screen the phone rises by a finger's width, so the
+     section is alive exactly when it is being looked at and dead when it is
+     not. Scroll-driven, `translate` only; where the timeline is unsupported
+     the phone simply stands still, and reduced motion keeps it there too.
+     A loop inside the screen was tried first and dropped: the frame cuts only
+     the last hundred pixels of the shot, so there is nothing to scroll to.
+     Корпус отвечает на прокрутку, а не дрейфует сам: пока полоса идёт через
+     экран, телефон поднимается на ширину пальца — секция живёт ровно тогда,
+     когда на неё смотрят. Привязка к прокрутке, только `translate`; где
+     таймлайн не поддержан, телефон просто стоит, и при reduced motion тоже.
+     Бегущий внутри экрана снимок пробовали первым и сняли: кадр срезает у него
+     последнюю сотню пикселей, ехать некуда. */
+  @keyframes phone-rise {
+    from {
+      translate: 0 30px;
+    }
+
+    to {
+      translate: 0 -20px;
+    }
+  }
+
+  .dl__stub-tag {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    color: var(--on-ink);
+  }
+
+  @media (min-width: 768px) {
+    .dl {
+      grid-template-columns: minmax(0, 1fr) 240px;
+      grid-template-areas:
+        'lead phone'
+        'cta phone';
+      column-gap: calc(var(--gap) + 24px);
+      row-gap: 28px;
+    }
+
+    .dl--solo {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas: 'lead cta';
+    }
+
+    .dl__lead {
+      grid-area: lead;
+    }
+
+    .dl__cta {
+      grid-area: cta;
+    }
+
+    .dl__phone {
+      grid-area: phone;
+      width: 220px;
+      padding: 7px;
+      border-radius: 36px;
+      margin-bottom: calc(var(--sec-pad) * -1 - 160px);
+    }
+
+    .dl__screen-win {
+      border-radius: 29px;
+    }
+
+    @supports (animation-timeline: view()) {
+      @media (prefers-reduced-motion: no-preference) {
+        .dl__phone {
+          animation: phone-rise linear both;
+          animation-timeline: view();
+          animation-range: entry 15% exit 15%;
+        }
+      }
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .dl {
+      /* три занятые колонки вместо двух: пустоты рядом с текстом не остаётся
+         three occupied columns instead of two: no void beside the text */
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) 280px;
+      grid-template-areas: 'lead cta phone';
+      column-gap: calc(var(--gap) + 40px);
+    }
+
+    /* без скриншота колонка экрана не резервируется — иначе справа дыра
+       without a screenshot the screen column is not reserved — a hole otherwise */
+    .dl--solo {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas: 'lead cta';
+    }
+
+    /* первая строка врезки встаёт вровень с первой строкой h2, а не с маркой
+       the first line of the offer aligns with the first line of h2, not the mark */
+    .dl__cta {
+      margin-top: 30px;
+    }
+
+    .dl__note {
+      font-size: clamp(24px, 2.1vw, 28px);
+    }
+
+    .dl__phone {
+      width: 260px;
+      padding: 8px;
+      border-radius: 40px;
+      /* глубже: экран задавал высоту полосы и оставлял под текстом мёртвую зону
+         deeper: the screen set the strip's height and left dead space under the text */
+      margin-bottom: calc(var(--sec-pad) * -1 - 260px);
+    }
+
+    .dl__screen-win {
+      border-radius: 32px;
+    }
+  }
+</style>

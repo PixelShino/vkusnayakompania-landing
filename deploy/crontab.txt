@@ -1,0 +1,6 @@
+# crontab -u deploy -e
+# 00:10 — rebuild so that show_from / show_until windows take effect
+# 00:10 — пересборка, чтобы окна показа афиши и акций вступили в силу
+10 0 * * * /srv/vkus/site/deploy/build.sh >> /srv/vkus/build.log 2>&1
+# 03:30 — database and uploads backup / бэкап базы и загрузок
+30 3 * * * /srv/vkus/site/deploy/backup.sh >> /srv/vkus/backup.log 2>&1

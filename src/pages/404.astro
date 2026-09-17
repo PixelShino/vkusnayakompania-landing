@@ -1,0 +1,135 @@
+---
+/**
+ * 404: nginx points here (`deploy/nginx/vkus-com.ru.conf`). One screen, the same
+ * two actions as everywhere plus the phone — a dead end must still lead somewhere.
+ * 404: сюда ведёт nginx. Один экран, те же два действия, что и везде, плюс
+ * телефон: тупик всё равно обязан куда-то вести.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { getContent } from '../lib/content.ts';
+
+const content = await getContent();
+const { settings, places } = content;
+---
+
+<BaseLayout content={content}>
+  <Header content={content} over={false} />
+  <main id="main" class="nf" tabindex="-1">
+    <div class="container nf__in">
+      <p class="kicker">Ошибка 404</p>
+      <h1 class="nf__title">Такой страницы нет</h1>
+      <p class="lead nf__lead">
+        Возможно, адрес набран с опечаткой или страница переехала. Всё о кафе,
+        ресторане и кондитерской — на главной.
+      </p>
+
+      <div class="nf__actions">
+        <a class="btn btn--primary" href="/">На главную</a>
+        <a class="btn btn--secondary" href={settings.phoneHref}>Позвонить {settings.phone}</a>
+      </div>
+
+      <ul class="nf__places">
+        {
+          places.map((place) => (
+            <li>
+              <span class="nf__n" aria-hidden="true">
+                {place.n}
+              </span>
+              <a href="/#contacts">{place.name}</a>
+              <span class="nf__kind">{place.kind}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </main>
+  <Footer content={content} base="/" />
+</BaseLayout>
+
+<style>
+  /* шапка липкая: без отступа заголовок уезжает под неё */
+  .nf {
+    display: flex;
+    align-items: center;
+    min-height: calc(100svh - var(--header-h) - 60px);
+    padding-block: calc(var(--sec-pad) * 1.2);
+  }
+
+  /* 34rem вместе с полями контейнера оставляли ряду кнопок 400 px,
+     а ему нужно 406: «На главную» 133 + «Позвонить …» 265 + зазор */
+  .nf__in {
+    max-width: 38rem;
+  }
+
+  .nf__title {
+    margin: 6px 0 12px;
+    font-size: var(--fs-h1);
+    line-height: 1.04;
+    letter-spacing: var(--ls-heading);
+  }
+
+  /* лид уже ограничен 46ch глобально — здесь только ряд кнопок,
+     которому эти 46ch тесны: 133 + 265 + 8 не помещаются в 400 */
+  .nf__actions {
+    max-width: none;
+  }
+
+  .nf__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 26px;
+  }
+
+  .nf__places {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 34px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+    list-style: none;
+  }
+
+  .nf__places li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .nf__n {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 26px;
+    height: 26px;
+    border-radius: var(--r-pill);
+    background: var(--olive);
+    color: var(--bg);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .nf__places a {
+    padding-block: 6px;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--line-4);
+    text-underline-offset: 4px;
+    transition: text-decoration-color 0.16s ease;
+  }
+
+  .nf__kind {
+    font-size: 12.5px;
+    color: var(--text-4);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .nf__places a:hover {
+      text-decoration-color: var(--text);
+    }
+  }
+</style>

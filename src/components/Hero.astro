@@ -1,210 +1,722 @@
 ---
+/**
+ * First screen on a central axis: the frame runs edge to edge under an even
+ * dark scrim, the mark, the caps antiqua title, one lead line and two buttons
+ * sit in the middle, both venues' status and phone form a strip at the bottom,
+ * and a round cake sticker hangs over the edge into the next section.
+ * Первый экран по центральной оси: кадр во всю ширину под ровным тёмным
+ * скримом, в середине марка, прописная антиква, одна строка лида и две
+ * кнопки, внизу полоса со статусом и телефоном обеих точек, а круглый стикер
+ * про торт свисает через край в следующую секцию.
+ */
 import Photo from './Photo.astro';
-import { heroPhotos } from '../data/catalog';
-import { site } from '../data/site';
+import Icon from './Icon.astro';
+import pinIcon from '../assets/icons/pin.svg?raw';
+import clockIcon from '../assets/icons/clock.svg?raw';
+import phoneIcon from '../assets/icons/phone.svg?raw';
+import OpenStatus from './OpenStatus.astro';
+import { HERO_SIZES } from '../lib/hero.ts';
+import { typo, type Content } from '../lib/content.ts';
+
+interface Props {
+  content: Content;
+}
+
+const { content } = Astro.props;
+const { home, settings, places, cakes } = content;
+
+// The sticker leads to the cakes: the section when it renders, the shop page
+// otherwise, and nothing at all when neither exists — «48 часов» comes from
+// the content, the same figure as in `home.cakes_text` and the numbers strip.
+// Стикер ведёт к тортам: в секцию, когда она есть, иначе на страницу магазина,
+// а без того и другого не рисуется — «48 часов» из контента, та же цифра, что в
+// `home.cakes_text` и в полосе цифр.
+const stickerHref = cakes.length > 0 ? '#cakes' : settings.shop_cakes_custom;
+const stickerExternal = cakes.length === 0;
 ---
 
 <section class="hero" id="top">
-  <div class="container">
-    <div class="hero__head">
-      <p class="kicker">Кондитерская и кухня · {site.city}</p>
-      <h1>Печём с утра, пока не разберут</h1>
-    </div>
+  <Photo
+    photo={home.hero_image}
+    ratio="auto"
+    ratioMd="auto"
+    radius="0"
+    sizes={HERO_SIZES}
+    eager
+    class="hero__photo"
+  />
+  <div class="hero__scrim" aria-hidden="true"></div>
 
-    <div class="hero__grid">
-      <Photo
-        photo={heroPhotos.tall}
-        ratio="3 / 4.4"
-        ratioMd="auto"
-        radius="var(--r-xl)"
-        sizes="(min-width: 1200px) 520px, (min-width: 768px) 45vw, 100vw"
-        eager
-        class="hero__tall"
+  <div class="hero__in">
+    <span class="mark hero__mark" aria-hidden="true"></span>
+    <h1 class="hero__title display-caps">{home.hero_title}</h1>
+    {home.hero_text && <p class="hero__lead">{typo(home.hero_text)}</p>}
+
+    <div class="hero__cta">
+      <button type="button" class="btn btn--light" data-book="Бронь стола">
+        <Icon name="chair" class="ico--pop" />
+        Забронировать стол
+      </button>
+      <a
+        class="btn btn--ghost-light"
+        href={settings.shop_url}
+        target="_blank"
+        rel="noopener"
       >
-        <div class="hero__scrim" aria-hidden="true"></div>
-        <div class="hero__overlay">
-          <p class="kicker kicker--light" aria-hidden="true">Кондитерская и кухня · {site.city}</p>
-          {/* дубль `h1` поверх фото: второго `h1` в документе быть не должно */}
-          <p class="hero__overlay-title" aria-hidden="true">Печём с утра, пока не разберут</p>
-          <p class="hero__overlay-lead">
-            Торты на&nbsp;заказ, пирожные и&nbsp;конфеты&nbsp;— и&nbsp;завтраки, супы и&nbsp;паста
-            в&nbsp;зале.
-          </p>
-          <div class="hero__overlay-cta">
-            <a class="btn btn--primary btn--block" href="#cakes">Смотреть торты</a>
-            <a
-              class="btn btn--ghost-light btn--block"
-              href={site.links.shop}
-              target="_blank"
-              rel="noopener">Заказать доставку</a
-            >
-          </div>
-        </div>
-      </Photo>
-
-      {/* виден сразу, но канал у LCP-снимка слева отбирать не должен */}
-      <Photo
-        photo={heroPhotos.wide}
-        ratio="16 / 9"
-        radius="var(--r-xl)"
-        sizes="(min-width: 1200px) 700px, 55vw"
-        eager
-        priority="low"
-        class="hero__wide"
-      />
-
-      <div class="hero__text">
-        <p class="lead">
-          Торты на&nbsp;заказ, пирожные, конфеты&nbsp;— и&nbsp;завтраки, супы и&nbsp;паста
-          в&nbsp;зале. Всё своё, всё с&nbsp;одной кухни.
-        </p>
-        <div class="hero__cta">
-          <a class="btn btn--primary" href="#cakes">Смотреть торты</a>
-          <a class="btn btn--secondary" href={site.links.shop} target="_blank" rel="noopener">
-            Заказать доставку
-          </a>
-        </div>
-      </div>
+        <Icon name="delivery" class="ico--go" />
+        Заказать доставку
+      </a>
     </div>
   </div>
+
+  <ul class="container hero__bar" aria-label="Точки сегодня">
+    {
+      places.map((place) => (
+        <li class="hero__place">
+          {/* Glyphs instead of the middle dots: the row had read «А · Б · В»,
+              a chain that says nothing, and the same three facts now name
+              themselves — address, hours, number.
+              Глифы вместо срединных точек: строка читалась цепочкой «А · Б · В»,
+              которая ничего не сообщает, а те же три факта теперь называют
+              себя сами — адрес, часы, номер. */}
+          <a class="hero__place-name" href="#contacts">
+            <span class="hero__ico" aria-hidden="true" set:html={pinIcon} />
+            {place.name}
+          </a>
+          <span class="hero__ico hero__ico--own" aria-hidden="true" set:html={clockIcon} />
+          <OpenStatus schedule={place.schedule} class="hero__status" />
+          <a class="hero__tel" href={place.phoneHref}>
+            <span class="hero__ico" aria-hidden="true" set:html={phoneIcon} />
+            {place.phone}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  {
+    home.hero_image.placeholder && (
+      <p class="hero__stub-tag">фото-заглушка · заменяется в админке</p>
+    )
+  }
+
+  {
+    stickerHref && (
+      <a
+        class="hero__sticker"
+        href={stickerHref}
+        target={stickerExternal ? '_blank' : undefined}
+        rel={stickerExternal ? 'noopener' : undefined}
+        aria-label="Торт на заказ за 48 часов — к витрине тортов"
+      >
+        {/* The promise runs round the seal and turns slowly; the arrow in the
+            middle says where the sticker leads — down the page to the cakes.
+            The name of the link is on the `a`, so the ring and the arrow are
+            decoration for a screen reader.
+            Обещание идёт по кругу печати и медленно поворачивается; стрелка в
+            середине говорит, куда стикер ведёт, — вниз по странице, к витрине
+            тортов. Имя ссылки стоит на `a`, поэтому кольцо и стрелка для
+            скринридера — украшение. */}
+        <svg class="hero__seal" viewBox="0 0 128 128" aria-hidden="true" focusable="false">
+          <defs>
+            {/* two arcs, both read left to right: a single ring turned the
+                bottom half upside down and the promise stopped being legible
+                две дуги, обе читаются слева направо: на одном кольце нижняя
+                половина вставала вверх ногами и обещание переставало читаться */}
+            <path id="hero-arc-top" d="M20 64a44 44 0 0 1 88 0" fill="none"></path>
+            <path id="hero-arc-bottom" d="M22.5 64a41.5 41.5 0 0 0 83 0" fill="none"></path>
+          </defs>
+          <circle
+            class="hero__seal-ring"
+            cx="64"
+            cy="64"
+            r="57"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1"
+            stroke-dasharray="1.5 7"
+            stroke-linecap="round"></circle>
+          <text class="hero__seal-text">
+            <textPath href="#hero-arc-top" startOffset="50%" text-anchor="middle"
+              >ТОРТ НА ЗАКАЗ</textPath
+            >
+          </text>
+          <text class="hero__seal-text">
+            <textPath href="#hero-arc-bottom" startOffset="50%" text-anchor="middle"
+              >ЗА 48 ЧАСОВ</textPath
+            >
+          </text>
+        </svg>
+        <svg
+          class="hero__sticker-arrow"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 5v13M6.5 12.5 12 18l5.5-5.5"></path>
+        </svg>
+      </a>
+    )
+  }
 </section>
 
 <style>
   .hero {
-    padding-top: calc(var(--sec-pad) * 0.6);
-  }
-
-  /* на телефоне `h1` не выключаем, а прячем: он нужен поиску и скринридеру */
-  .hero__head {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-
-  .hero__grid {
-    display: block;
-  }
-
-  .hero__scrim {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    background: linear-gradient(
-      to top,
-      rgba(26, 23, 20, 0.9) 0%,
-      rgba(26, 23, 20, 0.72) 30%,
-      rgba(26, 23, 20, 0.28) 62%,
-      rgba(26, 23, 20, 0.02) 100%
-    );
-  }
-
-  .hero__overlay {
-    position: absolute;
-    inset: auto 0 0 0;
-    z-index: 4;
+    position: relative;
+    z-index: 2;
     display: flex;
     flex-direction: column;
-    gap: 9px;
-    /* запас снизу: туда наезжает бенто из соседней секции */
-    padding: 20px 18px 76px;
-  }
-
-  .kicker--light {
-    color: rgba(255, 250, 237, 0.72);
-    margin-bottom: 0;
-  }
-
-  .hero__overlay-title {
-    font-size: 31px;
-    line-height: 1.06;
-    letter-spacing: -0.01em;
+    /* шапка липкая и стоит в потоке: без вычета её высоты полоса точек уезжает
+       за нижний край экрана
+       the sticky header is in flow: without subtracting it the venue strip
+       drops below the fold */
+    min-height: calc(100svh - var(--header-h));
+    padding-top: 40px;
     color: var(--bg);
   }
 
-  .hero__overlay-lead {
-    font-size: 14px;
-    line-height: 1.45;
-    color: rgba(255, 250, 237, 0.84);
+  /* класс лежит на корне дочернего `Photo.astro` — нужен `:global` */
+  .hero > :global(.hero__photo) {
+    position: absolute;
+    inset: 0;
+    height: 100%;
   }
 
-  .hero__overlay-cta {
+  .hero > :global(.hero__photo img) {
+    object-position: center 40%;
+    /* a slow settle from 1.06 to 1 on load: transform only, the frame keeps
+       its size for LCP; reduced motion collapses it to an instant
+       медленный сход с 1.06 к 1 на загрузке: только transform, кадр держит
+       размер для LCP; reduced motion сжимает его до мгновения */
+    animation: hero-settle 7s var(--ease-out) both;
+  }
+
+  @keyframes hero-settle {
+    from {
+      transform: scale(1.06);
+    }
+  }
+
+  /* Opening: the text block rises as the curtain lifts (global.css), the venue
+     strip and the sticker follow. Keyframes run once on load; a repeat visit
+     (`html.no-curtain`) starts them without the wait.
+     Открытие: текстовый блок поднимается, пока уходит занавес (global.css),
+     полоса точек и стикер следом. Keyframes идут один раз на загрузке;
+     повторный визит (`html.no-curtain`) запускает их без ожидания. */
+  .hero__in > *,
+  .hero__bar,
+  .hero__sticker {
+    animation: hero-rise 0.8s var(--ease-out) both;
+    animation-delay: calc(var(--t0, 0.9s) + var(--i, 0) * 0.09s);
+  }
+
+  .hero__in > :nth-child(2) {
+    --i: 1;
+  }
+
+  .hero__in > :nth-child(3) {
+    --i: 2;
+  }
+
+  .hero__in > :nth-child(4) {
+    --i: 3;
+  }
+
+  .hero__bar {
+    --i: 4;
+  }
+
+  .hero__sticker {
+    --i: 5;
+  }
+
+  :global(.no-curtain) .hero__in > *,
+  :global(.no-curtain) .hero__bar,
+  :global(.no-curtain) .hero__sticker {
+    --t0: 0.1s;
+  }
+
+  @keyframes hero-rise {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__in > *,
+    .hero__bar,
+    .hero__sticker {
+      animation-delay: 0s;
+    }
+  }
+
+  /* The frame stays a photo: a light base tint over the whole shot, a plateau
+     under the header and a deeper band under the venue strip — nothing more on
+     the sides, so the berries keep their red. The ink for the text sits on the
+     text block itself (`.hero__in`), not on the frame.
+     Кадр остаётся фотографией: лёгкий общий тон, плато под шапкой и более
+     плотная полоса под строкой точек — по бокам больше ничего, и ягоды
+     остаются красными. Чернила под текст лежат на самом текстовом блоке
+     (`.hero__in`), а не на кадре. */
+  .hero__scrim {
+    /* высота полосы точек: до неё нижняя полоса скрима держит плато
+       the venue strip's height: the bottom band holds its plateau up to it */
+    --band: 150px;
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(
+        to bottom,
+        rgb(44 41 39 / 0.7) 0,
+        rgb(44 41 39 / 0.62) 80px,
+        rgb(44 41 39 / 0) 220px
+      ),
+      linear-gradient(
+        to top,
+        rgb(44 41 39 / 0.88) 0,
+        rgb(44 41 39 / 0.78) var(--band),
+        rgb(44 41 39 / 0) calc(var(--band) + 150px)
+      ),
+      linear-gradient(rgb(44 41 39 / 0.22), rgb(44 41 39 / 0.22));
+    pointer-events: none;
+  }
+
+  /* The frame is a stock stand-in until the client's photo arrives: the page
+     says so, small and in the bottom corner — not before the venue's name.
+     Кадр — сток вместо фото клиента, пока оно не пришло: страница говорит об
+     этом мелко и в нижнем углу — не раньше названия заведения. */
+  .hero__stub-tag {
+    position: absolute;
+    right: var(--pad);
+    bottom: 6px;
+    z-index: 1;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bg);
+    opacity: 0.6;
+  }
+
+  /* The text block carries its own ink in a `::before` under the text: on the
+     phone a vertical band fading above and below, from 768 a soft rectangle
+     (two masks intersected) fading out on all four sides. The frame beyond it
+     stays at the base tint. `isolation` keeps the layer above the frame.
+     Текстовый блок несёт свои чернила в `::before` под текстом: на телефоне
+     вертикальная полоса, гаснущая сверху и снизу, с 768 — мягкий прямоугольник
+     (пересечение двух масок), гаснущий по всем четырём сторонам. Кадр за его
+     пределами остаётся под лёгким тоном. `isolation` держит слой над кадром. */
+  .hero__in {
+    position: relative;
+    isolation: isolate;
     display: flex;
     flex-direction: column;
-    gap: 7px;
-    margin-top: 2px;
+    align-items: center;
+    width: 100%;
+    /* центр оставшейся высоты: полоса точек внизу стоит в потоке
+       centred in what is left: the venue strip below stays in flow */
+    margin-block: auto;
+    padding: 44px var(--pad) 52px;
+    text-align: center;
   }
 
-  .hero__overlay-cta .btn {
-    height: 48px;
-    font-size: 14.5px;
+  .hero__in::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      to bottom,
+      rgb(44 41 39 / 0) 0,
+      rgb(44 41 39 / 0.62) 40px,
+      rgb(44 41 39 / 0.62) calc(100% - 48px),
+      rgb(44 41 39 / 0) 100%
+    );
   }
 
-  /* классы на корне дочернего `Photo.astro` — нужен `:global` */
-  .hero__grid > :global(.hero__wide),
-  .hero__text {
+  .hero__mark {
+    color: var(--bg);
+  }
+
+  /* Caps antiqua, two lines across two thirds of the screen: the size and the
+     tracking do the work. Its own scale, not `--fs-h1` — caps run wider.
+     Прописная антиква в две строки на две трети экрана: работу делают размер и
+     разрядка. Своя шкала, не `--fs-h1` — прописные шире. */
+  /* floor 24 px: at 320 the 27 px caps broke «И КОНДИТЕРСКАЯ» and gave four
+     lines; 24 px keeps three
+     пол 24 px: на 320 прописные 27 px рвали «И КОНДИТЕРСКАЯ» и давали четыре
+     строки; 24 px держит три */
+  .hero__title {
+    max-width: 22ch;
+    margin-top: 22px;
+    font-size: clamp(24px, 7.4vw, 34px);
+    color: var(--bg);
+  }
+
+  .hero__lead {
+    max-width: 44ch;
+    margin-top: 16px;
+    font-size: var(--fs-lead);
+    line-height: 1.5;
+    /* `--bg`, не `--surface`: на самом светлом пикселе витрины разница между
+       ними — 0,3 ступени контраста, и `--surface` там падал до 4,2:1
+       `--bg`, not `--surface`: over the brightest pixel `--surface` fell to 4.2:1 */
+    color: var(--bg);
+  }
+
+  .hero__cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 26px;
+  }
+
+  .hero__cta .btn {
+    min-width: 250px;
+  }
+
+  /* Ghost on the photo takes a dark fill, not a light one: the 16 % cream
+     lifted the brightest pixel under it to 4,15:1 for cream text; the ink
+     tint drops it below the scrim and the label holds 4,5:1 everywhere.
+     Призрачная на фото берёт тёмную заливку, а не светлую: 16 % крема
+     поднимали самый светлый пиксель под ней до 4,15:1 для кремового текста;
+     чернильный тон опускает его под скрим, и подпись держит 4,5:1 везде. */
+  .hero__cta .btn--ghost-light {
+    background: rgb(44 41 39 / 0.34);
+  }
+
+  .hero__cta .btn--ghost-light:active {
+    background: rgb(44 41 39 / 0.5);
+  }
+
+  /* Bottom strip: each venue on its own line on the phone, one row with a
+     hairline between them from 768. Cream at full alpha — the strip sits on the
+     darkest part of the scrim, but the photo under it is still a photo.
+     Нижняя полоса: на телефоне каждая точка своей строкой, с 768 в один ряд с
+     волосяной линией между ними. Крем без прозрачности — полоса лежит на самом
+     тёмном месте скрима, но под ней всё ещё фотография. */
+  .hero__bar {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin: 0 auto;
+    /* 30 px below: the stub tag sits in the bottom corner under the last number
+       снизу 30 px: ярлык заглушки стоит в нижнем углу под последним номером */
+    padding-block: 18px 30px;
+    list-style: none;
+    border-top: 1px solid rgb(255 250 237 / 0.22);
+    font-size: 13px;
+    line-height: 1.4;
+    text-align: center;
+  }
+
+  /* Grid, not wrapping flex: a wrapping flex item reports the sum of its parts
+     as max-content, and at 768 the row spilled past the viewport.
+     Сетка, а не переносимый flex: переносимый flex отдаёт max-content суммой
+     частей, и на 768 ряд вылезал за окно. */
+  .hero__place {
+    display: grid;
+    grid-template-columns: repeat(3, max-content);
+    justify-content: center;
+    align-items: baseline;
+    gap: 4px 8px;
+  }
+
+  .hero__place-name,
+  .hero__tel {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: var(--bg);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  /* 14 px при строке 13–14 px: знак весит столько же, сколько буква рядом
+     14 px against a 13–14 px line: the glyph weighs what the letter beside it does */
+  .hero__ico {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    opacity: 0.72;
+  }
+
+  .hero__ico > :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* часы стоят своей ячейкой сетки, а не внутри ссылки — их подпись рисует
+     `OpenStatus` / the clock is its own grid cell: its label is drawn by
+     `OpenStatus`, a child component */
+  .hero__ico--own {
+    align-self: center;
+  }
+
+  /* номер своей строкой под адресом и статусом, до 1200 — там строке тесно
+     the number on its own line under the address and status: under 1200 the
+     row has no room for it */
+  .hero__tel {
+    grid-column: 1 / -1;
+  }
+
+  /* The status is `OpenStatus`, which draws a pill; here it is plain text in
+     the row's own colour. `:global` — the class lives on a child component.
+     Статус рисует `OpenStatus` пилюлей; здесь он — обычный текст цветом строки.
+     `:global` — класс лежит на дочернем компоненте. */
+  .hero__bar :global(.hero__status),
+  .hero__bar :global(.hero__status.is-open) {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    font: inherit;
+    color: var(--bg);
+    white-space: nowrap;
+  }
+
+  /* Round sticker: one circle on the whole page, at the right edge of the frame
+     above the venue strip (Green Park). Cream on `--olive-dark` is 6.0:1; the
+     inner ring is the stamp's second line.
+     Круглый стикер: один круг на всю страницу, у правого края кадра над полосой
+     точек (Green Park). Крем на `--olive-dark` — 6,0:1; внутреннее кольцо —
+     вторая линия печати. */
+  .hero__sticker {
+    position: absolute;
+    right: calc(var(--pad) + 8px);
+    bottom: 112px;
+    z-index: 3;
     display: none;
+    width: 128px;
+    height: 128px;
+    place-items: center;
+    border-radius: var(--r-pill);
+    background: var(--olive-dark);
+
+    color: var(--bg);
+    text-decoration: none;
+    transition-property: scale, rotate;
+    transition-duration: 120ms, 240ms;
+    transition-timing-function: var(--ease-out);
+  }
+
+  /* The ring is the only thing on the page that moves by itself all the time.
+     One such thing is the budget: it is the page's mark, it is rare on the
+     screen (the first screen only) and it stops for reduced motion. `rotate`
+     alone, so it never leaves the compositor.
+     Кольцо — единственное на странице, что движется само по себе постоянно.
+     Одна такая вещь — это и есть весь бюджет: это марка страницы, она редко
+     на экране (только первый экран) и останавливается при reduced motion.
+     Только `rotate`, поэтому кольцо не сходит с композитора. */
+  .hero__seal {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* The promise stands still and is read; the dashed ring turns instead. A
+     turning ring of words put half the line upside down at every moment.
+     Обещание стоит и читается, а поворачивается пунктирное кольцо. Вращение
+     самих слов в любой момент держало половину строки вверх ногами. */
+  /* заливка и обводка стоят атрибутами на самом `circle`: так они не зависят
+     от того, доехал ли до браузера scoped-стиль компонента */
+  .hero__seal-ring {
+    opacity: 0.55;
+    transform-box: view-box;
+    transform-origin: 64px 64px;
+    animation: seal-turn 34s linear infinite;
+  }
+
+  .hero__seal-text {
+    fill: currentColor;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+  }
+
+  @keyframes seal-turn {
+    to {
+      rotate: 360deg;
+    }
+  }
+
+  .hero__sticker-arrow {
+    width: 22px;
+    height: 22px;
+    transition: translate 240ms var(--ease-out);
+  }
+
+  .hero__sticker:active {
+    scale: 0.96;
+  }
+
+  /* 13 px on each side of an 18 px line: a 44 px target that leaves the row
+     где стоит / 13 px сверху и снизу строки 18 px: цель 44 px, строка на месте */
+  @media (pointer: coarse) {
+    .hero__place-name,
+    .hero__tel {
+      padding-block: 13px;
+      margin-block: -13px;
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .hero__place-name:hover,
+    .hero__tel:hover {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    .hero__sticker:hover .hero__sticker-arrow {
+      translate: 0 3px;
+    }
+
+    .hero__cta .btn--ghost-light:hover {
+      background: rgb(44 41 39 / 0.46);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__seal-ring {
+      animation: none;
+    }
   }
 
   @media (min-width: 768px) {
-    .hero__head {
-      position: static;
+    /* шапка здесь `fixed` и фона не имеет — кадр начинается от самого верха
+       the header is `fixed` and transparent here — the frame starts at the top */
+    .hero {
+      min-height: 100svh;
+      padding-top: var(--header-h);
+    }
+
+
+    .hero__scrim {
+      --band: 90px;
+    }
+
+    .hero__in {
       width: auto;
-      height: auto;
-      margin: 0;
-      overflow: visible;
-      clip-path: none;
+      max-width: min(100%, 1060px);
+      margin-inline: auto;
+      padding: 60px 100px 68px;
     }
 
-    .hero__head h1 {
-      max-width: 18ch;
-      margin-bottom: 26px;
+    /* the plateau reaches 90 % of the block's width and 86 % of its height —
+       the widest title line ends at 81 %, the buttons at 75 % of the height
+       плато доходит до 90 % ширины блока и 86 % высоты — самая широкая строка
+       заголовка кончается на 81 %, кнопки — на 75 % высоты */
+    .hero__in::before {
+      background: rgb(44 41 39 / 0.64);
+      -webkit-mask-image:
+        linear-gradient(to right, transparent, #000 10%, #000 90%, transparent),
+        linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+      -webkit-mask-composite: source-in;
+      mask-image:
+        linear-gradient(to right, transparent, #000 10%, #000 90%, transparent),
+        linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+      mask-composite: intersect;
     }
 
-    .hero__grid {
-      display: grid;
-      grid-template-columns: 0.85fr 1.15fr;
-      grid-template-rows: auto auto;
-      gap: var(--gap);
-      align-items: stretch;
+    .hero__stub-tag {
+      bottom: 8px;
     }
 
-    .hero__grid > :global(.hero__tall) {
-      grid-column: 1;
-      grid-row: 1 / span 2;
-      height: 100%;
+    .hero__title {
+      margin-top: 26px;
+      font-size: clamp(40px, 5.2vw, 46px);
     }
 
-    .hero__scrim,
-    .hero__overlay {
-      display: none;
-    }
-
-    .hero__grid > :global(.hero__wide) {
-      display: block;
-      grid-column: 2;
-      grid-row: 1;
-    }
-
-    .hero__text {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      grid-column: 2;
-      grid-row: 2;
-      padding: calc(var(--gap) + 10px);
-      border-radius: 22px;
-      background: var(--surface);
+    .hero__lead {
+      margin-top: 20px;
     }
 
     .hero__cta {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+      flex-direction: row;
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    .hero__cta .btn {
+      min-width: 0;
+    }
+
+    .hero__bar {
+      flex-direction: row;
+      justify-content: center;
+      gap: 0;
+      padding-block: 20px 26px;
+    }
+
+    /* каждая точка — своей ширины: сжатая переносила номер под точку с висячей
+       точкой-разделителем
+       each venue keeps its own width: squeezed, it wrapped the number under a
+       dangling separator */
+    .hero__place {
+      flex: none;
+    }
+
+    .hero__place + .hero__place {
+      margin-left: 26px;
+      padding-left: 26px;
+      border-left: 1px solid rgb(255 250 237 / 0.35);
+    }
+
+    .hero__sticker {
+      display: grid;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .hero__title {
+      max-width: 20ch;
+      font-size: clamp(50px, 4.1vw, 60px);
+    }
+
+    /* не больше двух строк: приём — одна-две строки под заголовком
+       two lines at most: the device is one or two lines under the heading */
+    .hero__lead {
+      max-width: 62ch;
       margin-top: 24px;
+    }
+
+    .hero__bar {
+      font-size: 14px;
+    }
+
+    .hero__place {
+      grid-template-columns: repeat(4, max-content);
+    }
+
+    .hero__tel {
+      grid-column: auto;
+    }
+
+    .hero__place + .hero__place {
+      margin-left: 36px;
+      padding-left: 36px;
+    }
+
+    .hero__sticker {
+      width: 148px;
+      height: 148px;
+      bottom: 118px;
+    }
+
+    .hero__sticker-arrow {
+      width: 25px;
+      height: 25px;
     }
   }
 </style>

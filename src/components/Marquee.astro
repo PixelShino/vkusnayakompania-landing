@@ -1,0 +1,109 @@
+---
+/**
+ * The one marquee on the page: reasons to drop by, ink strip edge to edge.
+ * Speed answers the page scroll; the island freezes it on reduced motion.
+ * Единственная на странице бегущая строка: поводы зайти, чернильная полоса от
+ * края до края. Скорость отзывается на прокрутку, reduced motion её тормозит.
+ */
+import ScrollVelocity from '../islands/ScrollVelocity.tsx';
+
+// every line is backed by real content: direction texts, cakes and delivery
+// каждая строка подтверждается контентом: тексты направлений, торты, доставка
+const items = [
+  'Завтраки с восьми утра',
+  'Супы и паста днём',
+  'Торты на заказ за 48 часов',
+  'Пирожные и конфеты',
+  'Банкеты под ключ',
+  'Кейтеринг',
+  'Детские праздники',
+  'Доставка по Самаре',
+];
+---
+
+<section class="strip-ink mq">
+  <ScrollVelocity client:visible items={items} velocity={38} />
+</section>
+
+<style>
+  /* Thin strip: the band is a rhythm break between sections, not a section.
+     Тонкая полоса: лента — смена ритма между секциями, а не самостоятельная секция. */
+  .mq {
+    overflow: hidden;
+    padding-block: 20px;
+  }
+
+  @media (min-width: 768px) {
+    .mq {
+      padding-block: 26px;
+    }
+  }
+</style>
+
+<style is:global>
+  /* Markup comes from the React island, so its classes are styled globally.
+     Разметку рисует React-остров, поэтому его классы стилизуются глобально. */
+  .marquee {
+    color: var(--on-ink);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 1.15;
+    letter-spacing: var(--ls-display);
+    /* края гаснут, чтобы лента уходила за экран, а не обрывалась ступенькой */
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      black 6%,
+      black 94%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(to right, transparent 0, black 6%, black 94%, transparent 100%);
+  }
+
+  .marquee__row {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+  }
+
+  /* a copy never shrinks: the wrap distance is measured from its natural width
+     копия не сжимается: расстояние переброса меряется по её натуральной ширине */
+  .marquee__copy {
+    display: flex;
+    flex: none;
+    white-space: nowrap;
+  }
+
+  .marquee__item {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .marquee__dot {
+    margin-inline: 0.42em;
+    color: var(--terracotta-on-ink);
+  }
+
+  @media (min-width: 768px) {
+    .marquee {
+      font-size: 32px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* Frozen row rests one copy to the left, so only the right edge is cut:
+       drop the left fade and inset the start — the first word stays whole.
+       Остановленная лента стоит на одну копию левее, обрезан только правый край:
+       снимаем левое затухание и отодвигаем начало — первое слово читается целиком. */
+    .marquee {
+      -webkit-mask-image: linear-gradient(to right, black 0, black 94%, transparent 100%);
+      mask-image: linear-gradient(to right, black 0, black 94%, transparent 100%);
+    }
+
+    .marquee__row {
+      padding-left: var(--pad);
+      will-change: auto;
+    }
+  }
+</style>

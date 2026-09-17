@@ -1,0 +1,577 @@
+---
+/**
+ * Directions as a spread, not a grid of cards. The two venues are the only
+ * entities worth comparing, so each gets a full-bleed frame to its own edge of
+ * the screen and text pressed to the other side (Everest). The three services
+ * follow as one paper strip with hairlines between them — no boxes, no pills.
+ * Направления разворотом, а не сеткой карточек. Две точки — единственные
+ * сущности, которые есть смысл сравнивать: у каждой кадр под обрез своего края
+ * экрана и текст, прижатый к другой стороне (Everest). Три услуги идут одной
+ * бумажной полосой с волосяными линиями между ними — без рамок и пилюль.
+ */
+import Photo from './Photo.astro';
+import OpenStatus from './OpenStatus.astro';
+import { menuFor } from '../lib/select';
+import { typo, type Content, type Direction } from '../lib/content';
+import cake from '../assets/icons/cake.svg?raw';
+import cloche from '../assets/icons/cloche.svg?raw';
+import glasses from '../assets/icons/glasses.svg?raw';
+
+interface Props {
+  content: Content;
+}
+
+const { content } = Astro.props;
+const { settings, home, directions, menus } = content;
+
+/** Действие услуги: ссылка или триггер диалога брони (`book`). */
+type Action = {
+  label: string;
+  href?: string;
+  book?: string;
+  note?: string;
+  external?: boolean;
+};
+
+const at = (key: Direction['key']) => directions.find((item) => item.key === key);
+
+const menuHref = (direction: Direction) => menuFor(menus, direction.id)?.file.href ?? null;
+
+// Keep 1–2 sentences: the section carried 167 words and read as a wall.
+// Nothing is rewritten — only the tail of the admin text is dropped.
+// Остаётся 1–2 предложения: секция несла 167 слов и читалась стеной.
+// Текст не переписывается — отбрасывается только хвост админского поля.
+const sentences = (text: string, keep: number) =>
+  text
+    .split(/(?<=[.!?])\s+/)
+    .slice(0, keep)
+    .join(' ');
+
+// A stub is marked in the admin file title: it is drawn as a hatched plate,
+// never passed off as a photo.
+// Заглушка помечена в заголовке файла в админке: рисуется штрихованной
+// плашкой, за фото не выдаётся.
+const isStub = (direction: Direction) => !direction.photo || direction.photo.placeholder;
+
+const venues = (['cafe', 'restaurant'] as const)
+  .map(at)
+  .filter((d): d is Direction & { place: NonNullable<Direction['place']> } => Boolean(d?.place));
+
+/**
+ * The three services: an icon, one sentence and text links instead of buttons.
+ * `phone` adds the main number — catering and the confectionery answer on it.
+ * Три услуги: иконка, одно предложение и текстовые ссылки вместо кнопок.
+ * `phone` добавляет общий номер — по нему отвечают кейтеринг и кондитерская.
+ */
+const SERVICES: { key: Direction['key']; icon: string; phone?: boolean; actions: (d: Direction) => Action[] }[] = [
+  {
+    key: 'confectionery',
+    icon: cake,
+    phone: true,
+    actions: (direction) => [
+      ...(menuHref(direction) ? [{ label: 'Меню', href: menuHref(direction)!, external: true }] : []),
+      { label: 'В приложении', href: settings.shop_url, external: true },
+    ],
+  },
+  {
+    key: 'catering',
+    icon: cloche,
+    phone: true,
+    actions: () => [{ label: 'На сайт кейтеринга', href: settings.catering_url, external: true }],
+  },
+  {
+    key: 'banquets',
+    icon: glasses,
+    actions: () => [
+      { label: 'Обсудить банкет', book: 'Банкет', note: 'Скажите дату, число гостей и повод' },
+    ],
+  },
+];
+
+const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).filter(
+  (row): row is typeof row & { direction: Direction } => row.direction !== undefined,
+);
+---
+
+<section class="section dir" id="about">
+  <div class="container dir__head" data-reveal>
+    <span class="mark" aria-hidden="true"></span>
+    <h2 class="display-caps">{home.about_title}</h2>
+    {home.about_text && <p class="lead dir__lead">{typo(home.about_text)}</p>}
+  </div>
+
+  <div class="venues" data-reveal="grid">
+    {
+      venues.map((direction, i) => {
+        const { place } = direction;
+        const menu = menuHref(direction);
+        const stub = isStub(direction);
+        return (
+          <article class:list={['venue', i % 2 === 1 && 'venue--flip']}>
+            <div class="venue__frame">
+              {stub || !direction.photo ? (
+                <div class:list={['venue__stub', i % 2 ? 'venue__stub--warm' : 'venue__stub--ink']}>
+                  {/* a fixed word, not the alt: the alt repeats the venue's name that
+                      stands right under the plate / фиксированное слово, не alt: alt
+                      повторял имя точки, которое стоит прямо под плашкой */}
+                  <span class="venue__stub-title display">Фото зала</span>
+                  <span class="venue__stub-meta">заглушка · заменяется в админке</span>
+                </div>
+              ) : (
+                <Photo
+                  photo={direction.photo}
+                  ratio="16 / 10"
+                  ratioMd="16 / 10"
+                  radius="0"
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                  class="venue__photo"
+                />
+              )}
+            </div>
+
+            <div class="venue__body">
+              <h3 class="venue__title display">{direction.title}</h3>
+              <p class="venue__addr">
+                <a href="#contacts">{place.name}</a>
+                <span class="venue__dot" aria-hidden="true">
+                  {' · '}
+                </span>
+                {place.kind}
+              </p>
+              <p class="venue__text">{typo(sentences(direction.text, 2))}</p>
+              {/* today's hours only: the open/closed status and the number are on
+                  the strip of the first screen, in the contacts and in the footer
+                  только часы сегодня: статус и номер стоят на полосе первого
+                  экрана, в контактах и в подвале */}
+              <p class="venue__meta">
+                Сегодня <OpenStatus schedule={place.schedule} mode="today" class="tnum" />
+              </p>
+
+              <div class="venue__actions">
+                <button
+                  type="button"
+                  class="btn btn--primary"
+                  data-book={`Бронь стола: ${place.street}`}
+                >
+                  Забронировать
+                </button>
+                {menu && (
+                  <a class="btn btn--secondary" href={menu} target="_blank" rel="noopener">
+                    Меню
+                  </a>
+                )}
+              </div>
+            </div>
+          </article>
+        );
+      })
+    }
+  </div>
+
+  <div class="services">
+    <ul class="container services__row" role="list">
+      {
+        services.map(({ direction, icon, phone, actions }) => (
+          <li class="service">
+            <span class="service__icon" aria-hidden="true">
+              <Fragment set:html={icon} />
+            </span>
+            <h3 class="service__title display">{direction.title}</h3>
+            <p class="service__text">{typo(sentences(direction.text, 1))}</p>
+            <p class="service__links">
+              {actions(direction).map((action) =>
+                action.book ? (
+                  <button
+                    type="button"
+                    class="tlink"
+                    data-book={action.book}
+                    data-book-note={action.note}
+                  >
+                    {action.label}
+                  </button>
+                ) : (
+                  <a
+                    class="tlink"
+                    href={action.href}
+                    target={action.external ? '_blank' : undefined}
+                    rel={action.external ? 'noopener' : undefined}
+                  >
+                    {action.label}
+                  </a>
+                ),
+              )}
+              {phone && (
+                <a class="tlink service__tel" href={settings.phoneHref}>
+                  {settings.phone}
+                </a>
+              )}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  /* the paper strip closes the section: the ink strip of numbers follows it
+     without a cream gap
+     бумажная полоса закрывает секцию: чернильная полоса цифр идёт сразу за ней */
+  .dir {
+    padding-bottom: 0;
+  }
+
+  /* Heading on the central axis: the mark, caps antiqua, the lead as one line.
+     Заголовок по центральной оси: марка, прописная антиква, лид одной строкой. */
+  .dir__head {
+    text-align: center;
+  }
+
+  .dir__head h2 {
+    max-width: 22ch;
+    margin: 18px auto 0;
+  }
+
+  .dir__lead {
+    max-width: 46ch;
+    margin-inline: auto;
+  }
+
+  .venues {
+    display: grid;
+    gap: 40px;
+    margin-top: 32px;
+  }
+
+  .venue {
+    display: grid;
+  }
+
+  /* Plate instead of a frame, the ratio repeats the `ratio` of <Photo>: the
+     real shot drops in without moving a pixel. Ink and warm through one.
+     Плашка вместо кадра, пропорция повторяет `ratio` у <Photo>: настоящий
+     кадр встанет без сдвига. Чернила и тёплая — через одну. */
+  .venue__stub {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    aspect-ratio: 16 / 10;
+    padding: 22px var(--pad);
+  }
+
+  .venue__stub--ink {
+    background-color: var(--ink);
+    background-image: var(--hatch-ink);
+    color: var(--on-ink);
+  }
+
+  .venue__stub--warm {
+    background-color: var(--surface-warm);
+    background-image: var(--hatch);
+    color: var(--text);
+  }
+
+  .venue__stub-title {
+    display: block;
+    font-size: clamp(22px, 5.6vw, 30px);
+    text-wrap: balance;
+  }
+
+  .venue__stub-meta {
+    display: block;
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  .venue__stub--ink .venue__stub-meta {
+    color: var(--on-ink-2);
+    opacity: 1;
+  }
+
+  .venue__body {
+    padding: 22px var(--pad) 0;
+  }
+
+  .venue__title {
+    font-size: clamp(26px, 6.6vw, 30px);
+    line-height: 1.1;
+  }
+
+  .venue__addr {
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-2);
+  }
+
+  .venue__addr a {
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  /* the address link is an 18 px line: on touch it grows to 44 px in place
+     ссылка адреса — строка 18 px: на таче растёт до 44 px на месте */
+  @media (pointer: coarse) {
+    .venue__addr a {
+      display: inline-block;
+      padding-block: 13px;
+      margin-block: -13px;
+    }
+  }
+
+  .venue__dot {
+    color: var(--text-4);
+  }
+
+  .venue__text {
+    max-width: 46ch;
+    margin-top: 14px;
+    font-size: var(--fs-body);
+    color: var(--text-2);
+  }
+
+  .venue__meta {
+    margin-top: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-3);
+  }
+
+
+  .venue__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    margin-top: 20px;
+  }
+
+  .venue__actions .btn {
+    height: 44px;
+    padding-inline: 20px;
+  }
+
+  /* under 360 «Забронировать» and «Меню» no longer share a row: each takes
+     the full width instead of a ragged pair
+     до 360 «Забронировать» и «Меню» в строку не входят: каждая во всю ширину
+     вместо рваной пары */
+  @media (max-width: 359px) {
+    .venue__actions .btn {
+      width: 100%;
+    }
+  }
+
+
+  /* Paper strip across the screen: three services under one hairline, no
+     boxes. Centred like a menu card; the ink strip of numbers follows.
+     Бумажная полоса на весь экран: три услуги под одной волосяной линией, без
+     рамок. По центру, как карточка меню; дальше идёт чернильная полоса цифр. */
+  .services {
+    margin-top: 40px;
+    padding-block: 8px 12px;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+  }
+
+  .services__row {
+    display: grid;
+    margin: 0 auto;
+    padding-block: 0;
+    list-style: none;
+  }
+
+  .service {
+    padding-block: 30px;
+    text-align: center;
+  }
+
+  .service + .service {
+    border-top: 1px solid var(--line);
+  }
+
+  .service__icon {
+    display: inline-flex;
+    width: 26px;
+    height: 26px;
+    color: var(--olive-dark);
+  }
+
+  .service__icon > :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .service__title {
+    margin-top: 12px;
+    font-size: 24px;
+  }
+
+  .service__text {
+    max-width: 36ch;
+    margin: 10px auto 0;
+    font-size: var(--fs-body);
+    color: var(--text-2);
+  }
+
+  .service__links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 22px;
+    margin-top: 18px;
+  }
+
+  .service__tel {
+    color: var(--terracotta-text);
+    text-decoration-color: transparent;
+    white-space: nowrap;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .venue__addr a:hover {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+  }
+
+  /* The spread: the frame takes its half of the screen to the very edge, the
+     text sits in the other half, pressed to the container edge on its side.
+     Rows alternate with no gap — a chequerboard of frame and text.
+     Разворот: кадр занимает свою половину экрана до самого края, текст стоит в
+     другой половине, прижатый к краю контейнера со своей стороны. Ряды
+     чередуются без зазора — шахматка из кадра и текста. */
+  @media (min-width: 768px) {
+    .venues {
+      gap: 0;
+      margin-top: 40px;
+    }
+
+    .venue {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: center;
+    }
+
+    .venue__stub {
+      padding: 28px 36px;
+    }
+
+    /* The text sits on a paper panel that rides 64 px onto the frame: the one
+       thing laid over the photo (Everest, Green Park's panel on a shot), done
+       in our own print language — no brush, no torn edge. The panel is page
+       cream, so only the part over the frame reads as a panel; the outer
+       padding stays `--pad`, and the copy keeps the container edge.
+       Текст стоит на бумажной панели, которая на 64 px заезжает на кадр: то
+       самое «поверх фото» (Everest, панель на снимке у Green Park), но нашим
+       печатным языком — без мазка и рваного края. Панель кремовая, как
+       страница, поэтому панелью читается только часть над кадром; внешнее
+       поле остаётся `--pad`, и текст держит край контейнера. */
+    .venue__body {
+      position: relative;
+      z-index: 1;
+      max-width: 584px;
+      margin-left: -64px;
+      padding: 36px var(--pad) 36px 48px;
+      background: var(--bg);
+    }
+
+    .venue--flip .venue__frame {
+      order: 2;
+    }
+
+    .venue--flip .venue__body {
+      justify-self: end;
+      margin-left: 0;
+      margin-right: -64px;
+      padding: 36px 48px 36px var(--pad);
+      text-align: right;
+    }
+
+    /* the plate's caption moves to the frame's outer corner on the flipped
+       row — the panel rides over the inner one
+       подпись плашки в перевёрнутом ряду уходит в наружный угол кадра — на
+       внутренний заезжает панель */
+    .venue--flip .venue__stub {
+      align-items: flex-end;
+      text-align: right;
+    }
+
+    .venue--flip .venue__text {
+      margin-left: auto;
+    }
+
+    .venue--flip .venue__actions {
+      justify-content: flex-end;
+    }
+
+    .services {
+      margin-top: 0;
+      padding-block: 16px;
+    }
+
+    .services__row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .service {
+      display: flex;
+      flex-direction: column;
+      /* the column is flex only to pin the links; without this the icon stops
+         following `text-align` and hangs on the left edge
+         колонка стала flex только ради прижатия ссылок; без этого значок
+         перестаёт слушать `text-align` и виснет у левого края */
+      align-items: center;
+      padding: 28px 24px;
+    }
+
+    /* the middle column runs to three lines and pushed its links below the
+       others'; the row goes to the foot of the column instead
+       у средней колонки текст в три строки, и её ссылки уезжали ниже соседних;
+       строка уходит к низу колонки */
+    .service__links {
+      margin-top: auto;
+      padding-top: 18px;
+    }
+
+    .service + .service {
+      border-top: 0;
+      border-left: 1px solid var(--line);
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .venue__body {
+      max-width: 632px;
+      margin-left: -72px;
+      padding: 48px var(--pad) 48px 56px;
+    }
+
+    .venue--flip .venue__body {
+      margin-right: -72px;
+      padding: 48px 56px 48px var(--pad);
+    }
+
+    .venue__title {
+      font-size: 36px;
+    }
+
+    .venue__stub-title {
+      font-size: 34px;
+    }
+
+    .services {
+      padding-block: 24px;
+    }
+
+    .service {
+      padding: 32px 36px;
+    }
+
+    .service__title {
+      font-size: 26px;
+    }
+  }
+</style>

@@ -1,70 +1,354 @@
 ---
-import { site, footerLinks } from '../data/site';
+/**
+ * Footer: both venues with their own phone and hours, section links, the app
+ * and partners, legal line. Legal data and documents come from the admin panel,
+ * so an unfilled field simply does not render.
+ * Подвал: обе точки со своими телефонами и часами, разделы, приложение и
+ * партнёры, юрстрока. Реквизиты и документы приходят из админки — незаполненное
+ * поле просто не рисуется, заглушек «ИНН —» не бывает.
+ */
+import { BRAND, hoursRows } from '../data/site';
+import { footerGroupsFor, navFor } from '../lib/nav.ts';
+import type { Content } from '../lib/content.ts';
 
+interface Props {
+  content: Content;
+  /** префикс якорей: с внутренней страницы они должны вести на главную */
+  base?: string;
+}
+
+const { content, base = '' } = Astro.props;
+const { settings, places, home } = content;
+
+// «Главная» внизу страницы не нужна — подвал и так конец
+const sections = navFor(content, base).filter((link) => !link.href.endsWith('#top'));
+const { social, more } = footerGroupsFor(content);
 const year = new Date().getFullYear();
+
+// 15 digits is an individual entrepreneur's number / 15 цифр — номер ИП
+const ogrnLabel = settings.ogrn?.replace(/\D/g, '').length === 15 ? 'ОГРНИП' : 'ОГРН';
+const legal = [
+  settings.legal_name,
+  settings.inn && `ИНН ${settings.inn}`,
+  settings.ogrn && `${ogrnLabel} ${settings.ogrn}`,
+  settings.legal_address,
+]
+  .filter(Boolean)
+  .join(' · ');
+
+const docs = [
+  { label: 'Политика конфиденциальности', href: settings.policy?.href },
+  { label: 'Оферта', href: settings.offer?.href },
+].filter((doc) => Boolean(doc.href)) as { label: string; href: string }[];
 ---
 
 <footer class="footer">
-  <div class="container footer__in">
-    <div>
-      <p class="footer__brand">{site.name}</p>
-      <!-- TODO(клиент): юридическая строка — ИП/ООО, ИНН, ОГРН. -->
-      <p class="footer__legal">© {year} · {site.city}</p>
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__col footer__col--brand">
+        <p class="footer__brand display">{BRAND.name}</p>
+        <p class="footer__tagline">{home.hero_title}</p>
+        {
+          social.length > 0 && (
+            <nav class="footer__links footer__links--go" aria-label="Соцсети и мессенджеры">
+              {social.map((link) => (
+                <a class="tlink tlink--go tlink--out" href={link.href} target="_blank" rel="noopener">
+                  <span>{link.label}</span>
+                </a>
+              ))}
+            </nav>
+          )
+        }
+      </div>
+
+      {
+        places.map((place) => (
+          <div class="footer__col footer__place">
+            <p class="footer__place-name">{place.name}</p>
+            <p class="footer__muted">{place.kind}</p>
+            <a class="footer__tel" href={place.phoneHref}>
+              {place.phone}
+            </a>
+            <dl class="footer__hours">
+              {hoursRows(place.schedule).map((row) => (
+                <div class="footer__hours-row">
+                  <dt>{row.days}</dt>
+                  <dd class="tnum">{row.hours}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        ))
+      }
+
+      <div class="footer__col footer__col--links">
+        <nav class="footer__list" aria-label="Разделы">
+          {sections.map((link) => <a href={link.href}>{link.label}</a>)}
+        </nav>
+        {
+          more.length > 0 && (
+            <nav class="footer__list" aria-label="Приложение и партнёры">
+              {more.map((link) => (
+                <a href={link.href} target="_blank" rel="noopener">
+                  {link.label}
+                </a>
+              ))}
+            </nav>
+          )
+        }
+      </div>
     </div>
 
-    <nav class="footer__links" aria-label="Дополнительные ссылки">
-      {footerLinks.map((link) => <a href={link.href}>{link.label}</a>)}
-    </nav>
+    <div class="footer__bottom">
+      <p class="footer__legal">
+        © {year} · {BRAND.city}{legal && ` · ${legal}`}
+      </p>
+      {
+        docs.length > 0 && (
+          <nav class="footer__links footer__links--docs" aria-label="Документы">
+            {docs.map((doc) => (
+              <a href={doc.href} target="_blank" rel="noopener">
+                {doc.label}
+              </a>
+            ))}
+          </nav>
+        )
+      }
+    </div>
   </div>
 </footer>
 
 <style>
+  /* no top margin: the map band above meets the ink directly
+     без верхнего отступа: полоса карты выше встречает чернила вплотную */
   .footer {
-    margin-top: 20px;
-    padding-block: calc(var(--sec-pad) * 0.6);
-    background: var(--surface);
+    padding-block: calc(var(--sec-pad) * 0.8) calc(var(--sec-pad) * 0.5);
+    background: var(--ink);
+    color: var(--bg);
   }
 
-  .footer__in {
+  .footer__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 28px 24px;
+  }
+
+  .footer__col {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    justify-content: space-between;
     align-items: flex-start;
+    gap: 6px;
+    min-width: 0;
   }
 
+  /* Prata ships one weight: asking for 800 makes the browser fake the bold and
+     the name comes out smeared. Size and tracking come from .display.
+     У Prata один вес: запрос 800 заставляет браузер подделывать жирность и имя
+     плывёт. Размер и трекинг берутся из .display. */
   .footer__brand {
-    margin-bottom: 8px;
+    font-size: 23px;
+  }
+
+  /* 0,82: на `--ink` это 7,5:1, запас к юрстроке остаётся */
+  .footer__tagline,
+  .footer__muted,
+  .footer__legal,
+  .footer__hours dt {
+    color: rgb(255 250 237 / 0.82);
+  }
+
+  .footer__tagline {
+    max-width: 30ch;
+    font-size: 13px;
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  .footer__place-name {
     font-weight: var(--fw-heading);
-    font-size: 19px;
+    font-size: 17px;
     letter-spacing: var(--ls-heading);
   }
 
-  .footer__legal {
-    font-size: 12px;
-    color: var(--text-4);
+  .footer__muted {
+    font-size: 12.5px;
+  }
+
+  .footer__tel {
+    margin-top: 2px;
+    padding-block: 4px;
+    font-weight: var(--fw-heading);
+    font-size: 17px;
+    letter-spacing: var(--ls-heading);
+    font-variant-numeric: tabular-nums;
+    text-decoration: none;
+  }
+
+  .footer__hours {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 2px;
+    font-size: 12.5px;
+  }
+
+  .footer__hours-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .footer__hours dt {
+    flex: none;
+    min-width: 62px;
+  }
+
+  .footer__hours dd {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  /* две колонки ссылок стоят рядом уже на телефоне: подвал короче на экран */
+  .footer__col--links {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px 32px;
+  }
+
+  .footer__list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
   }
 
   .footer__links {
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 2px 16px;
+    margin-top: 6px;
   }
 
-  .footer__links a {
-    font-size: 12.5px;
-    text-decoration: none;
-    border-bottom: 1px solid var(--line-4);
+  /* ссылки со знаком стоят просторнее: кольцо занимает место подчёркивания */
+  .footer__links--go {
+    gap: 6px 20px;
+    margin-top: 12px;
   }
 
-  .footer__links a:hover {
-    border-bottom-color: var(--text);
+  /* underline via text-decoration so the vertical padding (32 px target) does not move the line
+     подчёркивание через text-decoration: вертикальный паддинг (зона 32 px) не сдвигает линию */
+  .footer__list a,
+  /* `:not(--go)`: у ссылок со знаком подчёркивание живёт на внутреннем `span`,
+     иначе линия прошла бы сквозь кольцо
+     `:not(--go)`: on the links with a glyph the underline lives on the inner
+     `span`, or the rule would draw a line straight through the ring */
+  .footer__links:not(.footer__links--go) a {
+    display: inline-block;
+    padding-block: 6px;
+    font-size: 13px;
+    text-decoration: underline;
+    text-decoration-color: rgb(255 250 237 / 0.4);
+    text-underline-offset: 4px;
+    transition: text-decoration-color 0.16s ease;
   }
 
+  /* `.tlink` красится в `--text`: на чернилах подвала он невидим */
+  .footer__links--go a {
+    color: var(--bg);
+  }
+
+  /* touch: the number (26 px line) and the 20 px links grow to 44 px in place
+     тач: номер (строка 26 px) и ссылки 20 px растут до 44 px на месте */
+  @media (pointer: coarse) {
+    .footer__tel {
+      padding-block: 9px;
+      /* keeps the 2 px top margin: 2 − 5 / сохраняет верхний отступ 2 px: 2 − 5 */
+      margin-block: -3px -5px;
+    }
+
+    .footer__list a,
+    .footer__links:not(.footer__links--go) a {
+      padding-block: 12px;
+      margin-block: -6px;
+    }
+  }
+
+  .footer__bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 28px;
+    padding-top: 16px;
+    border-top: 1px solid rgb(255 250 237 / 0.18);
+  }
+
+  .footer__legal {
+    font-size: 12px;
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  .footer__links--docs {
+    margin-top: 0;
+  }
+
+  .footer__links--docs a {
+    font-size: 12px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .footer__list a:hover,
+    .footer__links:not(.footer__links--go) a:hover {
+      text-decoration-color: var(--bg);
+    }
+
+    .footer__tel:hover {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+  }
+
+  /* планшет: бренд и ссылки в верхнем ряду, точки рядом под ними */
+  @media (min-width: 600px) {
+    .footer__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-areas:
+        'brand links'
+        'first second';
+      gap: 32px 24px;
+    }
+
+    .footer__col--brand {
+      grid-area: brand;
+    }
+
+    .footer__col--links {
+      grid-area: links;
+      gap: 8px 48px;
+    }
+
+    .footer__place:nth-child(2) {
+      grid-area: first;
+    }
+
+    .footer__place:nth-child(3) {
+      grid-area: second;
+    }
+  }
+
+  /* десктоп: бренд · точка · точка · ссылки, юрстрока и документы в одну строку */
   @media (min-width: 1200px) {
-    .footer__in {
+    .footer__grid {
+      grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+      grid-template-areas: 'brand first second links';
+      gap: 24px;
+    }
+
+    .footer__bottom {
       flex-direction: row;
-      align-items: flex-end;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 24px;
     }
   }
 </style>

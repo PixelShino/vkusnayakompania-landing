@@ -1,23 +1,42 @@
 {
   "name": "vkusnaya-kompaniya-landing",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
+  "packageManager": "pnpm@10.14.0",
   "scripts": {
     "dev": "astro dev --host 127.0.0.1",
     "start": "astro dev --host 127.0.0.1",
     "build": "astro build",
     "preview": "astro preview --host 127.0.0.1",
     "check": "astro check",
-    "test": "node src/data/site.check.ts"
+    "test": "node src/data/site.check.ts && node src/lib/select.check.ts && node src/data/content.check.ts",
+    "fixture": "node scripts/export-fixture.mjs",
+    "files": "node scripts/fetch-files.mjs",
+    "setup": "node scripts/directus-setup.mjs",
+    "prebuild": "node src/data/content.check.ts && node scripts/fetch-files.mjs"
   },
   "dependencies": {
+    "@astrojs/react": "^4.4.0",
     "@astrojs/sitemap": "^3.7.3",
     "@fontsource-variable/montserrat": "^5.3.0",
-    "astro": "^5.18.2"
+    "@fontsource/prata": "^5.3.0",
+    "astro": "^5.18.2",
+    "motion": "^13.2.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@iconify-json/solar": "^1.2.11",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
     "typescript": "^6.0.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp"
+    ]
   }
 }

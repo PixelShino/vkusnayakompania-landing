@@ -1,0 +1,70 @@
+# Directus admin for the site. Same file for local dev and the VPS:
+# the only difference is `.env` (see `.env.example`).
+# Админка Directus. Один файл для локали и VPS, разница только в `.env`.
+services:
+  database:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - ./data/database:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: directus
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: directus
+    healthcheck:
+      test: ['CMD', 'pg_isready', '--host=localhost', '--username=directus']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  directus:
+    image: directus/directus:11.17.0
+    restart: unless-stopped
+    # bound to localhost only: nginx (VPS) or the browser (local) talk to it
+    # только localhost: снаружи ходит nginx на VPS или браузер на локали
+    ports:
+      - '127.0.0.1:${DIRECTUS_PORT:-8055}:8055'
+    volumes:
+      - ./uploads:/directus/uploads
+      - ./extensions:/directus/extensions
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      # 127.0.0.1, а не localhost: внутри контейнера он резолвится в ::1, а Directus слушает IPv4
+      test: ['CMD-SHELL', 'wget --spider -q http://127.0.0.1:8055/server/ping || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    environment:
+      SECRET: ${SECRET}
+      PUBLIC_URL: ${PUBLIC_URL}
+
+      DB_CLIENT: pg
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_DATABASE: directus
+      DB_USER: directus
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      # first boot only: creates the admin user
+      # только первый запуск: создаёт администратора
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+
+      # invites and password resets; empty transport = no mail (local dev)
+      # приглашения и сброс пароля; пустой транспорт = без почты (локаль)
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@vkus-com.ru}
+      EMAIL_TRANSPORT: ${EMAIL_TRANSPORT:-sendmail}
+      EMAIL_SMTP_HOST: ${EMAIL_SMTP_HOST:-}
+      EMAIL_SMTP_PORT: ${EMAIL_SMTP_PORT:-587}
+      EMAIL_SMTP_USER: ${EMAIL_SMTP_USER:-}
+      EMAIL_SMTP_PASSWORD: ${EMAIL_SMTP_PASSWORD:-}
+      EMAIL_SMTP_SECURE: ${EMAIL_SMTP_SECURE:-false}
+
+      # editors see the admin in Russian by default
+      # редакторы видят админку по-русски
+      DEFAULT_LANGUAGE: ru-RU
+      TELEMETRY: 'false'

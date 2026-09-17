@@ -1,0 +1,28 @@
+---
+/**
+ * One icon from the Solar Linear set (24 × 24, `currentColor`, stroke 1.5),
+ * extracted into `src/assets/icons` at install time. The glob is eager, so the
+ * svg is inlined at build and costs no request; a name with no file renders
+ * nothing rather than breaking the line it stands in.
+ * Одна иконка из набора Solar Linear (24 × 24, `currentColor`, обводка 1,5),
+ * вынутого в `src/assets/icons` при установке. Глоб «жадный», поэтому svg
+ * встраивается на сборке и не стоит запроса; имя без файла рисует ничего, а не
+ * ломает строку, в которой стоит.
+ */
+interface Props {
+  name: string;
+  /** оживление на ховер родителя: см. `.ico--*` в `global.css` */
+  class?: string;
+}
+
+const files = import.meta.glob('../assets/icons/*.svg', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+});
+
+const { name, class: className = '' } = Astro.props;
+const svg = files[`../assets/icons/${name}.svg`] as string | undefined;
+---
+
+{svg && <span class:list={['ico', className]} aria-hidden="true" set:html={svg} />}

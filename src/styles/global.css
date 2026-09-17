@@ -24,6 +24,12 @@
   --line-4: #d6cbb8;
   --line-warm: #f4d6bd;
 
+  /* чернила: глубокая олива для полос во всю ширину, кремовый на ней 10,8:1 */
+  --ink: #333721;
+  --ink-2: #3f4429;
+  --on-ink: #f7f1e2;
+  --on-ink-2: rgb(247 241 226 / 0.74);
+
   /* акценты; оливковый затемнён с `#868C56` ради контраста белого текста */
   --olive: #6f7546;
   --olive-dark: #5f6439;
@@ -31,16 +37,42 @@
   --olive-tint-line: #dce2c6;
   --terracotta: #c67139;
   --terracotta-text: #8c4c24;
+  /* базовая терракота на чернилах даёт 3,2:1 — для текста осветляем до 5,5:1 */
+  --terracotta-on-ink: #e2a066;
 
-  /* типографика */
-  --font: 'Montserrat Variable', 'Montserrat', system-ui, sans-serif;
+  /* типографика: антиква несёт характер, гротеск — интерфейс */
+  /* the «Fallback» faces are Georgia and Arial scaled to the web fonts' metrics
+     (BaseLayout): the swap does not move the layout
+     начертания «Fallback» — Georgia и Arial под метрики веб-шрифтов
+     (BaseLayout): подмена не двигает раскладку */
+  --font: 'Montserrat Variable', 'Montserrat Fallback', system-ui, sans-serif;
+  --font-display: 'Prata', 'Prata Fallback', 'Georgia', serif;
   --fw-heading: 800;
   --ls-heading: -0.02em;
+  --ls-display: -0.005em;
+
+  /* движение: `--ease-out` на входы и нажатия, `--ease-in-out` — на то, что
+     едет по экрану (занавес) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* Hatch for placeholder plates: a flat fill at this size reads as a hole in
+     the layout, the hatch reads as a slot reserved for a photo. Alpha is low
+     enough that the caption on top keeps its full contrast.
+     Штриховка плашек-заглушек: ровная заливка такого размера читается дырой
+     в вёрстке, штриховка — местом, оставленным под фото. Альфа мала настолько,
+     что подпись поверх не теряет контраста. */
+  --hatch: repeating-linear-gradient(135deg, rgb(44 41 39 / 0.05) 0 1px, transparent 1px 10px);
+  --hatch-ink: repeating-linear-gradient(
+    135deg,
+    rgb(247 241 226 / 0.07) 0 1px,
+    transparent 1px 10px
+  );
 
   /* ритм — мобильные значения (390) */
   --pad: 18px;
   --gap: 12px;
-  --sec-pad: 44px;
+  --sec-pad: 36px;
   --content: 354px;
 
   --fs-h1: clamp(30px, 8.72vw, 40px);
@@ -49,13 +81,19 @@
   --fs-body: 14px;
   --fs-lead: 15px;
 
-  /* радиусы */
+  /* Radii: one squared value for every plate, panel and button — the 20–26 px
+     rounding read as a page builder next to the sharp references. `--r-pill`
+     stays for what is a real circle: the sticker, icon buttons, slider arrows.
+     Радиусы: одно квадратное значение на все плашки, панели и кнопки —
+     скругления 20–26 px рядом с острыми референсами читались конструктором.
+     `--r-pill` остаётся тому, что правда круг: стикер, икон-кнопки, стрелки. */
+  --r-sq: 3px;
   --r-pill: 999px;
-  --r-sm: 14px;
-  --r-md: 16px;
-  --r-lg: 20px;
-  --r-xl: 24px;
-  --r-2xl: 26px;
+  --r-sm: var(--r-sq);
+  --r-md: var(--r-sq);
+  --r-lg: var(--r-sq);
+  --r-xl: var(--r-sq);
+  --r-2xl: var(--r-sq);
 
   /* высота липкой шапки: по ней считается отступ якорей */
   --header-h: 68px;
@@ -65,7 +103,7 @@
   :root {
     --pad: 36px;
     --gap: 16px;
-    --sec-pad: 64px;
+    --sec-pad: 52px;
     --content: 762px;
     --fs-h1: clamp(44px, 5.64vw, 58px);
     --fs-h2: clamp(30px, 3.96vw, 40px);
@@ -80,7 +118,7 @@
   :root {
     --pad: 72px;
     --gap: 20px;
-    --sec-pad: 92px;
+    --sec-pad: 72px;
     --content: 1296px;
     --fs-h1: clamp(56px, 4.58vw, 66px);
     --fs-h2: clamp(38px, 2.92vw, 42px);
@@ -106,12 +144,27 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* мягче, а не «ноль»: цвет и прозрачность остаются, уезжает движение.
+   Полное глушение перебивало аккуратные правила диалога и липкой полосы,
+   и диалог у такого гостя не всплывал, а мигал. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    /* overlay и display держат переход верхнего слоя у <dialog>: без них
+       лист брони появляется рывком */
+    transition-property: opacity, color, background-color, border-color, fill, stroke,
+      overlay, display !important;
+    transition-duration: 150ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* the curtain still lifts at once — but with no wait before it
+     занавес всё равно уходит сразу — но без паузы перед этим */
+  .curtain {
+    animation-delay: 0s !important;
   }
 }
 
@@ -190,6 +243,28 @@ button {
   background: color-mix(in srgb, var(--terracotta) 30%, transparent);
 }
 
+/* видно только скринридеру: подписи у icon-only кнопок и пояснения к спискам */
+/* первая цель Tab: выезжает сверху и уводит на контент мимо шапки */
+.skip-link {
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  z-index: 100;
+  translate: -50% -200%;
+  padding: 10px 18px;
+  border-radius: var(--r-pill);
+  background: var(--text);
+  color: var(--bg);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: translate 0.18s var(--ease-out);
+}
+
+.skip-link:focus-visible {
+  translate: -50% 0;
+}
+
 /* ── раскладка ───────────────────────────────────────────────────────────── */
 
 .container {
@@ -207,31 +282,19 @@ button {
   contain-intrinsic-size: auto 900px;
 }
 
-.section-head {
-  display: flex;
-  gap: 20px 28px;
-  align-items: flex-end;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  margin-bottom: 4px;
-}
-
 /* лид отбивается от заголовка одинаково во всех секциях */
-.section-head h2 + .lead,
 h2 + .lead,
 h1 + .lead {
   margin-top: 10px;
 }
 
-.section-head > div {
-  min-width: 0;
-}
-
+/* only the 404 page still carries a kicker; sections use `.mark` + `.head`
+   кикер остался только на странице 404; секции берут `.mark` + `.head` */
 .kicker {
   font-size: 11.5px;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--text-4);
+  color: var(--olive-dark);
   margin-bottom: 14px;
 }
 
@@ -249,26 +312,37 @@ h3 {
 
 /* ── кнопки ──────────────────────────────────────────────────────────────── */
 
+/* Every button is the stamp from the first screen: squared, caps, tracked.
+   One shape on the whole page — the pill is gone from the vocabulary.
+   Каждая кнопка — оттиск с первого экрана: квадратная, прописными, вразрядку.
+   Одна форма на всю страницу — пилюли в словаре больше нет. */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 46px;
-  padding-inline: 22px;
+  height: 48px;
+  padding-inline: 26px;
   border: 1px solid transparent;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-sq);
   background: transparent;
-  font-size: 14px;
+  font-size: 12.5px;
   font-weight: 600;
+  letter-spacing: 0.08em;
   line-height: 1.2;
+  text-transform: uppercase;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
-  transition:
-    background-color 0.16s ease,
-    border-color 0.16s ease,
-    color 0.16s ease;
+  /* перечислено поимённо: `all` тянул бы за собой и размеры, и заливку фото */
+  transition-property: scale, background-color, border-color, color;
+  transition-duration: 120ms, 0.16s, 0.16s, 0.16s;
+  transition-timing-function: var(--ease-out), ease, ease, ease;
+}
+
+/* тактильный отклик на нажатие — единственная анимация кнопки */
+.btn:active {
+  scale: 0.96;
 }
 
 .btn img,
@@ -276,23 +350,86 @@ h3 {
   flex: none;
 }
 
+/* ── иконка ────────────────────────────────────────────────────────────────
+   One set for the whole page: Solar Linear, 24 × 24, `currentColor`, stroke
+   1.5 — the weight of a 600 label beside it. The size follows the type, so an
+   icon in a small button and one in a line of body text stay in proportion.
+   Один набор на всю страницу: Solar Linear, 24 × 24, `currentColor`, обводка
+   1,5 — вес подписи 600 рядом. Размер идёт за кеглем, поэтому значок в мелкой
+   кнопке и значок в строке текста остаются в пропорции. */
+.ico {
+  flex: none;
+  display: inline-flex;
+  width: 1.3em;
+  height: 1.3em;
+}
+
+.ico > svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+}
+
+.btn .ico {
+  width: 18px;
+  height: 18px;
+  margin-inline-start: -2px;
+}
+
+.btn--sm .ico {
+  width: 16px;
+  height: 16px;
+}
+
+/* The icon answers the press and the hover, each in its own direction: the
+   chair settles, the van drives off, the chevron drops, the phone tilts.
+   This is what makes a line icon read as alive instead of printed.
+   Значок отвечает на нажатие и наведение, каждый в свою сторону: кресло
+   оседает, фургон уезжает, шеврон падает, трубка наклоняется. Это и делает
+   линейную иконку живой, а не напечатанной. */
+.ico {
+  transition-property: translate, rotate, scale;
+  transition-duration: 260ms;
+  transition-timing-function: var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover .ico--go,
+  a:hover > .ico--go {
+    translate: 3px 0;
+  }
+
+  .btn:hover .ico--down {
+    translate: 0 3px;
+  }
+
+  .btn:hover .ico--tilt {
+    rotate: -10deg;
+  }
+
+  .btn:hover .ico--pop {
+    scale: 1.12;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ico {
+    transition: none;
+  }
+}
+
+/* главное действие — оливковая заливка: кремовый на ней 4,65:1 */
 .btn--primary {
-  background: var(--text);
+  background: var(--olive);
   color: var(--bg);
 }
-.btn--primary:hover {
-  background: #413c37;
-}
 .btn--primary:active {
-  background: #1e1b19;
+  background: var(--olive-dark);
 }
 
 .btn--secondary {
   border-color: var(--line);
   color: var(--text);
-}
-.btn--secondary:hover {
-  background: color-mix(in srgb, var(--text) 6%, transparent);
 }
 .btn--secondary:active {
   background: color-mix(in srgb, var(--text) 12%, transparent);
@@ -303,8 +440,8 @@ h3 {
   background: var(--bg);
   color: var(--text);
 }
-.btn--light:hover {
-  background: #fff;
+.btn--light:active {
+  background: var(--surface);
 }
 
 /* призрачная на фото */
@@ -313,124 +450,61 @@ h3 {
   border-color: rgba(255, 250, 237, 0.5);
   color: var(--bg);
 }
-.btn--ghost-light:hover {
-  background: rgba(255, 250, 237, 0.26);
+.btn--ghost-light:active {
+  background: rgba(255, 250, 237, 0.3);
+}
+
+/* hover только там, где есть настоящий курсор: тап на телефоне его подделывает */
+@media (hover: hover) and (pointer: fine) {
+  /* hover темнее базовой, а не светлее: осветление оливкового уводит
+     кремовую подпись ниже 4,5:1 */
+  .btn--primary:hover {
+    background: color-mix(in srgb, var(--olive) 50%, var(--olive-dark));
+  }
+
+  .btn--secondary:hover {
+    background: color-mix(in srgb, var(--text) 6%, transparent);
+  }
+
+  /* кремовый фон — самый светлый в палитре, поэтому hover уходит в тёплую тень */
+  .btn--light:hover {
+    background: var(--surface);
+  }
+
+  .btn--ghost-light:hover {
+    background: rgba(255, 250, 237, 0.26);
+  }
 }
 
 .btn--sm {
-  height: 38px;
-  padding-inline: 16px;
-  font-size: 13px;
+  height: 40px;
+  padding-inline: 18px;
+  font-size: 11.5px;
 }
 
+/* on touch screens every button grows to a 44 px target
+   на тач-экранах любая кнопка растёт до зоны нажатия 44 px */
+@media (pointer: coarse) {
+  .btn--sm,
+  .btn--md {
+    height: 44px;
+  }
+
+}
+
+/* Text links grow to 44 px on touch inside their own components: a bare
+   global class loses to the scoped selector that sets their padding.
+   Текстовые ссылки растут до 44 px на таче внутри своих компонентов: голый
+   глобальный класс проигрывает скоуповому селектору, задающему их поля. */
+
 .btn--md {
-  height: 42px;
-  padding-inline: 18px;
-  font-size: 13.5px;
+  height: 44px;
+  padding-inline: 20px;
+  font-size: 12px;
 }
 
 .btn--block {
   width: 100%;
-}
-
-/* ── повторяющийся паттерн: круг → пунктир → пилюля ──────────────────────── */
-
-.card-top {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  position: relative;
-  z-index: 1;
-}
-
-.card-mark {
-  width: 46px;
-  height: 46px;
-  flex: none;
-  display: grid;
-  place-items: center;
-  border-radius: var(--r-pill);
-  background: var(--text);
-  color: var(--bg);
-  font-weight: var(--fw-heading);
-  font-size: 21px;
-  line-height: 1;
-}
-
-/* на оливковой заливке подложка темнее фона: светлая роняет контраст до 3,3:1 */
-.card-mark--light {
-  background: rgba(28, 25, 22, 0.24);
-  color: var(--bg);
-}
-
-.card-mark--sm {
-  width: 36px;
-  height: 36px;
-  font-size: 16px;
-}
-
-.card-dash {
-  flex: 1;
-  border-top: 2px dashed var(--line);
-}
-
-.card-dash--light {
-  border-top-color: rgba(255, 250, 237, 0.32);
-}
-
-.card-pill {
-  padding: 7px 13px;
-  border: 1px solid var(--line-2);
-  border-radius: var(--r-pill);
-  background: var(--surface);
-  color: var(--text-3);
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.card-pill--light {
-  background: rgba(28, 25, 22, 0.24);
-  border-color: transparent;
-  color: var(--bg);
-}
-
-/* декоративный круг в углу акцентных карточек */
-.blob {
-  position: absolute;
-  width: 190px;
-  height: 190px;
-  right: -70px;
-  bottom: -80px;
-  border-radius: var(--r-pill);
-  background: rgba(255, 250, 237, 0.1);
-  pointer-events: none;
-}
-
-/* ── горизонтальные рельсы ───────────────────────────────────────────────── */
-
-.rail {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-padding-left: var(--pad);
-  overscroll-behavior-x: contain;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  -webkit-overflow-scrolling: touch;
-  width: calc(100% + var(--pad) * 2);
-  margin-inline: calc(var(--pad) * -1);
-  padding-inline: var(--pad);
-  padding-bottom: 4px;
-}
-
-.rail::-webkit-scrollbar {
-  display: none;
-}
-
-.rail > * {
-  scroll-snap-align: start;
 }
 
 /* ── медиа ───────────────────────────────────────────────────────────────── */
@@ -457,3 +531,637 @@ h3 {
   object-fit: cover;
 }
 
+
+/* ── дисплейная антиква ───────────────────────────────────────────────────
+   Prata несёт заголовки и крупные цифры. Один вес 400: иерархия внутри неё
+   строится размером, не начертанием.
+   Prata carries headings and large numbers. Single weight — size is hierarchy. */
+h1,
+h2,
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.06;
+  letter-spacing: var(--ls-display);
+}
+
+/* ── полосы во всю ширину ─────────────────────────────────────────────────
+   Ink strips break the cream monotony; they bleed edge to edge, never as a card.
+   Чернильные полосы рвут кремовую монотонность и идут от края до края. */
+.strip-ink {
+  background: var(--ink);
+  color: var(--on-ink);
+}
+
+.strip-ink :where(h1, h2, h3, .display) {
+  color: var(--on-ink);
+}
+
+.strip-ink :where(p, li, dd) {
+  color: var(--on-ink-2);
+}
+
+.strip-ink .kicker {
+  color: var(--terracotta-on-ink);
+}
+
+.strip-paper {
+  background: var(--surface);
+}
+
+/* ── появление секции ─────────────────────────────────────────────────────
+   Один оркестрованный вход на секцию, не на каждый элемент внутри.
+   One orchestrated entrance per section, never per element. */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.6s var(--ease-out),
+    transform 0.6s var(--ease-out);
+}
+
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── печатные формы ───────────────────────────────────────────────────────
+   One vocabulary for the whole page: the pill and the numbered circle read as a
+   page builder, a squared stamp-like button, an ornament over the heading and
+   caps antiqua read as a restaurant. Every section below the first screen
+   speaks it too — the patterns are here, the sections only use them.
+   Один словарь на всю страницу: пилюля и кружок-номер читаются конструктором,
+   квадратная кнопка-оттиск, марка над заголовком и прописная антиква —
+   заведением. Секции ниже первого экрана говорят на нём же — паттерны здесь,
+   секции их только используют. */
+/* Caps antiqua with a little tracking: size and spacing do the work, one weight
+   is enough (Green Park, Matsoni). Never on text under 22 px.
+   Прописная антиква с лёгкой разрядкой: работу делают размер и трекинг, веса
+   хватает одного (Green Park, Мацони). Не берётся на текст мельче 22 px. */
+.display-caps {
+  text-transform: uppercase;
+  letter-spacing: 0.045em;
+  line-height: 1.12;
+}
+
+/* Section mark instead of a kicker: a diamond between two whiskers, the same on
+   every heading. It holds the rhythm and never pretends to be information.
+   Марка вместо кикера: ромб между двумя усами, один и тот же над каждым
+   заголовком. Держит ритм и не притворяется информацией. */
+.mark {
+  position: relative;
+  display: block;
+  width: 76px;
+  height: 12px;
+  margin-inline: auto;
+  color: var(--terracotta);
+}
+
+.mark::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.6;
+  background:
+    linear-gradient(currentColor, currentColor) left center / 28px 1px no-repeat,
+    linear-gradient(currentColor, currentColor) right center / 28px 1px no-repeat;
+}
+
+.mark::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  translate: -50% -50%;
+  rotate: 45deg;
+  background: currentColor;
+}
+
+/* Text link in place of a third button: underlined, the same colour as the
+   copy, terracotta on hover. A `<button>` gets it too — the reset is inside.
+   Текстовая ссылка вместо третьей кнопки: подчёркнута, цветом текста, на
+   hover терракота. Годится и `<button>` — сброс внутри. */
+.tlink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-block: -10px;
+  /* 2 px each side: a four-letter link («Меню») is otherwise 43 px wide
+     по 2 px с боков: ссылка из четырёх букв («Меню») иначе 43 px шириной */
+  margin-inline: -2px;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  text-underline-offset: 5px;
+  cursor: pointer;
+  transition-property: color, text-decoration-color, text-underline-offset,
+    text-decoration-thickness;
+  transition-duration: 0.16s, 0.16s, 0.24s, 0.24s;
+  transition-timing-function: ease, ease, var(--ease-out), var(--ease-out);
+}
+
+/* The circled arrow the owner's references hang on every text link (Ballena
+   «VIEW FULL MENU», Pulso's slider chevrons): a hairline ring with an arrow
+   inside, drawn as one mask so the ring and the arrow are a single glyph in
+   `currentColor` and follow the link into hover and onto ink. `--go-turn`
+   points it: 0 goes forward, -45deg goes out of the site.
+   Стрелка в кружке, которую референсы владельца вешают на каждую текстовую
+   ссылку (Ballena «VIEW FULL MENU», шевроны слайдера Pulso): волосяное кольцо
+   со стрелкой внутри, нарисованное одной маской, — кольцо и стрелка один знак
+   в `currentColor`, уходят за ссылкой и в ховер, и на чернила. `--go-turn`
+   задаёт направление: 0 — вперёд, -45deg — наружу с сайта. */
+.tlink--go {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration-line: none;
+}
+
+.tlink--go > span {
+  text-decoration-line: underline;
+  text-decoration-color: inherit;
+  text-underline-offset: 4px;
+}
+
+.tlink--go::after {
+  content: '';
+  flex: none;
+  width: 19px;
+  height: 19px;
+  background-color: currentColor;
+  rotate: var(--go-turn, 0deg);
+  transition-property: translate, rotate;
+  transition-duration: 240ms;
+  transition-timing-function: var(--ease-out);
+  -webkit-mask: var(--go-glyph) center / 100% no-repeat;
+  mask: var(--go-glyph) center / 100% no-repeat;
+}
+
+/* один знак: кольцо волоском и стрелка внутри него */
+:root {
+  --go-glyph: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10.6" stroke-width="1.3"/><path d="M8.2 12h7.6M12.6 8.8 15.8 12l-3.2 3.2" stroke-width="1.6"/></svg>');
+}
+
+/* наружу с сайта — тот же знак, повёрнутый на 45° */
+.tlink--out {
+  --go-turn: -45deg;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /* подчёркивание подходит к строке и наливается: ссылка отвечает движением,
+     а не только цветом
+     the underline steps up to the line and fills in: the link answers with
+     motion, not colour alone */
+  .tlink:hover {
+    color: var(--terracotta-text);
+    text-decoration-color: currentColor;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1.5px;
+  }
+
+  /* знак делает шаг туда, куда показывает: вперёд у внутренней, вбок у внешней */
+  .tlink--go:hover::after {
+    translate: 3px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tlink--go:hover::after {
+    translate: 0;
+  }
+}
+
+/* ── отклик кадров на курсор ────────────────────────────────────────────────
+   The page answered the pointer only on buttons and links: photo frames and
+   hatched plates were as dead under the cursor as print on paper. A frame
+   answers the way a frame can — it shows more of its picture; a plate has no
+   picture, so its hatch drifts instead. Both are `scale` and
+   `background-position`, nothing that costs layout. Touch is left out: there
+   is no hover there and the state would stick after a tap.
+   Страница отвечала курсору только кнопками и ссылками: кадры и штрихованные
+   плашки были под курсором такими же мёртвыми, как оттиск на бумаге. Кадр
+   отвечает тем, чем может, — показывает больше своей картинки; у плашки
+   картинки нет, поэтому уезжает её штриховка. И то и другое — `scale` и
+   `background-position`, вёрстку это не трогает. Тач исключён: ховера там
+   нет, а состояние залипало бы после касания. */
+.media img,
+.stub,
+.venue__stub {
+  transition-property: scale, background-position;
+  transition-duration: 620ms;
+  transition-timing-function: var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cake-card:hover .media img,
+  .gl__slide:hover .media img,
+  .venue__frame:hover img {
+    scale: 1.045;
+  }
+
+  /* `.venue__stub` не носит общий класс `.stub`: у него своя заливка */
+  .cake-card:hover .stub,
+  .gl__slide:hover .stub,
+  .venue__frame:hover .stub,
+  .venue__frame:hover .venue__stub {
+    background-position: 26px 26px;
+  }
+
+  /* имя торта уходит в терракоту вместе с кадром: отклик читается и там,
+     где вместо фото пока плашка
+     the cake's name goes terracotta with its frame: the answer reads even
+     where the photo is still a plate */
+  .cake-card:hover .cake__name {
+    color: var(--terracotta-text);
+  }
+}
+
+/* ── заголовок секции по оси ──────────────────────────────────────────────
+   The mark, caps antiqua and one lead line on the central axis (Green Park,
+   Matsoni). Replaces `.section-head` + `.kicker` everywhere below the fold.
+   Марка, прописная антиква и одна строка лида по центральной оси (Green Park,
+   Мацони). Заменяет `.section-head` + `.kicker` во всех секциях ниже сгиба. */
+.head {
+  text-align: center;
+}
+
+.head h2 {
+  max-width: 22ch;
+  margin: 18px auto 0;
+}
+
+.head .lead {
+  max-width: 52ch;
+  margin: 12px auto 0;
+}
+
+.strip-ink .head .mark {
+  color: var(--terracotta-on-ink);
+}
+
+/* ── подпись-ярлык ─────────────────────────────────────────────────────────
+   A small caps label without a box («образец», «обе точки», «заглушка»): the
+   pill said the same thing with a border around it.
+   Мелкая прописная подпись без рамки («образец», «обе точки», «заглушка»):
+   пилюля говорила то же самое, только в рамке. */
+.tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.strip-ink .tag {
+  color: var(--on-ink-2);
+}
+
+/* ── вкладки ────────────────────────────────────────────────────────────────
+   Tabs as words under a rule: the active one carries a terracotta underline.
+   No pill, no fill — the switch is in the line, not in a box.
+   Вкладки словами под линией: активная несёт терракотовое подчёркивание.
+   Без пилюли и заливки — переключение в линии, а не в коробке. */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 28px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-bottom: -1px;
+  padding: 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  cursor: pointer;
+  transition-property: color, border-color;
+  transition-duration: 0.16s;
+  transition-timing-function: ease;
+}
+
+.tab[aria-selected='true'],
+.tab[aria-pressed='true'],
+.tab.is-active {
+  color: var(--text);
+  border-bottom-color: var(--terracotta);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tab:hover {
+    color: var(--text);
+  }
+}
+
+/* ── плашка-заглушка ────────────────────────────────────────────────────────
+   One stand-in for every missing photo: a hatched plate, the caption pressed
+   to the bottom-left, the honest «заглушка» line under it. Ink and warm
+   alternate; the ratio is set by the slot (`aspect-ratio` on the element).
+   Одна заглушка на любое отсутствующее фото: штрихованная плашка, подпись
+   прижата к левому низу, под ней честная строка «заглушка». Чернильная и
+   тёплая чередуются; пропорцию задаёт слот (`aspect-ratio` на элементе). */
+.stub {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 18px 20px;
+  border-radius: var(--r-sq);
+  background-color: var(--surface-warm);
+  background-image: var(--hatch);
+  color: var(--text);
+  overflow: hidden;
+}
+
+.stub--ink {
+  background-color: var(--ink);
+  background-image: var(--hatch-ink);
+  color: var(--on-ink);
+}
+
+.stub__title {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(20px, 5vw, 26px);
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.stub__meta {
+  display: block;
+  margin-top: 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.stub--ink .stub__meta {
+  color: var(--on-ink-2);
+  opacity: 1;
+}
+
+/* ── усы вокруг строки ──────────────────────────────────────────────────────
+   `—— text ——`: a hairline on each side of a short centred line (Levantine).
+   `—— текст ——`: волосяная линия с двух сторон короткой строки по центру. */
+.whiskers {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: center;
+  text-align: center;
+}
+
+.whiskers::before,
+.whiskers::after {
+  content: '';
+  flex: 1 1 0;
+  max-width: 96px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.35;
+}
+
+
+/* ── занавес открытия ─────────────────────────────────────────────────────
+   An ink sheet with the logo over the page for the first moment, then it
+   lifts on its own. CSS only, so it never waits for the network and costs the
+   first paint nothing; `html.no-curtain` (set from sessionStorage) skips it on
+   a repeat load. Transform and visibility only — 60 fps on a phone.
+   Чернильный лист с логотипом поверх страницы на первое мгновение, потом
+   уходит сам. Только CSS, поэтому ничего не ждёт от сети и первой отрисовке
+   ничего не стоит; `html.no-curtain` (по sessionStorage) пропускает его при
+   повторной загрузке. Только transform и visibility — 60 fps на телефоне. */
+.curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+  pointer-events: none;
+  animation: curtain-lift 0.8s var(--ease-in-out) 0.65s forwards;
+}
+
+.curtain__logo {
+  width: clamp(150px, 26vw, 220px);
+  height: auto;
+  /* the dark logo goes cream on ink, like in the header over the photo
+     тёмный логотип на чернилах становится кремовым, как в шапке над фото */
+  filter: brightness(0) invert(1);
+  opacity: 0.92;
+  animation: curtain-logo 0.5s var(--ease-out) both;
+}
+
+.no-curtain .curtain {
+  display: none;
+}
+
+@keyframes curtain-lift {
+  to {
+    transform: translateY(-100%);
+    visibility: hidden;
+  }
+}
+
+@keyframes curtain-logo {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* ── появление при прокрутке ──────────────────────────────────────────────
+   One signature per section, not a fade on every block: inside a
+   `[data-reveal]` block the mark draws its whiskers out from the diamond and
+   the children rise in a short stagger. Armed only with JS (`html.js`) — with
+   scripts off everything is simply visible. `reveal.ts` sets `is-in`.
+   Одна подпись на секцию, а не fade на каждом блоке: внутри `[data-reveal]`
+   марка вытягивает усы из ромба, дети поднимаются короткой лесенкой.
+   Взводится только с JS (`html.js`) — без скриптов всё просто видно.
+   `is-in` ставит `reveal.ts`. */
+.js [data-reveal] > * {
+  opacity: 0;
+  transform: translateY(14px);
+  /* The block comes out from behind an edge, it does not fade in: a mask is
+     what the owner's references do (Ballena, Bless, Pulso), and a hard edge
+     rising reads as print being pulled off a press, while a fade reads as a
+     slide deck. `clip-path` composites like `transform`.
+     Блок выходит из-за края, а не проявляется: маска — это то, что делают
+     референсы владельца (Ballena, Bless, Pulso), и жёсткий край, идущий вверх,
+     читается как оттиск, снимаемый со станка, а fade — как слайд презентации.
+     `clip-path` живёт на композиторе наравне с `transform`. */
+  clip-path: inset(100% 0 0 0);
+  transition:
+    opacity 0.5s var(--ease-out),
+    transform 0.7s var(--ease-out),
+    clip-path 0.7s var(--ease-out);
+}
+
+.js [data-reveal] > :nth-child(2) {
+  transition-delay: 0.07s;
+}
+
+.js [data-reveal] > :nth-child(3) {
+  transition-delay: 0.14s;
+}
+
+.js [data-reveal] > :nth-child(n + 4) {
+  transition-delay: 0.21s;
+}
+
+.js [data-reveal] .mark::before {
+  transform: scaleX(0);
+  transition: transform 0.9s var(--ease-out) 0.15s;
+}
+
+.js [data-reveal].is-in > * {
+  opacity: 1;
+  transform: none;
+  clip-path: inset(0 0 0 0);
+}
+
+/* Маску снимает `reveal.ts`, когда та отработала: `inset(0)` — это бокс
+   элемента, а дисплейная антиква с `line-height: 0.9` стоит выше него, и в
+   покое у «26» и «20 %» срезало верх.
+   The mask is dropped by `reveal.ts` once it has run: `inset(0)` is the
+   element's box, and display antiqua with `line-height: 0.9` stands above it,
+   so at rest «26» and «20 %» lost their tops. */
+.js [data-reveal].is-done > *,
+.js [data-reveal='self'].is-done {
+  clip-path: none;
+}
+
+/* The picture settles instead of standing still: it starts a touch larger and
+   comes to rest as the mask finishes, so the frame looks filmed, not pasted.
+   Slower than the mask on purpose — the settle must outlive the edge.
+   Кадр оседает, а не стоит: начинает чуть крупнее и приходит в покой к концу
+   маски, поэтому рамка выглядит снятой, а не вклеенной. Медленнее маски
+   намеренно: оседание должно пережить край. */
+.js [data-reveal] .media img {
+  scale: 1.07;
+  transition: scale 1.3s var(--ease-out);
+}
+
+.js [data-reveal].is-in .media img {
+  scale: 1;
+}
+
+.js [data-reveal].is-in .mark::before {
+  transform: none;
+}
+
+/* A grid reveals tile by tile: the eye runs along the row instead of meeting
+   a block that is already finished. The step is short and capped, so the last
+   tile never waits half a second for its turn. Only `opacity` and `transform`,
+   and the base rule above still supplies both.
+   Сетка появляется плитка за плиткой: взгляд идёт по ряду, а не встречает
+   готовый блок. Шаг короткий и с потолком, поэтому последняя плитка не ждёт
+   своей очереди полсекунды. Только `opacity` и `transform` — оба берутся из
+   базового правила выше. */
+.js [data-reveal='grid'] > :nth-child(2) {
+  transition-delay: 0.055s;
+}
+
+.js [data-reveal='grid'] > :nth-child(3) {
+  transition-delay: 0.11s;
+}
+
+.js [data-reveal='grid'] > :nth-child(4) {
+  transition-delay: 0.165s;
+}
+
+.js [data-reveal='grid'] > :nth-child(5) {
+  transition-delay: 0.22s;
+}
+
+.js [data-reveal='grid'] > :nth-child(6) {
+  transition-delay: 0.275s;
+}
+
+.js [data-reveal='grid'] > :nth-child(7) {
+  transition-delay: 0.33s;
+}
+
+.js [data-reveal='grid'] > :nth-child(n + 8) {
+  transition-delay: 0.385s;
+}
+
+/* a single element that reveals on its own (the poster): the block itself moves
+   одиночный элемент, который появляется сам (постер): едет сам блок */
+.js [data-reveal='self'] {
+  opacity: 0;
+  transform: translateY(28px);
+  clip-path: inset(100% 0 0 0);
+  transition:
+    opacity 0.6s var(--ease-out),
+    transform 0.9s var(--ease-out),
+    clip-path 0.9s var(--ease-out);
+}
+
+.js [data-reveal='self'] > * {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+.js [data-reveal='self'].is-in {
+  opacity: 1;
+  transform: none;
+  clip-path: inset(0 0 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] > *,
+  .js [data-reveal='self'],
+  .js [data-reveal] .media img,
+  .js [data-reveal] .mark::before {
+    opacity: 1;
+    transform: none;
+    scale: 1;
+    clip-path: none;
+    transition: none;
+  }
+}
+
+/* ── подпись-метка над строкой ──────────────────────────────────────────────
+   Small caps over a value («ТЕЛЕФОН», «ЧАСЫ»): the label form from the
+   contacts ledger, quieter than `.tag`.
+   Мелкие прописные над значением («ТЕЛЕФОН», «ЧАСЫ»): форма подписи из
+   реестра контактов, тише `.tag`. */
+.label {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: var(--text-5);
+}

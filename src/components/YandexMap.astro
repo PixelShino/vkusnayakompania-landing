@@ -1,67 +1,104 @@
 ---
 /**
- * Карта одна на две точки: виджет показывает карточку организации по `oid`,
- * а параметр `pt` игнорирует — свои метки умеет только статическое API.
- * Точку выбирают кнопки `[data-frame-target="map"]` в контактах.
+ * Map band: both venues on one map, always — the owner wants the two pins
+ * seen at once, so there is no «zoom to one venue» mode to fall out of. The
+ * map runs edge to edge with no frame (Green Park); the links to the venues'
+ * cards on Maps stand at the venues in Contacts, not on a bar here. With
+ * `PUBLIC_YANDEX_MAPS_KEY` it is the Yandex JS API 3.0 with a labelled marker
+ * per venue; without the key it is the iframe widget with a plain pin per
+ * venue (`pt`).
+ * Полоса карты: обе точки на одной карте, всегда — владелец хочет видеть две
+ * метки сразу, поэтому режима «одна точка крупно», из которого не вернуться,
+ * нет. Карта от края до края без рамки (Green Park); ссылки на карточки точек
+ * в Картах стоят у точек в контактах, а не на планке здесь. С ключом
+ * `PUBLIC_YANDEX_MAPS_KEY` — JS API 3.0 и подписанная метка на точку; без
+ * ключа — iframe-виджет с простой меткой на каждую точку (`pt`).
  */
-import { places, yandexOrgUrl, yandexWidgetUrl } from '../data/site';
+import { yandexOrgUrl, yandexWidgetUrl } from '../data/site';
+import type { Content } from '../lib/content.ts';
+
+interface Props {
+  content: Content;
+}
+
+const { places } = Astro.props.content;
+// ключ выдают в кабинете Яндекса и ограничивают доменами; пусто — ветка виджета
+const key = import.meta.env.PUBLIC_YANDEX_MAPS_KEY;
+
+const points = places.map((place) => ({
+  id: place.id,
+  n: place.n,
+  name: place.name,
+  lat: place.lat,
+  lng: place.lng,
+  href: yandexOrgUrl(place.yandex_org),
+}));
 ---
 
 <div class="map-block">
-  <p class="map-label">
-    На карте: <b data-frame-label="map">{places[0].addr}</b>
-  </p>
-
-  <div
-    class="map"
-    data-frame="map"
-    data-frame-title="Карта: «Вкусная компания» в Самаре"
-    data-src={yandexWidgetUrl(places[0])}
-  >
-    <div class="map__stub">
-      <p class="map__stub-label">Загружаем карту…</p>
-    </div>
-    <noscript>
-      <a
-        class="map__fallback"
-        href={yandexOrgUrl(places[0].yandexOrg)}
-        target="_blank"
-        rel="noopener"
+  {
+    key ? (
+      <div class="map" data-map data-places={JSON.stringify(points)}>
+        {/* the messenger panel stands on the top-right of the band from 768
+            (Contacts): the bounds fit keeps the pins clear of it
+            панель мессенджеров стоит на правом верхе полосы с 768 (контакты):
+            подгонка границ держит метки в стороне от неё */}
+        <div class="map__canvas" data-map-canvas />
+        <div class="map__stub">
+          <p class="map__stub-title display">Карта</p>
+          <p class="tag map__stub-label" data-map-note>
+            Загружаем карту…
+          </p>
+        </div>
+      </div>
+    ) : (
+      <div
+        class="map"
+        data-frame="map"
+        data-frame-title="Карта: «Вкусная компания» в Самаре"
+        data-src={yandexWidgetUrl(places)}
+        data-map-fit={JSON.stringify(points.map(({ lat, lng }) => ({ lat, lng })))}
       >
-        Открыть на Яндекс.Картах
-      </a>
-    </noscript>
-  </div>
+        <div class="map__stub">
+          <p class="map__stub-title display">Карта</p>
+          <p class="tag map__stub-label" data-frame-note>
+            Загружаем карту…
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  {/* JS off: nothing loads — the label is hidden, the venue links in Contacts stay
+      Без JS ничего не грузится — подпись гасим, ссылки у точек в контактах остаются */}
+  <noscript>
+    <style is:inline>
+      .map__stub-label {
+        display: none;
+      }
+    </style>
+  </noscript>
 </div>
 
 <style>
-  .map-block {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .map-label {
-    font-size: 12.5px;
-    color: var(--text-4);
-  }
-
-  .map-label b {
-    font-weight: 600;
-    color: var(--text);
-  }
-
+  /* Edge to edge, no frame: the same hatched plate as every photo stub sits
+     under the map until it lands. The height is the band's own, not a ratio —
+     on the phone a 4:3 frame gave a square, on the desktop a whole screen.
+     От края до края, без рамки: та же штрихованная плашка, что у фото-заглушек,
+     лежит под картой, пока та не встала. Высота своя, не пропорция — на
+     телефоне 4:3 давало квадрат, на десктопе целый экран. */
   .map {
     position: relative;
     width: 100%;
-    aspect-ratio: 4 / 3;
+    height: 360px;
     overflow: hidden;
-    border: 1px solid var(--line);
-    border-radius: var(--r-xl);
-    background: repeating-linear-gradient(45deg, #efe7da 0 12px, #eae1d2 12px 24px);
+    border-top: 1px solid var(--line);
+    background-color: var(--surface-photo);
+    background-image: var(--hatch);
   }
 
-  .map :global(iframe) {
+  .map :global(iframe),
+  .map__canvas {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -69,40 +106,95 @@ import { places, yandexOrgUrl, yandexWidgetUrl } from '../data/site';
     border: 0;
   }
 
-  .map__stub,
-  .map__fallback {
+  .map__stub {
     position: absolute;
     inset: 0;
-    display: grid;
-    place-items: center;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    padding: var(--gap);
+    text-align: center;
   }
 
-  .map__stub-label,
-  .map__fallback {
-    font-size: 13px;
-    color: var(--text-4);
-    text-decoration: none;
+  .map__stub-title {
+    font-size: 26px;
+    line-height: 1;
   }
 
+  /* `.tag` is the caps line under the title / `.tag` — прописная строка под заголовком */
   .map__stub-label {
-    padding: 8px 16px;
-    border: 1px solid var(--line);
-    border-radius: var(--r-pill);
-    background: var(--bg);
+    margin-top: 2px;
   }
 
   .map.is-loaded .map__stub {
     display: none;
   }
 
-  /* во всю ширину планшета квадратная карта съедает целый экран */
-  @media (min-width: 700px) and (max-width: 999px) {
+  /* полоски читаются как «ещё грузится» — у окончательного отказа фон спокойный */
+  .map.is-failed {
+    background: var(--surface);
+  }
+
+  @media (min-width: 768px) {
     .map {
-      aspect-ratio: 16 / 9;
+      height: 440px;
     }
   }
+
+  @media (min-width: 1200px) {
+    .map {
+      height: 520px;
+    }
+  }
+
+  /* ── метка карты: круг с номером точки и подпись адреса ──────────────────── */
+
+  /* метку ставят левым верхним углом на координату — сдвигаем круг на точку */
+  .map :global(.ymk) {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transform: translate(-14px, -14px);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .map :global(.ymk__dot) {
+    width: 28px;
+    height: 28px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border: 2px solid var(--bg);
+    border-radius: var(--r-pill);
+    /* заливка темнее `--terracotta`: на ней цифра цветом `--bg` даёт 6,3:1 */
+    background: var(--terracotta-text);
+    color: var(--bg);
+    font-weight: var(--fw-heading);
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .map :global(.ymk__label) {
+    padding: 5px 11px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-sq);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
 </style>
 
 <script>
+  // каждая ветка сама проверяет свою разметку: лишний модуль просто ничего не делает
+  // `map-fit` идёт первым: он правит адрес до того, как `lazy-frame` его смонтирует
+  import '../scripts/map-fit';
   import '../scripts/lazy-frame';
+  import '../scripts/yandex-map';
 </script>

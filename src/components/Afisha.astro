@@ -1,0 +1,364 @@
+---
+/**
+ * Current event as a spread where the poster is the hero: a large 2:3 frame
+ * that crosses both edges of the ink strip — it rises into the cream section
+ * above and hangs into the one below (Everest, Green Park: a frame over the
+ * seam, not inside a box). The strip paints its own cream bands top and
+ * bottom, so the poster never leaves the section and `content-visibility`
+ * stays intact. Beside it the event is pressed to its side under its own
+ * mark: the date as a display line, the title in antiqua, the venue as a
+ * label and the booking stamp. The caller decides whether to render it.
+ * Текущая афиша разворотом, где постер — главный: крупный кадр 2:3 пересекает
+ * оба края чернильной полосы — поднимается в кремовую секцию выше и свисает в
+ * ту, что ниже (Everest, Green Park: кадр поверх стыка, а не внутри коробки).
+ * Полоса сама красит кремовые поля сверху и снизу, поэтому постер не выходит
+ * из секции и `content-visibility` цела. Рядом событие прижато к своей
+ * стороне под своей маркой: дата дисплейной строкой, название антиквой, точка
+ * подписью и оттиск брони. Решение «показывать или нет» принимает вызывающий.
+ */
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import { typo, type Afisha } from '../lib/content';
+import Icon from './Icon.astro';
+
+interface Props {
+  afisha: Afisha;
+}
+
+const { afisha } = Astro.props;
+
+// dates come as YYYY-MM-DD; UTC keeps the day from sliding on a western builder
+// даты приходят как YYYY-MM-DD; UTC не даёт дню съехать на сборке западнее
+const date = new Date(`${afisha.date}T00:00:00Z`);
+const day = new Intl.DateTimeFormat('ru-RU', {
+  day: 'numeric',
+  month: 'long',
+  timeZone: 'UTC',
+}).format(date);
+const dayNumber = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', timeZone: 'UTC' }).format(date);
+// the long form minus the number leaves the month in the case the numeral needs
+// «26 сентября» минус число — родительный падеж месяца рядом с крупной цифрой
+const dayMonth = day.slice(dayNumber.length).trim();
+const time = afisha.time?.slice(0, 5);
+const datetime = time ? `${afisha.date}T${time}` : afisha.date;
+
+// a stub file is marked in the admin, and the mark reaches the page through alt
+// файл-заглушку помечают в админке, до страницы пометка доходит через `alt`
+const stub = /заглушк/i.test(afisha.poster.alt);
+---
+
+<section class="section strip-ink af-sec" id="afisha">
+  <div class="container af">
+    <figure class="af__poster" data-reveal="self">
+      {
+        stub ? (
+          <div class="stub af__stub">
+            <span class="stub__title">Постер афиши</span>
+            <span class="stub__meta">заглушка · заменяется в админке</span>
+          </div>
+        ) : (
+          <Image
+            src={afisha.poster.src as ImageMetadata}
+            width={afisha.poster.width}
+            height={afisha.poster.height}
+            alt={afisha.poster.alt}
+            widths={[360, 560, 760, 960, 1200]}
+            sizes="(min-width: 1200px) 466px, (min-width: 768px) 360px, 92vw"
+            format="avif"
+            quality={56}
+            loading="lazy"
+            decoding="async"
+          />
+        )
+      }
+    </figure>
+
+    <div class="af__body" data-reveal>
+      <span class="mark af__mark" aria-hidden="true"></span>
+      <h2 class="display-caps af__h">Афиша</h2>
+
+      <time datetime={datetime} class="af__date">
+        <span class="af__day display">{dayNumber}</span>
+        <span class="af__dm">
+          {dayMonth}
+          {
+            time && (
+              <>
+                <span class="af__dot" aria-hidden="true">
+                  {' · '}
+                </span>
+                <span class="af__time tnum">{time}</span>
+              </>
+            )
+          }
+        </span>
+      </time>
+
+      <h3 class="af__title display">{afisha.title}</h3>
+
+      <p class="tag af__place">
+        {afisha.place.name}
+        <span class="af__dot" aria-hidden="true">{' · '}</span>
+        {afisha.place.kind}
+      </p>
+
+      {afisha.text && <p class="lead af__text">{typo(afisha.text)}</p>}
+
+      <div class="af__actions">
+        <button
+          type="button"
+          class="btn btn--light"
+          data-book={`Бронь стола: ${afisha.place.street}`}
+          data-book-note={`${afisha.title}, ${day}${time ? `, ${time}` : ''}`}
+        >
+          <Icon name="chair" class="ico--pop" />
+          Забронировать стол
+        </button>
+        {
+          afisha.link && (
+            <a
+              class="tlink tlink--go tlink--out af__more"
+              href={afisha.link}
+              target="_blank"
+              rel="noopener"
+            >
+              <span>Подробнее</span>
+            </a>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* The strip is three bands: cream on top, ink in the middle, cream below.
+     The poster stands from the top edge to the bottom edge and so crosses both
+     seams; the copy lives in the ink band with the section padding inside it.
+     `--out` is how far the poster reaches beyond the ink on each side.
+     Полоса из трёх поясов: крем сверху, чернила посередине, крем снизу. Постер
+     стоит от верхнего края до нижнего и потому пересекает оба стыка; текст живёт
+     в чернильном поясе с отступом секции внутри него. `--out` — насколько постер
+     выходит за чернила с каждой стороны. */
+  .af-sec {
+    --out-top: 44px;
+    --out-bot: 0px;
+    padding-block: 0;
+    background: linear-gradient(
+      to bottom,
+      var(--bg) var(--out-top),
+      var(--ink) var(--out-top),
+      var(--ink) calc(100% - var(--out-bot)),
+      var(--bg) calc(100% - var(--out-bot))
+    );
+  }
+
+  .af {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 26px;
+  }
+
+  /* the poster keeps its natural ratio, so a real shot drops in without a shift
+     постер идёт в своей пропорции: подстановка кадра ничего не сдвинет */
+  .af__poster {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    aspect-ratio: 2 / 3;
+    border-radius: var(--r-sq);
+    overflow: hidden;
+    background: var(--surface-photo);
+  }
+
+  .af__poster :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    outline: 1px solid rgb(0 0 0 / 0.08);
+    outline-offset: -1px;
+  }
+
+  /* the stub is a finished plate with a caption, never an empty frame
+     заглушка — оформленная плашка с надписью, а не пустая рамка */
+  .af__stub {
+    height: 100%;
+  }
+
+  /* phone: the head on the axis under the poster, the copy centred with it
+     телефон: заголовок по оси под постером, текст по центру вместе с ним */
+  .af__body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    padding-bottom: var(--sec-pad);
+    text-align: center;
+  }
+
+  .af__h {
+    margin-top: 18px;
+  }
+
+  /* The date as a line, not a panel: the day numeral in the display face, the
+     month and time in small caps beside it, the time in lightened terracotta.
+     Дата строкой, а не панелью: число антиквой, рядом месяц и время мелкими
+     прописными, время — осветлённой терракотой. */
+  .af__date {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .af__day {
+    font-size: clamp(48px, 11vw, 60px);
+    line-height: 0.9;
+    color: var(--on-ink);
+  }
+
+  .af__dm {
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    line-height: 1.3;
+    text-transform: uppercase;
+    color: var(--on-ink);
+  }
+
+  /* терракота на чернилах только осветлённая: базовая даёт 3,2:1 */
+  .af__time {
+    color: var(--terracotta-on-ink);
+  }
+
+  .af__dot {
+    opacity: 0.55;
+  }
+
+  .af__title {
+    margin-top: 14px;
+    font-size: clamp(28px, 7vw, 34px);
+    line-height: 1.1;
+    color: var(--on-ink);
+    text-wrap: balance;
+  }
+
+  .af__place {
+    margin-top: 10px;
+    color: var(--on-ink-2);
+  }
+
+  .af__text {
+    margin-top: 14px;
+    color: var(--on-ink-2);
+  }
+
+  .af__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px 24px;
+    margin-top: 22px;
+  }
+
+  /* the text link on ink: cream, terracotta on hover
+     текстовая ссылка на чернилах: кремовая, на hover терракота */
+  .af__more {
+    color: var(--on-ink);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .af__more:hover {
+      color: var(--terracotta-on-ink);
+    }
+  }
+
+  /* на телефоне кнопка во всю ширину колонки */
+  @media (max-width: 767px) {
+    .af__actions .btn {
+      width: 100%;
+    }
+  }
+
+  /* From 768 the spread: the poster stands the full height of the strip and
+     crosses both seams, the copy is pressed to its side, vertically centred in
+     the ink band. `--h` sets the poster; the ink band is `--h` minus both
+     overhangs, the copy keeps the section padding inside it.
+     С 768 разворот: постер стоит на всю высоту полосы и пересекает оба стыка,
+     текст прижат к своей стороне и стоит по центру чернильного пояса. `--h`
+     задаёт постер; чернильный пояс — `--h` минус оба выступа, текст держит
+     внутри него отступ секции. */
+  @media (min-width: 768px) {
+    .af-sec {
+      --out-top: 56px;
+      --out-bot: 56px;
+      --h: 560px;
+    }
+
+    .af {
+      grid-template-columns: calc(var(--h) * 2 / 3) minmax(0, 1fr);
+      align-items: center;
+      column-gap: 40px;
+    }
+
+    .af__poster {
+      height: var(--h);
+      aspect-ratio: auto;
+    }
+
+    .af__body {
+      align-items: flex-start;
+      padding-block: calc(var(--out-top) + var(--sec-pad)) calc(var(--out-bot) + var(--sec-pad));
+      text-align: left;
+    }
+
+    /* the mark sits over its column, not on the page axis (Delivery does the same)
+       марка стоит над своей колонкой, а не на оси страницы (так же у доставки) */
+    .af__mark {
+      margin-inline: 0;
+    }
+
+    .af__h {
+      margin-top: 16px;
+    }
+
+    .af__date {
+      margin-top: 28px;
+    }
+
+    .af__title {
+      font-size: 32px;
+    }
+
+    .af__actions {
+      justify-content: flex-start;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .af-sec {
+      --out-top: 72px;
+      --out-bot: 72px;
+      --h: 700px;
+    }
+
+    .af {
+      column-gap: 72px;
+    }
+
+    .af__day {
+      font-size: 72px;
+    }
+
+    .af__title {
+      font-size: 40px;
+    }
+
+    /* the lead stays a paragraph, not a line across the whole strip */
+    /* лид остаётся абзацем, а не строкой через всю полосу */
+    .af__text {
+      max-width: 48ch;
+    }
+  }
+</style>
