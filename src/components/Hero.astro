@@ -10,6 +10,7 @@
  * про торт свисает через край в следующую секцию.
  */
 import Photo from './Photo.astro';
+import Icon from './Icon.astro';
 import pinIcon from '../assets/icons/pin.svg?raw';
 import clockIcon from '../assets/icons/clock.svg?raw';
 import phoneIcon from '../assets/icons/phone.svg?raw';
@@ -53,6 +54,7 @@ const stickerExternal = cakes.length === 0;
 
     <div class="hero__cta">
       <button type="button" class="btn btn--light" data-book="Бронь стола">
+        <Icon name="chair" class="ico--pop" />
         Забронировать стол
       </button>
       <a
@@ -61,6 +63,7 @@ const stickerExternal = cakes.length === 0;
         target="_blank"
         rel="noopener"
       >
+        <Icon name="delivery" class="ico--go" />
         Заказать доставку
       </a>
     </div>
@@ -116,11 +119,31 @@ const stickerExternal = cakes.length === 0;
             скринридера — украшение. */}
         <svg class="hero__seal" viewBox="0 0 128 128" aria-hidden="true" focusable="false">
           <defs>
-            <path id="hero-seal-ring" d="M64 64m-46 0a46 46 0 1 1 92 0a46 46 0 1 1-92 0"></path>
+            {/* two arcs, both read left to right: a single ring turned the
+                bottom half upside down and the promise stopped being legible
+                две дуги, обе читаются слева направо: на одном кольце нижняя
+                половина вставала вверх ногами и обещание переставало читаться */}
+            <path id="hero-arc-top" d="M20 64a44 44 0 0 1 88 0" fill="none"></path>
+            <path id="hero-arc-bottom" d="M22.5 64a41.5 41.5 0 0 0 83 0" fill="none"></path>
           </defs>
+          <circle
+            class="hero__seal-ring"
+            cx="64"
+            cy="64"
+            r="57"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1"
+            stroke-dasharray="1.5 7"
+            stroke-linecap="round"></circle>
           <text class="hero__seal-text">
-            <textPath href="#hero-seal-ring" startOffset="0"
-              >ТОРТ НА ЗАКАЗ · ЗА 48 ЧАСОВ · </textPath
+            <textPath href="#hero-arc-top" startOffset="50%" text-anchor="middle"
+              >ТОРТ НА ЗАКАЗ</textPath
+            >
+          </text>
+          <text class="hero__seal-text">
+            <textPath href="#hero-arc-bottom" startOffset="50%" text-anchor="middle"
+              >ЗА 48 ЧАСОВ</textPath
             >
           </text>
         </svg>
@@ -478,9 +501,7 @@ const stickerExternal = cakes.length === 0;
     place-items: center;
     border-radius: var(--r-pill);
     background: var(--olive-dark);
-    box-shadow:
-      inset 0 0 0 5px var(--olive-dark),
-      inset 0 0 0 6px rgb(255 250 237 / 0.55);
+
     color: var(--bg);
     text-decoration: none;
     transition-property: scale, rotate;
@@ -501,7 +522,19 @@ const stickerExternal = cakes.length === 0;
     inset: 0;
     width: 100%;
     height: 100%;
-    animation: seal-turn 26s linear infinite;
+  }
+
+  /* The promise stands still and is read; the dashed ring turns instead. A
+     turning ring of words put half the line upside down at every moment.
+     Обещание стоит и читается, а поворачивается пунктирное кольцо. Вращение
+     самих слов в любой момент держало половину строки вверх ногами. */
+  /* заливка и обводка стоят атрибутами на самом `circle`: так они не зависят
+     от того, доехал ли до браузера scoped-стиль компонента */
+  .hero__seal-ring {
+    opacity: 0.55;
+    transform-box: view-box;
+    transform-origin: 64px 64px;
+    animation: seal-turn 34s linear infinite;
   }
 
   .hero__seal-text {
@@ -555,7 +588,7 @@ const stickerExternal = cakes.length === 0;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .hero__seal {
+    .hero__seal-ring {
       animation: none;
     }
   }

@@ -9,6 +9,9 @@
  * короткой лесенкой). Один наблюдатель, один раз на блок, повторно не взводится.
  * Без IntersectionObserver и при reduced-motion всё показывается сразу.
  */
+/** дольше самой длинной пары «задержка + длительность» в `global.css` */
+const DONE = 1500;
+
 const blocks = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
 
 const showAll = () => blocks.forEach((block) => block.classList.add('is-in'));
@@ -21,6 +24,13 @@ if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: 
       for (const entry of entries) {
         if (!entry.isIntersecting) continue;
         entry.target.classList.add('is-in');
+        // The mask is dropped once it has finished. `clip-path: inset(0)` is the
+        // element's own box, and display antiqua with `line-height: 0.9` stands
+        // 17–27 px above it — at rest the mask cut the tops off «26» and «20 %».
+        // Маска снимается, когда отработала. `clip-path: inset(0)` — это бокс
+        // самого элемента, а дисплейная антиква с `line-height: 0.9` выходит за
+        // него на 17–27 px: в покое маска срезала верх у «26» и «20 %».
+        window.setTimeout(() => entry.target.classList.add('is-done'), DONE);
         observer.unobserve(entry.target);
       }
     },

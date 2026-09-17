@@ -350,6 +350,74 @@ h3 {
   flex: none;
 }
 
+/* ── иконка ────────────────────────────────────────────────────────────────
+   One set for the whole page: Solar Linear, 24 × 24, `currentColor`, stroke
+   1.5 — the weight of a 600 label beside it. The size follows the type, so an
+   icon in a small button and one in a line of body text stay in proportion.
+   Один набор на всю страницу: Solar Linear, 24 × 24, `currentColor`, обводка
+   1,5 — вес подписи 600 рядом. Размер идёт за кеглем, поэтому значок в мелкой
+   кнопке и значок в строке текста остаются в пропорции. */
+.ico {
+  flex: none;
+  display: inline-flex;
+  width: 1.3em;
+  height: 1.3em;
+}
+
+.ico > svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+}
+
+.btn .ico {
+  width: 18px;
+  height: 18px;
+  margin-inline-start: -2px;
+}
+
+.btn--sm .ico {
+  width: 16px;
+  height: 16px;
+}
+
+/* The icon answers the press and the hover, each in its own direction: the
+   chair settles, the van drives off, the chevron drops, the phone tilts.
+   This is what makes a line icon read as alive instead of printed.
+   Значок отвечает на нажатие и наведение, каждый в свою сторону: кресло
+   оседает, фургон уезжает, шеврон падает, трубка наклоняется. Это и делает
+   линейную иконку живой, а не напечатанной. */
+.ico {
+  transition-property: translate, rotate, scale;
+  transition-duration: 260ms;
+  transition-timing-function: var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover .ico--go,
+  a:hover > .ico--go {
+    translate: 3px 0;
+  }
+
+  .btn:hover .ico--down {
+    translate: 0 3px;
+  }
+
+  .btn:hover .ico--tilt {
+    rotate: -10deg;
+  }
+
+  .btn:hover .ico--pop {
+    scale: 1.12;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ico {
+    transition: none;
+  }
+}
+
 /* главное действие — оливковая заливка: кремовый на ней 4,65:1 */
 .btn--primary {
   background: var(--olive);
@@ -971,6 +1039,17 @@ h2,
   opacity: 1;
   transform: none;
   clip-path: inset(0 0 0 0);
+}
+
+/* Маску снимает `reveal.ts`, когда та отработала: `inset(0)` — это бокс
+   элемента, а дисплейная антиква с `line-height: 0.9` стоит выше него, и в
+   покое у «26» и «20 %» срезало верх.
+   The mask is dropped by `reveal.ts` once it has run: `inset(0)` is the
+   element's box, and display antiqua with `line-height: 0.9` stands above it,
+   so at rest «26» and «20 %» lost their tops. */
+.js [data-reveal].is-done > *,
+.js [data-reveal='self'].is-done {
+  clip-path: none;
 }
 
 /* The picture settles instead of standing still: it starts a touch larger and

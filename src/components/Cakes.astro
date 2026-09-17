@@ -8,6 +8,7 @@
  * сетка с доминантой в две строки растягивала одну заглушку до 1200 px.
  */
 import Photo from './Photo.astro';
+import Icon from './Icon.astro';
 import { isPlaceholder, type Cake, type Content } from '../lib/content.ts';
 
 interface Props {
@@ -81,6 +82,7 @@ const SIZES = '(min-width: 1200px) 309px, (min-width: 768px) 243px, 45vw';
         aria-expanded="false"
         aria-controls="cakes-grid"
       >
+        <Icon name="chevron-down" class="ico--down" />
         Показать ещё
       </button>
     </div>

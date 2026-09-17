@@ -19,6 +19,7 @@
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import { typo, type Afisha } from '../lib/content';
+import Icon from './Icon.astro';
 
 interface Props {
   afisha: Afisha;
@@ -110,6 +111,7 @@ const stub = /заглушк/i.test(afisha.poster.alt);
           data-book={`Бронь стола: ${afisha.place.street}`}
           data-book-note={`${afisha.title}, ${day}${time ? `, ${time}` : ''}`}
         >
+          <Icon name="chair" class="ico--pop" />
           Забронировать стол
         </button>
         {

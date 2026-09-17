@@ -15,6 +15,7 @@
  * страницы. Направление без меню сохраняет свою строку.
  */
 import { menuFor } from '../lib/select';
+import Icon from './Icon.astro';
 import { typo, type Content, type Direction } from '../lib/content';
 
 interface Props {
@@ -45,6 +46,7 @@ const cards = KEYS.map((key) => directions.find((item) => item.key === key))
     {home.menu_text && <p class="mn__lead">{typo(home.menu_text)}</p>}
     <div class="mn__cta">
       <a class="btn btn--light" href={settings.shop_url} target="_blank" rel="noopener">
+        <Icon name="app" class="ico--tilt" />
         Заказать в приложении
       </a>
     </div>
