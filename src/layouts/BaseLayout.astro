@@ -72,7 +72,8 @@ const fontFaces = `
   line-gap-override: 0%;
 }
 `;
-import { getImage } from 'astro:assets';
+import { getImage, Image } from 'astro:assets';
+import logo from '../assets/logo.png';
 import BookingDialog from '../components/BookingDialog.astro';
 import StickyBar from '../components/StickyBar.astro';
 import { BRAND, schemaHours, yandexOrgUrl } from '../data/site';
@@ -169,6 +170,17 @@ const jsonLd = {
     <link rel="icon" href={asset('favicon.svg')} type="image/svg+xml" />
     <meta name="theme-color" content="#FFFAED" />
 
+    {/* `js` unlocks the scroll reveals (without it every block stays visible);
+        the opening curtain runs once per tab — a repeat load skips it.
+        `js` включает появление при прокрутке (без него всё видно сразу);
+        занавес идёт один раз на вкладку — повторная загрузка его пропускает */}
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      try {
+        if (sessionStorage.getItem('vk-opened')) document.documentElement.classList.add('no-curtain');
+        else sessionStorage.setItem('vk-opened', '1');
+      } catch {}
+    </script>
     <style is:global set:html={fontFaces}></style>
     <link rel="preload" as="font" type="font/woff2" href={montserratCyrillic} crossorigin />
     <link rel="preload" href={prataCyrillic} as="font" type="font/woff2" crossorigin />
@@ -205,6 +217,13 @@ const jsonLd = {
     }
   </head>
   <body>
+    {/* Opening curtain: ink with the logo, lifts on its own — never waits for
+        anything, so it costs the first paint nothing (CSS only, see global.css).
+        Занавес открытия: чернила с логотипом, поднимается сам — ничего не ждёт,
+        поэтому первой отрисовке ничего не стоит (только CSS, см. global.css) */}
+    <div class="curtain" aria-hidden="true">
+      <Image src={logo} alt="" width={440} height={192} class="curtain__logo" loading="eager" />
+    </div>
     <a class="skip-link" href="#main">К основному содержимому</a>
     <slot />
 
@@ -229,6 +248,9 @@ const jsonLd = {
     }
 
     <StickyBar settings={settings} />
+    <script>
+      import '../scripts/reveal';
+    </script>
     <BookingDialog settings={settings} places={places} note={home.contacts_note} />
   </body>
 </html>

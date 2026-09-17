@@ -94,7 +94,7 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
 ---
 
 <section class="section dir" id="about">
-  <div class="container dir__head">
+  <div class="container dir__head" data-reveal>
     <span class="mark" aria-hidden="true"></span>
     <h2 class="display-caps">{home.about_title}</h2>
     {home.about_text && <p class="lead dir__lead">{typo(home.about_text)}</p>}

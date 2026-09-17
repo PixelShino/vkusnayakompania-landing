@@ -133,6 +133,71 @@ const stickerExternal = cakes.length === 0;
 
   .hero > :global(.hero__photo img) {
     object-position: center 40%;
+    /* a slow settle from 1.06 to 1 on load: transform only, the frame keeps
+       its size for LCP; reduced motion collapses it to an instant
+       медленный сход с 1.06 к 1 на загрузке: только transform, кадр держит
+       размер для LCP; reduced motion сжимает его до мгновения */
+    animation: hero-settle 7s var(--ease-out) both;
+  }
+
+  @keyframes hero-settle {
+    from {
+      transform: scale(1.06);
+    }
+  }
+
+  /* Opening: the text block rises as the curtain lifts (global.css), the venue
+     strip and the sticker follow. Keyframes run once on load; a repeat visit
+     (`html.no-curtain`) starts them without the wait.
+     Открытие: текстовый блок поднимается, пока уходит занавес (global.css),
+     полоса точек и стикер следом. Keyframes идут один раз на загрузке;
+     повторный визит (`html.no-curtain`) запускает их без ожидания. */
+  .hero__in > *,
+  .hero__bar,
+  .hero__sticker {
+    animation: hero-rise 0.8s var(--ease-out) both;
+    animation-delay: calc(var(--t0, 0.9s) + var(--i, 0) * 0.09s);
+  }
+
+  .hero__in > :nth-child(2) {
+    --i: 1;
+  }
+
+  .hero__in > :nth-child(3) {
+    --i: 2;
+  }
+
+  .hero__in > :nth-child(4) {
+    --i: 3;
+  }
+
+  .hero__bar {
+    --i: 4;
+  }
+
+  .hero__sticker {
+    --i: 5;
+  }
+
+  :global(.no-curtain) .hero__in > *,
+  :global(.no-curtain) .hero__bar,
+  :global(.no-curtain) .hero__sticker {
+    --t0: 0.1s;
+  }
+
+  @keyframes hero-rise {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__in > *,
+    .hero__bar,
+    .hero__sticker {
+      animation-delay: 0s;
+    }
   }
 
   /* The frame stays a photo: a light base tint over the whole shot, a plateau

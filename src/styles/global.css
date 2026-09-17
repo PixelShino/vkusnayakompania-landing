@@ -51,8 +51,10 @@
   --ls-heading: -0.02em;
   --ls-display: -0.005em;
 
-  /* движение: одна кривая на вход диалога, полосы и нажатие кнопки */
+  /* движение: `--ease-out` на входы и нажатия, `--ease-in-out` — на то, что
+     едет по экрану (занавес) */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 
   /* Hatch for placeholder plates: a flat fill at this size reads as a hole in
      the layout, the hatch reads as a slot reserved for a photo. Alpha is low
@@ -157,6 +159,12 @@ html {
       overlay, display !important;
     transition-duration: 150ms !important;
     scroll-behavior: auto !important;
+  }
+
+  /* the curtain still lifts at once — but with no wait before it
+     занавес всё равно уходит сразу — но без паузы перед этим */
+  .curtain {
+    animation-delay: 0s !important;
   }
 }
 
@@ -761,4 +769,142 @@ h2,
   height: 1px;
   background: currentColor;
   opacity: 0.35;
+}
+
+
+/* ── занавес открытия ─────────────────────────────────────────────────────
+   An ink sheet with the logo over the page for the first moment, then it
+   lifts on its own. CSS only, so it never waits for the network and costs the
+   first paint nothing; `html.no-curtain` (set from sessionStorage) skips it on
+   a repeat load. Transform and visibility only — 60 fps on a phone.
+   Чернильный лист с логотипом поверх страницы на первое мгновение, потом
+   уходит сам. Только CSS, поэтому ничего не ждёт от сети и первой отрисовке
+   ничего не стоит; `html.no-curtain` (по sessionStorage) пропускает его при
+   повторной загрузке. Только transform и visibility — 60 fps на телефоне. */
+.curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+  pointer-events: none;
+  animation: curtain-lift 0.8s var(--ease-in-out) 0.65s forwards;
+}
+
+.curtain__logo {
+  width: clamp(150px, 26vw, 220px);
+  height: auto;
+  /* the dark logo goes cream on ink, like in the header over the photo
+     тёмный логотип на чернилах становится кремовым, как в шапке над фото */
+  filter: brightness(0) invert(1);
+  opacity: 0.92;
+  animation: curtain-logo 0.5s var(--ease-out) both;
+}
+
+.no-curtain .curtain {
+  display: none;
+}
+
+@keyframes curtain-lift {
+  to {
+    transform: translateY(-100%);
+    visibility: hidden;
+  }
+}
+
+@keyframes curtain-logo {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* ── появление при прокрутке ──────────────────────────────────────────────
+   One signature per section, not a fade on every block: inside a
+   `[data-reveal]` block the mark draws its whiskers out from the diamond and
+   the children rise in a short stagger. Armed only with JS (`html.js`) — with
+   scripts off everything is simply visible. `reveal.ts` sets `is-in`.
+   Одна подпись на секцию, а не fade на каждом блоке: внутри `[data-reveal]`
+   марка вытягивает усы из ромба, дети поднимаются короткой лесенкой.
+   Взводится только с JS (`html.js`) — без скриптов всё просто видно.
+   `is-in` ставит `reveal.ts`. */
+.js [data-reveal] > * {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.6s var(--ease-out),
+    transform 0.6s var(--ease-out);
+}
+
+.js [data-reveal] > :nth-child(2) {
+  transition-delay: 0.07s;
+}
+
+.js [data-reveal] > :nth-child(3) {
+  transition-delay: 0.14s;
+}
+
+.js [data-reveal] > :nth-child(n + 4) {
+  transition-delay: 0.21s;
+}
+
+.js [data-reveal] .mark::before {
+  transform: scaleX(0);
+  transition: transform 0.9s var(--ease-out) 0.15s;
+}
+
+.js [data-reveal].is-in > * {
+  opacity: 1;
+  transform: none;
+}
+
+.js [data-reveal].is-in .mark::before {
+  transform: none;
+}
+
+/* a single element that reveals on its own (the poster): the block itself moves
+   одиночный элемент, который появляется сам (постер): едет сам блок */
+.js [data-reveal='self'] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.9s var(--ease-out),
+    transform 0.9s var(--ease-out);
+}
+
+.js [data-reveal='self'] > * {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+.js [data-reveal='self'].is-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] > *,
+  .js [data-reveal='self'],
+  .js [data-reveal] .mark::before {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ── подпись-метка над строкой ──────────────────────────────────────────────
+   Small caps over a value («ТЕЛЕФОН», «ЧАСЫ»): the label form from the
+   contacts ledger, quieter than `.tag`.
+   Мелкие прописные над значением («ТЕЛЕФОН», «ЧАСЫ»): форма подписи из
+   реестра контактов, тише `.tag`. */
+.label {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: var(--text-5);
 }
