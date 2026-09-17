@@ -877,9 +877,19 @@ h2,
 .js [data-reveal] > * {
   opacity: 0;
   transform: translateY(14px);
+  /* The block comes out from behind an edge, it does not fade in: a mask is
+     what the owner's references do (Ballena, Bless, Pulso), and a hard edge
+     rising reads as print being pulled off a press, while a fade reads as a
+     slide deck. `clip-path` composites like `transform`.
+     Блок выходит из-за края, а не проявляется: маска — это то, что делают
+     референсы владельца (Ballena, Bless, Pulso), и жёсткий край, идущий вверх,
+     читается как оттиск, снимаемый со станка, а fade — как слайд презентации.
+     `clip-path` живёт на композиторе наравне с `transform`. */
+  clip-path: inset(100% 0 0 0);
   transition:
-    opacity 0.6s var(--ease-out),
-    transform 0.6s var(--ease-out);
+    opacity 0.5s var(--ease-out),
+    transform 0.7s var(--ease-out),
+    clip-path 0.7s var(--ease-out);
 }
 
 .js [data-reveal] > :nth-child(2) {
@@ -902,6 +912,22 @@ h2,
 .js [data-reveal].is-in > * {
   opacity: 1;
   transform: none;
+  clip-path: inset(0 0 0 0);
+}
+
+/* The picture settles instead of standing still: it starts a touch larger and
+   comes to rest as the mask finishes, so the frame looks filmed, not pasted.
+   Slower than the mask on purpose — the settle must outlive the edge.
+   Кадр оседает, а не стоит: начинает чуть крупнее и приходит в покой к концу
+   маски, поэтому рамка выглядит снятой, а не вклеенной. Медленнее маски
+   намеренно: оседание должно пережить край. */
+.js [data-reveal] .media img {
+  scale: 1.07;
+  transition: scale 1.3s var(--ease-out);
+}
+
+.js [data-reveal].is-in .media img {
+  scale: 1;
 }
 
 .js [data-reveal].is-in .mark::before {
@@ -949,9 +975,11 @@ h2,
 .js [data-reveal='self'] {
   opacity: 0;
   transform: translateY(28px);
+  clip-path: inset(100% 0 0 0);
   transition:
-    opacity 0.9s var(--ease-out),
-    transform 0.9s var(--ease-out);
+    opacity 0.6s var(--ease-out),
+    transform 0.9s var(--ease-out),
+    clip-path 0.9s var(--ease-out);
 }
 
 .js [data-reveal='self'] > * {
@@ -963,14 +991,18 @@ h2,
 .js [data-reveal='self'].is-in {
   opacity: 1;
   transform: none;
+  clip-path: inset(0 0 0 0);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .js [data-reveal] > *,
   .js [data-reveal='self'],
+  .js [data-reveal] .media img,
   .js [data-reveal] .mark::before {
     opacity: 1;
     transform: none;
+    scale: 1;
+    clip-path: none;
     transition: none;
   }
 }
