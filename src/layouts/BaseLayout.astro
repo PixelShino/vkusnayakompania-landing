@@ -41,6 +41,36 @@ const fontFaces = `
   src: url(${prataLatin}) format('woff2');
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
 }
+/* Metric-matched stand-ins for the swap window: Georgia and Arial are scaled
+   to Prata's and Montserrat's average advance width, so the fallback takes the
+   same space and the layout does not jump when the web font lands. Values are
+   measured from the font files (fontTools): size-adjust = avg width ratio over
+   a Russian-frequency sample, ascent/descent = the web font's, divided by the
+   size-adjust. Without this the wider fallback pushed the «образец» tag onto
+   the menu name for the first second of every visit.
+   Запасные начертания под метрики: Georgia и Arial масштабированы к средней
+   ширине знака Prata и Montserrat, поэтому занимают то же место, и раскладка
+   не прыгает, когда веб-шрифт долетает. Значения сняты с файлов шрифтов
+   (fontTools): size-adjust — отношение средних ширин по частотам русских букв,
+   ascent/descent — метрики веб-шрифта, поделённые на size-adjust. Без этого
+   более широкий запасной шрифт наезжал ярлыком «образец» на название меню
+   первую секунду каждого визита. */
+@font-face {
+  font-family: 'Prata Fallback';
+  src: local('Georgia');
+  size-adjust: 108.7%;
+  ascent-override: 91.4%;
+  descent-override: 33.3%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Montserrat Fallback';
+  src: local('Arial');
+  size-adjust: 109.6%;
+  ascent-override: 88.3%;
+  descent-override: 22.9%;
+  line-gap-override: 0%;
+}
 `;
 import { getImage } from 'astro:assets';
 import BookingDialog from '../components/BookingDialog.astro';

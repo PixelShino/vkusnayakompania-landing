@@ -41,8 +41,12 @@
   --terracotta-on-ink: #e2a066;
 
   /* типографика: антиква несёт характер, гротеск — интерфейс */
-  --font: 'Montserrat Variable', 'Montserrat', system-ui, sans-serif;
-  --font-display: 'Prata', 'Georgia', 'Times New Roman', serif;
+  /* the «Fallback» faces are Georgia and Arial scaled to the web fonts' metrics
+     (BaseLayout): the swap does not move the layout
+     начертания «Fallback» — Georgia и Arial под метрики веб-шрифтов
+     (BaseLayout): подмена не двигает раскладку */
+  --font: 'Montserrat Variable', 'Montserrat Fallback', system-ui, sans-serif;
+  --font-display: 'Prata', 'Prata Fallback', 'Georgia', serif;
   --fw-heading: 800;
   --ls-heading: -0.02em;
   --ls-display: -0.005em;
