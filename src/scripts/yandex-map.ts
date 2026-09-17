@@ -5,7 +5,7 @@
  * and `YMapMarker(props, element)`.
  * Карта на две точки, всегда обе в кадре — режима «одна точка крупно» нет.
  * Скрипт подключается лениво, когда контейнер подходит к экрану; не загрузился
- * за 8 секунд — остаются ссылки на карточки организаций на планке над картой.
+ * за 8 секунд — остаются ссылки на карточки организаций у точек в контактах.
  */
 
 /** Точка для метки: адрес карточки организации приходит из контента готовым. */
@@ -33,6 +33,16 @@ declare const ymaps3: {
 const KEY = import.meta.env.PUBLIC_YANDEX_MAPS_KEY;
 /** отступ от краёв, чтобы метки не липли к рамке: [сверху, справа, снизу, слева] */
 const MARGIN = [40, 40, 40, 40];
+/**
+ * From 768 the messenger panel stands on the top-right corner of the band
+ * (Contacts.astro: 340 px wide from 768, 380 px from 1200, 64–72 px of it
+ * over the map); the fit keeps both pins out from under it.
+ * С 768 панель мессенджеров стоит на правом верхнем углу полосы
+ * (Contacts.astro: 340 px с 768, 380 px с 1200, из них 64–72 px на карте);
+ * подгонка держит обе метки вне её.
+ */
+const marginFor = (width: number) =>
+  width >= 1200 ? [140, 480, 40, 40] : width >= 768 ? [120, 420, 40, 40] : MARGIN;
 const TIMEOUT = 8000;
 
 const loadApi = () =>
@@ -77,7 +87,7 @@ const build = async (holder: HTMLElement) => {
     await loadApi();
     await ymaps3.ready;
   } catch {
-    // карты нет — на планке над ней остаются ссылки на карточки точек
+    // карты нет — у точек в контактах остаются ссылки на их карточки
     holder.classList.add('is-failed');
     if (note) note.textContent = 'Карта не загрузилась';
     return;
@@ -92,7 +102,7 @@ const build = async (holder: HTMLElement) => {
     [Math.max(...lngs), Math.min(...lats)],
   ];
 
-  const map = new YMap(canvas, { location: { bounds }, margin: MARGIN });
+  const map = new YMap(canvas, { location: { bounds }, margin: marginFor(window.innerWidth) });
   map.addChild(new YMapDefaultSchemeLayer());
   map.addChild(new YMapDefaultFeaturesLayer());
 
