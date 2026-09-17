@@ -57,6 +57,7 @@ const points = places.map((place) => ({
         data-frame="map"
         data-frame-title="Карта: «Вкусная компания» в Самаре"
         data-src={yandexWidgetUrl(places)}
+        data-map-fit={JSON.stringify(points.map(({ lat, lng }) => ({ lat, lng })))}
       >
         <div class="map__stub">
           <p class="map__stub-title display">Карта</p>
@@ -192,6 +193,8 @@ const points = places.map((place) => ({
 
 <script>
   // каждая ветка сама проверяет свою разметку: лишний модуль просто ничего не делает
+  // `map-fit` идёт первым: он правит адрес до того, как `lazy-frame` его смонтирует
+  import '../scripts/map-fit';
   import '../scripts/lazy-frame';
   import '../scripts/yandex-map';
 </script>
