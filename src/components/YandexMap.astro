@@ -1,11 +1,18 @@
 ---
 /**
- * Two venues on one map. With `PUBLIC_YANDEX_MAPS_KEY` it is the Yandex JS API
- * 3.0 with a marker per venue; without the key it is the iframe widget with a
- * plain pin per venue (`pt`), and the contact buttons re-centre it.
- * Карта на две точки. С ключом `PUBLIC_YANDEX_MAPS_KEY` — JS API 3.0 и по метке
- * на точку; без ключа — iframe-виджет с простой меткой на каждую точку (`pt`),
- * а кнопки контактов перецентровывают его.
+ * Map band: both venues on one map, always — the owner wants the two pins
+ * seen at once, so there is no «zoom to one venue» mode to fall out of. The
+ * bar above carries the caption and the links to the venues' cards on Maps;
+ * the map runs edge to edge under it with no frame (Green Park). With
+ * `PUBLIC_YANDEX_MAPS_KEY` it is the Yandex JS API 3.0 with a labelled marker
+ * per venue; without the key it is the iframe widget with a plain pin per
+ * venue (`pt`).
+ * Полоса карты: обе точки на одной карте, всегда — владелец хочет видеть две
+ * метки сразу, поэтому режима «одна точка крупно», из которого не вернуться,
+ * нет. На планке сверху подпись и ссылки на карточки точек в Картах; карта
+ * под ней от края до края без рамки (Green Park). С ключом
+ * `PUBLIC_YANDEX_MAPS_KEY` — JS API 3.0 и подписанная метка на точку; без
+ * ключа — iframe-виджет с простой меткой на каждую точку (`pt`).
  */
 import { yandexOrgUrl, yandexWidgetUrl } from '../data/site';
 import type { Content } from '../lib/content.ts';
@@ -29,60 +36,56 @@ const points = places.map((place) => ({
 ---
 
 <div class="map-block">
+  <div class="container map-bar">
+    <p class="tag map-caption">На карте · обе точки</p>
+    {/* the cards on Maps (photos, reviews, the route from anywhere) — the one
+        place on the page that links to them; the route buttons above lead
+        elsewhere / карточки в Картах (фото, отзывы, маршрут откуда угодно) —
+        единственное место на странице со ссылками на них; кнопки маршрута
+        выше ведут в другое */}
+    <p class="map-note">
+      На Яндекс Картах:{' '}
+      {places.map((place, i) => (
+        <>
+          {i > 0 && <span aria-hidden="true">{' · '}</span>}
+          <a href={yandexOrgUrl(place.yandex_org)} target="_blank" rel="noopener">
+            {place.street}
+          </a>
+        </>
+      ))}
+    </p>
+  </div>
+
   {
     key ? (
       <div class="map" data-map data-places={JSON.stringify(points)}>
         <div class="map__canvas" data-map-canvas />
-        {/* подложка видна, пока карта не встала: без JS и после таймаута это ссылки */}
         <div class="map__stub">
           <p class="map__stub-title display">Карта</p>
           <p class="tag map__stub-label" data-map-note>
             Загружаем карту…
           </p>
-          <p class="map__stub-hint">Открыть в Яндекс Картах:</p>
-          {places.map((place) => (
-            <a class="map__stub-link" href={yandexOrgUrl(place.yandex_org)} target="_blank" rel="noopener">
-              {place.name}
-            </a>
-          ))}
         </div>
       </div>
     ) : (
-      <>
-        <p class="map-label">
-          На карте: <b data-frame-label="map">обе точки</b>
-        </p>
-
-        <div
-          class="map"
-          data-frame="map"
-          data-frame-title="Карта: «Вкусная компания» в Самаре"
-          data-src={yandexWidgetUrl(places)}
-        >
-          <div class="map__stub">
-            <p class="map__stub-title display">Карта</p>
-            <p class="tag map__stub-label" data-frame-note>
-              Загружаем карту…
-            </p>
-            <p class="map__stub-hint">Открыть в Яндекс Картах:</p>
-            {places.map((place) => (
-              <a
-                class="map__stub-link"
-                href={yandexOrgUrl(place.yandex_org)}
-                target="_blank"
-                rel="noopener"
-              >
-                {place.name}
-              </a>
-            ))}
-          </div>
+      <div
+        class="map"
+        data-frame="map"
+        data-frame-title="Карта: «Вкусная компания» в Самаре"
+        data-src={yandexWidgetUrl(places)}
+      >
+        <div class="map__stub">
+          <p class="map__stub-title display">Карта</p>
+          <p class="tag map__stub-label" data-frame-note>
+            Загружаем карту…
+          </p>
         </div>
-      </>
+      </div>
     )
   }
 
-  {/* JS off: nothing is loading, only the links below are real */}
-  {/* Без JS ничего не грузится — подпись гасим, живыми остаются ссылки */}
+  {/* JS off: nothing loads — the label is hidden, the links on the bar stay
+      Без JS ничего не грузится — подпись гасим, ссылки на планке остаются */}
   <noscript>
     <style is:inline>
       .map__stub-label {
@@ -94,31 +97,54 @@ const points = places.map((place) => ({
 
 <style>
   .map-block {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    margin-top: 28px;
   }
 
-  .map-label {
+  /* caption left, the links right; on the phone the links drop under the caption
+     подпись слева, ссылки справа; на телефоне ссылки уходят под подпись */
+  .map-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 24px;
+    padding-bottom: 12px;
+  }
+
+  .map-note {
     font-size: 12.5px;
     color: var(--text-4);
   }
 
-  .map-label b {
+  .map-note a {
+    display: inline-block;
+    padding-block: 13px;
+    margin-block: -13px;
     font-weight: 600;
     color: var(--text);
+    text-decoration-color: var(--line-4);
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.16s ease;
   }
 
-  /* the same hatched plate as every photo stub on the page, under the map
-     until it lands / та же штрихованная плашка, что у фото-заглушек страницы,
-     под картой, пока она не встала */
+  @media (hover: hover) and (pointer: fine) {
+    .map-note a:hover {
+      text-decoration-color: var(--text);
+    }
+  }
+
+  /* Edge to edge, no frame: the same hatched plate as every photo stub sits
+     under the map until it lands. The height is the band's own, not a ratio —
+     on the phone a 4:3 frame gave a square, on the desktop a whole screen.
+     От края до края, без рамки: та же штрихованная плашка, что у фото-заглушек,
+     лежит под картой, пока та не встала. Высота своя, не пропорция — на
+     телефоне 4:3 давало квадрат, на десктопе целый экран. */
   .map {
     position: relative;
     width: 100%;
-    aspect-ratio: 4 / 3;
+    height: 360px;
     overflow: hidden;
-    border: 1px solid var(--line);
-    border-radius: var(--r-sq);
+    border-top: 1px solid var(--line);
     background-color: var(--surface-photo);
     background-image: var(--hatch);
   }
@@ -150,39 +176,9 @@ const points = places.map((place) => ({
     line-height: 1;
   }
 
-  /* `.tag` is the caps line; the hint stays plain under it
-     `.tag` — прописная строка; подсказка под ней обычным текстом */
+  /* `.tag` is the caps line under the title / `.tag` — прописная строка под заголовком */
   .map__stub-label {
     margin-top: 2px;
-  }
-
-  .map__stub-hint {
-    font-size: 13px;
-    color: var(--text-4);
-  }
-
-  .map__stub-hint {
-    margin-top: 6px;
-    font-size: 12px;
-    color: var(--text-5);
-  }
-
-  .map__stub-link {
-    display: inline-block;
-    padding-block: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-    text-decoration: underline;
-    text-decoration-color: var(--line-4);
-    text-underline-offset: 3px;
-    transition: text-decoration-color 0.16s ease;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .map__stub-link:hover {
-      text-decoration-color: var(--text);
-    }
   }
 
   .map.is-loaded .map__stub {
@@ -194,10 +190,23 @@ const points = places.map((place) => ({
     background: var(--surface);
   }
 
-  /* во всю ширину планшета квадратная карта съедает целый экран */
-  @media (min-width: 700px) and (max-width: 999px) {
+  @media (min-width: 768px) {
+    .map-block {
+      margin-top: 36px;
+    }
+
     .map {
-      aspect-ratio: 16 / 9;
+      height: 440px;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .map-block {
+      margin-top: 44px;
+    }
+
+    .map {
+      height: 520px;
     }
   }
 
@@ -227,7 +236,6 @@ const points = places.map((place) => ({
     font-weight: var(--fw-heading);
     font-size: 14px;
     line-height: 1;
-    transition: background-color 0.16s ease;
   }
 
   .map :global(.ymk__label) {
@@ -239,16 +247,8 @@ const points = places.map((place) => ({
     font-size: 12px;
     font-weight: 600;
     line-height: 1.2;
-    transition: border-color 0.16s ease;
   }
 
-  .map :global(.ymk.is-active .ymk__dot) {
-    background: var(--text);
-  }
-
-  .map :global(.ymk.is-active .ymk__label) {
-    border-color: var(--line-4);
-  }
 </style>
 
 <script>

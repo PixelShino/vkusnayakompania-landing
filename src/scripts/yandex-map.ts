@@ -3,23 +3,17 @@
  * Written against the official docs — `ymaps3.ready`, `YMap` with
  * `location: { bounds }`, `YMapDefaultSchemeLayer` / `YMapDefaultFeaturesLayer`
  * and `YMapMarker(props, element)`.
- * Карта на две точки. Скрипт подключается лениво, когда контейнер подходит к
- * экрану; не загрузился за 8 секунд — вместо карты остаются ссылки на карточки
- * организаций.
+ * Карта на две точки, всегда обе в кадре — режима «одна точка крупно» нет.
+ * Скрипт подключается лениво, когда контейнер подходит к экрану; не загрузился
+ * за 8 секунд — остаются ссылки на карточки организаций на планке над картой.
  */
 
 /** Точка для метки: адрес карточки организации приходит из контента готовым. */
 type Point = { id: number; n: string; name: string; lat: number; lng: number; href: string };
 
 type LngLat = [number, number];
-type Location = {
-  center?: LngLat;
-  bounds?: [LngLat, LngLat];
-  zoom?: number;
-  duration?: number;
-  easing?: string;
-};
-type YMapInstance = { addChild(child: unknown): void; setLocation(location: Location): void };
+type Location = { bounds: [LngLat, LngLat] };
+type YMapInstance = { addChild(child: unknown): void };
 
 // The CDN script puts `ymaps3` on window; its types live in
 // `@yandex/ymaps3-types`, which we do not pull into the bundle.
@@ -40,8 +34,6 @@ const KEY = import.meta.env.PUBLIC_YANDEX_MAPS_KEY;
 /** отступ от краёв, чтобы метки не липли к рамке: [сверху, справа, снизу, слева] */
 const MARGIN = [40, 40, 40, 40];
 const TIMEOUT = 8000;
-
-const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const loadApi = () =>
   new Promise<void>((resolve, reject) => {
@@ -85,12 +77,9 @@ const build = async (holder: HTMLElement) => {
     await loadApi();
     await ymaps3.ready;
   } catch {
-    // карты нет — «Показать на карте» некуда вести, у карточек остаются ссылки
+    // карты нет — на планке над ней остаются ссылки на карточки точек
     holder.classList.add('is-failed');
     if (note) note.textContent = 'Карта не загрузилась';
-    document.querySelectorAll<HTMLElement>('[data-map-focus]').forEach((button) => {
-      button.hidden = true;
-    });
     return;
   }
 
@@ -107,42 +96,20 @@ const build = async (holder: HTMLElement) => {
   map.addChild(new YMapDefaultSchemeLayer());
   map.addChild(new YMapDefaultFeaturesLayer());
 
-  const marks = new Map<number, HTMLElement>();
   for (const point of points) {
     const element = markerElement(point);
-    marks.set(point.id, element);
     // blockEvents: карта не перехватывает клик по метке у ссылки внутри неё
     map.addChild(new YMapMarker({ coordinates: [point.lng, point.lat], blockEvents: true }, element));
   }
   holder.classList.add('is-loaded');
-
-  const targets = [...document.querySelectorAll<HTMLElement>('[data-map-focus]')];
-  targets.forEach((target) => {
-    target.addEventListener('click', () => {
-      const id = Number(target.dataset.mapFocus);
-      const point = points.find((item) => item.id === id);
-      if (!point) return;
-      targets.forEach((other) => {
-        other.setAttribute('aria-pressed', String(other === target));
-        other.closest('[data-place]')?.classList.toggle('is-shown', other === target);
-      });
-      marks.forEach((element, key) => element.classList.toggle('is-active', key === id));
-      map.setLocation({
-        center: [point.lng, point.lat],
-        zoom: 16,
-        duration: reduceMotion() ? 0 : 300,
-        easing: 'ease-in-out',
-      });
-      // карта может лежать ниже кнопки
-      holder.scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'nearest' });
-    });
-  });
 };
 
-// widget branch: on a 320 px screen two pins at zoom 12 touch the frame edges
-// ветка виджета: на экране 320 px две метки при зуме 12 упираются в края кадра
+// widget branch: the pins are ~300 px apart at zoom 12, so on a band narrower
+// than 480 px they sit on the edges — one step out keeps both well inside
+// ветка виджета: при зуме 12 метки стоят в ~300 px друг от друга, и на полосе
+// уже 480 px они упираются в края — шаг назад держит обе внутри кадра
 const widget = document.querySelector<HTMLElement>('[data-frame="map"]');
-if (widget && widget.clientWidth < 340 && widget.dataset.src)
+if (widget && widget.clientWidth < 480 && widget.dataset.src)
   widget.dataset.src = widget.dataset.src.replace('&z=12&', '&z=11&');
 
 const holder = document.querySelector<HTMLElement>('[data-map]');

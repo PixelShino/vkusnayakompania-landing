@@ -119,8 +119,9 @@ const docs = [
 </footer>
 
 <style>
+  /* no top margin: the map band above meets the ink directly
+     без верхнего отступа: полоса карты выше встречает чернила вплотную */
   .footer {
-    margin-top: 20px;
     padding-block: calc(var(--sec-pad) * 0.8) calc(var(--sec-pad) * 0.5);
     background: var(--ink);
     color: var(--bg);
@@ -239,6 +240,22 @@ const docs = [
     text-decoration-color: rgb(255 250 237 / 0.4);
     text-underline-offset: 4px;
     transition: text-decoration-color 0.16s ease;
+  }
+
+  /* touch: the number (26 px line) and the 20 px links grow to 44 px in place
+     тач: номер (строка 26 px) и ссылки 20 px растут до 44 px на месте */
+  @media (pointer: coarse) {
+    .footer__tel {
+      padding-block: 9px;
+      /* keeps the 2 px top margin: 2 − 5 / сохраняет верхний отступ 2 px: 2 − 5 */
+      margin-block: -3px -5px;
+    }
+
+    .footer__list a,
+    .footer__links a {
+      padding-block: 12px;
+      margin-block: -6px;
+    }
   }
 
   .footer__bottom {
