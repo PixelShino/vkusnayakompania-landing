@@ -82,7 +82,31 @@ const STORES = [
   /* the strip bleeds edge to edge and clips the screen: no inner panel
      полоса идёт от края до края и режет экран: внутренней панели нет */
   .dl-strip {
+    position: relative;
     overflow: hidden;
+  }
+
+  /* The cut is meant, but a clean rectangle across a photo reads as a crop
+     gone wrong. The strip's own colour is laid over its last centimetre, so
+     the screen sinks into the ink instead of being guillotined by it. It is
+     ink over ink everywhere else and therefore invisible there.
+     Срез задуман, но ровный прямоугольник поперёк фотографии читается как
+     сбившаяся обрезка. На последний сантиметр полосы положен её собственный
+     цвет: экран уходит в чернила, а не отрезается ими. Везде, кроме экрана,
+     это чернила по чернилам — то есть ничего. */
+  .dl-strip::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 56px;
+    background: linear-gradient(to top, var(--ink), transparent);
+    pointer-events: none;
+  }
+
+  @media (min-width: 1200px) {
+    .dl-strip::after {
+      height: 72px;
+    }
   }
 
   .dl {
