@@ -16,7 +16,7 @@ interface Props {
 }
 
 const { content } = Astro.props;
-const { settings, places } = content;
+const { places, cakes } = content;
 
 /**
  * `value` досчитывается островом, `text` стоит как есть: рейтинг «4,9» — строка
@@ -26,18 +26,22 @@ const { settings, places } = content;
  */
 type Figure = { label: string; accent?: boolean } & ({ value: number } | { text: string });
 
-const { yandex_score: score } = settings;
-
 // 48 hours is the cake lead time, the same one in home.cakes_text and the confectionery card;
 // there is no hall capacity in the data, so that figure is absent instead of guessed.
-// The ratings and reviews counts are not here: the reviews section says them.
+// The Maps score is not here either: the typed-in «4,9» disagreed with the live
+// widget two screens below (4,8 and 5,0 per venue) — the widget is the one source.
+// The cake count is the catalogue itself, and the same «twelve» stands in the cakes lead.
 // 48 часов — срок торта, он же в `home.cakes_text` и в карточке кондитерской;
 // вместимости зала в данных нет, поэтому такой цифры здесь нет, а не выдумана.
-// Числа оценок и отзывов сюда не идут: их называет секция отзывов.
+// Оценки с Карт тут тоже нет: вбитая руками «4,9» спорила с живым виджетом двумя
+// экранами ниже (4,8 и 5,0 по точкам) — источник один, виджет. Число тортов —
+// сам каталог, и та же «двенадцать» стоит в лиде секции тортов.
 const figures: Figure[] = [
   { value: places.length, label: `${plural(places.length, 'точка', 'точки', 'точек')} в Самаре` },
-  { value: 48, label: 'часов на торт' },
-  ...(score ? [{ text: score, label: 'рейтинг на Картах', accent: true }] : []),
+  { value: 48, label: 'часов на торт', accent: true },
+  ...(cakes.length > 0
+    ? [{ value: cakes.length, label: `${plural(cakes.length, 'торт', 'торта', 'тортов')} в меню` }]
+    : []),
 ];
 ---
 
