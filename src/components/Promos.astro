@@ -1,9 +1,11 @@
 ---
 /**
- * Live promos: one dominant ink card carrying the discount figure in display
- * type, the rest compact on paper. A card is a heading plus one condition.
- * Живые акции: доминанта — чернильная карточка с размером скидки антиквой,
- * остальные компактные на поверхности. Карточка — заголовок и одно условие.
+ * Live promos as an even grid of squared panels with centred text (Everest):
+ * the first carries the discount figure in display type on ink, the rest sit
+ * on paper. A panel is a caps heading, one condition and the venue as a label.
+ * Живые акции ровной сеткой квадратных панелей с текстом по центру (Everest):
+ * первая несёт размер скидки антиквой на чернилах, остальные стоят на бумаге.
+ * Панель — заголовок прописными, одно условие и точка подписью.
  */
 import { groupByPlace } from '../lib/select';
 import { typo, type Place, type Promo } from '../lib/content';
@@ -22,12 +24,12 @@ const ordered = [null, ...places.map((place) => place.id)]
   .flatMap((key) => groups.get(key) ?? [])
   .map((row) => row.promo);
 
-// card copy is cut to the first sentence: nothing is added, only trimmed
+// panel copy is cut to the first sentence: nothing is added, only trimmed
 // текст режется до первого предложения: ничего не дописываем, только убираем
 const oneSentence = (text: string) => text.match(/^[^.!?]*[.!?]/)?.[0] ?? text;
 
-// the dominant card takes the discount figure out of its own title, e.g. «20 %»
-// доминанта вынимает размер скидки из своего же заголовка, например «20 %»
+// the ink panel takes the discount figure out of its own title, e.g. «20 %»
+// чернильная панель вынимает размер скидки из своего же заголовка, например «20 %»
 const [hero, ...rest] = ordered;
 const figure = hero?.title.match(/\d+\s*%/)?.[0] ?? null;
 const heroTitle = figure
@@ -43,30 +45,24 @@ const addr = (promo: Promo) => promo.place?.name ?? 'Обе точки';
   ordered.length > 0 && (
     <section class="section" id="promos">
       <div class="container">
-        <div class="section-head">
-          <div>
-            <h2>Акции</h2>
-          </div>
+        <div class="head">
+          <span class="mark" aria-hidden="true" />
+          <h2 class="display-caps">Акции</h2>
         </div>
 
-        <div
-          class:list={['pr__grid', { 'pr__grid--solo': rest.length === 0 }]}
-          style={`--pr-span:${Math.max(rest.length, 1)}`}
-        >
-          <article class="pr pr--hi">
-            <div class="blob" aria-hidden="true" />
-
+        <div class="pr__grid">
+          <article class="pr pr--ink">
             {figure && <p class="pr__figure display">{figure}</p>}
-            <h3 class="pr__title pr__title--hi">{heroTitle}</h3>
-            <p class="pr__text">{oneSentence(hero.text)}</p>
-            <p class="pr__addr">{addr(hero)}</p>
+            <h3 class="pr__title">{heroTitle}</h3>
+            <p class="pr__text">{typo(oneSentence(hero.text))}</p>
+            <p class="tag pr__addr">{addr(hero)}</p>
           </article>
 
           {rest.map((promo) => (
             <article class="pr">
               <h3 class="pr__title">{typo(promo.title)}</h3>
               <p class="pr__text">{typo(oneSentence(promo.text))}</p>
-              <p class="pr__addr">{addr(promo)}</p>
+              <p class="tag pr__addr">{addr(promo)}</p>
             </article>
           ))}
         </div>
@@ -76,128 +72,98 @@ const addr = (promo: Promo) => promo.place?.name ?? 'Обе точки';
 }
 
 <style>
-  /* start-aligned: a short card stays short, no padded-out bottoms */
-  /* выравнивание по верху: короткая карточка остаётся короткой */
+  /* equal panels: the grid stretches every row to its tallest panel
+     ровные панели: сетка тянет каждый ряд до самой высокой панели */
   .pr__grid {
     display: grid;
     gap: var(--gap);
-    margin-top: 18px;
-    align-items: start;
+    margin-top: 30px;
   }
 
+  /* text on the central axis of the panel, the label pushed to the bottom
+     текст по центральной оси панели, подпись прижата к низу */
   .pr {
-    position: relative;
     display: flex;
     flex-direction: column;
-    padding: calc(var(--gap) + 6px) calc(var(--gap) + 8px);
+    align-items: center;
+    padding: 30px 24px 26px;
     border: 1px solid var(--line);
-    border-radius: var(--r-lg);
+    border-radius: var(--r-sq);
     background: var(--surface);
-    transition: border-color 0.16s ease;
+    text-align: center;
   }
 
-  .pr--hi {
-    overflow: hidden;
-    padding: calc(var(--gap) + 12px);
+  /* ink is set here, not via `.strip-ink`: the scoped `.pr` background would
+     win over the global class and leave cream text on cream
+     чернила заданы здесь, а не через `.strip-ink`: скоуповый фон `.pr`
+     перебил бы глобальный класс и оставил бы кремовый текст на креме */
+  .pr--ink {
     border-color: var(--ink);
-    border-radius: var(--r-xl);
     background: var(--ink);
     color: var(--on-ink);
   }
 
-  /* the figure leads the card and stays on one line at any width */
-  /* цифра ведёт карточку и не переносится ни на какой ширине */
+  .pr--ink .pr__text {
+    color: var(--on-ink-2);
+  }
+
+  .pr--ink .pr__addr {
+    color: var(--on-ink-2);
+  }
+
+  /* the figure leads the panel and stays on one line at any width
+     цифра ведёт панель и не переносится ни на какой ширине */
   .pr__figure {
-    position: relative;
-    z-index: 1;
-    margin-bottom: 10px;
-    font-size: clamp(56px, 7.2vw, 80px);
+    margin-bottom: 8px;
+    font-size: clamp(56px, 12vw, 64px);
+    line-height: 1;
     color: var(--terracotta-on-ink);
     white-space: nowrap;
   }
 
+  /* caps grotesque with tracking, one weight: the title is a label, the
+     antiqua is kept for the figure and the section heading
+     гротеск прописными вразрядку, один вес: заголовок — подпись, антиква
+     остаётся цифре и заголовку секции */
   .pr__title {
-    position: relative;
-    z-index: 1;
-    margin-bottom: 6px;
-    font-size: var(--fs-h3);
-    line-height: 1.14;
-  }
-
-  .pr__title--hi {
-    font-size: calc(var(--fs-h3) + 3px);
+    max-width: 24ch;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    line-height: 1.35;
+    text-transform: uppercase;
   }
 
   .pr__text {
-    position: relative;
-    z-index: 1;
+    max-width: 38ch;
+    margin-top: 10px;
     font-size: var(--fs-body);
     color: var(--text-2);
   }
 
-  /* на чернилах светлый текст только `--on-ink` / `--on-ink-2` */
-  .pr--hi .pr__text {
-    color: var(--on-ink-2);
-  }
-
   .pr__addr {
-    position: relative;
-    z-index: 1;
-    margin-top: 12px;
-    font-size: 12.5px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    color: var(--text-4);
-  }
-
-  .pr--hi .pr__addr {
-    color: var(--on-ink-2);
+    margin-top: auto;
+    padding-top: 18px;
   }
 
   @media (min-width: 768px) {
-    /* доминанта держит левую колонку на всю высоту стопки справа */
-    /* the dominant card holds the left column for the whole right-hand stack */
     .pr__grid {
-      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 36px;
     }
 
-    .pr__grid--solo {
-      grid-template-columns: minmax(0, 1fr);
+    .pr {
+      padding: 40px 32px 32px;
     }
 
-    /* карточка тянется на всю стопку, поэтому блок текста стоит по центру:
-       иначе высокая заливка расходится пустотой сверху или снизу */
-    /* the card spans the whole stack, so its copy is centred: otherwise the
-       tall fill breaks into dead space above or below */
-    .pr--hi {
-      grid-row: span var(--pr-span, 1);
-      align-self: stretch;
-      justify-content: center;
-      padding: calc(var(--gap) + 16px);
-    }
-
-    .pr__title--hi {
-      font-size: calc(var(--fs-h3) + 6px);
+    .pr__title {
+      font-size: 15px;
     }
   }
 
   @media (min-width: 1200px) {
-    .pr__grid {
-      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    }
-
-    .pr__grid--solo {
-      grid-template-columns: minmax(0, 1fr);
-    }
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .pr:hover {
-      border-color: var(--line-4);
-    }
-
-    .pr--hi:hover {
-      border-color: var(--olive);
+    .pr {
+      padding: 48px 40px 36px;
     }
   }
 </style>

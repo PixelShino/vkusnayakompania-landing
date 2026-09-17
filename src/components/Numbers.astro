@@ -80,8 +80,13 @@ const figures: Figure[] = [
     list-style: none;
   }
 
+  /* on the central axis like every heading below the fold: the figure and its
+     label are centred in the cell, the hairline sits between cells
+     по центральной оси, как все заголовки ниже сгиба: цифра и подпись по центру
+     ячейки, волосяная линия стоит между ячейками */
   .num {
     min-width: 0;
+    text-align: center;
   }
 
   .num:last-child:nth-child(odd) {
@@ -142,7 +147,6 @@ const figures: Figure[] = [
 
     .num:first-child,
     .num:nth-child(3) {
-      padding-inline-start: 0;
       border-inline-start: 0;
     }
 
@@ -173,7 +177,6 @@ const figures: Figure[] = [
     }
 
     .num:nth-child(3) {
-      padding-inline-start: 22px;
       border-inline-start: 1px solid color-mix(in srgb, var(--on-ink) 14%, transparent);
     }
 

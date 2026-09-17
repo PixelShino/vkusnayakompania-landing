@@ -1,13 +1,16 @@
 ---
 /**
- * Menus as three shelf lines on an ink strip: mark, name, honesty pill and the
- * PDF button in one row. A direction without a published menu keeps its line.
- * Меню тремя строками-полками на чернильной полосе: метка, название, честная
- * пилюля и кнопка PDF в одну линию. Направление без меню сохраняет свою строку.
+ * Menus as three shelf lines on an ink strip under a centred head: name in the
+ * display serif, kind beside it, the honesty tag and the PDF button at the
+ * right. No numbered circles — the line itself is the row's mark. A direction
+ * without a published menu keeps its line.
+ * Меню тремя строками-полками на чернильной полосе под заголовком по оси:
+ * название антиквой, рядом тип, справа честный ярлык и кнопка PDF. Без
+ * кружков-номеров — метка строки сама линия. Направление без меню сохраняет
+ * свою строку.
  */
 import { menuFor } from '../lib/select';
 import { typo, type Content, type Direction } from '../lib/content';
-import cake from '../assets/icons/cake.svg?raw';
 
 interface Props {
   content: Content;
@@ -32,37 +35,30 @@ const cards = KEYS.map((key) => directions.find((item) => item.key === key))
 
 <section class="section strip-ink mn" id="menu">
   <div class="container">
-    <div class="mn__head">
-      <h2>Меню</h2>
-      {home.menu_text && <p class="lead">{typo(home.menu_text)}</p>}
+    <div class="head">
+      <span class="mark" aria-hidden="true"></span>
+      <h2 class="display-caps">Меню</h2>
+      {home.menu_text && <p class="lead mn__lead">{typo(home.menu_text)}</p>}
     </div>
 
     <ul class="mn__list">
       {
         cards.map(({ direction, menu }) => (
           <li class="mn__row">
-            {/* круг остаётся только под номером точки: у кондитерской его нет */}
-            {direction.place ? (
-              <span class="card-mark card-mark--sm mn__mark">{direction.place.n}</span>
-            ) : (
-              <span class="mn__mark mn__mark--icon" aria-hidden="true">
-                <Fragment set:html={cake} />
-              </span>
-            )}
-
             <span class="mn__name">
-              <h3 class="mn__title">{direction.title}</h3>
+              <h3 class="mn__title display">{direction.title}</h3>
               <span class="mn__kind">{direction.place?.kind ?? 'Пирожные, торты, конфеты'}</span>
             </span>
 
-            <span class="card-pill card-pill--light mn__pill">
-              {/* дата у файла-заглушки соврала бы: под кнопкой пустой лист */}
+            <span class="tag mn__tag">
+              {/* дата у файла-заглушки соврала бы: под кнопкой пустой лист
+                  a date on a stub file would lie: the sheet under the button is blank */}
               {!menu ? 'скоро' : menu.file.placeholder ? 'образец' : `обновлено ${day(menu.updated)}`}
             </span>
 
             {menu ? (
               <a
-                class="btn btn--secondary btn--sm mn__act"
+                class="btn btn--ghost-light btn--md mn__act"
                 href={menu.file.href}
                 target="_blank"
                 rel="noopener"
@@ -78,7 +74,7 @@ const cards = KEYS.map((key) => directions.find((item) => item.key === key))
     </ul>
 
     <div class="mn__cta">
-      <a class="btn btn--light btn--md" href={settings.shop_url} target="_blank" rel="noopener">
+      <a class="btn btn--light" href={settings.shop_url} target="_blank" rel="noopener">
         Заказать в приложении
       </a>
     </div>
@@ -92,87 +88,46 @@ const cards = KEYS.map((key) => directions.find((item) => item.key === key))
     --mn-line: color-mix(in srgb, var(--on-ink) 20%, transparent);
   }
 
-  .mn__head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 4px 32px;
-  }
-
-  .mn__head .lead {
-    max-width: 34rem;
+  /* лид на чернилах идёт вторым тоном кремового, а не серым с бумаги
+     the lead on ink takes the second cream tone, not the paper grey */
+  .mn__lead {
+    color: var(--on-ink-2);
   }
 
   .mn__list {
-    margin: 14px 0 0;
+    max-width: 880px;
+    margin: 28px auto 0;
     padding: 0;
     list-style: none;
     border-top: 1px solid var(--mn-line);
   }
 
-  /* Phone: a two-column grid, not a wrapping flex row. On wrap the button fell
-     back to the container edge and the row's left side broke into three steps.
-     Телефон: сетка в две колонки, а не переносимый flex. На переносе кнопка
-     падала к краю контейнера и левый край строки ломался в три ступени. */
+  /* Phone: name and kind stack, the tag and the button share the second line.
+     A grid, not a wrapping flex — on wrap the button fell to the container edge.
+     Телефон: название и тип столбиком, ярлык и кнопка делят вторую строку.
+     Сетка, а не переносимый flex — на переносе кнопка падала к краю. */
   .mn__row {
     display: grid;
-    grid-template-columns: 32px minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 10px 12px;
-    padding: 12px 0;
+    gap: 12px 16px;
+    padding: 18px 0;
     border-bottom: 1px solid var(--mn-line);
   }
 
-  /* метка в строке компактнее карточной: круг 36 задавал высоту всей полки */
-  .mn__mark {
-    grid-area: 1 / 1;
-    width: 32px;
-    height: 32px;
-    font-size: 15px;
-  }
-
-  .mn__pill {
-    grid-area: 1 / 3;
-  }
-
-  /* кнопка идёт под названием и в его колонке: левый край строки один */
-  .mn__act {
-    grid-column: 2 / -1;
-    grid-row: 2;
-    justify-self: start;
-  }
-
-  .mn__mark--icon {
-    display: grid;
-    place-items: center;
-    color: var(--terracotta-on-ink);
-  }
-
-  /* On ink a dark pill is indistinguishable from the strip and reads as a hole:
-     the chip goes lighter. Cream on it keeps 7.2:1.
-     На чернилах тёмная пилюля не отличается от полосы и читается дырой:
-     фишка светлеет. Кремовый на ней держит 7,2:1. */
-  .mn .mn__pill {
-    background: color-mix(in srgb, var(--on-ink) 15%, transparent);
-    color: var(--on-ink);
-  }
-
-  .mn__mark--icon > :global(svg) {
-    width: 22px;
-    height: 22px;
-  }
-
   .mn__name {
-    grid-area: 1 / 2;
+    grid-column: 1 / -1;
     display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 2px 12px;
+    flex-direction: column;
+    gap: 2px;
     min-width: 0;
   }
 
+  /* 22 px — нижняя граница Prata: мельче антиква теряет характер
+     22 px is the floor for Prata: smaller, the serif loses its character */
   .mn__title {
+    font-size: 22px;
+    line-height: 1.15;
     color: var(--on-ink);
   }
 
@@ -181,64 +136,64 @@ const cards = KEYS.map((key) => directions.find((item) => item.key === key))
     color: var(--on-ink-2);
   }
 
-  /* пустое состояние держит высоту кнопки: строки не пляшут */
+  .mn__tag {
+    justify-self: start;
+  }
+
+  .mn__act {
+    justify-self: end;
+  }
+
+  /* пустое состояние держит высоту кнопки: строки не пляшут
+     the empty state keeps the button's height: rows do not jump */
   .mn__soon {
     display: inline-flex;
     align-items: center;
-    min-height: 38px;
+    min-height: 44px;
     font-size: 13px;
     font-weight: 600;
     color: var(--on-ink-2);
   }
 
-  /* обводка кнопки на чернилах кремовая: базовая рамка `--line` там не видна */
-  .mn__row .btn--secondary {
-    border-color: color-mix(in srgb, var(--on-ink) 45%, transparent);
-    color: var(--on-ink);
-  }
-
-  .mn__row .btn--secondary:active {
-    background: color-mix(in srgb, var(--on-ink) 18%, transparent);
-  }
-
   .mn__cta {
     display: flex;
-    margin-top: 12px;
-  }
-
-  .mn__cta .btn {
-    flex: 1 1 auto;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .mn__row .btn--secondary:hover {
-      background: color-mix(in srgb, var(--on-ink) 12%, transparent);
-      border-color: var(--on-ink);
-    }
+    justify-content: center;
+    margin-top: 28px;
   }
 
   @media (min-width: 768px) {
-    /* заголовок слева, лид справа — одной строкой, без столбика */
-    .mn__head .lead {
-      margin-top: 0;
-    }
-
-    /* строка укладывается в одну линию — кнопке можно вернуть правый край */
+    /* one line per menu: name and kind on a baseline, tag and button at the right
+       одна строка на меню: название и тип по базовой линии, ярлык и кнопка справа */
     .mn__row {
-      grid-template-columns: 32px minmax(0, 1fr) auto auto;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 24px;
+      padding: 20px 0;
     }
 
-    .mn__act {
-      grid-area: 1 / 4;
+    .mn__name {
+      grid-column: auto;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 2px 14px;
     }
 
-    .mn__cta {
-      justify-content: flex-start;
-      margin-top: 14px;
+    .mn__title {
+      font-size: 24px;
     }
 
-    .mn__cta .btn {
-      flex: none;
+    .mn__tag {
+      justify-self: auto;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .mn__list {
+      margin-top: 36px;
+    }
+
+    .mn__title {
+      font-size: 26px;
     }
   }
 </style>

@@ -75,13 +75,19 @@
   --fs-body: 14px;
   --fs-lead: 15px;
 
-  /* радиусы */
+  /* Radii: one squared value for every plate, panel and button — the 20–26 px
+     rounding read as a page builder next to the sharp references. `--r-pill`
+     stays for what is a real circle: the sticker, icon buttons, slider arrows.
+     Радиусы: одно квадратное значение на все плашки, панели и кнопки —
+     скругления 20–26 px рядом с острыми референсами читались конструктором.
+     `--r-pill` остаётся тому, что правда круг: стикер, икон-кнопки, стрелки. */
+  --r-sq: 3px;
   --r-pill: 999px;
-  --r-sm: 14px;
-  --r-md: 16px;
-  --r-lg: 20px;
-  --r-xl: 24px;
-  --r-2xl: 26px;
+  --r-sm: var(--r-sq);
+  --r-md: var(--r-sq);
+  --r-lg: var(--r-sq);
+  --r-xl: var(--r-sq);
+  --r-2xl: var(--r-sq);
 
   /* высота липкой шапки: по ней считается отступ якорей */
   --header-h: 68px;
@@ -264,26 +270,14 @@ button {
   contain-intrinsic-size: auto 900px;
 }
 
-.section-head {
-  display: flex;
-  gap: 20px 28px;
-  align-items: flex-end;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  margin-bottom: 4px;
-}
-
 /* лид отбивается от заголовка одинаково во всех секциях */
-.section-head h2 + .lead,
 h2 + .lead,
 h1 + .lead {
   margin-top: 10px;
 }
 
-.section-head > div {
-  min-width: 0;
-}
-
+/* only the 404 page still carries a kicker; sections use `.mark` + `.head`
+   кикер остался только на странице 404; секции берут `.mark` + `.head` */
 .kicker {
   font-size: 11.5px;
   letter-spacing: 0.09em;
@@ -306,19 +300,25 @@ h3 {
 
 /* ── кнопки ──────────────────────────────────────────────────────────────── */
 
+/* Every button is the stamp from the first screen: squared, caps, tracked.
+   One shape on the whole page — the pill is gone from the vocabulary.
+   Каждая кнопка — оттиск с первого экрана: квадратная, прописными, вразрядку.
+   Одна форма на всю страницу — пилюли в словаре больше нет. */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 46px;
-  padding-inline: 22px;
+  height: 48px;
+  padding-inline: 26px;
   border: 1px solid transparent;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-sq);
   background: transparent;
-  font-size: 14px;
+  font-size: 12.5px;
   font-weight: 600;
+  letter-spacing: 0.08em;
   line-height: 1.2;
+  text-transform: uppercase;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
@@ -397,9 +397,9 @@ h3 {
 }
 
 .btn--sm {
-  height: 38px;
-  padding-inline: 16px;
-  font-size: 13px;
+  height: 40px;
+  padding-inline: 18px;
+  font-size: 11.5px;
 }
 
 /* on touch screens every button grows to a 44 px target
@@ -424,78 +424,13 @@ h3 {
 }
 
 .btn--md {
-  height: 42px;
-  padding-inline: 18px;
-  font-size: 13.5px;
+  height: 44px;
+  padding-inline: 20px;
+  font-size: 12px;
 }
 
 .btn--block {
   width: 100%;
-}
-
-/* ── повторяющийся паттерн: круг → пунктир → пилюля ──────────────────────── */
-
-.card-top {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  position: relative;
-  z-index: 1;
-}
-
-.card-mark {
-  width: 46px;
-  height: 46px;
-  flex: none;
-  display: grid;
-  place-items: center;
-  border-radius: var(--r-pill);
-  background: var(--olive);
-  color: var(--bg);
-  font-weight: var(--fw-heading);
-  font-size: 21px;
-  line-height: 1;
-}
-
-/* на оливковой заливке подложка темнее фона: светлая роняет контраст до 3,3:1 */
-.card-mark--light {
-  background: rgba(28, 25, 22, 0.24);
-  color: var(--bg);
-}
-
-.card-mark--sm {
-  width: 36px;
-  height: 36px;
-  font-size: 16px;
-}
-
-.card-pill {
-  padding: 7px 13px;
-  border: 1px solid var(--line-2);
-  border-radius: var(--r-pill);
-  background: var(--surface);
-  color: var(--text-3);
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.card-pill--light {
-  background: rgba(28, 25, 22, 0.24);
-  border-color: transparent;
-  color: var(--bg);
-}
-
-/* декоративный круг в углу акцентных карточек */
-.blob {
-  position: absolute;
-  width: 190px;
-  height: 190px;
-  right: -70px;
-  bottom: -80px;
-  border-radius: var(--r-pill);
-  background: rgba(255, 250, 237, 0.1);
-  pointer-events: none;
 }
 
 /* ── медиа ───────────────────────────────────────────────────────────────── */
@@ -584,26 +519,14 @@ h2,
 }
 
 /* ── печатные формы ───────────────────────────────────────────────────────
-   Taste pass on the first screen and the directions: the pill and the numbered
-   circle read as a page builder, a squared stamp-like button, an ornament over
-   the heading and caps antiqua read as a restaurant. The rest of the page still
-   carries the pill until the pass is rolled out.
-   Вкусовой проход по первому экрану и направлениям: пилюля и кружок-номер
-   читаются конструктором, квадратная кнопка-оттиск, марка над заголовком и
-   прописная антиква — заведением. Остальные секции несут пилюлю до раскатки. */
-:root {
-  --r-sq: 3px;
-}
-
-.btn--sq {
-  height: 48px;
-  padding-inline: 26px;
-  border-radius: var(--r-sq);
-  font-size: 12.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
+   One vocabulary for the whole page: the pill and the numbered circle read as a
+   page builder, a squared stamp-like button, an ornament over the heading and
+   caps antiqua read as a restaurant. Every section below the first screen
+   speaks it too — the patterns are here, the sections only use them.
+   Один словарь на всю страницу: пилюля и кружок-номер читаются конструктором,
+   квадратная кнопка-оттиск, марка над заголовком и прописная антиква —
+   заведением. Секции ниже первого экрана говорят на нём же — паттерны здесь,
+   секции их только используют. */
 /* Caps antiqua with a little tracking: size and spacing do the work, one weight
    is enough (Green Park, Matsoni). Never on text under 22 px.
    Прописная антиква с лёгкой разрядкой: работу делают размер и трекинг, веса
@@ -678,4 +601,162 @@ h2,
     color: var(--terracotta-text);
     text-decoration-color: currentColor;
   }
+}
+
+/* ── заголовок секции по оси ──────────────────────────────────────────────
+   The mark, caps antiqua and one lead line on the central axis (Green Park,
+   Matsoni). Replaces `.section-head` + `.kicker` everywhere below the fold.
+   Марка, прописная антиква и одна строка лида по центральной оси (Green Park,
+   Мацони). Заменяет `.section-head` + `.kicker` во всех секциях ниже сгиба. */
+.head {
+  text-align: center;
+}
+
+.head h2 {
+  max-width: 22ch;
+  margin: 18px auto 0;
+}
+
+.head .lead {
+  max-width: 52ch;
+  margin: 12px auto 0;
+}
+
+.strip-ink .head .mark {
+  color: var(--terracotta-on-ink);
+}
+
+/* ── подпись-ярлык ─────────────────────────────────────────────────────────
+   A small caps label without a box («образец», «обе точки», «заглушка»): the
+   pill said the same thing with a border around it.
+   Мелкая прописная подпись без рамки («образец», «обе точки», «заглушка»):
+   пилюля говорила то же самое, только в рамке. */
+.tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.strip-ink .tag {
+  color: var(--on-ink-2);
+}
+
+/* ── вкладки ────────────────────────────────────────────────────────────────
+   Tabs as words under a rule: the active one carries a terracotta underline.
+   No pill, no fill — the switch is in the line, not in a box.
+   Вкладки словами под линией: активная несёт терракотовое подчёркивание.
+   Без пилюли и заливки — переключение в линии, а не в коробке. */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 28px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-bottom: -1px;
+  padding: 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  cursor: pointer;
+  transition-property: color, border-color;
+  transition-duration: 0.16s;
+  transition-timing-function: ease;
+}
+
+.tab[aria-selected='true'],
+.tab.is-active {
+  color: var(--text);
+  border-bottom-color: var(--terracotta);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tab:hover {
+    color: var(--text);
+  }
+}
+
+/* ── плашка-заглушка ────────────────────────────────────────────────────────
+   One stand-in for every missing photo: a hatched plate, the caption pressed
+   to the bottom-left, the honest «заглушка» line under it. Ink and warm
+   alternate; the ratio is set by the slot (`aspect-ratio` on the element).
+   Одна заглушка на любое отсутствующее фото: штрихованная плашка, подпись
+   прижата к левому низу, под ней честная строка «заглушка». Чернильная и
+   тёплая чередуются; пропорцию задаёт слот (`aspect-ratio` на элементе). */
+.stub {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 18px 20px;
+  border-radius: var(--r-sq);
+  background-color: var(--surface-warm);
+  background-image: var(--hatch);
+  color: var(--text);
+  overflow: hidden;
+}
+
+.stub--ink {
+  background-color: var(--ink);
+  background-image: var(--hatch-ink);
+  color: var(--on-ink);
+}
+
+.stub__title {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(20px, 5vw, 26px);
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.stub__meta {
+  display: block;
+  margin-top: 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.stub--ink .stub__meta {
+  color: var(--on-ink-2);
+  opacity: 1;
+}
+
+/* ── усы вокруг строки ──────────────────────────────────────────────────────
+   `—— text ——`: a hairline on each side of a short centred line (Levantine).
+   `—— текст ——`: волосяная линия с двух сторон короткой строки по центру. */
+.whiskers {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: center;
+  text-align: center;
+}
+
+.whiskers::before,
+.whiskers::after {
+  content: '';
+  flex: 1 1 0;
+  max-width: 96px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.35;
 }

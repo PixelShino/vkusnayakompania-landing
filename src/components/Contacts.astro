@@ -16,11 +16,10 @@ const { places, settings, home } = content;
 
 <section class="section" id="contacts">
   <div class="container">
-    <div class="section-head">
-      <div>
-        <p class="kicker">Две точки в городе</p>
-        <h2>Контакты</h2>
-      </div>
+    <div class="head">
+      <span class="mark" aria-hidden="true"></span>
+      <h2 class="display-caps">Контакты</h2>
+      <p class="lead">Две точки в городе</p>
     </div>
 
     <div class="ct">
@@ -28,13 +27,16 @@ const { places, settings, home } = content;
         {
           places.map((place) => (
             <article class="ct__card" data-place>
-              <div class="card-top">
-                <span class="card-mark card-mark--sm">{place.n}</span>
-                <OpenStatus schedule={place.schedule} />
-              </div>
-
-              <h3 class="ct__name">{place.name}</h3>
-              <p class="ct__note">{place.kind}</p>
+              <h3 class="ct__name display">{place.name}</h3>
+              {/* status as words on the meta line, olive when open — no pill, no number
+                  статус словами в строке меты, оливой когда открыто — без пилюли и номера */}
+              <p class="ct__note">
+                {place.kind}
+                <span class="ct__dot" aria-hidden="true">
+                  {' · '}
+                </span>
+                <OpenStatus schedule={place.schedule} class="ct__status" />
+              </p>
               <a class="ct__tel" href={place.phoneHref}>{place.phone}</a>
 
               <dl class="ct__hours">
@@ -74,7 +76,7 @@ const { places, settings, home } = content;
               </div>
 
               <a
-                class="ct__org"
+                class="tlink ct__org"
                 href={yandexOrgUrl(place.yandex_org)}
                 target="_blank"
                 rel="noopener"
@@ -90,9 +92,8 @@ const { places, settings, home } = content;
         <YandexMap content={content} />
 
         <div class="ct__write">
-          <div class="blob" aria-hidden="true"></div>
           <div class="ct__write-col">
-            <h3 class="ct__write-title">Написать нам</h3>
+            <h3 class="ct__write-title display">Написать нам</h3>
             <p class="ct__write-sub">{home.contacts_note}</p>
           </div>
           <MessengerButtons settings={settings} variant="light" size="lg" />
@@ -118,30 +119,49 @@ const { places, settings, home } = content;
     gap: calc(var(--gap) + 2px);
   }
 
+  /* Venue blocks without a frame: text on paper with a hairline between the
+     two — next to the framed map a second box only added noise. `.is-shown`
+     (the venue the map is centred on) is carried by the pressed button alone.
+     Блоки точек без рамки: текст на бумаге и волосяная линия между ними —
+     рядом с картой в рамке второй короб только шумел. `.is-shown` (точка, на
+     которой стоит карта) держится на нажатой кнопке. */
   .ct__card {
     display: flex;
     flex-direction: column;
-    padding: calc(var(--gap) + 4px);
-    border: 1px solid var(--line);
-    border-radius: var(--r-lg);
-    background: var(--bg);
-    transition: border-color 0.16s ease;
+    padding-block: 4px 22px;
   }
 
-  /* точка, на которой сейчас стоит карта; изначально карта показывает обе */
-  .ct__card.is-shown {
-    border-color: var(--line-4);
+  .ct__card + .ct__card {
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
   }
 
   .ct__name {
-    margin: 14px 0 4px;
-    font-size: calc(var(--fs-h3) + 1px);
-    line-height: 1.12;
+    margin-bottom: 6px;
+    font-size: clamp(24px, 6vw, 28px);
+    line-height: 1.1;
   }
 
   .ct__note {
     font-size: calc(var(--fs-body) - 0.5px);
+    font-weight: 600;
+    color: var(--text-3);
+  }
+
+  .ct__dot {
     color: var(--text-4);
+  }
+
+  /* on a narrow phone the status takes its own line, no dot left dangling
+     на узком телефоне статус уходит на свою строку, точка в конце не висит */
+  @media (max-width: 399px) {
+    .ct__dot {
+      display: none;
+    }
+
+    .ct__note :global(.ct__status) {
+      display: block;
+    }
   }
 
   /* свой номер у каждой точки — крупнее часов, как заголовок карточки */
@@ -192,29 +212,18 @@ const { places, settings, home } = content;
     margin-top: auto;
   }
 
-  /* подчёркивание, а не рамка: паддинг растит зону нажатия, не сдвигая линию */
+  /* `.tlink` from the vocabulary; its negative margins are reset so the link
+     sits under the buttons at its own distance
+     `.tlink` из словаря; его отрицательные поля сброшены, чтобы ссылка стояла
+     под кнопками на своём расстоянии */
   .ct__org {
     align-self: flex-start;
-    margin-top: 3px;
-    padding-block: 9px;
+    margin-block: 6px 0;
     font-size: 12.5px;
-    font-weight: 600;
     color: var(--text-3);
-    text-decoration: underline;
-    text-decoration-color: var(--line-4);
-    text-decoration-thickness: 1px;
-    text-underline-offset: 4px;
-    transition:
-      color 0.16s ease,
-      text-decoration-color 0.16s ease;
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .ct__org:hover {
-      color: var(--text);
-      text-decoration-color: var(--text);
-    }
-
     .ct__tel:hover {
       text-decoration: underline;
       text-underline-offset: 4px;
@@ -259,27 +268,18 @@ const { places, settings, home } = content;
   }
 
   .ct__write {
-    position: relative;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
     gap: 16px;
     padding: calc(var(--gap) + 10px);
-    border-radius: var(--r-xl);
+    border-radius: var(--r-sq);
     background: var(--olive);
-  }
-
-  .ct__write-col {
-    position: relative;
-    z-index: 1;
   }
 
   .ct__write-title {
     margin-bottom: 6px;
-    font-weight: var(--fw-heading);
-    font-size: calc(var(--fs-h3) + 2px);
+    font-size: 24px;
     line-height: 1.12;
-    letter-spacing: var(--ls-heading);
     color: var(--bg);
   }
 
@@ -289,12 +289,8 @@ const { places, settings, home } = content;
     color: var(--bg);
   }
 
-  .ct__write :global(.messengers) {
-    position: relative;
-    z-index: 1;
-  }
-
-  /* карточки в две колонки: иначе карта уезжает на второй экран */
+  /* блоки в две колонки: иначе карта уезжает на второй экран; линия между
+     ними встаёт вертикально */
   @media (min-width: 700px) and (max-width: 999px) {
     .ct__col {
       display: grid;
@@ -304,6 +300,13 @@ const { places, settings, home } = content;
 
     .ct__card {
       height: 100%;
+    }
+
+    .ct__card + .ct__card {
+      padding-top: 4px;
+      padding-left: 24px;
+      border-top: 0;
+      border-left: 1px solid var(--line);
     }
   }
 

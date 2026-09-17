@@ -29,11 +29,9 @@ const STAR =
 
 <section class="section" id="reviews">
   <div class="container">
-    <div class="section-head">
-      <div>
-        <p class="kicker">Отзывы</p>
-        <h2>Что говорят гости</h2>
-      </div>
+    <div class="head">
+      <span class="mark" aria-hidden="true"></span>
+      <h2 class="display-caps">Что говорят гости</h2>
       <p class="lead">
         Ничего не переписываем и не отбираем — рядом живой виджет Яндекс Карт со всеми отзывами,
         как есть.
@@ -44,18 +42,16 @@ const STAR =
       {
         hasPanel && (
           <div class="rev__score">
-            <div class="blob" aria-hidden="true" />
-
-            <div class="card-top">
-              <span class="card-mark card-mark--light">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            {/* the award as a caps line with the star inline — no circle, no pill
+                награда строкой прописными со звездой в строке — без круга и пилюли */}
+            {settings.yandex_award && (
+              <p class="tag rev__award">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d={STAR} />
                 </svg>
-              </span>
-              {settings.yandex_award && (
-                <span class="card-pill card-pill--light">{settings.yandex_award}</span>
-              )}
-            </div>
+                {settings.yandex_award}
+              </p>
+            )}
 
             {score && (
               <div class="rev__big-row">
@@ -105,8 +101,10 @@ const STAR =
                   target="_blank"
                   rel="noopener"
                 >
-                  <span class="rev__source-name">{place.street}</span>
+                  {/* figure first: a wrapped street name no longer pushes it down
+                      цифра первой: перенёсшаяся улица её больше не сдвигает */}
                   {place.rating && <span class="rev__source-score tnum">{place.rating}</span>}
+                  <span class="rev__source-name">{place.street}</span>
                 </a>
               ))}
             </div>
@@ -115,19 +113,21 @@ const STAR =
       }
 
       <div class="rev__widget">
-        <div class="rev__tabs" role="group" aria-label="Отзывы по точкам">
+        <div class="tabs rev__tabs" role="group" aria-label="Отзывы по точкам">
           {
             places.map((place, i) => (
               <button
                 type="button"
-                class="rev__tab"
+                class="tab rev__tab"
                 data-frame-target="reviews"
                 data-src={yandexReviewsUrl(place.yandex_org)}
                 data-frame-href={`${yandexOrgUrl(place.yandex_org)}reviews/`}
                 data-frame-name={place.name}
                 aria-pressed={i === 0 ? 'true' : 'false'}
               >
-                {place.name}
+                {/* the street alone: with the house number both tabs stacked on the phone
+                    только улица: с номером дома вкладки на телефоне вставали в два ряда */}
+                {place.street}
                 {place.rating && <span class="rev__tab-score tnum">{place.rating}</span>}
               </button>
             ))
@@ -184,25 +184,38 @@ const STAR =
   }
 
   .rev__score {
-    position: relative;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
     padding: 20px;
-    border-radius: var(--r-xl);
+    border-radius: var(--r-sq);
     background: var(--olive);
     /* на оливковой заливке текст только непрозрачный кремовый: 0,86 даёт 3,9:1 */
     color: var(--bg);
   }
 
+  /* `.tag` is `--text-3` for paper; on the olive it takes the panel's cream
+     `.tag` на бумаге — `--text-3`; на оливе берёт кремовый панели */
+  .rev__award {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--bg);
+  }
+
+  .rev__award svg {
+    flex: none;
+  }
+
   .rev__big-row {
-    position: relative;
-    z-index: 1;
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
     gap: 6px 16px;
     margin-top: 18px;
+  }
+
+  .rev__award + .rev__big-row {
+    margin-top: 22px;
   }
 
   .rev__big {
@@ -237,8 +250,6 @@ const STAR =
   /* полоски вместо пилюль: название и доля читаются разом. Список тянется на
      свободную высоту панели — иначе под ним оставалась пустая зона */
   .rev__marks {
-    position: relative;
-    z-index: 1;
     display: grid;
     flex: 1 1 auto;
     align-content: space-between;
@@ -259,9 +270,10 @@ const STAR =
     font-size: 13.5px;
   }
 
+  /* square-ended bars: a printed chart, not a progress pill
+     полоски с прямыми концами: печатная диаграмма, не пилюля прогресса */
   .rev__mark-bar {
-    height: 8px;
-    border-radius: var(--r-pill);
+    height: 6px;
     /* подложка темнее заливки: светлая полупрозрачная сливалась бы с оливой */
     background: color-mix(in srgb, var(--text) 26%, transparent);
     overflow: hidden;
@@ -270,7 +282,6 @@ const STAR =
   .rev__mark-fill {
     display: block;
     height: 100%;
-    border-radius: var(--r-pill);
     background: var(--bg);
   }
 
@@ -281,54 +292,50 @@ const STAR =
   }
 
   .rev__marks-note {
-    position: relative;
-    z-index: 1;
     margin-top: 10px;
     font-size: 11.5px;
   }
 
+  /* Per-venue scores as one line under a hairline: two columns, a rule
+     between them, the figure in the antiqua — no buttons inside the panel.
+     Оценки точек одной строкой под волосяной линией: две колонки, линия между
+     ними, цифра антиквой — кнопок внутри панели нет. */
   .rev__sources {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     margin-top: auto;
-    padding-top: 20px;
+    padding-top: 18px;
   }
 
   .rev__source {
-    flex: 1 1 auto;
-    min-width: max-content;
-    height: 42px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding-inline: 14px;
-    border-radius: var(--r-pill);
-    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 0 2px;
+    border-top: 1px solid rgb(255 250 237 / 0.35);
+    color: var(--bg);
     text-decoration: none;
-    transition:
-      scale 120ms var(--ease-out),
-      background-color 0.16s ease;
   }
 
-  .rev__source:active {
-    scale: 0.96;
+  .rev__source + .rev__source {
+    padding-left: 18px;
+    border-left: 1px solid rgb(255 250 237 / 0.35);
   }
 
   .rev__source-name {
-    font-size: 13.5px;
+    align-self: flex-start;
+    font-size: 12.5px;
     font-weight: 600;
-    color: var(--text);
+    text-decoration: underline;
+    text-decoration-color: rgb(255 250 237 / 0.4);
+    text-underline-offset: 4px;
+    transition: text-decoration-color 0.16s ease;
   }
 
   .rev__source-score {
-    font-weight: var(--fw-heading);
-    font-size: 15px;
+    font-family: var(--font-display);
+    font-size: 30px;
     line-height: 1;
-    color: var(--terracotta-text);
   }
 
   .rev__widget {
@@ -337,30 +344,12 @@ const STAR =
     gap: 10px;
   }
 
-  .rev__tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
+  /* the switch is driven by `aria-pressed` (lazy-frame), the global `.tab`
+     styles `aria-selected` — the active line is wired here
+     переключение ведёт `aria-pressed` (lazy-frame), глобальный `.tab` красит
+     `aria-selected` — активная линия подключается здесь */
   .rev__tab {
-    display: inline-flex;
-    align-items: center;
     gap: 8px;
-    padding: 9px 15px;
-    border: 1px solid var(--line);
-    border-radius: var(--r-pill);
-    background: var(--bg);
-    font-size: 12.5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition-property: scale, background-color, border-color, color;
-    transition-duration: 120ms, 0.16s, 0.16s, 0.16s;
-    transition-timing-function: var(--ease-out), ease, ease, ease;
-  }
-
-  .rev__tab:active {
-    scale: 0.96;
   }
 
   .rev__tab-score {
@@ -368,23 +357,13 @@ const STAR =
   }
 
   .rev__tab[aria-pressed='true'] {
-    background: var(--text);
-    border-color: var(--text);
-    color: var(--bg);
-  }
-
-  .rev__tab[aria-pressed='true'] .rev__tab-score {
-    color: inherit;
+    color: var(--text);
+    border-bottom-color: var(--terracotta);
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .rev__tab:hover:not([aria-pressed='true']) {
-      background: var(--surface);
-      border-color: var(--line-4);
-    }
-
-    .rev__source:hover {
-      background: var(--surface);
+    .rev__source:hover .rev__source-name {
+      text-decoration-color: var(--bg);
     }
   }
 
@@ -396,7 +375,7 @@ const STAR =
     min-height: 460px;
     overflow: hidden;
     border: 1px solid var(--line);
-    border-radius: var(--r-xl);
+    border-radius: var(--r-sq);
     background: var(--surface);
   }
 
@@ -451,7 +430,7 @@ const STAR =
     }
 
     .rev__score {
-      padding: 24px;
+      padding: 24px 26px;
     }
 
     /* планшет: панель во всю ширину, доли в две колонки — иначе она вытягивается
@@ -472,7 +451,11 @@ const STAR =
     }
 
     .rev__score {
-      padding: 28px;
+      padding: 28px 30px;
+    }
+
+    .rev__source-score {
+      font-size: 34px;
     }
 
     .rev--split .rev__marks {

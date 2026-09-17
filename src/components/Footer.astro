@@ -64,12 +64,7 @@ const docs = [
       {
         places.map((place) => (
           <div class="footer__col footer__place">
-            <p class="footer__place-name">
-              <span class="footer__n" aria-hidden="true">
-                {place.n}
-              </span>
-              {place.name}
-            </p>
+            <p class="footer__place-name">{place.name}</p>
             <p class="footer__muted">{place.kind}</p>
             <a class="footer__tel" href={place.phoneHref}>
               {place.phone}
@@ -169,26 +164,9 @@ const docs = [
   }
 
   .footer__place-name {
-    display: flex;
-    align-items: center;
-    gap: 10px;
     font-weight: var(--fw-heading);
     font-size: 17px;
     letter-spacing: var(--ls-heading);
-  }
-
-  /* тот же круг с номером, что у карточек и меток карты, только контуром */
-  .footer__n {
-    display: grid;
-    place-items: center;
-    flex: none;
-    width: 26px;
-    height: 26px;
-    border: 1.5px solid rgb(255 250 237 / 0.55);
-    border-radius: var(--r-pill);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0;
   }
 
   .footer__muted {

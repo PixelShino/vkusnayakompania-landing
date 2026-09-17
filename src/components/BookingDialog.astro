@@ -64,11 +64,13 @@ const phones =
     width: 100%;
     max-width: 100%;
     max-height: 92dvh;
-    /* лист снизу: `auto auto 0` прижимает его к нижнему краю экрана */
+    /* лист снизу: `auto auto 0` прижимает его к нижнему краю экрана; верхние
+       углы 12 px — ровно столько, чтобы лист читался листом, а не карточкой
+       bottom sheet; 12 px on top reads as a sheet, not a rounded card */
     margin: auto auto 0;
     padding: 0;
     border: 0;
-    border-radius: 24px 24px 0 0;
+    border-radius: 12px 12px 0 0;
     background: var(--bg);
     color: var(--text);
     overflow: auto;
@@ -197,8 +199,21 @@ const phones =
     gap: 8px;
   }
 
-  /* улица перед номером: серее, чтобы номер читался первым */
+  /* Street over the number as a small caps line: side by side the caps street
+     and the number overran the button on 320.
+     Улица над номером мелкой прописной строкой: в одну строку прописная улица
+     и номер вылезали за кнопку на 320. */
+  .book__actions > .btn {
+    flex-direction: column;
+    gap: 3px;
+    height: auto;
+    min-height: 48px;
+    padding-block: 9px;
+  }
+
   .book__where {
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
     color: var(--text-4);
   }
 
@@ -206,7 +221,7 @@ const phones =
     .book {
       width: 420px;
       margin: auto;
-      border-radius: var(--r-2xl);
+      border-radius: var(--r-sq);
       translate: 0 12px;
     }
 

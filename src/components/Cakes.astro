@@ -1,15 +1,14 @@
 ---
 /**
- * Cake showcase as an uneven grid: the first two frames dominate, the rest are
- * cells, and a pending photo stands as a poster plaque instead of a stand-in
- * shot — twelve equal tiles of one sliced display case read as a wall.
- * Витрина тортов разноразмерной сеткой: первые два кадра — доминанты, дальше
- * ячейки, а неснятое фото стоит плашкой-постером вместо подставного кадра —
- * двенадцать равных плиток из одной нарезанной витрины читались стеной.
+ * Cake showcase as an even grid under a centred head: every frame is the same
+ * 4:5 plate, a pending photo stands as a hatched plaque with the name on it.
+ * The uneven grid with a two-row lead tile made one placeholder 1200 px tall.
+ * Витрина тортов ровной сеткой под заголовком по оси: каждый кадр — одна
+ * плашка 4:5, неснятое фото стоит штрихованной плашкой с названием. Неровная
+ * сетка с доминантой в две строки растягивала одну заглушку до 1200 px.
  */
 import Photo from './Photo.astro';
 import { isPlaceholder, type Cake, type Content } from '../lib/content.ts';
-import cakeIcon from '../assets/icons/cake.svg?raw';
 
 interface Props {
   content: Content;
@@ -25,32 +24,26 @@ const shop = settings.shop_cakes_ready ?? settings.shop_url;
 const stub = (cake: Cake) =>
   isPlaceholder(cake.photo.alt) || cake.photo.alt.includes('фото появится позже');
 
-// Grid slots and the frame each one asks for: the lead runs two columns by two
-// rows, the second is the wide frame beside it, the rest are single cells.
-// Места в сетке и кадр под каждое: первый — две колонки на две строки, второй —
-// широкий рядом с ним, остальные — обычные ячейки.
-const SLOT = ['cake-card--lead', 'cake-card--wide'];
-const RATIO = ['4 / 3', '3 / 2'];
-const SIZES_BIG = '(min-width: 1200px) 638px, (min-width: 768px) 372px, 100vw';
-const SIZES_CELL = '(min-width: 1200px) 309px, (min-width: 768px) 178px, 45vw';
+const SIZES = '(min-width: 1200px) 309px, (min-width: 768px) 243px, 45vw';
 ---
 
 <section class="section" id="cakes">
   <div class="container">
-    <div class="section-head cakes__head">
-      <h2>{home.cakes_title}</h2>
-      {home.cakes_text && <p class="lead cakes__lead">{home.cakes_text}</p>}
+    <div class="head">
+      <span class="mark" aria-hidden="true"></span>
+      <h2 class="display-caps">{home.cakes_title}</h2>
+      {home.cakes_text && <p class="lead">{home.cakes_text}</p>}
 
       <div class="cakes__actions">
         <button
           type="button"
-          class="btn btn--primary btn--sm"
+          class="btn btn--primary"
           data-book="Торт на заказ"
           data-book-note="Пришлите картинку, посчитаем в тот же день"
         >
           Торт на заказ
         </button>
-        <a class="btn btn--secondary btn--sm" href={shop} target="_blank" rel="noopener">
+        <a class="btn btn--secondary" href={shop} target="_blank" rel="noopener">
           Торты в наличии
         </a>
       </div>
@@ -58,32 +51,22 @@ const SIZES_CELL = '(min-width: 1200px) 309px, (min-width: 768px) 178px, 45vw';
 
     <div class="cakes__grid" id="cakes-grid" data-cakes-grid>
       {
-        cakes.map((cake, i) => (
-          <article class:list={['cake-card', SLOT[i]]}>
+        cakes.map((cake) => (
+          <article class="cake-card">
             {stub(cake) ? (
-              <figure
-                class:list={['media', 'cake-stub', (i === 0 || i % 4 === 2) && 'cake-stub--ink']}
-                style={`--ratio:${RATIO[i] ?? '3 / 4'}`}
-              >
-                <span class="cake-stub__icon" aria-hidden="true">
-                  <Fragment set:html={cakeIcon} />
-                </span>
+              <figure class="stub cake-stub">
                 {/* название несёт плашка: под кадром у заглушки остаются только вес и срок
                     the plaque carries the name; the caption below keeps weight and lead time */}
-                <span class="cake-stub__name display">{cake.title}</span>
-                <span class="cake-stub__meta">заглушка · заменяется в админке</span>
+                <span class="stub__title">{cake.title}</span>
+                <span class="stub__meta">заглушка · заменяется в админке</span>
               </figure>
             ) : (
-              <Photo
-                photo={cake.photo}
-                ratio={RATIO[i] ?? '3 / 4'}
-                sizes={i < 2 ? SIZES_BIG : SIZES_CELL}
-              />
+              <Photo photo={cake.photo} ratio="4 / 5" sizes={SIZES} />
             )}
 
             <div class="cake__cap">
               {!stub(cake) && <span class="cake__name">{cake.title}</span>}
-              {cake.note && <span class="cake__meta tnum">{cake.note}</span>}
+              {cake.note && <span class="tag tnum">{cake.note}</span>}
             </div>
           </article>
         ))
@@ -93,7 +76,7 @@ const SIZES_CELL = '(min-width: 1200px) 309px, (min-width: 768px) 178px, 45vw';
     <div class="cakes__more">
       <button
         type="button"
-        class="btn btn--secondary btn--md"
+        class="btn btn--secondary"
         data-cakes-toggle
         aria-expanded="false"
         aria-controls="cakes-grid"
@@ -105,128 +88,105 @@ const SIZES_CELL = '(min-width: 1200px) 309px, (min-width: 768px) 178px, 45vw';
 </section>
 
 <style>
-  /* h2 слева, лид справа одной строкой: столбиком они оставляли правый край пустым
-     h2 left, lead right on one line: stacked they left the right edge empty */
-  .cakes__head h2 {
-    flex: 1 1 16rem;
-    min-width: 0;
-  }
-
-  .cakes__lead {
-    flex: 1 1 20rem;
-    max-width: 34rem;
-  }
-
+  /* the section's two buttons on the axis, like the first screen
+     две кнопки секции по оси, как на первом экране */
   .cakes__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    justify-content: center;
+    gap: 10px 12px;
+    margin-top: 22px;
   }
 
   .cakes__grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px var(--gap);
+    gap: 20px var(--gap);
     /* карточка не тянется по высоте ряда: длинная подпись остаётся длинной
        cards never stretch to the row height: a long caption stays long */
     align-items: start;
-    margin-top: 18px;
+    margin-top: 32px;
   }
 
   .cake-card {
     display: flex;
     flex-direction: column;
-    gap: 9px;
+    gap: 8px;
     min-width: 0;
   }
 
-  /* две доминанты идут во всю ширину: ряд одинаковых плиток запрещён, DESIGN.md §4
-     both dominants span the full width: a row of equal tiles is banned */
-  .cake-card--lead,
-  .cake-card--wide {
-    grid-column: span 2;
-  }
-
-  /* лимит витрины живёт только здесь: свёрнутая показывает первые восемь —
-     на обеих сетках это целые ряды
-     the shelf limit lives here alone: collapsed shows the first eight, which is
-     whole rows in both grids */
+  /* лимит витрины живёт только здесь: свёрнутая показывает целые ряды — восемь
+     на двух и четырёх колонках, шесть на трёх
+     the shelf limit lives here alone: collapsed shows whole rows — eight on two
+     and four columns, six on three */
   .cakes__grid:not(.is-open) > .cake-card:nth-child(n + 9) {
     display: none;
   }
 
-  /* тортов не больше восьми — раскрывать нечего, кнопки нет */
+  /* тортов не больше, чем видно — раскрывать нечего, кнопки нет
+     no more cakes than shown — nothing to unfold, no button */
   .cakes__grid:not(:has(> :nth-child(9))) + .cakes__more {
     display: none;
   }
 
   .cakes__more {
     display: flex;
-    margin-top: 20px;
+    justify-content: center;
+    margin-top: 28px;
   }
 
-  /* Неснятый кадр — оформленный постер, а не пустая рамка: заливка, имя
-     антиквой и одна строка меты. Пунктира нет, он читался дырой в вёрстке.
-     A pending frame is a designed poster, not an empty box: a fill, the name in
-     the display serif and one meta line. No dashed outline — it read as a hole. */
+  /* The plate reads its fill from two properties so the ink rhythm below can
+     switch it without repeating the stub styles.
+     Плашка берёт заливку из двух свойств: ритм чернил ниже переключает её,
+     не повторяя стили заглушки. */
   .cake-stub {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    gap: 8px;
-    padding: 14px;
-    background-color: var(--surface-warm);
-    background-image: var(--hatch);
-    color: var(--text);
+    aspect-ratio: 4 / 5;
+    margin: 0;
+    background-color: var(--plate, var(--surface-warm));
+    background-image: var(--plate-hatch, var(--hatch));
+    color: var(--plate-ink, var(--text));
   }
 
-  .cake-stub--ink {
-    background-color: var(--ink);
-    background-image: var(--hatch-ink);
-    color: var(--on-ink);
+  .cake-stub .stub__meta {
+    color: var(--plate-meta, inherit);
   }
 
-  .cake-stub__icon {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 20px;
-    height: 20px;
-    color: var(--terracotta-text);
+  /* Ink plates step diagonally — one per row, never a column. An index from
+     the markup lined them up on three columns, so the rhythm is set per column
+     count, each in its own width range: 2nd and 3rd of four on two columns,
+     2nd and 6th of six on three, 2nd and 7th of eight on four.
+     Чернильные плашки идут по диагонали — по одной в ряду, никогда столбцом.
+     Индекс из разметки выстраивал их в колонку на трёх столбцах, поэтому ритм
+     задаётся на каждое число колонок в своём диапазоне ширин: 2-я и 3-я из
+     четырёх на двух, 2-я и 6-я из шести на трёх, 2-я и 7-я из восьми на четырёх. */
+  @media (max-width: 767.98px) {
+    .cake-card:nth-child(4n + 2) > .cake-stub,
+    .cake-card:nth-child(4n + 3) > .cake-stub {
+      --plate: var(--ink);
+      --plate-hatch: var(--hatch-ink);
+      --plate-ink: var(--on-ink);
+      --plate-meta: var(--on-ink-2);
+    }
   }
 
-  .cake-stub--ink .cake-stub__icon {
-    color: var(--terracotta-on-ink);
+  @media (min-width: 768px) and (max-width: 1199.98px) {
+    .cake-card:nth-child(6n + 2) > .cake-stub,
+    .cake-card:nth-child(6n + 6) > .cake-stub {
+      --plate: var(--ink);
+      --plate-hatch: var(--hatch-ink);
+      --plate-ink: var(--on-ink);
+      --plate-meta: var(--on-ink-2);
+    }
   }
 
-  .cake-stub__icon > :global(svg) {
-    width: 100%;
-    height: 100%;
-  }
-
-  /* 22 px — нижняя граница Prata: мельче антиква теряет характер */
-  .cake-stub__name {
-    font-size: 22px;
-  }
-
-  .cake-card--lead .cake-stub__name {
-    font-size: clamp(26px, 6.4vw, 38px);
-  }
-
-  .cake-card--wide .cake-stub__name {
-    font-size: clamp(24px, 5.4vw, 30px);
-  }
-
-  .cake-stub__meta {
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    line-height: 1.3;
-    text-transform: uppercase;
-    color: var(--text-3);
-  }
-
-  .cake-stub--ink .cake-stub__meta {
-    color: var(--on-ink-2);
+  @media (min-width: 1200px) {
+    .cake-card:nth-child(8n + 2) > .cake-stub,
+    .cake-card:nth-child(8n + 7) > .cake-stub {
+      --plate: var(--ink);
+      --plate-hatch: var(--hatch-ink);
+      --plate-ink: var(--on-ink);
+      --plate-meta: var(--on-ink-2);
+    }
   }
 
   .cake__cap {
@@ -243,41 +203,45 @@ const SIZES_CELL = '(min-width: 1200px) 309px, (min-width: 768px) 178px, 45vw';
     text-wrap: balance;
   }
 
-  .cake__meta {
-    font-size: 12.5px;
-    line-height: 1.35;
-    color: var(--text-3);
+  @media (min-width: 768px) {
+    .cakes__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px var(--gap);
+      margin-top: 36px;
+    }
+
+    .cakes__grid:not(.is-open) > .cake-card:nth-child(n + 7) {
+      display: none;
+    }
+
+    .cakes__grid:not(:has(> :nth-child(7))) + .cakes__more {
+      display: none;
+    }
+
   }
 
-  @media (min-width: 768px) {
-    .cakes__head .cakes__lead {
-      margin-top: 0;
-    }
-
-    /* 2×2 доминанта, широкий кадр рядом и ячейки под ним: высоту рядов задают
-       ячейки, доминанта тянется по ним и держит пропорцию около 3:4
-       a 2×2 dominant, the wide frame beside it and cells under that: the cells
-       set the row heights, the dominant stretches over them near a 3:4 frame */
+  @media (min-width: 1200px) {
     .cakes__grid {
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 22px var(--gap);
-      margin-top: 22px;
+      margin-top: 40px;
     }
 
-    .cake-card--lead {
-      grid-row: span 2;
-      align-self: stretch;
+    .cakes__grid:not(.is-open) > .cake-card:nth-child(n + 7) {
+      display: revert;
     }
 
-    .cake-card--lead > :global(.media) {
-      flex: 1;
-      aspect-ratio: auto;
+    .cakes__grid:not(.is-open) > .cake-card:nth-child(n + 9) {
+      display: none;
     }
 
-    .cake-card--lead :global(.media img) {
-      position: absolute;
-      inset: 0;
+    .cakes__grid:not(:has(> :nth-child(7))) + .cakes__more {
+      display: revert;
     }
+
+    .cakes__grid:not(:has(> :nth-child(9))) + .cakes__more {
+      display: none;
+    }
+
   }
 </style>
 

@@ -35,7 +35,8 @@ const points = places.map((place) => ({
         <div class="map__canvas" data-map-canvas />
         {/* подложка видна, пока карта не встала: без JS и после таймаута это ссылки */}
         <div class="map__stub">
-          <p class="map__stub-label" data-map-note>
+          <p class="map__stub-title display">Карта</p>
+          <p class="tag map__stub-label" data-map-note>
             Загружаем карту…
           </p>
           <p class="map__stub-hint">Открыть в Яндекс Картах:</p>
@@ -59,7 +60,10 @@ const points = places.map((place) => ({
           data-src={yandexWidgetUrl(places)}
         >
           <div class="map__stub">
-            <p class="map__stub-label" data-frame-note>Загружаем карту…</p>
+            <p class="map__stub-title display">Карта</p>
+            <p class="tag map__stub-label" data-frame-note>
+              Загружаем карту…
+            </p>
             <p class="map__stub-hint">Открыть в Яндекс Картах:</p>
             {places.map((place) => (
               <a
@@ -105,14 +109,18 @@ const points = places.map((place) => ({
     color: var(--text);
   }
 
+  /* the same hatched plate as every photo stub on the page, under the map
+     until it lands / та же штрихованная плашка, что у фото-заглушек страницы,
+     под картой, пока она не встала */
   .map {
     position: relative;
     width: 100%;
     aspect-ratio: 4 / 3;
     overflow: hidden;
     border: 1px solid var(--line);
-    border-radius: var(--r-xl);
-    background: repeating-linear-gradient(45deg, #efe7da 0 12px, #eae1d2 12px 24px);
+    border-radius: var(--r-sq);
+    background-color: var(--surface-photo);
+    background-image: var(--hatch);
   }
 
   .map :global(iframe),
@@ -137,17 +145,20 @@ const points = places.map((place) => ({
     text-align: center;
   }
 
-  .map__stub-label,
+  .map__stub-title {
+    font-size: 26px;
+    line-height: 1;
+  }
+
+  /* `.tag` is the caps line; the hint stays plain under it
+     `.tag` — прописная строка; подсказка под ней обычным текстом */
+  .map__stub-label {
+    margin-top: 2px;
+  }
+
   .map__stub-hint {
     font-size: 13px;
     color: var(--text-4);
-  }
-
-  .map__stub-label {
-    padding: 8px 16px;
-    border: 1px solid var(--line);
-    border-radius: var(--r-pill);
-    background: var(--bg);
   }
 
   .map__stub-hint {
@@ -222,7 +233,7 @@ const points = places.map((place) => ({
   .map :global(.ymk__label) {
     padding: 5px 11px;
     border: 1px solid var(--line);
-    border-radius: var(--r-pill);
+    border-radius: var(--r-sq);
     background: var(--bg);
     color: var(--text);
     font-size: 12px;

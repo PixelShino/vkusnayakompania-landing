@@ -149,13 +149,13 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
               <div class="venue__actions">
                 <button
                   type="button"
-                  class="btn btn--sq btn--primary"
+                  class="btn btn--primary"
                   data-book={`Бронь стола: ${place.street}`}
                 >
                   Забронировать
                 </button>
                 {menu && (
-                  <a class="btn btn--sq btn--secondary" href={menu} target="_blank" rel="noopener">
+                  <a class="btn btn--secondary" href={menu} target="_blank" rel="noopener">
                     Меню
                   </a>
                 )}

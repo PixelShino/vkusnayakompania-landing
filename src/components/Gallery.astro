@@ -1,13 +1,15 @@
 ---
 /**
- * One long horizontal strip over the photos of every venue: the lead frame is
- * twice as wide, then three per screen on a desktop, two on a tablet, one and a
- * peek on a phone; swipe on touch, drag with the mouse, arrows and keys page by
- * frame. A frame with no photo yet becomes a filled plaque of the same ratio.
- * Одна длинная горизонтальная лента по фото всех точек: первый кадр вдвое шире,
- * дальше три на десктопе, два на планшете, кадр с краешком следующего на
- * телефоне; свайп, перетаскивание мышью, стрелки и клавиши листают по кадру.
- * Кадр без фото становится залитой плашкой той же пропорции.
+ * Film strip over the photos of every venue: one large frame on the central
+ * axis, the neighbours peek in cropped by the viewport edge (Green Park,
+ * Levantine). Cream circle arrows sit on the frames, dots below; swipe on
+ * touch, drag with the mouse, arrows and keys page by frame. A frame with no
+ * photo yet is a hatched plate of the same ratio that says so.
+ * Кинолента по фото всех точек: один крупный кадр по центральной оси, соседние
+ * подглядывают, обрезанные краем окна (Green Park, Levantine). Кремовые круглые
+ * стрелки лежат на кадрах, точки под лентой; свайп, перетаскивание мышью,
+ * стрелки и клавиши листают по кадру. Кадр без фото — штрихованная плашка той
+ * же пропорции, которая об этом говорит.
  */
 import Photo from './Photo.astro';
 import { isPlaceholder, type Content } from '../lib/content.ts';
@@ -18,25 +20,13 @@ interface Props {
 
 const { places } = Astro.props.content;
 
-// ширина кадра = ширина ленты по колонкам: треть с 1200, половина с 768, 78 % на телефоне
-// frame width = strip width per column: a third from 1200, a half from 768, 78 % on a phone
-const SIZES = [
-  '(min-width: 1440px) 419px',
-  '(min-width: 1200px) calc((100vw - 184px) / 3)',
-  '(min-width: 834px) 373px',
-  '(min-width: 768px) calc((100vw - 88px) / 2)',
-  '78vw',
-].join(', ');
-
-// первый кадр шире прочих — источник ему нужен крупнее
-// the lead frame is wider than the rest and needs a larger source
-const SIZES_LEAD = [
-  '(min-width: 1440px) 858px',
-  '(min-width: 1200px) calc((100vw - 184px) / 3 * 2 + 20px)',
-  '(min-width: 834px) 507px',
-  '(min-width: 768px) calc((100vw - 88px) * 0.68)',
-  '88vw',
-].join(', ');
+// ширина кадра = ширина центрального слота: 60 % окна с 1200 (до 860 px),
+// 72 % с 768, 86 % на телефоне
+// frame width = the central slot: 60 % of the viewport from 1200 (up to 860 px),
+// 72 % from 768, 86 % on a phone
+const SIZES = ['(min-width: 1200px) min(860px, 60vw)', '(min-width: 768px) 72vw', '86vw'].join(
+  ', ',
+);
 
 // The admin marks a stand-in in the file title, but only `alt` reaches the
 // strip: both wordings are checked so a real photo is never hidden by a plaque.
@@ -49,7 +39,6 @@ const shots = places.flatMap((place) =>
     const stub = isStub(shot.image.alt);
     return {
       photo: shot.image,
-      n: place.n,
       title: shot.caption || place.name,
       // на плашке предмет кадра уже стоит крупно: под ней остаётся один адрес
       // the plaque already carries the subject: only the address stays below it
@@ -64,64 +53,25 @@ const shots = places.flatMap((place) =>
 const COUNT = ['', 'Один зал', 'Два зала', 'Три зала', 'Четыре зала'];
 const heading = `${COUNT[places.length] || 'Залы'} в Самаре`;
 
-// один кадр листать некуда: стрелок нет
-// nothing to page through with a single frame: no arrows
+// один кадр листать некуда: ни стрелок, ни точек
+// nothing to page through with a single frame: no arrows, no dots
 const many = shots.length > 1;
 ---
 
 {
   shots.length > 0 && (
-    <section class="section" id="gallery" aria-labelledby="gallery-title">
-      <div class="container">
-        <div class="section-head gl__head">
-          <h2 id="gallery-title">{heading}</h2>
-          <p class="lead gl__lead">
-            Кафе на Садовой и ресторан на Советской Армии — кадры обеих точек идут подряд.
-          </p>
+    <section class="section gl" id="gallery" aria-labelledby="gallery-title">
+      <div class="container head">
+        <span class="mark" aria-hidden="true" />
+        <h2 id="gallery-title" class="display-caps">
+          {heading}
+        </h2>
+        <p class="lead">
+          Кафе на Садовой и ресторан на Советской Армии — кадры обеих точек идут подряд.
+        </p>
+      </div>
 
-          {many && (
-            <div class="gl__nav">
-              <button
-                type="button"
-                class="gl__arrow"
-                data-slider-prev
-                aria-disabled="true"
-                aria-label="Предыдущее фото"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.75"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M14.5 5.5 8 12l6.5 6.5" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                class="gl__arrow"
-                data-slider-next
-                aria-label="Следующее фото"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.75"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M9.5 5.5 16 12l-6.5 6.5" />
-                </svg>
-              </button>
-            </div>
-          )}
-        </div>
-
+      <div class="gl__strip">
         <div
           class="gl__rail"
           data-slider-rail
@@ -132,92 +82,112 @@ const many = shots.length > 1;
           {shots.map((shot, i) => (
             <div class="gl__slide">
               {shot.stub ? (
-                <div class:list={['gl__stub', i % 2 ? 'gl__stub--warm' : 'gl__stub--ink']}>
-                  <span class="card-mark card-mark--sm" aria-hidden="true">
-                    {shot.n}
-                  </span>
-                  <span class="gl__stub-text">
-                    <span class="gl__stub-title display">{shot.title}</span>
-                    <span class="gl__stub-meta">заглушка · заменяется в админке</span>
-                  </span>
+                <div class:list={['stub', 'gl__stub', i % 2 === 0 && 'stub--ink']}>
+                  <span class="stub__title">{shot.title}</span>
+                  <span class="stub__meta">заглушка · заменяется в админке</span>
                 </div>
               ) : (
                 <Photo
                   photo={shot.photo}
-                  ratio="4 / 3"
-                  radius="var(--r-lg)"
-                  sizes={i === 0 ? SIZES_LEAD : SIZES}
+                  ratio="16 / 10"
+                  radius="var(--r-sq)"
+                  sizes={SIZES}
                   class="gl__media"
                   eager={i < 2}
                   priority="low"
                 />
               )}
-              <p class="gl__caption">{shot.caption}</p>
+              <p class="tag gl__caption">{shot.caption}</p>
             </div>
           ))}
         </div>
+
+        {many && (
+          <>
+            <button
+              type="button"
+              class="gl__arrow gl__arrow--prev"
+              data-slider-prev
+              aria-disabled="true"
+              aria-label="Предыдущее фото"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M14.5 5.5 8 12l6.5 6.5" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="gl__arrow gl__arrow--next"
+              data-slider-next
+              aria-label="Следующее фото"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M9.5 5.5 16 12l-6.5 6.5" />
+              </svg>
+            </button>
+          </>
+        )}
       </div>
+
+      {many && (
+        <div class="gl__dots" data-slider-dots role="group" aria-label="Перейти к кадру">
+          {shots.map((shot, i) => (
+            <button
+              type="button"
+              class="gl__dot"
+              data-slider-dot={i}
+              aria-label={`Кадр ${i + 1}: ${shot.title}`}
+              aria-current={i === 0 ? 'true' : undefined}
+            />
+          ))}
+        </div>
+      )}
     </section>
   )
 }
 
 <style>
-  /* заголовок слева, лид справа: столбик оставлял пустой всю правую половину
-     heading left, lead right: the stacked pair left the whole right half empty */
-  .gl__head h2,
-  .gl__lead {
-    flex: 1 1 100%;
+  /* Frame width per breakpoint. `vw`, not `%`: the arrows sit on the frame's
+     edges and need the same length for their offset from the strip's centre.
+     Ширина кадра по брейкпоинтам. `vw`, а не `%`: стрелки лежат на краях
+     кадра, и им нужна та же длина для отступа от центра ленты. */
+  .gl {
+    --frame: 86vw;
   }
 
-  .gl__nav {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex: none;
+  /* the strip runs edge to edge under the centred heading
+     лента идёт от края до края под заголовком по центру */
+  .gl__strip {
+    position: relative;
+    margin-top: 26px;
   }
 
-  .gl__arrow {
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    border: 1px solid var(--line);
-    border-radius: var(--r-pill);
-    background: transparent;
-    color: var(--text);
-    cursor: pointer;
-    /* перечислено поимённо: `all` тянул бы за собой и рамку, и размеры */
-    transition-property: scale, background-color, border-color, opacity;
-    transition-duration: 120ms, 0.16s, 0.16s, 0.16s;
-    transition-timing-function: var(--ease-out), ease, ease, ease;
-  }
-
-  .gl__arrow:not([aria-disabled='true']):active {
-    scale: 0.96;
-  }
-
-  .gl__arrow svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .gl__arrow[aria-disabled='true'] {
-    opacity: 0.35;
-    cursor: default;
-  }
-
-  /* лента выходит за поля до края контейнера, кадры снапятся к левому полю
-     the strip bleeds past the padding to the container edge, frames snap to the left padding */
+  /* The rail is the full viewport; side padding parks the first and last frame
+     in the centre, every frame snaps to the centre. No scrollbar: the arrows,
+     the dots and the peeking neighbours already say that the strip moves.
+     Рельс на всё окно; боковые поля ставят первый и последний кадр в центр,
+     каждый кадр снапится к центру. Без скроллбара: стрелки, точки и торчащие
+     соседи и так говорят, что лента едет. */
   .gl__rail {
-    --slide: 78%;
-    --slide-lead: 88%;
     display: flex;
     gap: var(--gap);
-    margin-top: 22px;
-    margin-inline: calc(-1 * var(--pad));
-    padding-inline: var(--pad);
-    scroll-padding-inline: var(--pad);
+    padding-inline: calc((100% - var(--frame)) / 2);
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     overscroll-behavior-x: contain;
@@ -241,34 +211,9 @@ const many = shots.length > 1;
   }
 
   .gl__slide {
-    flex: 0 0 var(--slide);
+    flex: 0 0 var(--frame);
     min-width: 0;
-    scroll-snap-align: start;
-  }
-
-  /* доминанта: лента из одинаковых прямоугольников читается как заглушка целиком
-     the dominant frame: a strip of equal rectangles reads as one big placeholder */
-  .gl__slide:first-child {
-    flex-basis: var(--slide-lead);
-  }
-
-  /* Wider, never taller: a taller lead breaks the row and leaves a dead band
-     under its neighbours. The lead keeps the ordinary frame's height, so its
-     ratio is (lead width / ordinary width) x 4/3 — recomputed per breakpoint,
-     because those widths are percentages of the rail, not fixed pixels.
-     Шире, но не выше: высокая доминанта рвёт ряд и оставляет под соседними
-     кадрами пустую полосу. Доминанта держит высоту обычного кадра, поэтому её
-     соотношение — (ширина доминанты / ширина обычного) x 4/3, и оно своё на
-     каждом брейкпоинте: ширины заданы процентами ленты, а не пикселями. */
-  .gl__slide:first-child .gl__stub,
-  .gl__slide:first-child :global(.gl__media) {
-    /* телефон: 88 / 78 x 4/3 */
-    aspect-ratio: 3 / 2;
-  }
-
-  .gl__slide:first-child :global(.gl__media img) {
-    height: 100%;
-    object-fit: cover;
+    scroll-snap-align: center;
   }
 
   /* `:global` — кадр рисует `Photo.astro`, метки области у него нет */
@@ -277,83 +222,114 @@ const many = shots.length > 1;
     outline-offset: -1px;
   }
 
-  /* Plaque instead of a frame: a fill, not a dashed outline. The ratio repeats
-     the `ratio` prop of <Photo>, so a real shot drops in without shifting a pixel.
-     Плашка вместо кадра: заливка, а не пунктирная рамка. Пропорция повторяет
-     проп `ratio` у <Photo> — настоящий кадр встанет на место без сдвига. */
+  /* the plate repeats the `ratio` of <Photo>: a real shot drops in without a shift
+     плашка повторяет `ratio` у <Photo>: настоящий кадр встанет без сдвига */
   .gl__stub {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 12px;
-    aspect-ratio: 4 / 3;
-    padding: 14px;
-    border-radius: var(--r-lg);
-    overflow: hidden;
-  }
-
-  /* через одну: сплошная лента чернил монотонна не меньше сплошного крема
-     every other one: a solid ink strip is as monotone as a solid cream one */
-  .gl__stub--ink {
-    background-color: var(--ink);
-    background-image: var(--hatch-ink);
-  }
-
-  .gl__stub--warm {
-    background-color: var(--surface-warm);
-    background-image: var(--hatch);
-    border: 1px solid var(--line-warm);
-  }
-
-  .gl__stub-text {
-    display: block;
-  }
-
-  .gl__stub-title {
-    display: block;
-    font-size: clamp(20px, 4.6vw, 23px);
-    text-wrap: balance;
-  }
-
-  .gl__slide:first-child .gl__stub-title {
-    font-size: clamp(22px, 5vw, 26px);
-  }
-
-  .gl__stub--ink .gl__stub-title {
-    color: var(--on-ink);
-  }
-
-  .gl__stub--warm .gl__stub-title {
-    color: var(--text);
-  }
-
-  .gl__stub-meta {
-    display: block;
-    margin-top: 8px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .gl__stub--ink .gl__stub-meta {
-    color: var(--on-ink-2);
-  }
-
-  .gl__stub--warm .gl__stub-meta {
-    color: var(--text-4);
+    aspect-ratio: 16 / 10;
   }
 
   .gl__caption {
-    margin-top: 10px;
-    font-size: 12.5px;
-    color: var(--text-4);
+    margin-top: 12px;
+    text-align: center;
+  }
+
+  /* Cream circle on the frame's edge, vertically centred on the frame (the
+     caption below is not counted): the frame is 10/16 of its width high.
+     Кремовый круг на краю кадра, по вертикали — в центре кадра (подпись под
+     ним не считается): высота кадра — 10/16 его ширины. */
+  .gl__arrow {
+    position: absolute;
+    top: calc(var(--frame) * 10 / 16 / 2);
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: var(--bg);
+    box-shadow: 0 1px 4px rgb(44 41 39 / 0.25);
+    color: var(--text);
+    translate: 0 -50%;
+    cursor: pointer;
+    /* перечислено поимённо: `all` тянул бы за собой и размеры, и тень */
+    transition-property: scale, background-color, opacity;
+    transition-duration: 120ms, 0.16s, 0.16s;
+    transition-timing-function: var(--ease-out), ease, ease;
+  }
+
+  /* the arrow sits inside the frame, on the shot itself (Levantine): half a
+     circle on bare cream next to the peeking neighbour vanished
+     стрелка стоит внутри кадра, прямо на снимке (Levantine): половина круга
+     на голом креме рядом с торчащим соседом пропадала */
+  .gl__arrow--prev {
+    left: calc((100% - var(--frame)) / 2 + 10px);
+  }
+
+  .gl__arrow--next {
+    right: calc((100% - var(--frame)) / 2 + 10px);
+  }
+
+  .gl__arrow:not([aria-disabled='true']):active {
+    scale: 0.96;
+  }
+
+  .gl__arrow svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .gl__arrow[aria-disabled='true'] {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  /* Dots under the strip: the current one is a filled olive circle, the rest
+     are hairline rings. Each is a 24 px target with an 8 px mark inside.
+     Точки под лентой: текущая — залитый оливковый круг, остальные — кольца в
+     волосяную линию. Каждая — цель 24 px с меткой 8 px внутри. */
+  .gl__dots {
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    margin-top: 18px;
+  }
+
+  .gl__dot {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .gl__dot::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border: 1px solid var(--olive-dark);
+    border-radius: var(--r-pill);
+    background: transparent;
+    transition-property: background-color;
+    transition-duration: 0.16s;
+    transition-timing-function: ease;
+  }
+
+  .gl__dot[aria-current='true']::before {
+    background: var(--olive-dark);
   }
 
   @media (hover: hover) and (pointer: fine) {
     .gl__arrow:not([aria-disabled='true']):hover {
-      background: color-mix(in srgb, var(--text) 6%, transparent);
-      border-color: var(--line-4);
+      background: var(--surface);
+    }
+
+    .gl__dot:not([aria-current='true']):hover::before {
+      background: color-mix(in srgb, var(--olive-dark) 35%, transparent);
     }
 
     .gl__rail {
@@ -362,107 +338,114 @@ const many = shots.length > 1;
   }
 
   @media (min-width: 768px) {
-    .gl__head h2 {
-      flex: 0 1 auto;
+    .gl {
+      --frame: 72vw;
     }
 
-    .gl__lead {
-      flex: 1 1 20rem;
-      max-width: 34rem;
-      margin-top: 0;
+    .gl__strip {
+      margin-top: 32px;
     }
 
-    .gl__rail {
-      --slide: calc((100% - var(--gap)) / 2);
-      --slide-lead: calc((100% - var(--gap)) * 0.68);
+    .gl__arrow {
+      width: 44px;
+      height: 44px;
     }
 
-    /* 0,68 ленты против половины: 1,36 x 4/3 */
-    .gl__slide:first-child .gl__stub,
-    .gl__slide:first-child :global(.gl__media) {
-      aspect-ratio: 16 / 9;
-      margin-top: 26px;
+    /* inside the frame here too: a circle straddling the edge left half of
+       itself on bare cream and read as a smudge when disabled
+       и здесь внутри кадра: круг верхом на краю оставлял половину себя на
+       голом креме и в выключенном виде читался пятном */
+    .gl__arrow--prev {
+      left: calc((100% - var(--frame)) / 2 + 14px);
     }
 
-    .gl__stub {
-      padding: 18px;
-    }
-
-    .gl__caption {
-      margin-top: 12px;
-      font-size: 13px;
+    .gl__arrow--next {
+      right: calc((100% - var(--frame)) / 2 + 14px);
     }
   }
 
   @media (min-width: 1200px) {
-    .gl__rail {
-      --slide: calc((100% - 2 * var(--gap)) / 3);
-      --slide-lead: calc((100% - 2 * var(--gap)) * 2 / 3 + var(--gap));
+    .gl {
+      --frame: min(860px, 60vw);
     }
 
-    /* две колонки с зазором против одной: 2,05 x 4/3 */
-    .gl__slide:first-child .gl__stub,
-    .gl__slide:first-child :global(.gl__media) {
-      aspect-ratio: 2.73;
-    }
-
-    .gl__stub {
-      padding: 20px;
+    .gl__caption {
+      margin-top: 14px;
     }
   }
 </style>
 
 <script>
   /**
-   * Arrows, keys and mouse drag for the venue strip. Edges are marked with
-   * `aria-disabled` rather than `disabled`: a native disabled button drops the
-   * keyboard focus to `<body>` mid-scroll.
-   * Стрелки, клавиши и перетаскивание мышью для ленты залов. Край помечается
-   * `aria-disabled`, а не `disabled`: нативно погашенная кнопка роняет фокус
-   * на `<body>` прямо во время прокрутки.
+   * Arrows, dots, keys and mouse drag for the venue strip. The current frame is
+   * the one nearest the rail's centre; edges are marked with `aria-disabled`
+   * rather than `disabled`: a native disabled button drops the keyboard focus
+   * to `<body>` mid-scroll.
+   * Стрелки, точки, клавиши и перетаскивание мышью для ленты залов. Текущий
+   * кадр — ближайший к центру рельса; край помечается `aria-disabled`, а не
+   * `disabled`: нативно погашенная кнопка роняет фокус на `<body>` прямо во
+   * время прокрутки.
    */
   const rail = document.querySelector<HTMLElement>('[data-slider-rail]');
   const prev = document.querySelector<HTMLButtonElement>('[data-slider-prev]');
   const next = document.querySelector<HTMLButtonElement>('[data-slider-next]');
+  const dots = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-slider-dot]'));
   const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const off = (button: HTMLButtonElement | null) =>
     button?.getAttribute('aria-disabled') === 'true';
 
   if (rail) {
+    const frames = Array.from(rail.children) as HTMLElement[];
+
+    // offset that puts a frame in the middle of the rail
+    // смещение, при котором кадр стоит посередине рельса
+    const leftFor = (frame: HTMLElement) =>
+      frame.offsetLeft - (rail.clientWidth - frame.offsetWidth) / 2;
+
+    const current = () => {
+      const centre = rail.scrollLeft + rail.clientWidth / 2;
+      let best = 0;
+      let gap = Infinity;
+      frames.forEach((frame, i) => {
+        const d = Math.abs(frame.offsetLeft + frame.offsetWidth / 2 - centre);
+        if (d < gap) {
+          gap = d;
+          best = i;
+        }
+      });
+      return best;
+    };
+
     const sync = () => {
       // пока секцию пропускает `content-visibility`, кадры не разложены и обе
       // ширины равны: по ним обе стрелки погасли бы навсегда
       // while `content-visibility` skips the section the frames are not laid
       // out and both widths match: judging by them would kill both arrows
       if (rail.scrollWidth <= rail.clientWidth) return;
-      const max = rail.scrollWidth - rail.clientWidth - 1;
-      prev?.setAttribute('aria-disabled', String(rail.scrollLeft <= 0));
-      next?.setAttribute('aria-disabled', String(rail.scrollLeft >= max));
+      const i = current();
+      prev?.setAttribute('aria-disabled', String(i === 0));
+      next?.setAttribute('aria-disabled', String(i === frames.length - 1));
+      dots.forEach((dot, j) => {
+        if (j === i) dot.setAttribute('aria-current', 'true');
+        else dot.removeAttribute('aria-current');
+      });
     };
 
-    // The step is measured against the neighbouring frame, not one fixed width:
-    // the lead frame is wider, so a single constant would overshoot after it.
-    // Шаг считается по соседнему кадру, а не по одной ширине: первый кадр шире,
-    // и одна константа промахивалась бы после него.
+    const goTo = (i: number) => {
+      const frame = frames[Math.max(0, Math.min(frames.length - 1, i))];
+      if (!frame) return;
+      rail.scrollTo({ left: leftFor(frame), behavior: smooth ? 'smooth' : 'auto' });
+    };
+
     const go = (direction: number) => {
       if (direction < 0 ? off(prev) : off(next)) return;
-      const snap =
-        rail.getBoundingClientRect().left +
-        rail.clientLeft +
-        (parseFloat(getComputedStyle(rail).paddingLeft) || 0);
-      const frames = Array.from(rail.children) as HTMLElement[];
-      if (direction < 0) frames.reverse();
-      const target = frames.find((frame) => {
-        const shift = frame.getBoundingClientRect().left - snap;
-        return direction > 0 ? shift > 1 : shift < -1;
-      });
-      const left = target ? target.getBoundingClientRect().left - snap : direction * rail.clientWidth;
-      rail.scrollBy({ left, behavior: smooth ? 'smooth' : 'auto' });
+      goTo(current() + direction);
     };
 
     prev?.addEventListener('click', () => go(-1));
     next?.addEventListener('click', () => go(1));
+    dots.forEach((dot) => dot.addEventListener('click', () => goTo(Number(dot.dataset.sliderDot))));
     rail.addEventListener('scroll', sync, { passive: true });
 
     // снап отбирает нативную прокрутку стрелками, поэтому листаем кадрами сами
@@ -491,7 +474,13 @@ const many = shots.length > 1;
       if (!rail.classList.contains('is-dragging')) return;
       rail.scrollLeft = dragLeft - (event.clientX - dragX);
     });
-    const release = () => rail.classList.remove('is-dragging');
+    const release = () => {
+      if (!rail.classList.contains('is-dragging')) return;
+      rail.classList.remove('is-dragging');
+      // after a drag the strip settles on the nearest frame by itself
+      // после перетаскивания лента сама доезжает до ближайшего кадра
+      goTo(current());
+    };
     rail.addEventListener('pointerup', release);
     rail.addEventListener('pointercancel', release);
 

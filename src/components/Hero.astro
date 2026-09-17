@@ -49,11 +49,11 @@ const stickerExternal = cakes.length === 0;
     {home.hero_text && <p class="hero__lead">{typo(home.hero_text)}</p>}
 
     <div class="hero__cta">
-      <button type="button" class="btn btn--sq btn--light" data-book="Бронь стола">
+      <button type="button" class="btn btn--light" data-book="Бронь стола">
         Забронировать стол
       </button>
       <a
-        class="btn btn--sq btn--ghost-light"
+        class="btn btn--ghost-light"
         href={settings.shop_url}
         target="_blank"
         rel="noopener"
@@ -257,6 +257,20 @@ const stickerExternal = cakes.length === 0;
     min-width: 250px;
   }
 
+  /* Ghost on the photo takes a dark fill, not a light one: the 16 % cream
+     lifted the brightest pixel under it to 4,15:1 for cream text; the ink
+     tint drops it below the scrim and the label holds 4,5:1 everywhere.
+     Призрачная на фото берёт тёмную заливку, а не светлую: 16 % крема
+     поднимали самый светлый пиксель под ней до 4,15:1 для кремового текста;
+     чернильный тон опускает его под скрим, и подпись держит 4,5:1 везде. */
+  .hero__cta .btn--ghost-light {
+    background: rgb(44 41 39 / 0.34);
+  }
+
+  .hero__cta .btn--ghost-light:active {
+    background: rgb(44 41 39 / 0.5);
+  }
+
   /* Bottom strip: each venue on its own line on the phone, one row with a
      hairline between them from 768. Cream at full alpha — the strip sits on the
      darkest part of the scrim, but the photo under it is still a photo.
@@ -389,6 +403,10 @@ const stickerExternal = cakes.length === 0;
 
     .hero__sticker:hover {
       rotate: -6deg;
+    }
+
+    .hero__cta .btn--ghost-light:hover {
+      background: rgb(44 41 39 / 0.46);
     }
   }
 
