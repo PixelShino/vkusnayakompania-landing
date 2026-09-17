@@ -239,19 +239,33 @@ const nav = navFor(content, over ? '' : '/');
       display: contents;
     }
 
+    /* Centred between the logo and the actions, caps with tracking: that is
+       how the references set navigation (Green Park, Levantine); small text
+       pressed to the logo read as a page builder.
+       По центру между логотипом и действиями, прописными вразрядку: так
+       навигацию ставят референсы (Green Park, Levantine); мелкие пункты,
+       прижатые к логотипу, читались конструктором. */
     .header__nav {
       flex-direction: row;
-      gap: 13px;
-      margin-inline: 10px auto;
+      gap: 14px;
+      margin-inline: auto;
     }
 
     .header__nav a {
       padding-block: 4px;
-      font-size: 12.5px;
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
       white-space: nowrap;
-      font-weight: 400;
       border-bottom: 1px solid transparent;
       transition: border-color 0.16s ease;
+    }
+
+    /* до 1024 в строку не входит: «Главная» дублирует логотип и уходит первой
+       under 1024 the row is full: «Главная» duplicates the logo and goes first */
+    .header__nav a:first-child {
+      display: none;
     }
 
     .header__actions {
@@ -261,10 +275,17 @@ const nav = navFor(content, over ? '' : '/');
       margin-top: 0;
     }
 
+    /* квадратные, как на первом экране: пилюля здесь единственная выдавала бы
+       конструктор
+       squared like the first screen's: a pill here would be the one giveaway */
     .header__actions .btn {
       width: auto;
-      height: 38px;
-      font-size: 13px;
+      height: 36px;
+      padding-inline: 14px;
+      border-radius: var(--r-sq);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
     .header__book {
@@ -292,12 +313,13 @@ const nav = navFor(content, over ? '' : '/');
     }
 
     .header__nav {
-      gap: 16px;
-      margin-inline: 14px auto;
+      gap: 20px;
     }
 
     .header__nav a {
-      font-size: 13px;
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.12em;
     }
   }
 
@@ -318,6 +340,21 @@ const nav = navFor(content, over ? '' : '/');
 
     .header__book {
       display: inline-flex;
+    }
+
+    /* с 1200 в строку входит и «Главная» — при чуть меньшем шаге между пунктами
+       from 1200 the row has room for «Главная» too, at a slightly tighter step */
+    .header__nav {
+      gap: 16px;
+      margin-inline: 12px auto;
+    }
+
+    .header__nav a:first-child {
+      display: block;
+    }
+
+    .header__actions .btn {
+      padding-inline: 12px;
     }
   }
 

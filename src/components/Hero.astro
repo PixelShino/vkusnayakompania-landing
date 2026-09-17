@@ -42,13 +42,8 @@ const stickerExternal = cakes.length === 0;
     class="hero__photo"
   />
   <div class="hero__scrim" aria-hidden="true"></div>
-  {
-    home.hero_image.placeholder && (
-      <p class="hero__stub-tag">фото-заглушка · заменяется в админке</p>
-    )
-  }
 
-  <div class="container hero__in">
+  <div class="hero__in">
     <span class="mark hero__mark" aria-hidden="true"></span>
     <h1 class="hero__title display-caps">{home.hero_title}</h1>
     {home.hero_text && <p class="hero__lead">{typo(home.hero_text)}</p>}
@@ -89,6 +84,12 @@ const stickerExternal = cakes.length === 0;
       ))
     }
   </ul>
+
+  {
+    home.hero_image.placeholder && (
+      <p class="hero__stub-tag">фото-заглушка · заменяется в админке</p>
+    )
+  }
 
   {
     stickerHref && (
@@ -134,54 +135,88 @@ const stickerExternal = cakes.length === 0;
     object-position: center 40%;
   }
 
-  /* Even ink over the whole frame, as on every reference: the text lives in the
-     middle, so the scrim holds one level there and only deepens at both ends —
-     under the header and under the venue strip. 0.7 over the brightest pixel
-     of the display case keeps the lead at 4.6:1 (measured), the ends give 6:1+.
-     Ровные чернила по всему кадру, как у всех референсов: текст стоит посередине,
-     поэтому скрим держит там одну ступень и густеет лишь по краям — под шапкой и
-     под полосой точек. 0,7 на самом светлом пикселе витрины держит лид на
-     4,6:1 (замер), края дают от 6:1. */
+  /* The frame stays a photo: a light base tint over the whole shot, a plateau
+     under the header and a deeper band under the venue strip — nothing more on
+     the sides, so the berries keep their red. The ink for the text sits on the
+     text block itself (`.hero__in`), not on the frame.
+     Кадр остаётся фотографией: лёгкий общий тон, плато под шапкой и более
+     плотная полоса под строкой точек — по бокам больше ничего, и ягоды
+     остаются красными. Чернила под текст лежат на самом текстовом блоке
+     (`.hero__in`), а не на кадре. */
   .hero__scrim {
+    /* высота полосы точек: до неё нижняя полоса скрима держит плато
+       the venue strip's height: the bottom band holds its plateau up to it */
+    --band: 150px;
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      to bottom,
-      rgb(44 41 39 / 0.78) 0%,
-      rgb(44 41 39 / 0.7) 28%,
-      rgb(44 41 39 / 0.7) 70%,
-      rgb(44 41 39 / 0.86) 100%
-    );
+    background:
+      linear-gradient(
+        to bottom,
+        rgb(44 41 39 / 0.7) 0,
+        rgb(44 41 39 / 0.62) 80px,
+        rgb(44 41 39 / 0) 220px
+      ),
+      linear-gradient(
+        to top,
+        rgb(44 41 39 / 0.88) 0,
+        rgb(44 41 39 / 0.78) var(--band),
+        rgb(44 41 39 / 0) calc(var(--band) + 150px)
+      ),
+      linear-gradient(rgb(44 41 39 / 0.22), rgb(44 41 39 / 0.22));
     pointer-events: none;
   }
 
   /* The frame is a stock stand-in until the client's photo arrives: the page
-     says so in a corner instead of passing it off as the venue.
+     says so, small and in the bottom corner — not before the venue's name.
      Кадр — сток вместо фото клиента, пока оно не пришло: страница говорит об
-     этом в углу, а не выдаёт его за заведение. */
+     этом мелко и в нижнем углу — не раньше названия заведения. */
   .hero__stub-tag {
     position: absolute;
-    top: 14px;
-    left: var(--pad);
+    right: var(--pad);
+    bottom: 6px;
     z-index: 1;
-    font-size: 10.5px;
+    font-size: 9.5px;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--bg);
-    opacity: 0.8;
+    opacity: 0.6;
   }
 
+  /* The text block carries its own ink in a `::before` under the text: on the
+     phone a vertical band fading above and below, from 768 a soft rectangle
+     (two masks intersected) fading out on all four sides. The frame beyond it
+     stays at the base tint. `isolation` keeps the layer above the frame.
+     Текстовый блок несёт свои чернила в `::before` под текстом: на телефоне
+     вертикальная полоса, гаснущая сверху и снизу, с 768 — мягкий прямоугольник
+     (пересечение двух масок), гаснущий по всем четырём сторонам. Кадр за его
+     пределами остаётся под лёгким тоном. `isolation` держит слой над кадром. */
   .hero__in {
     position: relative;
+    isolation: isolate;
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
     /* центр оставшейся высоты: полоса точек внизу стоит в потоке
        centred in what is left: the venue strip below stays in flow */
     margin-block: auto;
-    padding-block: 24px 40px;
+    padding: 44px var(--pad) 52px;
     text-align: center;
+  }
+
+  .hero__in::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      to bottom,
+      rgb(44 41 39 / 0) 0,
+      rgb(44 41 39 / 0.62) 40px,
+      rgb(44 41 39 / 0.62) calc(100% - 48px),
+      rgb(44 41 39 / 0) 100%
+    );
   }
 
   .hero__mark {
@@ -200,7 +235,7 @@ const stickerExternal = cakes.length === 0;
   }
 
   .hero__lead {
-    max-width: 52ch;
+    max-width: 44ch;
     margin-top: 16px;
     font-size: var(--fs-lead);
     line-height: 1.5;
@@ -303,8 +338,8 @@ const stickerExternal = cakes.length === 0;
      вторая линия печати. */
   .hero__sticker {
     position: absolute;
-    right: var(--pad);
-    bottom: 104px;
+    right: calc(var(--pad) + 8px);
+    bottom: 112px;
     z-index: 3;
     display: none;
     width: 128px;
@@ -371,12 +406,36 @@ const stickerExternal = cakes.length === 0;
       padding-top: var(--header-h);
     }
 
-    .hero__stub-tag {
-      top: calc(var(--header-h) + 8px);
+
+    .hero__scrim {
+      --band: 90px;
     }
 
     .hero__in {
-      padding-block: 32px 56px;
+      width: auto;
+      max-width: min(100%, 1060px);
+      margin-inline: auto;
+      padding: 60px 100px 68px;
+    }
+
+    /* the plateau reaches 90 % of the block's width and 86 % of its height —
+       the widest title line ends at 81 %, the buttons at 75 % of the height
+       плато доходит до 90 % ширины блока и 86 % высоты — самая широкая строка
+       заголовка кончается на 81 %, кнопки — на 75 % высоты */
+    .hero__in::before {
+      background: rgb(44 41 39 / 0.64);
+      -webkit-mask-image:
+        linear-gradient(to right, transparent, #000 10%, #000 90%, transparent),
+        linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+      -webkit-mask-composite: source-in;
+      mask-image:
+        linear-gradient(to right, transparent, #000 10%, #000 90%, transparent),
+        linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+      mask-composite: intersect;
+    }
+
+    .hero__stub-tag {
+      bottom: 8px;
     }
 
     .hero__title {
@@ -430,7 +489,10 @@ const stickerExternal = cakes.length === 0;
       font-size: clamp(50px, 4.1vw, 60px);
     }
 
+    /* не больше двух строк: приём — одна-две строки под заголовком
+       two lines at most: the device is one or two lines under the heading */
     .hero__lead {
+      max-width: 62ch;
       margin-top: 24px;
     }
 
@@ -460,7 +522,7 @@ const stickerExternal = cakes.length === 0;
     .hero__sticker {
       width: 148px;
       height: 148px;
-      bottom: 110px;
+      bottom: 118px;
       font-size: 12.5px;
     }
   }
