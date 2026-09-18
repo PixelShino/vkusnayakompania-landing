@@ -12,6 +12,7 @@
 import { Image } from 'astro:assets';
 import logo from '../assets/logo.png';
 import { BRAND } from '../data/site';
+import { BASE } from '../lib/base.ts';
 import { navFor } from '../lib/nav.ts';
 import Icon from './Icon.astro';
 import type { Content } from '../lib/content.ts';
@@ -24,12 +25,16 @@ interface Props {
 
 const { content, over = true } = Astro.props;
 const { settings } = content;
-const nav = navFor(content, over ? '' : '/');
+// Off the home page the anchors need the page in front of them, and under a
+// subfolder that page is BASE, not the domain root.
+// Вне главной якорям нужна сама страница, а в подпапке это BASE, не корень.
+const home = over ? '' : BASE;
+const nav = navFor(content, home);
 ---
 
 <header class:list={['header', { 'header--over': over, 'is-solid': !over }]}>
   <div class="container header__bar">
-    <a class="header__logo" href="#top" aria-label={`${BRAND.name} — на главную`}>
+    <a class="header__logo" href={`${home}#top`} aria-label={`${BRAND.name} — на главную`}>
       <Image
         src={logo}
         alt={BRAND.name}

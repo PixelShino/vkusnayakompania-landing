@@ -8,6 +8,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { BASE } from '../lib/base.ts';
 import { getContent } from '../lib/content.ts';
 
 const content = await getContent();
@@ -26,7 +27,7 @@ const { settings, places } = content;
       </p>
 
       <div class="nf__actions">
-        <a class="btn btn--primary" href="/">На главную</a>
+        <a class="btn btn--primary" href={BASE}>На главную</a>
         <a class="btn btn--secondary" href={settings.phoneHref}>Позвонить {settings.phone}</a>
       </div>
 
@@ -37,7 +38,7 @@ const { settings, places } = content;
               <span class="nf__n" aria-hidden="true">
                 {place.n}
               </span>
-              <a href="/#contacts">{place.name}</a>
+              <a href={`${BASE}#contacts`}>{place.name}</a>
               <span class="nf__kind">{place.kind}</span>
             </li>
           ))
@@ -45,7 +46,7 @@ const { settings, places } = content;
       </ul>
     </div>
   </main>
-  <Footer content={content} base="/" />
+  <Footer content={content} base={BASE} />
 </BaseLayout>
 
 <style>

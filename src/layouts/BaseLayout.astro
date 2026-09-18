@@ -4,6 +4,7 @@ import montserratLatin from '@fontsource-variable/montserrat/files/montserrat-la
 import prataCyrillic from '@fontsource/prata/files/prata-cyrillic-400-normal.woff2?url';
 import prataLatin from '@fontsource/prata/files/prata-latin-400-normal.woff2?url';
 import '../styles/global.css';
+import { BASE } from '../lib/base.ts';
 
 // `@font-face` вручную вместо импорта пакета: он объявляет ещё `latin-ext`,
 // `cyrillic-ext` и `vietnamese` — 100+ КБ подмножеств, которых тут нет.
@@ -92,7 +93,7 @@ const description = home.seo_description;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://example.com');
 
 // на превью-сборке сайт лежит в подкаталоге, поэтому файлы из `public` — через `base`
-const asset = (path: string) => `${import.meta.env.BASE_URL.replace(/\/$/, '')}/${path}`;
+const asset = (path: string) => `${BASE}${path}`;
 
 // превью не должно попасть в поиск и конкурировать с боевым доменом
 const isPreview = canonical.hostname !== 'vkus-com.ru';
