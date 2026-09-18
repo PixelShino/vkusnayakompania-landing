@@ -26,8 +26,10 @@ pnpm-debug.log*
 # скриншоты проверок в корне (в src/assets .jpeg не трогаем)
 /*.jpeg
 
-# контент из Directus: файлы фикстуры и документы для public
-src/data/fixture-files/
+# Directus payloads: fixture binaries are committed so CI builds without Directus,
+# `public/media` is regenerated from them by `prebuild` and stays out of the repo.
+# Контент из Directus: файлы фикстуры лежат в репозитории, иначе сборка на CI
+# падает без Directus; `public/media` собирается из них в `prebuild` и не хранится.
 public/media/
 
 # настройки Claude Code
