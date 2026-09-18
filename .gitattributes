@@ -1,0 +1,5 @@
+# Directus fixture payloads are binary: never normalise line endings,
+# a CRLF rewrite on a Windows checkout would corrupt the PDFs.
+# Файлы фикстуры Directus бинарные: переводы строк не трогать,
+# на Windows-чекауте CRLF ломает PDF.
+src/data/fixture-files/** binary

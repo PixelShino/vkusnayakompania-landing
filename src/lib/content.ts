@@ -7,6 +7,7 @@
  */
 import type { ImageMetadata } from 'astro';
 import { toSchedule, type HoursRow, type Schedule } from '../data/site.ts';
+import { BASE } from './base.ts';
 import { currentAfisha, livePromos, type Dated } from './select.ts';
 import { QUERIES } from '../../scripts/queries.mjs';
 import fixture from '../data/fixture.json' with { type: 'json' };
@@ -231,11 +232,9 @@ const toImg = (file: RawFile | null | undefined, resolve: ResolveImage): Img | u
 const toDoc = (file: RawFile | null | undefined): Doc | undefined =>
   file
     ? {
-        // `BASE_URL` вместо корня: на GitHub Pages сайт живёт в подпапке, и
-        // абсолютный `/media/...` там ведёт в 404
-        // `BASE_URL`, not the root: on GitHub Pages the site lives in a
-        // subfolder and an absolute `/media/...` lands on a 404 there
-        href: `${import.meta.env?.BASE_URL ?? '/'}media/${file.id}.${ext(file)}`,
+        // BASE, not the root: under a subfolder `/media/...` lands on a 404
+        // BASE вместо корня: в подпапке `/media/...` ведёт в 404
+        href: `${BASE}media/${file.id}.${ext(file)}`,
         title: file.title || file.filename_download,
         placeholder: isPlaceholder(file.title),
       }
