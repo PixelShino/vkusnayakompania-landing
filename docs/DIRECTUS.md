@@ -217,5 +217,8 @@ pnpm fixture                           # выгрузить контент в ф
 pnpm dev                               # http://127.0.0.1:4321
 ```
 
-Без `DIRECTUS_URL` в `.env` сайт собирается из `src/data/fixture.json`;
-файлы фикстуры в `src/data/fixture-files/` не в git, их создаёт `pnpm fixture`.
+Без `DIRECTUS_URL` в `.env` сайт собирается из `src/data/fixture.json`; файлы
+фикстуры в `src/data/fixture-files/` лежат в git, поэтому сборка проходит на
+чистом клоне и на CI без Directus. `pnpm fixture` их перезаписывает — после
+правок контента в админке изменения в этой папке коммитятся вместе с
+`fixture.json`. `public/media/` из них собирает `prebuild`, она в `.gitignore`.
