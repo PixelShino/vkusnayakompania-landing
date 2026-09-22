@@ -184,6 +184,9 @@ const stickerExternal = cakes.length === 0;
     position: absolute;
     inset: 0;
     height: 100%;
+    /* the blurred preview is framed like the img below: `object-position` */
+    /* размытое превью кадрируется как img ниже: `object-position` */
+    --pos: center 40%;
   }
 
   .hero > :global(.hero__photo img) {

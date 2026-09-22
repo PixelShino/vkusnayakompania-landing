@@ -9,6 +9,7 @@ import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import type { Img } from '../lib/content.ts';
 import { widthsFor } from '../lib/hero.ts';
+import { lqip } from '../lib/lqip.ts';
 
 interface Props {
   photo: Img;
@@ -37,11 +38,17 @@ const {
 // <Image> принимает и адрес, и файл, но типы у него — размеченное объединение:
 // при заданных width/height строка безопасна, поэтому сужаем один раз здесь
 const src = photo.src as ImageMetadata;
+
+// The blurred preview goes under the frame as a background of the figure: it is
+// already in the HTML, so the first paint shows the photo, not the plate.
+// Размытое превью уходит фоном самой фигуры: оно уже в HTML, поэтому первая
+// отрисовка показывает кадр, а не плашку.
+const preview = await lqip(photo.src);
 ---
 
 <figure
   class:list={['media', className]}
-  style={`--ratio:${ratio};${ratioMd ? `--ratio-md:${ratioMd};` : ''}${radius ? `--radius:${radius};` : ''}`}
+  style={`--ratio:${ratio};${ratioMd ? `--ratio-md:${ratioMd};` : ''}${radius ? `--radius:${radius};` : ''}${preview ? `--lqip:url("${preview}");` : ''}`}
 >
   <Image
     src={src}

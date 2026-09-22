@@ -516,7 +516,11 @@ h3 {
   overflow: hidden;
   aspect-ratio: var(--ratio, 3 / 4);
   border-radius: var(--radius, var(--r-md));
-  background: var(--surface-photo);
+  /* the blurred preview (`--lqip` from `Photo.astro`) sits under the frame and
+     is framed like the image itself: `--pos` mirrors its `object-position`
+     размытое превью (`--lqip` из `Photo.astro`) лежит под кадром и кадрируется
+     как сам снимок: `--pos` повторяет его `object-position` */
+  background: var(--lqip, none) var(--pos, center) / cover no-repeat, var(--surface-photo);
 }
 
 @media (min-width: 768px) {
