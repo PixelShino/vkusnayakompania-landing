@@ -412,7 +412,7 @@ fields:
       note: Вертикальный 2:3, например 1000×1500
       options: null
       readonly: false
-      required: true
+      required: false
       searchable: true
       sort: 81
       special:
@@ -431,7 +431,7 @@ fields:
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_indexed: false
       is_primary_key: false
@@ -455,7 +455,7 @@ fields:
       note: null
       options: null
       readonly: false
-      required: true
+      required: false
       searchable: true
       sort: 82
       special: null
@@ -473,7 +473,7 @@ fields:
       max_length: null
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_indexed: false
       is_primary_key: false
@@ -540,7 +540,7 @@ fields:
       options:
         template: '{{name}}'
       readonly: false
-      required: true
+      required: false
       searchable: true
       sort: 84
       special:
@@ -559,7 +559,7 @@ fields:
       max_length: null
       numeric_precision: 32
       numeric_scale: 0
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_indexed: false
       is_primary_key: false

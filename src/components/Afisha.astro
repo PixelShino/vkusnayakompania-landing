@@ -27,34 +27,38 @@ interface Props {
 
 const { afisha } = Astro.props;
 
-// dates come as YYYY-MM-DD; UTC keeps the day from sliding on a western builder
-// даты приходят как YYYY-MM-DD; UTC не даёт дню съехать на сборке западнее
-const date = new Date(`${afisha.date}T00:00:00Z`);
-const day = new Intl.DateTimeFormat('ru-RU', {
-  day: 'numeric',
-  month: 'long',
-  timeZone: 'UTC',
-}).format(date);
-const dayNumber = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', timeZone: 'UTC' }).format(date);
+// dates come as YYYY-MM-DD; UTC keeps the day from sliding on a western builder.
+// An announcement may carry no date at all: then the date line is not drawn.
+// даты приходят как YYYY-MM-DD; UTC не даёт дню съехать на сборке западнее.
+// У анонса даты может не быть вовсе: тогда строка с датой не рисуется.
+const date = afisha.date ? new Date(`${afisha.date}T00:00:00Z`) : null;
+const fmt = (options: Intl.DateTimeFormatOptions) =>
+  date ? new Intl.DateTimeFormat('ru-RU', { ...options, timeZone: 'UTC' }).format(date) : '';
+const day = fmt({ day: 'numeric', month: 'long' });
+const dayNumber = fmt({ day: 'numeric' });
 // the long form minus the number leaves the month in the case the numeral needs
 // «26 сентября» минус число — родительный падеж месяца рядом с крупной цифрой
 const dayMonth = day.slice(dayNumber.length).trim();
-const time = afisha.time?.slice(0, 5);
-const datetime = time ? `${afisha.date}T${time}` : afisha.date;
+const time = date ? afisha.time?.slice(0, 5) : undefined;
+const datetime = afisha.date ? (time ? `${afisha.date}T${time}` : afisha.date) : undefined;
 
-// a stub file is marked in the admin, and the mark reaches the page through alt
-// файл-заглушку помечают в админке, до страницы пометка доходит через `alt`
-const stub = /заглушк/i.test(afisha.poster.alt);
+// a stub file is marked in the admin, and the mark reaches the page through alt;
+// no poster at all is drawn the same way, only the plate says so
+// файл-заглушку помечают в админке, до страницы пометка доходит через `alt`;
+// отсутствующий постер рисуется той же плашкой, только с другой подписью
+const stub = !afisha.poster || /заглушк/i.test(afisha.poster.alt);
 ---
 
 <section class="section strip-ink af-sec" id="afisha">
   <div class="container af">
     <figure class="af__poster" data-reveal="self">
       {
-        stub ? (
+        !afisha.poster || stub ? (
           <div class="stub af__stub">
             <span class="stub__title">Постер афиши</span>
-            <span class="stub__meta">заглушка · заменяется в админке</span>
+            <span class="stub__meta">
+              {afisha.poster ? 'заглушка · заменяется в админке' : 'добавляется в админке'}
+            </span>
           </div>
         ) : (
           <Image
@@ -77,30 +81,36 @@ const stub = /заглушк/i.test(afisha.poster.alt);
       <span class="mark af__mark" aria-hidden="true"></span>
       <h2 class="display-caps af__h">Афиша</h2>
 
-      <time datetime={datetime} class="af__date">
-        <span class="af__day display">{dayNumber}</span>
-        <span class="af__dm">
-          {dayMonth}
-          {
-            time && (
-              <>
-                <span class="af__dot" aria-hidden="true">
-                  {' · '}
-                </span>
-                <span class="af__time tnum">{time}</span>
-              </>
-            )
-          }
-        </span>
-      </time>
+      {
+        date && (
+          <time datetime={datetime} class="af__date">
+            <span class="af__day display">{dayNumber}</span>
+            <span class="af__dm">
+              {dayMonth}
+              {time && (
+                <>
+                  <span class="af__dot" aria-hidden="true">
+                    {' · '}
+                  </span>
+                  <span class="af__time tnum">{time}</span>
+                </>
+              )}
+            </span>
+          </time>
+        )
+      }
 
       <h3 class="af__title display">{afisha.title}</h3>
 
-      <p class="tag af__place">
-        {afisha.place.name}
-        <span class="af__dot" aria-hidden="true">{' · '}</span>
-        {afisha.place.kind}
-      </p>
+      {
+        afisha.place && (
+          <p class="tag af__place">
+            {afisha.place.name}
+            <span class="af__dot" aria-hidden="true">{' · '}</span>
+            {afisha.place.kind}
+          </p>
+        )
+      }
 
       {afisha.text && <p class="lead af__text">{typo(afisha.text)}</p>}
 
@@ -108,8 +118,8 @@ const stub = /заглушк/i.test(afisha.poster.alt);
         <button
           type="button"
           class="btn btn--light"
-          data-book={`Бронь стола: ${afisha.place.street}`}
-          data-book-note={`${afisha.title}, ${day}${time ? `, ${time}` : ''}`}
+          data-book={afisha.place ? `Бронь стола: ${afisha.place.street}` : 'Бронь стола'}
+          data-book-note={[afisha.title, day, time].filter(Boolean).join(', ')}
         >
           <Icon name="chair" class="ico--pop" />
           Забронировать стол

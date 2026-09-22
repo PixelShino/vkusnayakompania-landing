@@ -114,13 +114,17 @@ export type Direction = {
   place?: Place;
 };
 
+// Only the title is required: an announcement («новое меню») may have no date,
+// no venue and even no poster — the editor fills in what the event has.
+// Обязателен только заголовок: у анонса («новое меню») может не быть ни даты,
+// ни адреса, ни постера — редактор заполняет то, что у события есть.
 export type Afisha = {
   id: number;
   title: string;
-  poster: Img;
-  date: string;
+  poster?: Img;
+  date?: string;
   time?: string;
-  place: Place;
+  place?: Place;
   text?: string;
   link?: string;
 };
@@ -186,7 +190,7 @@ type RawPlace = Omit<Place, 'n' | 'schedule' | 'gallery' | 'phone' | 'phoneHref'
   gallery?: { sort?: number; caption?: string; directus_files_id: RawFile }[];
 };
 type RawDirection = Omit<Direction, 'photo' | 'place'> & { photo?: RawFile; place?: number };
-type RawAfisha = Omit<Afisha, 'poster' | 'place'> & Dated & { poster: RawFile; place: number };
+type RawAfisha = Omit<Afisha, 'poster' | 'place'> & Dated & { poster?: RawFile; place?: number };
 type RawPromo = Omit<Promo, 'place'> & Dated & { place?: number; sort?: number };
 type RawMenu = Omit<Menu, 'file'> & { file: RawFile };
 type RawCake = Omit<Cake, 'photo'> & { status: string; photo: RawFile; sort?: number };
@@ -308,11 +312,8 @@ export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraTo
     })),
     afisha: current && {
       ...current,
-      poster: need(img(current.poster), `афиша «${current.title}»: нет постера`),
-      place: need(
-        at(current.place, `афиша «${current.title}»`),
-        `афиша «${current.title}»: не выбран адрес`,
-      ),
+      poster: img(current.poster),
+      place: at(current.place, `афиша «${current.title}»`),
     },
     promos: livePromos(raw.promos, today).map((promo) => ({
       ...promo,
