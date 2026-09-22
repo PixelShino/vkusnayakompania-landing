@@ -61,7 +61,7 @@ const many = shots.length > 1;
 
 {
   shots.length > 0 && (
-    <section class="section gl" id="gallery" aria-labelledby="gallery-title">
+    <section class="section gl" id="gallery" aria-labelledby="gallery-title" data-slider>
       <div class="container head" data-reveal>
         <span class="mark" aria-hidden="true" />
         <h2 id="gallery-title" class="display-caps">
@@ -104,7 +104,7 @@ const many = shots.length > 1;
           <>
             <button
               type="button"
-              class="gl__arrow gl__arrow--prev"
+              class="slider-arrow gl__arrow gl__arrow--prev"
               data-slider-prev
               aria-disabled="true"
               aria-label="Предыдущее фото"
@@ -123,7 +123,7 @@ const many = shots.length > 1;
             </button>
             <button
               type="button"
-              class="gl__arrow gl__arrow--next"
+              class="slider-arrow gl__arrow gl__arrow--next"
               data-slider-next
               aria-label="Следующее фото"
             >
@@ -232,59 +232,25 @@ const many = shots.length > 1;
     text-align: center;
   }
 
-  /* Cream circle on the frame's edge, vertically centred on the frame (the
-     caption below is not counted): the frame is 10/16 of its width high.
-     Кремовый круг на краю кадра, по вертикали — в центре кадра (подпись под
-     ним не считается): высота кадра — 10/16 его ширины. */
+  /* On the frame's edge, vertically centred on the frame (the caption below
+     is not counted): the frame is 10/16 of its width high. The circle itself
+     is the shared `.slider-arrow`.
+     На краю кадра, по вертикали — в центре кадра (подпись под ним не
+     считается): высота кадра — 10/16 его ширины. Сам круг — общий
+     `.slider-arrow`. */
   .gl__arrow {
-    transition-property: background-color, translate, scale;
-    transition-duration: 200ms;
-    transition-timing-function: var(--ease-out);
     position: absolute;
     top: calc(var(--frame) * 10 / 16 / 2);
     z-index: 1;
-    display: grid;
-    place-items: center;
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    border: 0;
-    border-radius: var(--r-pill);
-    background: var(--bg);
-    box-shadow: 0 1px 4px rgb(44 41 39 / 0.25);
-    color: var(--text);
     translate: 0 -50%;
-    cursor: pointer;
-    /* перечислено поимённо: `all` тянул бы за собой и размеры, и тень */
-    transition-property: scale, background-color, opacity;
-    transition-duration: 120ms, 0.16s, 0.16s;
-    transition-timing-function: var(--ease-out), ease, ease;
   }
 
-  /* the arrow sits inside the frame, on the shot itself (Levantine): half a
-     circle on bare cream next to the peeking neighbour vanished
-     стрелка стоит внутри кадра, прямо на снимке (Levantine): половина круга
-     на голом креме рядом с торчащим соседом пропадала */
   .gl__arrow--prev {
     left: calc((100% - var(--frame)) / 2 + 10px);
   }
 
   .gl__arrow--next {
     right: calc((100% - var(--frame)) / 2 + 10px);
-  }
-
-  .gl__arrow:not([aria-disabled='true']):active {
-    scale: 0.96;
-  }
-
-  .gl__arrow svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .gl__arrow[aria-disabled='true'] {
-    opacity: 0.4;
-    cursor: default;
   }
 
   /* Progress under the strip: a hairline with one olive segment of 1/n width
@@ -324,32 +290,17 @@ const many = shots.length > 1;
     transition: transform 0.4s var(--ease-out);
   }
 
-  /* a finger gets 44 px: the arrow grows, each dot is a 30 × 44 target with
-     the same 8 px mark inside
-     палец получает 44 px: стрелка растёт, каждая точка — цель 30 × 44 с той же
-     меткой 8 px внутри */
-  @media (pointer: coarse) {
-    .gl__arrow {
-      width: 44px;
-      height: 44px;
-    }
-  }
-
   @media (hover: hover) and (pointer: fine) {
     /* кружок делает шаг в ту сторону, куда листает: подсказка направления
        раньше, чем взгляд дойдёт до значка внутри
        the circle steps the way it scrolls: the direction is read before the
        eye reaches the glyph inside it */
-    .gl__arrow:not([aria-disabled='true']):hover {
-      background: var(--surface);
-    }
-
     .gl__arrow--prev:not([aria-disabled='true']):hover {
-      translate: -3px 0;
+      translate: -3px -50%;
     }
 
     .gl__arrow--next:not([aria-disabled='true']):hover {
-      translate: 3px 0;
+      translate: 3px -50%;
     }
 
     .gl__rail {
@@ -396,114 +347,5 @@ const many = shots.length > 1;
 </style>
 
 <script>
-  /**
-   * Arrows, keys and mouse drag for the venue strip; the progress line follows. The current frame is
-   * the one nearest the rail's centre; edges are marked with `aria-disabled`
-   * rather than `disabled`: a native disabled button drops the keyboard focus
-   * to `<body>` mid-scroll.
-   * Стрелки, клавиши и перетаскивание мышью для ленты залов; прогресс-линия следует. Текущий
-   * кадр — ближайший к центру рельса; край помечается `aria-disabled`, а не
-   * `disabled`: нативно погашенная кнопка роняет фокус на `<body>` прямо во
-   * время прокрутки.
-   */
-  const rail = document.querySelector<HTMLElement>('[data-slider-rail]');
-  const prev = document.querySelector<HTMLButtonElement>('[data-slider-prev]');
-  const next = document.querySelector<HTMLButtonElement>('[data-slider-next]');
-  const now = document.querySelector<HTMLElement>('[data-slider-now]');
-  const fill = document.querySelector<HTMLElement>('[data-slider-fill]');
-  const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  const off = (button: HTMLButtonElement | null) =>
-    button?.getAttribute('aria-disabled') === 'true';
-
-  if (rail) {
-    const frames = Array.from(rail.children) as HTMLElement[];
-
-    // offset that puts a frame in the middle of the rail
-    // смещение, при котором кадр стоит посередине рельса
-    const leftFor = (frame: HTMLElement) =>
-      frame.offsetLeft - (rail.clientWidth - frame.offsetWidth) / 2;
-
-    const current = () => {
-      const centre = rail.scrollLeft + rail.clientWidth / 2;
-      let best = 0;
-      let gap = Infinity;
-      frames.forEach((frame, i) => {
-        const d = Math.abs(frame.offsetLeft + frame.offsetWidth / 2 - centre);
-        if (d < gap) {
-          gap = d;
-          best = i;
-        }
-      });
-      return best;
-    };
-
-    const sync = () => {
-      // пока секцию пропускает `content-visibility`, кадры не разложены и обе
-      // ширины равны: по ним обе стрелки погасли бы навсегда
-      // while `content-visibility` skips the section the frames are not laid
-      // out and both widths match: judging by them would kill both arrows
-      if (rail.scrollWidth <= rail.clientWidth) return;
-      const i = current();
-      prev?.setAttribute('aria-disabled', String(i === 0));
-      next?.setAttribute('aria-disabled', String(i === frames.length - 1));
-      if (now) now.textContent = String(i + 1).padStart(2, '0');
-      fill?.style.setProperty('--i', String(i));
-    };
-
-    const goTo = (i: number) => {
-      const frame = frames[Math.max(0, Math.min(frames.length - 1, i))];
-      if (!frame) return;
-      rail.scrollTo({ left: leftFor(frame), behavior: smooth ? 'smooth' : 'auto' });
-    };
-
-    const go = (direction: number) => {
-      if (direction < 0 ? off(prev) : off(next)) return;
-      goTo(current() + direction);
-    };
-
-    prev?.addEventListener('click', () => go(-1));
-    next?.addEventListener('click', () => go(1));
-    rail.addEventListener('scroll', sync, { passive: true });
-
-    // снап отбирает нативную прокрутку стрелками, поэтому листаем кадрами сами
-    // snap fights the native arrow-key scroll, so we page by frame ourselves
-    rail.addEventListener('keydown', (event) => {
-      const direction = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
-      if (!direction) return;
-      event.preventDefault();
-      go(direction);
-    });
-
-    // мышью ленту тянут как пальцем: на время захвата снап выключен, после
-    // отпускания лента сама доснапится к ближайшему кадру
-    // the mouse drags the strip like a finger: snap is off while captured and
-    // the strip settles on the nearest frame once released
-    let dragX = 0;
-    let dragLeft = 0;
-    rail.addEventListener('pointerdown', (event) => {
-      if (event.pointerType !== 'mouse' || event.button !== 0) return;
-      dragX = event.clientX;
-      dragLeft = rail.scrollLeft;
-      rail.classList.add('is-dragging');
-      rail.setPointerCapture(event.pointerId);
-    });
-    rail.addEventListener('pointermove', (event) => {
-      if (!rail.classList.contains('is-dragging')) return;
-      rail.scrollLeft = dragLeft - (event.clientX - dragX);
-    });
-    const release = () => {
-      if (!rail.classList.contains('is-dragging')) return;
-      rail.classList.remove('is-dragging');
-      // after a drag the strip settles on the nearest frame by itself
-      // после перетаскивания лента сама доезжает до ближайшего кадра
-      goTo(current());
-    };
-    rail.addEventListener('pointerup', release);
-    rail.addEventListener('pointercancel', release);
-
-    // ResizeObserver ловит момент, когда секция наконец получила размеры
-    // ResizeObserver catches the moment the section finally gets its size
-    new ResizeObserver(sync).observe(rail);
-  }
+  import '../scripts/slider.ts';
 </script>

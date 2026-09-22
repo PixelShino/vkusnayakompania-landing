@@ -273,6 +273,20 @@
         {
           "id": 7,
           "sort": 3,
+          "caption": "Банкетная рассадка",
+          "directus_files_id": {
+            "id": "80a41150-9eef-4505-89c2-051224332be5",
+            "filename_download": "zal-sovetskoy-banket.webp",
+            "title": "Банкетная рассадка — Советской Армии",
+            "alt": "Зал ресторана на Советской Армии: банкетная рассадка, зелёные кресла и подвесные лампы",
+            "width": 1024,
+            "height": 1536,
+            "type": "image/webp"
+          }
+        },
+        {
+          "id": 8,
+          "sort": 4,
           "caption": "Столики у дивана",
           "directus_files_id": {
             "id": "09db50cb-f3be-4c21-a49c-f5e26abca4f7",
@@ -281,20 +295,6 @@
             "alt": "Столики вдоль дивана в ресторане на Советской Армии, цветы на столах",
             "width": 1206,
             "height": 1834,
-            "type": "image/webp"
-          }
-        },
-        {
-          "id": 8,
-          "sort": 4,
-          "caption": "Блюда из меню",
-          "directus_files_id": {
-            "id": "bb31077d-1aeb-49f1-867b-9267de9e552d",
-            "filename_download": "zal-sovetskoy-blyuda.webp",
-            "title": "Блюда из меню — Советской Армии",
-            "alt": "Блюда ресторана на Советской Армии: утка с грушей, салат и лимонад",
-            "width": 1214,
-            "height": 1829,
             "type": "image/webp"
           }
         }
@@ -329,12 +329,12 @@
       "sort": 2,
       "date_updated": null,
       "photo": {
-        "id": "80a41150-9eef-4505-89c2-051224332be5",
-        "filename_download": "zal-sovetskoy-banket.webp",
-        "title": "Зал ресторана на Советской Армии",
-        "alt": "Зал ресторана на Советской Армии: банкетная рассадка, зелёные кресла и подвесные лампы",
-        "width": 1024,
-        "height": 1536,
+        "id": "9b259731-b5f6-477c-ad49-919b49fb1535",
+        "filename_download": "zal-sovetskoy-osnovnoy.webp",
+        "title": "Основной зал — Советской Армии",
+        "alt": "Основной зал ресторана на Советской Армии: круглый стол и терракотовые кресла",
+        "width": 1217,
+        "height": 1826,
         "type": "image/webp"
       }
     },

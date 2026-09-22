@@ -818,6 +818,59 @@ h2,
    pill said the same thing with a border around it.
    Мелкая прописная подпись без рамки («образец», «обе точки», «заглушка»):
    пилюля говорила то же самое, только в рамке. */
+/* ── стрелка ленты ───────────────────────────────────────────────────────── */
+
+/* A cream circle for the photo strips (gallery, venue frames): the look only,
+   each strip places it itself. `aria-disabled` dims it without dropping the
+   focus; a coarse pointer gets 44 px.
+   Кремовый круг для лент фото (галерея, кадры залов): только вид, ставит его
+   каждая лента сама. `aria-disabled` гасит, не роняя фокус; грубому
+   указателю — 44 px. */
+.slider-arrow {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--bg);
+  box-shadow: 0 1px 4px rgb(44 41 39 / 0.25);
+  color: var(--text);
+  cursor: pointer;
+  /* перечислено поимённо: `all` тянул бы за собой и размеры, и тень */
+  transition-property: scale, translate, background-color, opacity;
+  transition-duration: 120ms, 200ms, 0.16s, 0.16s;
+  transition-timing-function: var(--ease-out), var(--ease-out), ease, ease;
+}
+
+.slider-arrow svg {
+  width: 20px;
+  height: 20px;
+}
+
+.slider-arrow:not([aria-disabled='true']):active {
+  scale: 0.96;
+}
+
+.slider-arrow[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+@media (pointer: coarse) {
+  .slider-arrow {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .slider-arrow:not([aria-disabled='true']):hover {
+    background: var(--surface);
+  }
+}
+
 .tag {
   display: inline-block;
   font-size: 11px;
