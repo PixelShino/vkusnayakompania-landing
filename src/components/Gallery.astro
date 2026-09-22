@@ -48,10 +48,11 @@ const shots = places.flatMap((place) =>
   }),
 );
 
-// числительное берётся из данных: с третьей точкой заголовок не должен врать
-// the numeral comes from the data: with a third venue the heading must not lie
-const COUNT = ['', 'Один зал', 'Два зала', 'Три зала', 'Четыре зала'];
-const heading = `${COUNT[places.length] || 'Залы'} в Самаре`;
+// a general photo gallery, not a tour of the halls: the client asked for the
+// plain name so any shot — a dish, the showcase, the entrance — fits under it
+// общая фотогалерея, а не обход залов: заказчица попросила простое имя, чтобы
+// под ним помещался любой кадр — блюдо, витрина, вход
+const heading = 'Фотогалерея';
 
 // один кадр листать некуда: ни стрелок, ни точек
 // nothing to page through with a single frame: no arrows, no progress line
