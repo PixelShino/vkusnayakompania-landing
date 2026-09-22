@@ -67,12 +67,12 @@
     "contacts_note": "Отвечаем с 9:00 до 21:00, обычно за пару минут",
     "hero_image": {
       "id": "7e8b5575-cf7b-422e-9f56-ed18e9c45443",
-      "filename_download": "hero-vitrina.jpg",
+      "filename_download": "hero-vitrina.webp",
       "title": "Кондитерская витрина",
       "alt": "Кондитерская витрина: рулеты с миндалём и клубникой, пирожные и торт",
       "width": 1320,
       "height": 1954,
-      "type": "image/jpeg"
+      "type": "image/webp"
     },
     "og_image": null,
     "app_screenshot": {
@@ -248,12 +248,12 @@
           "caption": "Основной зал",
           "directus_files_id": {
             "id": "9b259731-b5f6-477c-ad49-919b49fb1535",
-            "filename_download": "zal-sovetskoy-osnovnoy.jpg",
+            "filename_download": "zal-sovetskoy-osnovnoy.webp",
             "title": "Основной зал — Советской Армии",
             "alt": "Основной зал ресторана на Советской Армии: круглый стол и терракотовые кресла",
             "width": 1217,
             "height": 1826,
-            "type": "image/jpeg"
+            "type": "image/webp"
           }
         },
         {
@@ -262,12 +262,12 @@
           "caption": "Зал у стеллажа",
           "directus_files_id": {
             "id": "2a29b06e-9867-48ad-b922-a94e800f2236",
-            "filename_download": "zal-sovetskoy-stellazh.jpg",
+            "filename_download": "zal-sovetskoy-stellazh.webp",
             "title": "Зал у стеллажа — Советской Армии",
             "alt": "Зал ресторана на Советской Армии: диван вдоль стены и стеллаж с неоном",
             "width": 1212,
             "height": 1831,
-            "type": "image/jpeg"
+            "type": "image/webp"
           }
         },
         {
@@ -276,12 +276,12 @@
           "caption": "Столики у дивана",
           "directus_files_id": {
             "id": "09db50cb-f3be-4c21-a49c-f5e26abca4f7",
-            "filename_download": "zal-sovetskoy-stoliki.jpg",
+            "filename_download": "zal-sovetskoy-stoliki.webp",
             "title": "Столики у дивана — Советской Армии",
             "alt": "Столики вдоль дивана в ресторане на Советской Армии, цветы на столах",
             "width": 1206,
             "height": 1834,
-            "type": "image/jpeg"
+            "type": "image/webp"
           }
         },
         {
@@ -290,12 +290,12 @@
           "caption": "Блюда из меню",
           "directus_files_id": {
             "id": "bb31077d-1aeb-49f1-867b-9267de9e552d",
-            "filename_download": "zal-sovetskoy-blyuda.jpg",
+            "filename_download": "zal-sovetskoy-blyuda.webp",
             "title": "Блюда из меню — Советской Армии",
             "alt": "Блюда ресторана на Советской Армии: утка с грушей, салат и лимонад",
             "width": 1214,
             "height": 1829,
-            "type": "image/jpeg"
+            "type": "image/webp"
           }
         }
       ]
@@ -330,12 +330,12 @@
       "date_updated": null,
       "photo": {
         "id": "80a41150-9eef-4505-89c2-051224332be5",
-        "filename_download": "zal-sovetskoy-banket.jpg",
+        "filename_download": "zal-sovetskoy-banket.webp",
         "title": "Зал ресторана на Советской Армии",
         "alt": "Зал ресторана на Советской Армии: банкетная рассадка, зелёные кресла и подвесные лампы",
         "width": 1024,
         "height": 1536,
-        "type": "image/jpeg"
+        "type": "image/webp"
       }
     },
     {
