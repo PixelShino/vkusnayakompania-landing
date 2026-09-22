@@ -208,6 +208,14 @@ const nav = navFor(content, home);
     white-space: nowrap;
   }
 
+  /* Presence on the cream bar: `--line` on a transparent circle read as a
+     disabled or skeleton control. The fill is `--surface`, the contour is the
+     ink at 40 % — the same printed pair as the page's own rules, and the
+     glyph keeps `--text` (14:1 on `--surface`).
+     Присутствие на кремовой шапке: `--line` на прозрачном круге читался
+     отключённой или скелетной кнопкой. Заливка — `--surface`, контур —
+     чернила на 40 %, та же печатная пара, что у линеек страницы, а знак
+     остаётся `--text` (14:1 на `--surface`). */
   .header__call,
   .header__burger {
     flex: none;
@@ -215,9 +223,9 @@ const nav = navFor(content, home);
     height: 44px;
     display: grid;
     place-items: center;
-    border: 1px solid var(--line);
+    border: 1px solid color-mix(in srgb, var(--text) 40%, transparent);
     border-radius: var(--r-pill);
-    background: transparent;
+    background: var(--surface);
     color: var(--text);
     cursor: pointer;
     transition-property: scale, background-color;
@@ -264,7 +272,7 @@ const nav = navFor(content, home);
 
     .header__call:hover,
     .header__burger:hover {
-      background: color-mix(in srgb, var(--text) 6%, transparent);
+      background: color-mix(in srgb, var(--text) 8%, var(--surface));
     }
   }
 

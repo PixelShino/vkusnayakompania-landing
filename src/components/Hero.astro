@@ -184,6 +184,9 @@ const stickerExternal = cakes.length === 0;
     position: absolute;
     inset: 0;
     height: 100%;
+    /* the blurred preview is framed like the img below: `object-position` */
+    /* размытое превью кадрируется как img ниже: `object-position` */
+    --pos: center 40%;
   }
 
   .hero > :global(.hero__photo img) {
@@ -401,19 +404,37 @@ const stickerExternal = cakes.length === 0;
      Нижняя полоса: на телефоне каждая точка своей строкой, с 768 в один ряд с
      волосяной линией между ними. Крем без прозрачности — полоса лежит на самом
      тёмном месте скрима, но под ней всё ещё фотография. */
+  /* Grid, not a column flex: a flex column leaves every venue at its own
+     max-content width and centres each one apart, so the two left edges were
+     ragged. A single grid column takes the wider venue's width and both
+     stretch to it — the list is centred as a whole, its rows start on one
+     vertical. `minmax(0, …)` keeps that column inside the container at 320.
+     Сетка, а не колоночный flex: в колонке flex каждая точка получает свою
+     max-content ширину и центруется сама по себе — левые края расходились.
+     Одна колонка сетки берёт ширину более широкой точки, обе тянутся до неё:
+     список центрован целиком, а строки начинаются по одной вертикали.
+     `minmax(0, …)` держит колонку внутри контейнера на 320. */
   .hero__bar {
     position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: minmax(0, max-content);
+    justify-content: center;
+    gap: 14px;
     margin: 0 auto;
     /* 30 px below: the stub tag sits in the bottom corner under the last number
        снизу 30 px: ярлык заглушки стоит в нижнем углу под последним номером */
     padding-block: 18px 30px;
     list-style: none;
     border-top: 1px solid rgb(255 250 237 / 0.22);
-    font-size: 13px;
+    /* 13 px holds from 366 up; below it the address, the clock and «Открыто до
+       22:30» need 306 px against the 284 the 320 screen gives, and the hours
+       were cut off at the edge. The line scales down instead of wrapping —
+       from 768 the vw term is far past the ceiling and 13 px stands again.
+       13 px держатся с 366 и выше; ниже адрес, часы и «Открыто до 22:30»
+       просят 306 px против 284 на экране 320, и часы срезало краем. Строка
+       уменьшается вместо переноса — с 768 слагаемое vw далеко за потолком, и
+       снова стоит 13 px. */
+    font-size: clamp(11.25px, 3.5vw, 13px);
     line-height: 1.4;
     text-align: center;
   }
@@ -422,12 +443,22 @@ const stickerExternal = cakes.length === 0;
      as max-content, and at 768 the row spilled past the viewport.
      Сетка, а не переносимый flex: переносимый flex отдаёт max-content суммой
      частей, и на 768 ряд вылезал за окно. */
+  /* `start`, а не `center`: адрес и номер стартуют с первой колонки, значки
+     стоят своим столбцом внутри ссылок (14 px + зазор 6 px), и текст обеих
+     строк обеих точек встаёт по одной вертикали.
+     `start`, not `center`: the address and the number both begin at the first
+     column, the glyphs keep their own column inside the links (14 px + a 6 px
+     gap), and the text of both rows of both venues lines up. */
   .hero__place {
     display: grid;
     grid-template-columns: repeat(3, max-content);
-    justify-content: center;
+    justify-content: start;
     align-items: baseline;
-    gap: 4px 8px;
+    /* 6 px между ячейками на телефоне: на 320 строка укладывалась в контейнер
+       с запасом в полтора пикселя, а с этим шагом — в пять с половиной
+       6 px between the cells on the phone: at 320 the row cleared the
+       container by a pixel and a half, at this step it clears it by five */
+    gap: 4px 6px;
   }
 
   .hero__place-name,
@@ -652,7 +683,10 @@ const stickerExternal = cakes.length === 0;
       min-width: 0;
     }
 
+    /* `display: flex` возвращается явно: базовая раскладка теперь сетка
+       `display: flex` is restored explicitly: the base layout is a grid now */
     .hero__bar {
+      display: flex;
       flex-direction: row;
       justify-content: center;
       gap: 0;
@@ -665,6 +699,7 @@ const stickerExternal = cakes.length === 0;
        dangling separator */
     .hero__place {
       flex: none;
+      gap: 4px 8px;
     }
 
     .hero__place + .hero__place {

@@ -33,6 +33,11 @@ assert.equal(currentAfisha([...afisha, { id: 5, status: 'published', date: TODAY
 // все прошли — остаётся последняя живая, а не пустота
 assert.equal(currentAfisha(afisha.slice(0, 1), TODAY)?.id, 1);
 assert.equal(currentAfisha([], TODAY), null);
+// запись без даты — анонс: берётся, когда датированных впереди нет, и уступает
+// любой датированной будущей; прошедшую датированную она обгоняет
+assert.equal(currentAfisha([{ id: 7, status: 'published' }], TODAY)?.id, 7);
+assert.equal(currentAfisha([{ id: 7, status: 'published' }, ...afisha], TODAY)?.id, 2);
+assert.equal(currentAfisha([{ id: 7, status: 'published' }, afisha[0]], TODAY)?.id, 7);
 // запись вне окна показа не берётся, хотя дата ещё впереди
 assert.equal(
   currentAfisha([{ id: 6, status: 'published', date: '2026-09-10', show_from: '2026-09-09' }], TODAY),

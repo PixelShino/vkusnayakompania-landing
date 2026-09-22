@@ -14,14 +14,21 @@ export const isLive = <T extends Dated>(item: T, today: string) =>
   (!item.show_from || item.show_from <= today) &&
   (!item.show_until || item.show_until >= today);
 
+// an undated record is an announcement: it counts as upcoming but yields to any
+// dated event, so «новое меню» shows only when nothing concrete is scheduled
+// запись без даты — анонс: считается будущей, но уступает любой датированной,
+// поэтому «новое меню» показывается, только когда ничего конкретного не назначено
+const FAR = '9999-12-31';
+const when = (item: { date?: string | null }) => item.date || FAR;
+
 /** Текущая афиша: ближайшая будущая из живых, а если все прошли — последняя. */
-export const currentAfisha = <T extends Dated & { date: string }>(
+export const currentAfisha = <T extends Dated & { date?: string | null }>(
   items: T[],
   today: string,
 ): T | null => {
   const live = items.filter((item) => isLive(item, today));
-  const upcoming = live.filter((item) => item.date >= today);
-  const sorted = (upcoming.length ? upcoming : live).sort((a, b) => a.date.localeCompare(b.date));
+  const upcoming = live.filter((item) => when(item) >= today);
+  const sorted = (upcoming.length ? upcoming : live).sort((a, b) => when(a).localeCompare(when(b)));
   return (upcoming.length ? sorted[0] : sorted.at(-1)) ?? null;
 };
 

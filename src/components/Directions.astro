@@ -58,6 +58,21 @@ const venues = (['cafe', 'restaurant'] as const)
   .filter((d): d is Direction & { place: NonNullable<Direction['place']> } => Boolean(d?.place));
 
 /**
+ * The frame turns into a strip when the venue's own gallery holds two or more
+ * real shots — the four photos the client sent for the restaurant. A single
+ * shot or stubs keep the lone frame.
+ * Кадр становится лентой, когда в галерее точки два и больше настоящих
+ * снимков — четыре фото, что заказчица прислала для ресторана. Один снимок
+ * или заглушки оставляют одиночный кадр.
+ */
+const stripOf = (place: (typeof venues)[number]['place']) => {
+  const shots = place.gallery.filter((shot) => !shot.image.placeholder);
+  return shots.length > 1 ? shots : [];
+};
+
+const CHEVRON = { prev: 'M14.5 5.5 8 12l6.5 6.5', next: 'M9.5 5.5 16 12l-6.5 6.5' };
+
+/**
  * The three services: an icon, one sentence and text links instead of buttons.
  * `phone` adds the main number — catering and the confectionery answer on it.
  * Три услуги: иконка, одно предложение и текстовые ссылки вместо кнопок.
@@ -106,10 +121,71 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
         const { place } = direction;
         const menu = menuHref(direction);
         const stub = isStub(direction);
+        const strip = stripOf(place);
         return (
           <article class:list={['venue', i % 2 === 1 && 'venue--flip']}>
             <div class="venue__frame">
-              {stub || !direction.photo ? (
+              {strip.length > 0 ? (
+                <div class="vs" data-slider>
+                  <div
+                    class="vs__rail"
+                    data-slider-rail
+                    tabindex="0"
+                    role="group"
+                    aria-label={`Фото зала: ${place.name}`}
+                  >
+                    {strip.map((shot) => (
+                      <div class="vs__slide" data-caption={shot.caption}>
+                        <Photo
+                          photo={shot.image}
+                          ratio="16 / 10"
+                          ratioMd="16 / 10"
+                          radius="0"
+                          sizes="(min-width: 768px) 50vw, 100vw"
+                          eager
+                          priority="low"
+                          class="venue__photo"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  {/* caption, counter and arrows at the foot of the shot; the strip is
+                      a photo, so the counter is decoration for the reader
+                      подпись, счётчик и стрелки у подножия снимка; лента — фото,
+                      счётчик для читателя — украшение */}
+                  <div class="vs__bar">
+                    <p class="vs__cap">
+                      <span data-slider-cap>{strip[0].caption}</span>
+                      <span class="vs__count tnum" aria-hidden="true">
+                        <span data-slider-now>01</span> / {String(strip.length).padStart(2, '0')}
+                      </span>
+                    </p>
+                    <div class="vs__arrows">
+                      {(['prev', 'next'] as const).map((side) => (
+                        <button
+                          type="button"
+                          class="slider-arrow"
+                          {...{ [`data-slider-${side}`]: true }}
+                          aria-disabled={side === 'prev' ? 'true' : undefined}
+                          aria-label={side === 'prev' ? 'Предыдущее фото' : 'Следующее фото'}
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.75"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                          >
+                            <path d={CHEVRON[side]} />
+                          </svg>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : stub || !direction.photo ? (
                 <div class:list={['venue__stub', i % 2 ? 'venue__stub--warm' : 'venue__stub--ink']}>
                   {/* a fixed word, not the alt: the alt repeats the venue's name that
                       stands right under the plate / фиксированное слово, не alt: alt
@@ -213,6 +289,10 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
   </div>
 </section>
 
+<script>
+  import '../scripts/slider.ts';
+</script>
+
 <style>
   /* the paper strip closes the section: the ink strip of numbers follows it
      without a cream gap
@@ -290,6 +370,111 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
   .venue__stub--ink .venue__stub-meta {
     color: var(--on-ink-2);
     opacity: 1;
+  }
+
+  /* The frame as a strip: every frame the full width of the frame, snap to
+     the start, no scrollbar — that the strip moves say the arrows and the
+     counter. The focus ring sits inside: outside it would be cut by the
+     screen edge the frame runs to.
+     Кадр как лента: каждый кадр во всю ширину рамки, снап к началу, без
+     скроллбара — что лента едет, говорят стрелки и счётчик. Кольцо фокуса
+     внутри: снаружи его срезал бы край экрана, до которого идёт кадр. */
+  .vs {
+    position: relative;
+  }
+
+  .vs__rail {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .vs__rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .vs__rail.is-dragging {
+    scroll-snap-type: none;
+    cursor: grabbing;
+  }
+
+  .vs__rail :global(img) {
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
+  .vs__rail:focus-visible {
+    outline-offset: -4px;
+    border-radius: 0;
+  }
+
+  .vs__slide {
+    flex: 0 0 100%;
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  /* Caption, counter and arrows in one line at the foot of the shot, on a soft
+     ink fade so cream reads on any photo. The line lets the drag through;
+     only the buttons take the pointer.
+     Подпись, счётчик и стрелки одной строкой у подножия снимка, на мягком
+     чернильном градиенте, чтобы крем читался на любом фото. Строка пропускает
+     перетаскивание сквозь себя; указатель ловят только кнопки. */
+  .vs__bar {
+    position: absolute;
+    inset: auto 0 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 56px var(--pad) 16px;
+    background: linear-gradient(to top, rgb(44 41 39 / 0.62), rgb(44 41 39 / 0));
+    color: var(--on-ink);
+    pointer-events: none;
+  }
+
+  .vs__cap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 12px;
+    min-width: 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    line-height: 1.35;
+    text-transform: uppercase;
+  }
+
+  .vs__count {
+    color: var(--on-ink-2);
+  }
+
+  .vs__arrows {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+    pointer-events: auto;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .vs__rail {
+      cursor: grab;
+    }
+
+    /* the circle steps the way it scrolls, as in the gallery
+       кружок делает шаг в ту сторону, куда листает, как в галерее */
+    .vs__arrows [data-slider-prev]:not([aria-disabled='true']):hover {
+      translate: -3px 0;
+    }
+
+    .vs__arrows [data-slider-next]:not([aria-disabled='true']):hover {
+      translate: 3px 0;
+    }
   }
 
   .venue__body {
@@ -501,6 +686,31 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
 
     .venue--flip .venue__text {
       margin-left: auto;
+    }
+
+    /* the cluster keeps to the frame's outer corner: the panel rides over the
+       inner one. Left row: arrows first, then the caption; flipped row: the
+       caption, then the arrows, everything pressed to the right.
+       кластер держится наружного угла кадра: на внутренний заезжает панель.
+       Левый ряд: сначала стрелки, потом подпись; перевёрнутый — подпись,
+       потом стрелки, всё прижато вправо. */
+    .vs__bar {
+      flex-direction: row-reverse;
+      justify-content: flex-end;
+      padding: 64px var(--pad) 20px;
+    }
+
+    .vs__arrows {
+      margin-left: 0;
+    }
+
+    .venue--flip .vs__bar {
+      flex-direction: row;
+    }
+
+    .venue--flip .vs__cap {
+      justify-content: flex-end;
+      text-align: right;
     }
 
     .venue--flip .venue__actions {
