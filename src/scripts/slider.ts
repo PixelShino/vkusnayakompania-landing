@@ -1,14 +1,14 @@
 /**
  * Photo strips: the gallery and the venue frames. One root with `data-slider`
- * is one strip; its rail, arrows, counter, progress line and caption are
- * looked up inside the root, so two strips on a page never see each other.
+ * is one strip; its rail, arrows, counter and progress line are looked up
+ * inside the root, so two strips on a page never see each other.
  * Arrows, keys and mouse drag move the rail; the current frame is the one
  * nearest the rail's centre. Edges are marked with `aria-disabled` rather
  * than `disabled`: a native disabled button drops the keyboard focus to
  * `<body>` mid-scroll.
  * Ленты фото: галерея и кадры залов. Один корень с `data-slider` — одна
- * лента; её рельс, стрелки, счётчик, прогресс и подпись ищутся внутри корня,
- * поэтому две ленты на странице не видят друг друга. Рельс двигают стрелки,
+ * лента; её рельс, стрелки, счётчик и прогресс ищутся внутри корня, поэтому
+ * две ленты на странице не видят друг друга. Рельс двигают стрелки,
  * клавиши и мышь; текущий кадр — ближайший к центру рельса. Край помечается
  * `aria-disabled`, а не `disabled`: нативно погашенная кнопка роняет фокус
  * на `<body>` прямо во время прокрутки.
@@ -24,7 +24,6 @@ const mount = (root: HTMLElement) => {
   const next = root.querySelector<HTMLButtonElement>('[data-slider-next]');
   const now = root.querySelector<HTMLElement>('[data-slider-now]');
   const fill = root.querySelector<HTMLElement>('[data-slider-fill]');
-  const caption = root.querySelector<HTMLElement>('[data-slider-cap]');
   const frames = Array.from(rail.children) as HTMLElement[];
 
   // offset that puts a frame in the middle of the rail
@@ -56,9 +55,6 @@ const mount = (root: HTMLElement) => {
     next?.setAttribute('aria-disabled', String(i === frames.length - 1));
     if (now) now.textContent = String(i + 1).padStart(2, '0');
     fill?.style.setProperty('--i', String(i));
-    // the caption names the frame in the middle; the frame carries it itself
-    // подпись называет кадр в центре; кадр несёт её на себе
-    if (caption) caption.textContent = frames[i]?.dataset.caption ?? '';
   };
 
   const goTo = (i: number) => {

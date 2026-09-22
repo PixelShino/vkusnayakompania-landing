@@ -135,7 +135,7 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
                     aria-label={`Фото зала: ${place.name}`}
                   >
                     {strip.map((shot) => (
-                      <div class="vs__slide" data-caption={shot.caption}>
+                      <div class="vs__slide">
                         <Photo
                           photo={shot.image}
                           ratio="16 / 10"
@@ -149,17 +149,16 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
                       </div>
                     ))}
                   </div>
-                  {/* caption, counter and arrows at the foot of the shot; the strip is
-                      a photo, so the counter is decoration for the reader
-                      подпись, счётчик и стрелки у подножия снимка; лента — фото,
-                      счётчик для читателя — украшение */}
+                  {/* the counter and the arrows at the foot of the shot — no caption: the
+                      owner wants the frames unlabelled; the counter is decoration for the
+                      reader, the rail carries the accessible name
+                      счётчик и стрелки у подножия снимка — без подписи: владелец хочет
+                      кадры без ярлыков; счётчик для читателя — украшение, доступное имя
+                      несёт рельс */}
                   <div class="vs__bar">
-                    <p class="vs__cap">
-                      <span data-slider-cap>{strip[0].caption}</span>
-                      <span class="vs__count tnum" aria-hidden="true">
-                        <span data-slider-now>01</span> / {String(strip.length).padStart(2, '0')}
-                      </span>
-                    </p>
+                    <span class="vs__count tnum" aria-hidden="true">
+                      <span data-slider-now>01</span> / {String(strip.length).padStart(2, '0')}
+                    </span>
                     <div class="vs__arrows">
                       {(['prev', 'next'] as const).map((side) => (
                         <button
@@ -418,11 +417,11 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
     scroll-snap-align: start;
   }
 
-  /* Caption, counter and arrows in one line at the foot of the shot, on a soft
+  /* The counter and the arrows in one line at the foot of the shot, on a soft
      ink fade so cream reads on any photo. The line lets the drag through;
      only the buttons take the pointer.
-     Подпись, счётчик и стрелки одной строкой у подножия снимка, на мягком
-     чернильном градиенте, чтобы крем читался на любом фото. Строка пропускает
+     Счётчик и стрелки одной строкой у подножия снимка, на мягком чернильном
+     градиенте, чтобы крем читался на любом фото. Строка пропускает
      перетаскивание сквозь себя; указатель ловят только кнопки. */
   .vs__bar {
     position: absolute;
@@ -437,21 +436,11 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
     pointer-events: none;
   }
 
-  .vs__cap {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 2px 12px;
-    min-width: 0;
-    font-size: 11px;
+  .vs__count {
+    font-size: 12.5px;
     font-weight: 600;
     letter-spacing: 0.08em;
     line-height: 1.35;
-    text-transform: uppercase;
-  }
-
-  .vs__count {
-    color: var(--on-ink-2);
   }
 
   .vs__arrows {
@@ -689,10 +678,10 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
     }
 
     /* the cluster keeps to the frame's outer corner: the panel rides over the
-       inner one. Left row: arrows first, then the caption; flipped row: the
-       caption, then the arrows, everything pressed to the right.
+       inner one. Left row: arrows first, then the counter; flipped row: the
+       counter, then the arrows, everything pressed to the right.
        кластер держится наружного угла кадра: на внутренний заезжает панель.
-       Левый ряд: сначала стрелки, потом подпись; перевёрнутый — подпись,
+       Левый ряд: сначала стрелки, потом счётчик; перевёрнутый — счётчик,
        потом стрелки, всё прижато вправо. */
     .vs__bar {
       flex-direction: row-reverse;
@@ -706,11 +695,6 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
 
     .venue--flip .vs__bar {
       flex-direction: row;
-    }
-
-    .venue--flip .vs__cap {
-      justify-content: flex-end;
-      text-align: right;
     }
 
     .venue--flip .venue__actions {
