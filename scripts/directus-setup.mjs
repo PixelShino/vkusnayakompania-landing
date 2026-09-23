@@ -120,4 +120,11 @@ if (!flow) {
   console.log('+ flow Пересборка сайта');
 }
 
+// 5. project: name, colour and Russian UI, the sign-in page included
+//    проект: имя, цвет и русский интерфейс, включая страницу входа
+await api('PATCH', '/settings', {
+  project_name: 'Вкусная компания', project_descriptor: 'Админка сайта', project_color: '#6F7546', default_language: 'ru-RU',
+});
+console.log('= проект: имя и русский язык');
+
 console.log('setup: готово');

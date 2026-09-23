@@ -63,12 +63,13 @@ cp .env.example .env
 docker compose up -d
 curl -s http://127.0.0.1:8055/server/ping        # pong
 docker compose cp snapshot.yaml directus:/directus/snapshot.yaml
-docker compose exec -T directus npx directus schema apply --yes /directus/snapshot.yaml
+docker compose exec -T directus node /directus/cli.js schema apply --yes /directus/snapshot.yaml
 # … INFO: Snapshot applied successfully
 ```
 
 Снапшот схемы лежит в репо (`directus/snapshot.yaml`), контейнер его не видит,
-поэтому файл сначала копируется внутрь.
+поэтому файл сначала копируется внутрь. CLI зовётся через `node /directus/cli.js`:
+`npx directus` в образе не находит бинарник и качает пакет из npm заново.
 
 Дальше роли, сборщик и Flow одним скриптом. Нужен статический токен
 администратора: в админке «Пользователи → админ → Token → Generate», сохранить.
@@ -76,16 +77,18 @@ docker compose exec -T directus npx directus schema apply --yes /directus/snapsh
 ```bash
 cd /srv/vkus/site
 DIRECTUS_URL=http://127.0.0.1:8055 DIRECTUS_ADMIN_TOKEN=<токен админа> \
-REBUILD_HOOK_URL=http://127.0.0.1:9000/hooks/rebuild REBUILD_HOOK_SECRET=<секрет вебхука> \
+REBUILD_HOOK_URL=https://admin.vkus-com.ru/hooks/rebuild REBUILD_HOOK_SECRET=<секрет вебхука> \
 pnpm setup
 ```
 
 Скрипт напечатает `DIRECTUS_TOKEN` сборщика — он нужен в следующем шаге и
 больше не показывается. Секрет вебхука придумайте сами (`openssl rand -hex 24`).
+Адрес вебхука — публичный: Flow выполняется внутри контейнера Directus, и
+`127.0.0.1:9000` там указывает на сам контейнер, а не на сервер.
 
-В админке: «Настройки → Проект» уже по-русски и с именем из схемы; создайте
-пользователей редакторов с ролью «Редактор» («Пользователи → +», роль
-«Редактор», приглашение уйдёт письмом).
+Имя проекта, цвет и русский язык админки (в том числе на странице входа) ставит
+тот же скрипт. Дальше в админке создайте пользователей редакторов с ролью
+«Редактор» («Пользователи → +», роль «Редактор», приглашение уйдёт письмом).
 
 ### 4. Сайт
 
@@ -106,19 +109,26 @@ cp .env.example .env
 заглушки, их заменяют редакторы).
 
 ```bash
-chmod +x deploy/build.sh deploy/backup.sh
 deploy/build.sh        # первый релиз, /srv/vkus/current появился
 ```
 
 ### 5. nginx и сертификаты
 
+Конфиги из репо ссылаются на сертификаты, которых ещё нет, и с ними `nginx -t`
+не проходит. Поэтому сначала временный блок на `:80` для выпуска, потом конфиги:
+
 ```bash
+cat >/etc/nginx/sites-enabled/acme <<'EOF'
+server { listen 80; server_name vkus-com.ru www.vkus-com.ru admin.vkus-com.ru; return 404; }
+EOF
+nginx -t && systemctl reload nginx
+certbot certonly --nginx -d vkus-com.ru -d www.vkus-com.ru
+certbot certonly --nginx -d admin.vkus-com.ru
+rm /etc/nginx/sites-enabled/acme /etc/nginx/sites-enabled/default
 cp deploy/nginx/vkus-com.ru.conf /etc/nginx/sites-available/vkus-com.ru
 cp deploy/nginx/admin.vkus-com.ru.conf /etc/nginx/sites-available/admin.vkus-com.ru
 ln -s /etc/nginx/sites-available/vkus-com.ru /etc/nginx/sites-enabled/
 ln -s /etc/nginx/sites-available/admin.vkus-com.ru /etc/nginx/sites-enabled/
-certbot certonly --nginx -d vkus-com.ru -d www.vkus-com.ru
-certbot certonly --nginx -d admin.vkus-com.ru
 nginx -t && systemctl reload nginx
 ```
 
@@ -127,19 +137,25 @@ Certbot сам добавит таймер продления.
 ### 6. Приёмник вебхука
 
 `hooks.json` берёт секрет из окружения, поэтому `webhook` запускается с
-флагом `-template`:
+флагом `-template`. Юнит из пакета Ubuntu стартует только при наличии
+`/etc/webhook.conf` — условие снимается пустым `ConditionPathExists=`.
+`-verbose` пишет вывод сборки в журнал: `journalctl -u webhook`.
 
 ```bash
 cat >/etc/default/webhook <<'EOF'
 HOOK_SECRET=<секрет вебхука, тот же что в pnpm setup>
 EOF
+chmod 600 /etc/default/webhook
 mkdir -p /etc/systemd/system/webhook.service.d
 cat >/etc/systemd/system/webhook.service.d/override.conf <<'EOF'
+[Unit]
+ConditionPathExists=
+
 [Service]
 User=deploy
 EnvironmentFile=/etc/default/webhook
 ExecStart=
-ExecStart=/usr/bin/webhook -nopanic -template -ip 127.0.0.1 -port 9000 -hooks /srv/vkus/site/deploy/webhook/hooks.json
+ExecStart=/usr/bin/webhook -verbose -nopanic -template -ip 127.0.0.1 -port 9000 -hooks /srv/vkus/site/deploy/webhook/hooks.json
 EOF
 systemctl daemon-reload && systemctl enable --now webhook
 curl -s -X POST -H 'X-Hook-Secret: <секрет>' http://127.0.0.1:9000/hooks/rebuild   # принято, сборка запущена
