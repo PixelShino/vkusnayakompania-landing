@@ -38,6 +38,31 @@ usermod -aG docker deploy
 mkdir -p /srv/vkus /srv/backups && chown -R deploy:deploy /srv/vkus /srv/backups
 ```
 
+Защита и память. Часовой пояс — Самара: ночная пересборка в 00:10 должна
+совпадать с полуночью точек. Своп обязателен: на 2 ГБ сборка Astro доходит
+до 1,5 ГБ, рядом работают Directus и Postgres.
+
+```bash
+timedatectl set-timezone Europe/Samara
+apt install -y fail2ban ufw unattended-upgrades
+fallocate -l 4G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
+printf 'vm.swappiness = 10\nnet.core.default_qdisc = fq\nnet.ipv4.tcp_congestion_control = bbr\n' >/etc/sysctl.d/90-vkus.conf
+sysctl --system
+ufw default deny incoming && ufw allow 22/tcp && ufw allow 80/tcp && ufw allow 443/tcp && ufw enable
+printf 'PermitRootLogin prohibit-password\nPasswordAuthentication no\nKbdInteractiveAuthentication no\n' \
+  >/etc/ssh/sshd_config.d/00-hardening.conf   # сначала положить свой ключ в authorized_keys
+sshd -t && systemctl reload ssh
+printf '[DEFAULT]\nbackend = systemd\nbanaction = ufw\n\n[sshd]\nenabled = true\nmode = normal\n' >/etc/fail2ban/jail.local
+systemctl restart fail2ban
+printf '{ "log-driver": "local", "log-opts": { "max-size": "10m", "max-file": "3" } }\n' >/etc/docker/daemon.json
+systemctl restart docker
+```
+
+Для SSH `ufw allow`, а не `ufw limit`, и `fail2ban` в режиме `normal`, а не
+`aggressive`: `ssh-keyscan` в GitHub Actions открывает пять соединений подряд,
+и строгие правила банят раннер выкладки.
+
 ### 2. Код
 
 ```bash
@@ -173,6 +198,13 @@ crontab -u deploy /srv/vkus/site/deploy/crontab.txt
 `VPS_HOST` (IP или домен) и секрет `VPS_SSH_KEY` (приватный ключ, публичный —
 в `/home/deploy/.ssh/authorized_keys`). После этого пуш в `main` собирает сайт
 на сервере. Пока переменной нет, workflow пропускается.
+
+Ключ стоит ограничить одной командой выкладки: даже утёкший, он не даст
+шелла на сервере.
+
+```
+command="cd /srv/vkus/site && git pull --ff-only && deploy/build.sh",restrict ssh-ed25519 AAAA… github-actions
+```
 
 ### 9. Проверка
 
