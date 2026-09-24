@@ -49,9 +49,20 @@ const datetime = afisha.date ? (time ? `${afisha.date}T${time}` : afisha.date) :
 // `alt` не проверяется: у заменённого фото остаётся старый alt, и настоящий
 // постер прятался под плашкой. Без постера рисуется та же плашка
 const stub = !afisha.poster || afisha.poster.placeholder;
+
+// the frame follows the poster's own proportions, so the lettering at its top
+// and bottom is not cropped; kept between 1:2 and 4:5 to hold the spread,
+// anything beyond is cropped by `cover`. The stub keeps the classic 2:3
+// рамка повторяет пропорции самого постера, чтобы надписи сверху и снизу не
+// срезались; держится между 1:2 и 4:5, чтобы не развалить разворот, всё что
+// за пределами — обрезает `cover`. Заглушка остаётся классическим 2:3
+const ratio =
+  afisha.poster && !stub
+    ? Math.min(Math.max(afisha.poster.width / afisha.poster.height, 1 / 2), 4 / 5)
+    : 2 / 3;
 ---
 
-<section class="section strip-ink af-sec" id="afisha">
+<section class="section strip-ink af-sec" id="afisha" style={`--ar: ${ratio.toFixed(4)}`}>
   <div class="container af">
     <figure class="af__poster" data-reveal="self">
       {
@@ -69,7 +80,7 @@ const stub = !afisha.poster || afisha.poster.placeholder;
             height={afisha.poster.height}
             alt={afisha.poster.alt}
             widths={[360, 560, 760, 960, 1200]}
-            sizes="(min-width: 1200px) 466px, (min-width: 768px) 360px, 92vw"
+            sizes={`(min-width: 1200px) ${Math.round(700 * ratio)}px, (min-width: 768px) ${Math.round(560 * ratio)}px, 92vw`}
             format="avif"
             quality={56}
             loading="lazy"
@@ -177,7 +188,7 @@ const stub = !afisha.poster || afisha.poster.placeholder;
     position: relative;
     z-index: 1;
     margin: 0;
-    aspect-ratio: 2 / 3;
+    aspect-ratio: var(--ar, 2 / 3);
     border-radius: var(--r-sq);
     overflow: hidden;
     background: var(--surface-photo);
@@ -309,7 +320,7 @@ const stub = !afisha.poster || afisha.poster.placeholder;
     }
 
     .af {
-      grid-template-columns: calc(var(--h) * 2 / 3) minmax(0, 1fr);
+      grid-template-columns: calc(var(--h) * var(--ar, 2 / 3)) minmax(0, 1fr);
       align-items: center;
       column-gap: 40px;
     }
