@@ -6,7 +6,9 @@
 set -euo pipefail
 
 ROOT=/srv/vkus
-SITE=$ROOT/site
+# not SITE: `.env` defines SITE (the public URL) and would overwrite it
+# не SITE: в `.env` есть SITE (адрес сайта), он затёр бы путь
+REPO=$ROOT/site
 RELEASES=$ROOT/releases
 LOCK=/tmp/vkus-build.lock
 AGAIN=/tmp/vkus-build.again
@@ -21,8 +23,8 @@ if ! flock -n 9; then
 fi
 
 build() {
-  cd "$SITE"
-  set -a; . "$SITE/.env"; set +a
+  cd "$REPO"
+  set -a; . "$REPO/.env"; set +a
   pnpm install --frozen-lockfile --prefer-offline
   pnpm build
   local stamp
