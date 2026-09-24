@@ -59,13 +59,17 @@ for (const c of SINGLE) {
 }
 for (const a of ALL) add('directus_files', a);
 for (const a of ['create', 'read', 'update']) add('directus_folders', a);
+// build status is written by the builder, editors only watch it
+// статус сборки пишет сборщик, редактор только смотрит
+add('site_build', 'read');
 if (perms.length) {
   await api('POST', '/permissions', perms);
   console.log(`+ ${perms.length} permissions Редактор`);
 }
 
-// 3. builder: read-only policy, role, user with a static token
-//    сборщик: политика только на чтение, роль, пользователь со статическим токеном
+// 3. builder: read-only policy (plus its own build status), role, user with a static token
+//    сборщик: политика только на чтение (кроме своего статуса сборки), роль,
+//    пользователь со статическим токеном
 let bpolicy = await findOne('/policies', { name: { _eq: 'Сборщик' } });
 if (!bpolicy) {
   bpolicy = await api('POST', '/policies', { name: 'Сборщик', icon: 'build', app_access: false, admin_access: false });
@@ -75,6 +79,13 @@ const bexisting = await api('GET', `/permissions?filter[policy][_eq]=${bpolicy.i
 const bperms = [...CONTENT, ...SINGLE, 'directus_files']
   .filter((c) => !bexisting.some((p) => p.collection === c))
   .map((c) => ({ policy: bpolicy.id, collection: c, action: 'read', fields: ['*'] }));
+// PATCH on an empty singleton creates the row, hence `create`
+// PATCH пустого одиночного создаёт запись, поэтому нужен и `create`
+for (const action of ['read', 'create', 'update']) {
+  if (!bexisting.some((p) => p.collection === 'site_build' && p.action === action)) {
+    bperms.push({ policy: bpolicy.id, collection: 'site_build', action, fields: ['*'] });
+  }
+}
 if (bperms.length) {
   await api('POST', '/permissions', bperms);
   console.log(`+ ${bperms.length} permissions Сборщик`);
