@@ -42,11 +42,13 @@ const dayMonth = day.slice(dayNumber.length).trim();
 const time = date ? afisha.time?.slice(0, 5) : undefined;
 const datetime = afisha.date ? (time ? `${afisha.date}T${time}` : afisha.date) : undefined;
 
-// a stub file is marked in the admin, and the mark reaches the page through alt;
-// no poster at all is drawn the same way, only the plate says so
-// файл-заглушку помечают в админке, до страницы пометка доходит через `alt`;
-// отсутствующий постер рисуется той же плашкой, только с другой подписью
-const stub = !afisha.poster || /заглушк/i.test(afisha.poster.alt);
+// a stub is marked by the `[заглушка]` prefix in the file title, as everywhere
+// else; alt is not checked: a replaced photo keeps its old alt, and the real
+// poster stayed hidden behind the plate. No poster is drawn with the same plate.
+// заглушку отмечает приставка `[заглушка]` в заголовке файла, как и везде;
+// `alt` не проверяется: у заменённого фото остаётся старый alt, и настоящий
+// постер прятался под плашкой. Без постера рисуется та же плашка
+const stub = !afisha.poster || afisha.poster.placeholder;
 ---
 
 <section class="section strip-ink af-sec" id="afisha">

@@ -12,7 +12,7 @@
  * же пропорции, которая об этом говорит.
  */
 import Photo from './Photo.astro';
-import { isPlaceholder, type Content } from '../lib/content.ts';
+import type { Content } from '../lib/content.ts';
 
 interface Props {
   content: Content;
@@ -28,15 +28,11 @@ const SIZES = ['(min-width: 1200px) min(860px, 60vw)', '(min-width: 768px) 72vw'
   ', ',
 );
 
-// The admin marks a stand-in in the file title, but only `alt` reaches the
-// strip: both wordings are checked so a real photo is never hidden by a plaque.
-// В админке заглушка помечена в заголовке файла, до ленты доходит только `alt`:
-// проверяются обе формулировки, чтобы плашка не закрыла настоящее фото.
-const isStub = (alt: string) => isPlaceholder(alt) || alt.includes('фото появится позже');
-
 const shots = places.flatMap((place) =>
   place.gallery.map((shot) => {
-    const stub = isStub(shot.image.alt);
+    // заглушку отмечает `[заглушка]` в заголовке файла, не alt: у заменённого
+    // фото alt остаётся прежним / the title marks a stub, a replaced photo keeps its alt
+    const stub = shot.image.placeholder;
     return {
       photo: shot.image,
       title: shot.caption || place.name,
