@@ -53,9 +53,14 @@ const sentences = (text: string, keep: number) =>
 // плашкой, за фото не выдаётся.
 const isStub = (direction: Direction) => !direction.photo || direction.photo.placeholder;
 
-const venues = (['cafe', 'restaurant'] as const)
-  .map(at)
-  .filter((d): d is Direction & { place: NonNullable<Direction['place']> } => Boolean(d?.place));
+// the two venues in the admin order: «Направления» are sorted by drag, so the
+// owner decides which one opens the section
+// две точки в порядке админки: «Направления» сортируются перетаскиванием, и
+// какая точка открывает раздел, решает владелец
+const venues = directions.filter(
+  (d): d is Direction & { place: NonNullable<Direction['place']> } =>
+    (d.key === 'cafe' || d.key === 'restaurant') && Boolean(d.place),
+);
 
 /**
  * The frame turns into a strip when the venue's own gallery holds two or more
@@ -643,9 +648,13 @@ const services = SERVICES.map((row) => ({ ...row, direction: at(row.key) })).fil
        печатным языком — без мазка и рваного края. Панель кремовая, как
        страница, поэтому панелью читается только часть над кадром; внешнее
        поле остаётся `--pad`, и текст держит край контейнера. */
+    /* z-index 2, not 1: grid items paint in `order`, and the flipped frame
+       (`order: 2`) put the slider's gradient over the panel's overlap
+       z-index 2, а не 1: элементы сетки рисуются в порядке `order`, и
+       перевёрнутый кадр (`order: 2`) клал градиент слайдера поверх заезда панели */
     .venue__body {
       position: relative;
-      z-index: 1;
+      z-index: 2;
       max-width: 584px;
       margin-left: -64px;
       padding: 36px var(--pad) 36px 48px;
