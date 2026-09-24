@@ -164,6 +164,19 @@ nginx -t && systemctl reload nginx
 
 Certbot сам добавит таймер продления.
 
+Прокси для сборки. Directus не отвечает `304` на повторный запрос картинки, и
+Astro при каждой сборке заново пережимает все фото: минута вместо нескольких
+секунд. Локальный nginx на `127.0.0.1:8056` сверяет `If-Modified-Since` и
+отдаёт `304`, если файл не менялся; сборка ходит в Directus через него:
+
+```bash
+mkdir -p /var/cache/nginx/directus-assets && chown www-data: /var/cache/nginx/directus-assets
+cp deploy/nginx/directus-build.conf /etc/nginx/sites-available/directus-build
+ln -s /etc/nginx/sites-available/directus-build /etc/nginx/sites-enabled/
+nginx -t && systemctl reload nginx
+sed -i 's|^DIRECTUS_URL=.*|DIRECTUS_URL=http://127.0.0.1:8056|' /srv/vkus/site/.env
+```
+
 ### 6. Приёмник вебхука
 
 `hooks.json` берёт секрет из окружения, поэтому `webhook` запускается с
