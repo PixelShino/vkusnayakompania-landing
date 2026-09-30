@@ -155,6 +155,7 @@ nginx -t && systemctl reload nginx
 certbot certonly --nginx -d vkus-com.ru -d www.vkus-com.ru
 certbot certonly --nginx -d admin.vkus-com.ru
 rm /etc/nginx/sites-enabled/acme /etc/nginx/sites-enabled/default
+cp deploy/nginx/10-vkus-tuning.conf /etc/nginx/conf.d/
 cp deploy/nginx/vkus-com.ru.conf /etc/nginx/sites-available/vkus-com.ru
 cp deploy/nginx/admin.vkus-com.ru.conf /etc/nginx/sites-available/admin.vkus-com.ru
 ln -s /etc/nginx/sites-available/vkus-com.ru /etc/nginx/sites-enabled/
@@ -163,6 +164,13 @@ nginx -t && systemctl reload nginx
 ```
 
 Certbot сам добавит таймер продления.
+
+Кеш дескрипторов (`open_file_cache`) выключен намеренно: релиз переключается
+симлинком `current`, а с кешем nginx до двух минут отдавал `index.html`
+прошлого релиза и помнил `404` на файлы, которые уже появились. Страница и
+`/media/` отдаются с `Cache-Control: no-cache`: браузер перепроверяет их при
+каждом заходе (неизменённые — одним `304`), поэтому правка видна сразу, а
+адреса документов не меняются при замене файла.
 
 Прокси для сборки. Directus не отвечает `304` на повторный запрос картинки, и
 Astro при каждой сборке заново пережимает все фото: минута вместо нескольких

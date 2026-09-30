@@ -44,7 +44,16 @@ status() {
     }).then((r) => r.ok || console.error(`статус сборки не записан: ${r.status}`), (e) => console.error(`статус сборки не записан: ${e.message}`));
   ' "$@" || true
 }
-trap 'status status=error finished_at="$(date -Iseconds)" message="$(tail -n 40 "$LOG")"' ERR
+# the tail editors see: without Astro's revalidation warnings (they are noise
+# from the 304 proxy and would push the real error out) and with the builder
+# token masked — the message field is readable by the editor role
+# хвост, который видят редакторы: без предупреждений Astro о перепроверке
+# (это шум от прокси с 304, он вытеснил бы настоящую ошибку) и с замаскированным
+# токеном сборщика — поле сообщения читает роль редактора
+tail_for_editors() {
+  grep -v 'revalidating a cached remote asset' "$LOG" | tail -n 40 | sed -E 's/access_token=[^ &"]+/access_token=***/g'
+}
+trap 'status status=error finished_at="$(date -Iseconds)" message="$(tail_for_editors)"' ERR
 
 build() {
   cd "$REPO"
