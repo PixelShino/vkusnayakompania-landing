@@ -76,7 +76,9 @@ const cards = KEYS.map((key) => directions.find((item) => item.key === key))
                   target="_blank"
                   rel="noopener"
                 >
-                  <span>Открыть PDF</span>
+                  {/* a picture of the menu is not a PDF: the link promises only what opens
+                      картинка меню — не PDF: ссылка обещает ровно то, что откроется */}
+                  <span>{menu.file.kind === 'pdf' ? 'Открыть PDF' : 'Открыть меню'}</span>
                 </a>
               ) : (
                 <span class="mn__soon">Меню скоро появится</span>

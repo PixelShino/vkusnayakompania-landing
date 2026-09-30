@@ -9,7 +9,7 @@
  */
 import Photo from './Photo.astro';
 import Icon from './Icon.astro';
-import { isPlaceholder, type Cake, type Content } from '../lib/content.ts';
+import type { Cake, Content } from '../lib/content.ts';
 
 interface Props {
   content: Content;
@@ -18,12 +18,9 @@ interface Props {
 const { cakes, settings, home } = Astro.props.content;
 const shop = settings.shop_cakes_ready ?? settings.shop_url;
 
-// The admin marks a pending file in its title; normalization keeps only `alt`,
-// so the same mark is read from there — a real shot never carries it.
-// В админке пометка стоит в заголовке файла, нормализация оставляет только
-// `alt`, поэтому она читается оттуда — на настоящем кадре её нет.
-const stub = (cake: Cake) =>
-  isPlaceholder(cake.photo.alt) || cake.photo.alt.includes('фото появится позже');
+// one rule for every block: normalization decides what is a placeholder
+// одно правило на все блоки: что заглушка, решает нормализация
+const stub = (cake: Cake) => cake.photo.placeholder;
 
 const SIZES = '(min-width: 1200px) 309px, (min-width: 768px) 243px, 45vw';
 ---

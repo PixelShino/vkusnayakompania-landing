@@ -12,9 +12,49 @@ import { currentAfisha, livePromos, type Dated } from './select.ts';
 import { QUERIES } from '../../scripts/queries.mjs';
 import fixture from '../data/fixture.json' with { type: 'json' };
 
-/** Картинка для `<Image>`: свой файл или адрес Directus, размеры обязательны. */
 /** Файл-заглушка помечен в админке: с этой пометкой сайт не выдаёт его за готовый. */
 export const isPlaceholder = (title?: string | null) => Boolean(title?.startsWith('[заглушка]'));
+
+/**
+ * Timestamps of a file in Directus. A seed file has both stamps within a few
+ * milliseconds; «Заменить файл» moves `uploaded_on` and leaves `created_on`.
+ * The fixture carries no stamps, so there the title alone decides.
+ * Метки времени файла в Directus. У файла из посева обе метки в паре
+ * миллисекунд; «Заменить файл» сдвигает `uploaded_on`, а `created_on` не
+ * трогает. В фикстуре меток нет — там решает только заголовок.
+ */
+type Stamped = { title?: string | null; created_on?: string | null; uploaded_on?: string | null };
+
+const replaced = (file: Stamped) =>
+  Boolean(file.created_on && file.uploaded_on) &&
+  Date.parse(file.uploaded_on!) - Date.parse(file.created_on!) > 60_000;
+
+/**
+ * The mark alone is not enough: the owner replaces the file and never edits the
+ * title, so a real photo kept showing as a plaque. A replaced file is real
+ * whatever its title says.
+ * Одной пометки мало: владелица заменяет файл, а заголовок не правит, и
+ * настоящее фото продолжало стоять плашкой. Заменённый файл настоящий, что бы
+ * ни было в заголовке.
+ */
+export const placeholderFile = (file: Stamped) => isPlaceholder(file.title) && !replaced(file);
+
+/** Заголовок файла без пометки — им подписывается кадр, у которого alt не заполнен. */
+const cleanTitle = (title?: string | null) => (title ?? '').replace(/^\[заглушка\]\s*/, '').trim();
+
+/**
+ * The seed alt says «фото появится позже»; after a replacement it lies under a
+ * real photo and used to hide it. Such an alt, or an empty one, gives way to
+ * the file title; the build fails only when both are empty.
+ * Alt из посева гласит «фото появится позже»; после замены он врёт под
+ * настоящим фото и раньше скрывал его. Такой alt, как и пустой, уступает
+ * заголовку файла; сборка падает, только если пусто и там.
+ */
+const altOf = (file: RawFile, placeholder: boolean) => {
+  const alt = file.alt?.trim() ?? '';
+  const stale = !placeholder && (isPlaceholder(alt) || alt.includes('фото появится позже'));
+  return alt && !stale ? alt : cleanTitle(file.title);
+};
 
 /**
  * A dash never starts a line: the space before it becomes non-breaking. Russian
@@ -35,8 +75,13 @@ export type Img = {
   alt: string;
   placeholder: boolean;
 };
-/** Документ в `public/media/` — PDF меню, политика, оферта. */
-export type Doc = { href: string; title: string; placeholder: boolean };
+/**
+ * A document in `public/media/`: a menu, the policy, the offer. `kind` is what
+ * the link may promise — the owner uploads a picture of the menu as readily as a PDF.
+ * Документ в `public/media/`: меню, политика, оферта. `kind` — что вправе
+ * обещать ссылка: владелица кладёт картинку меню так же охотно, как PDF.
+ */
+export type Doc = { href: string; title: string; placeholder: boolean; kind: 'pdf' | 'image' | 'file' };
 
 export type Settings = {
   phone: string;
@@ -161,7 +206,7 @@ export type Content = {
   today: string;
 };
 
-type RawFile = {
+type RawFile = Stamped & {
   id: string;
   filename_download: string;
   title?: string;
@@ -222,16 +267,16 @@ const telHref = (phone: string) => `tel:${phone.replace(/[^0-9+]/g, '')}`;
 const toImg = (file: RawFile | null | undefined, resolve: ResolveImage): Img | undefined => {
   if (!file) return undefined;
   const name = file.title || file.id;
-  if (!file.alt?.trim()) throw new Error(`alt пуст у файла ${name}`);
+  const placeholder = placeholderFile(file);
+  const alt = altOf(file, placeholder);
+  if (!alt) throw new Error(`alt пуст у файла ${name}`);
   if (!file.width || !file.height) throw new Error(`нет размеров у файла ${name}`);
-  return {
-    src: resolve(file),
-    width: file.width,
-    height: file.height,
-    alt: file.alt,
-    placeholder: isPlaceholder(file.title),
-  };
+  return { src: resolve(file), width: file.width, height: file.height, alt, placeholder };
 };
+
+const IMAGE_EXT = new Set(['jpg', 'jpeg', 'png', 'webp', 'avif', 'gif', 'heic']);
+const kindOf = (file: RawFile): Doc['kind'] =>
+  ext(file) === 'pdf' ? 'pdf' : IMAGE_EXT.has(ext(file)) ? 'image' : 'file';
 
 const toDoc = (file: RawFile | null | undefined): Doc | undefined =>
   file
@@ -240,9 +285,21 @@ const toDoc = (file: RawFile | null | undefined): Doc | undefined =>
         // BASE вместо корня: в подпапке `/media/...` ведёт в 404
         href: `${BASE}media/${file.id}.${ext(file)}`,
         title: file.title || file.filename_download,
-        placeholder: isPlaceholder(file.title),
+        placeholder: placeholderFile(file),
+        kind: kindOf(file),
       }
     : undefined;
+
+// the day of the replacement in the venues' timezone: the manual date under a
+// freshly uploaded menu would say «обновлено 1 сентября» for a September 29 file
+// день замены в поясе точек: ручная дата под свежим меню говорила бы
+// «обновлено 1 сентября» про файл от 29 сентября
+const samaraDay = (iso: string) =>
+  new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Samara' }).format(new Date(iso));
+const menuUpdated = (menu: RawMenu) =>
+  replaced(menu.file) && menu.file.uploaded_on! > `${menu.updated}T00:00:00.000Z`
+    ? samaraDay(menu.file.uploaded_on!)
+    : menu.updated;
 
 // toSchedule knows the days but not the venue; the venue name is added here
 // toSchedule знает про дни, но не про точку — имя точки подставляется здесь
@@ -321,6 +378,7 @@ export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraTo
     })),
     menus: raw.menus.map((menu) => ({
       ...menu,
+      updated: menuUpdated(menu),
       file: need(toDoc(menu.file), `меню «${menu.title}»: не приложен файл`),
     })),
     cakes: raw.cakes

@@ -72,15 +72,38 @@ assert.deepEqual(
   'directions: нужны ровно пять направлений с разными ключами',
 );
 
-// alt обязателен у всех картинок: нормализация валится с именем файла
+// пустой alt подменяется заголовком файла; без заголовка нормализация валится с именем файла
+const hero = raw.home.hero_image;
+assert.equal(
+  normalize({ ...raw, home: { ...raw.home, hero_image: { ...hero, alt: '' } } }, resolve).home
+    .hero_image.alt,
+  hero.title,
+);
 assert.throws(
   () =>
     normalize(
-      { ...raw, home: { ...raw.home, hero_image: { ...raw.home.hero_image, alt: '' } } },
+      { ...raw, home: { ...raw.home, hero_image: { ...hero, alt: '', title: '' } } },
       resolve,
     ),
   /alt пуст/,
 );
+
+// заменённый файл — настоящий, даже с пометкой и посевным alt; alt берётся из заголовка
+const seed = raw.cakes[0].photo;
+const stamped = {
+  ...seed,
+  title: '[заглушка] Торт «Медовик»',
+  alt: 'Торт «Медовик» — фото появится позже',
+  created_on: '2026-09-23T10:26:53.000Z',
+};
+const cakeOf = (photo: typeof stamped) =>
+  normalize({ ...raw, cakes: [{ ...raw.cakes[0], photo }] }, resolve).cakes[0].photo;
+const untouched = cakeOf({ ...stamped, uploaded_on: '2026-09-23T10:26:53.006Z' });
+assert.equal(untouched.placeholder, true, 'посевной файл остаётся заглушкой');
+assert.equal(untouched.alt, 'Торт «Медовик» — фото появится позже');
+const real = cakeOf({ ...stamped, uploaded_on: '2026-09-29T12:30:15.516Z' });
+assert.equal(real.placeholder, false, 'заменённый файл — не заглушка');
+assert.equal(real.alt, 'Торт «Медовик»', 'посевной alt под настоящим фото уступает заголовку');
 
 console.log(
   `контент фикстуры: ${content.places.length} точки, ${content.directions.length} направлений, ` +

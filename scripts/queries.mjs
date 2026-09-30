@@ -6,7 +6,11 @@
 
 // fields that describe a file
 // поля, описывающие файл
-export const FILE_FIELDS = ['id', 'filename_download', 'title', 'alt', 'width', 'height', 'type'];
+// created_on and uploaded_on together tell a replaced file from a seed one
+// created_on и uploaded_on вместе отличают заменённый файл от посевного
+export const FILE_FIELDS = [
+  'id', 'filename_download', 'title', 'alt', 'width', 'height', 'type', 'created_on', 'uploaded_on',
+];
 
 const img = (f) => FILE_FIELDS.map((x) => `${f}.${x}`).join(',');
 const q = (fields, extra = '') => `fields=${fields}&limit=-1${extra}`;
