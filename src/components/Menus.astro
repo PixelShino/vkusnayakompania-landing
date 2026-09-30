@@ -211,6 +211,14 @@ const label = (menu: (typeof menus)[number], alone: boolean) =>
     gap: 16px;
   }
 
+  /* the date is one token: «обновлено 30 сентября» broken over two lines read
+     as two tags next to a column of links
+     дата — одно целое: «обновлено 30 сентября» в две строки читалось как два
+     ярлыка рядом со столбиком ссылок */
+  .mn__tag {
+    white-space: nowrap;
+  }
+
   /* several menus of one venue stand in a row and wrap on a narrow screen
      несколько меню одной точки стоят в ряд и переносятся на узком экране */
   .mn__acts {
