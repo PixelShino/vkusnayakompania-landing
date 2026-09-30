@@ -6,7 +6,7 @@
 // Run / Запуск: pnpm fixture  (needs DIRECTUS_URL, DIRECTUS_TOKEN in .env)
 import fs from 'node:fs/promises';
 import { loadEnv } from './env.mjs';
-import { QUERIES } from './queries.mjs';
+import { QUERIES, docTarget, fileExt } from './queries.mjs';
 
 loadEnv();
 const BASE = process.env.DIRECTUS_URL;
@@ -33,14 +33,22 @@ const walk = (v) => {
   }
 };
 walk(fixture);
+// the documents: policy, offer and menu files / документы: политика, оферта и файлы меню
+const docs = new Set(
+  [fixture.settings?.policy_file, fixture.settings?.offer_file, ...fixture.menus.map((m) => m.file)]
+    .filter(Boolean)
+    .map((f) => f.id),
+);
 
 await fs.rm('src/data/fixture-files', { recursive: true, force: true });
 await fs.mkdir('src/data/fixture-files', { recursive: true });
 for (const f of files.values()) {
-  const ext = f.filename_download.split('.').pop().toLowerCase();
-  const r = await fetch(`${BASE}/assets/${f.id}?access_token=${TOKEN}`);
+  // documents land under the name the page links to; photos keep their extension
+  // документы ложатся под именем, на которое ссылается страница; фото со своим расширением
+  const { name, asset } = docs.has(f.id) ? docTarget(f) : { name: `${f.id}.${fileExt(f)}`, asset: `/assets/${f.id}` };
+  const r = await fetch(`${BASE}${asset}`, { headers: { Authorization: `Bearer ${TOKEN}` } });
   if (!r.ok) throw new Error(`asset ${f.id} → ${r.status}`);
-  await fs.writeFile(`src/data/fixture-files/${f.id}.${ext}`, Buffer.from(await r.arrayBuffer()));
+  await fs.writeFile(`src/data/fixture-files/${name}`, Buffer.from(await r.arrayBuffer()));
 }
 await fs.writeFile('src/data/fixture.json', JSON.stringify(fixture, null, 2) + '\n');
 console.log(`fixture: ${Object.keys(QUERIES).length} коллекций, ${files.size} файлов`);

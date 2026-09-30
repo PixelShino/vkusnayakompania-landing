@@ -9,7 +9,7 @@ import type { ImageMetadata } from 'astro';
 import { toSchedule, type HoursRow, type Schedule } from '../data/site.ts';
 import { BASE } from './base.ts';
 import { currentAfisha, livePromos, type Dated } from './select.ts';
-import { QUERIES } from '../../scripts/queries.mjs';
+import { QUERIES, docKind, docTarget } from '../../scripts/queries.mjs';
 import fixture from '../data/fixture.json' with { type: 'json' };
 
 /** Файл-заглушка помечен в админке: с этой пометкой сайт не выдаёт его за готовый. */
@@ -274,19 +274,17 @@ const toImg = (file: RawFile | null | undefined, resolve: ResolveImage): Img | u
   return { src: resolve(file), width: file.width, height: file.height, alt, placeholder };
 };
 
-const IMAGE_EXT = new Set(['jpg', 'jpeg', 'png', 'webp', 'avif', 'gif', 'heic']);
-const kindOf = (file: RawFile): Doc['kind'] =>
-  ext(file) === 'pdf' ? 'pdf' : IMAGE_EXT.has(ext(file)) ? 'image' : 'file';
-
 const toDoc = (file: RawFile | null | undefined): Doc | undefined =>
   file
     ? {
-        // BASE, not the root: under a subfolder `/media/...` lands on a 404
-        // BASE вместо корня: в подпапке `/media/...` ведёт в 404
-        href: `${BASE}media/${file.id}.${ext(file)}`,
+        // BASE, not the root: under a subfolder `/media/...` lands on a 404;
+        // the name is the one `fetch-files` saves under
+        // BASE вместо корня: в подпапке `/media/...` ведёт в 404; имя — то,
+        // под которым файл сохраняет `fetch-files`
+        href: `${BASE}media/${docTarget(file).name}`,
         title: file.title || file.filename_download,
         placeholder: placeholderFile(file),
-        kind: kindOf(file),
+        kind: docKind(file) as Doc['kind'],
       }
     : undefined;
 

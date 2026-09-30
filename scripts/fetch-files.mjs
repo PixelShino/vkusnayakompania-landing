@@ -10,7 +10,7 @@
 // Run / Запуск: pnpm files (шаг prebuild)
 import fs from 'node:fs/promises';
 import { loadEnv } from './env.mjs';
-import { QUERIES } from './queries.mjs';
+import { QUERIES, docTarget } from './queries.mjs';
 
 loadEnv();
 const BASE = process.env.DIRECTUS_URL;
@@ -41,11 +41,11 @@ const files = [settings?.policy_file, settings?.offer_file, ...menus.map((m) => 
 await fs.mkdir(OUT, { recursive: true });
 let saved = 0;
 for (const file of files) {
-  const name = `${file.id}.${file.filename_download.split('.').pop().toLowerCase()}`;
+  const { name, asset } = docTarget(file);
   const dest = `${OUT}/${name}`;
   if (!source && (await fs.access(dest).then(() => true, () => false))) continue;
   if (source) {
-    const r = await fetch(`${BASE}/assets/${file.id}?access_token=${TOKEN}`);
+    const r = await fetch(`${BASE}${asset}`, { headers: { Authorization: `Bearer ${TOKEN}` } });
     if (!r.ok) throw new Error(`asset ${name} (${file.title ?? file.id}) → ${r.status}`);
     await fs.writeFile(dest, Buffer.from(await r.arrayBuffer()));
   } else {
@@ -55,6 +55,18 @@ for (const file of files) {
   }
   saved += 1;
 }
+// a document that left the admin, or changed its extension, must not ride into
+// the next release under its old address
+// документ, который убрали из админки или сменил расширение, не должен уехать
+// в следующий релиз под старым адресом
+const keep = new Set(files.map((file) => docTarget(file).name));
+let removed = 0;
+for (const name of await fs.readdir(OUT)) {
+  if (keep.has(name)) continue;
+  await fs.unlink(`${OUT}/${name}`);
+  removed += 1;
+}
 console.log(
-  `files: ${files.length} документов из ${source ? 'Directus' : 'фикстуры'}, скачано ${saved}`,
+  `files: ${files.length} документов из ${source ? 'Directus' : 'фикстуры'}, скачано ${saved}` +
+    (removed ? `, убрано старых ${removed}` : ''),
 );
