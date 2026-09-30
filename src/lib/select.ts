@@ -55,11 +55,23 @@ export const groupByPlace = <T extends { place?: number | null }>(items: T[]) =>
   return groups;
 };
 
+/**
+ * Every published menu of a direction in admin order: a venue may carry a
+ * food menu and a bar menu side by side, the main one listed first.
+ * Все опубликованные меню направления в порядке админки: у точки может быть
+ * основное меню и рядом барное, основное идёт первым.
+ */
+export const menusFor = <T extends { status: string; direction: number }>(
+  menus: T[],
+  direction: number,
+): T[] => menus.filter((menu) => menu.status === 'published' && menu.direction === direction);
+
 /** Опубликованное меню направления, самое свежее по `updated`; нет — `null`. */
 export const menuFor = <T extends { status: string; direction: number; updated: string }>(
   menus: T[],
   direction: number,
 ): T | null =>
-  menus
-    .filter((menu) => menu.status === 'published' && menu.direction === direction)
-    .reduce<T | null>((best, menu) => (!best || menu.updated > best.updated ? menu : best), null);
+  menusFor(menus, direction).reduce<T | null>(
+    (best, menu) => (!best || menu.updated > best.updated ? menu : best),
+    null,
+  );

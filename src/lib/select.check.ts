@@ -4,7 +4,7 @@
  * Запуск: `pnpm test` (Node читает TypeScript сам).
  */
 import assert from 'node:assert/strict';
-import { currentAfisha, groupByPlace, isLive, livePromos, menuFor } from './select.ts';
+import { currentAfisha, groupByPlace, isLive, livePromos, menuFor, menusFor } from './select.ts';
 
 const TODAY = '2026-09-03';
 
@@ -79,5 +79,11 @@ const menus = [
 assert.equal(menuFor(menus, 1)?.id, 2);
 assert.equal(menuFor(menus, 2)?.id, 4);
 assert.equal(menuFor(menus, 3), null);
+// все опубликованные меню направления в порядке админки, черновик не в счёт
+assert.deepEqual(
+  menusFor(menus, 1).map((menu) => menu.id),
+  [1, 2],
+);
+assert.deepEqual(menusFor(menus, 3), []);
 
 console.log('выборки афиши, акций и меню — все проверки прошли');
