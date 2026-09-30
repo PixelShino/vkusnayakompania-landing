@@ -9,8 +9,46 @@
 //
 // Run / Запуск: pnpm files (шаг prebuild)
 import fs from 'node:fs/promises';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { loadEnv } from './env.mjs';
 import { QUERIES, docTarget } from './queries.mjs';
+
+const run = promisify(execFile);
+
+// A print-ready PDF (bleeds, 300 dpi photos) weighs 10–20 MB; on a phone that
+// is half a minute. Ghostscript resamples images to 200 dpi and re-encodes them
+// as JPEG 85: the text stays vector and sharp, the size drops 10–20×. Without
+// `gs` on the machine the file is served as uploaded.
+// Печатный PDF (вылеты, фото 300 dpi) весит 10–20 МБ, на телефоне это
+// полминуты. Ghostscript пересчитывает картинки в 200 dpi и пережимает их в
+// JPEG 85: текст остаётся векторным и резким, вес падает в 10–20 раз. Без `gs`
+// на машине файл отдаётся как загружен.
+const PDF_KEEP_UNDER = 1_500_000;
+const shrinkPdf = async (path) => {
+  const { size } = await fs.stat(path);
+  if (size <= PDF_KEEP_UNDER) return null;
+  const tmp = `${path}.tmp`;
+  try {
+    await run('gs', [
+      '-q', '-dNOPAUSE', '-dBATCH', '-dSAFER', '-sDEVICE=pdfwrite', '-dCompatibilityLevel=1.5',
+      '-dPDFSETTINGS=/ebook', '-dColorImageResolution=200', '-dGrayImageResolution=200',
+      '-dMonoImageResolution=300', '-dJPEGQ=85', '-dDetectDuplicateImages=true',
+      `-sOutputFile=${tmp}`, path,
+    ]);
+  } catch (error) {
+    await fs.rm(tmp, { force: true });
+    if (error.code === 'ENOENT') return 'нет ghostscript, файл как есть';
+    throw new Error(`ghostscript: ${error.stderr || error.message}`);
+  }
+  const shrunk = (await fs.stat(tmp)).size;
+  if (shrunk >= size) {
+    await fs.rm(tmp);
+    return null;
+  }
+  await fs.rename(tmp, path);
+  return `${Math.round(size / 1024)} → ${Math.round(shrunk / 1024)} КБ`;
+};
 
 loadEnv();
 const BASE = process.env.DIRECTUS_URL;
@@ -48,6 +86,10 @@ for (const file of files) {
     const r = await fetch(`${BASE}${asset}`, { headers: { Authorization: `Bearer ${TOKEN}` } });
     if (!r.ok) throw new Error(`asset ${name} (${file.title ?? file.id}) → ${r.status}`);
     await fs.writeFile(dest, Buffer.from(await r.arrayBuffer()));
+    if (name.endsWith('.pdf')) {
+      const note = await shrinkPdf(dest);
+      if (note) console.log(`files: ${file.title ?? name} — ${note}`);
+    }
   } else {
     await fs.copyFile(`${FIXTURE_FILES}/${name}`, dest).catch(() => {
       throw new Error(`нет файла ${FIXTURE_FILES}/${name} — запусти pnpm fixture`);
