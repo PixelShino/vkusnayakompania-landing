@@ -3,4 +3,6 @@
 .env
 data/
 uploads/
-extensions/
+# extensions Directus installs itself; ours live in the repo / расширения, которые ставит сам Directus; наши — в репо
+extensions/*
+!extensions/optimize-upload/
