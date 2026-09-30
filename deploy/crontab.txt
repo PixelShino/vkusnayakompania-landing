@@ -4,3 +4,5 @@
 10 0 * * * /srv/vkus/site/deploy/build.sh >> /srv/vkus/build.log 2>&1
 # 03:30 — database and uploads backup / бэкап базы и загрузок
 30 3 * * * /srv/vkus/site/deploy/backup.sh >> /srv/vkus/backup.log 2>&1
+# every 2 min — watchdog: rebuild if a change slipped past the Flow / сторож: пересборка, если правка прошла мимо Flow
+*/2 * * * * /srv/vkus/site/deploy/watch.sh >> /srv/vkus/watch.log 2>&1

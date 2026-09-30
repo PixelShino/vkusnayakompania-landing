@@ -5153,6 +5153,18 @@ fields:
           rule:
             status:
               _eq: error
+        - name: Есть правки
+          options:
+            color: warning
+            icon: sync_problem
+            text: >-
+              На сайте нет части правок: сборка после них не запустилась. Сторож
+              запустит её сам в ближайшие две минуты — перезагрузите страницу
+              чуть позже. Если статус держится дольше пяти минут — напишите
+              разработчику.
+          rule:
+            status:
+              _eq: stale
       display: null
       display_options: null
       field: hint
@@ -5195,6 +5207,10 @@ fields:
             foreground: '#FFFFFF'
             text: Опубликовано
             value: ok
+          - background: '#E6A23C'
+            foreground: '#FFFFFF'
+            text: Есть правки, которых нет на сайте
+            value: stale
           - background: '#E35169'
             foreground: '#FFFFFF'
             text: Ошибка сборки
@@ -5210,6 +5226,8 @@ fields:
             value: building
           - text: Опубликовано
             value: ok
+          - text: Есть правки, которых нет на сайте
+            value: stale
           - text: Ошибка сборки
             value: error
       readonly: true
@@ -5263,7 +5281,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 4
+      sort: 5
       special: null
       translations:
         - language: ru-RU
@@ -5305,7 +5323,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 2
+      sort: 3
       special: null
       translations:
         - language: ru-RU
@@ -5353,7 +5371,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 3
+      sort: 4
       special: null
       translations:
         - language: ru-RU
@@ -5395,7 +5413,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 5
+      sort: 6
       special: null
       translations:
         - language: ru-RU
@@ -5445,7 +5463,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 6
+      sort: 7
       special: null
       translations:
         - language: ru-RU
@@ -5455,6 +5473,49 @@ fields:
       width: full
     schema:
       name: message
+      table: site_build
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: site_build
+    field: summary
+    type: text
+    meta:
+      collection: site_build
+      conditions: null
+      display: null
+      display_options: null
+      field: summary
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: Что сейчас на сайте и чего ещё нет. Заполняет сборщик.
+      options:
+        trim: true
+      readonly: true
+      required: false
+      searchable: true
+      sort: 2
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Что на сайте
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: summary
       table: site_build
       data_type: text
       default_value: null

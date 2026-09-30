@@ -24,7 +24,25 @@ Astro в новый релиз и переключает симлинк. Упа�
 Ход сборки виден в самой админке, раздел «Публикация сайта»: «Идёт сборка»,
 «Опубликовано» со временем и длительностью или «Ошибка сборки» с последними
 строками лога. Туда пишет `build.sh` токеном сборщика; при сборке без Directus
-(на фикстуре) отчёт пропускается, а сбой отчёта сборку не роняет.
+(на фикстуре) отчёт пропускается, а сбой отчёта сборку не роняет. Поле «Что на
+сайте» отвечает на главный вопрос редактора: «На сайте всё, что сохранено до
+16:51» — своё «Сохранить» позже этого времени значит, что правка ещё едет; там
+же «Осталось заменить заглушки: торты — 1, меню — 2» (`scripts/site-report.mjs`).
+
+Сторож `deploy/watch.sh` (крон раз в 2 минуты) сверяет журнал действий с
+началом последней сборки: правка старше минуты, после которой сборка не
+запустилась, — статус «Есть правки, которых нет на сайте» и пересборка.
+Flow подписан и на `items.sort`: перетаскивание порядка тортов и акций
+собирает сайт сразу, а не ночью.
+
+Загрузки ужимаются на входе: расширение `directus/extensions/optimize-upload`
+после каждой загрузки картинки переписывает файл под тем же id — не больше
+2560 px по длинной стороне, JPEG (из JPEG/TIFF/AVIF) или WebP (из PNG,
+прозрачность сохраняется), качество 85. PNG-скриншот на 2 МБ становится
+120 КБ, печатное меню на 7 МБ — 400 КБ; заголовок, alt и связи не меняются.
+GIF, SVG и HEIC не трогаются. PDF сжимает сборка: `fetch-files` прогоняет
+документы тяжелее 1,5 МБ через Ghostscript (картинки 200 dpi, JPEG 85) —
+печатное меню на 22 МБ уходит на сайт весом 1 МБ.
 
 ## Установка на VPS
 
@@ -96,6 +114,10 @@ docker compose cp snapshot.yaml directus:/directus/snapshot.yaml
 docker compose exec -T directus node /directus/cli.js schema apply --yes /directus/snapshot.yaml
 # … INFO: Snapshot applied successfully
 ```
+
+Расширения из `directus/extensions/` контейнер читает с диска; после `git pull`
+с новым или изменённым расширением — `docker compose restart directus`
+(в логе `Loaded extensions: directus-extension-optimize-upload`).
 
 Снапшот схемы лежит в репо (`directus/snapshot.yaml`), контейнер его не видит,
 поэтому файл сначала копируется внутрь. CLI зовётся через `node /directus/cli.js`:
@@ -212,10 +234,11 @@ systemctl daemon-reload && systemctl enable --now webhook
 curl -s -X POST -H 'X-Hook-Secret: <секрет>' http://127.0.0.1:9000/hooks/rebuild   # принято, сборка запущена
 ```
 
-### 7. Крон
+### 7. Крон и Ghostscript
 
 ```bash
-crontab -u deploy /srv/vkus/site/deploy/crontab.txt
+crontab -u deploy /srv/vkus/site/deploy/crontab.txt   # ночная сборка, бэкап, сторож
+apt install -y ghostscript                             # сжатие PDF на сборке
 ```
 
 ### 8. Выкладка кода из GitHub
@@ -243,6 +266,10 @@ command="cd /srv/vkus/site && git pull --ff-only && deploy/build.sh",restrict ss
 ## Эксплуатация
 
 - **Статус сборки**: в админке «Публикация сайта»; при ошибке там же хвост лога.
+  «Есть правки, которых нет на сайте» дольше пяти минут — смотреть
+  `/srv/vkus/watch.log` и `journalctl -u webhook`.
+- **Сжатие загрузок**: строки `optimize-upload:` в логе Directus; «не сжат» —
+  файл оставлен как загружен, сайт всё равно пережмёт его на сборке.
 - **Логи**: `docker compose -f /srv/vkus/site/directus/docker-compose.yml logs -f directus`;
   ночные сборки — `/srv/vkus/build.log`; сборки после сохранения — `journalctl -u webhook`.
 - **Пересобрать руками**: `sudo -u deploy /srv/vkus/site/deploy/build.sh`.

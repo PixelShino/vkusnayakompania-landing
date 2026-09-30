@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Builds the site into a new release and switches the `current` symlink atomically.
-# Called by the webhook receiver, the nightly cron and GitHub Actions.
+# Called by the webhook receiver, the nightly cron, the watchdog and GitHub Actions.
 # Собирает сайт в новый релиз и атомарно переключает симлинк `current`.
-# Запускают приёмник вебхука, ночной крон и GitHub Actions.
+# Запускают приёмник вебхука, ночной крон, сторож и GitHub Actions.
 set -Eeuo pipefail
 
 ROOT=/srv/vkus
@@ -15,14 +15,8 @@ AGAIN=/tmp/vkus-build.again
 LOG=$(mktemp)
 trap 'rm -f "$LOG"' EXIT
 
-# a change during a running build is not lost: the loop below runs once more
-# изменение во время сборки не теряется: цикл ниже соберёт ещё раз
-touch "$AGAIN"
-exec 9>"$LOCK"
-if ! flock -n 9; then
-  echo "сборка уже идёт, повторю после неё"
-  exit 0
-fi
+cd "$REPO"
+set -a; . "$REPO/.env"; set +a
 
 # build status for editors, «Публикация сайта» in the admin; a failed report
 # never fails the build, and without Directus (fixture builds) it is skipped
@@ -44,6 +38,7 @@ status() {
     }).then((r) => r.ok || console.error(`статус сборки не записан: ${r.status}`), (e) => console.error(`статус сборки не записан: ${e.message}`));
   ' "$@" || true
 }
+
 # the tail editors see: without Astro's revalidation warnings (they are noise
 # from the 304 proxy and would push the real error out) and with the builder
 # token masked — the message field is readable by the editor role
@@ -53,14 +48,29 @@ status() {
 tail_for_editors() {
   grep -v 'revalidating a cached remote asset' "$LOG" | tail -n 40 | sed -E 's/access_token=[^ &"]+/access_token=***/g'
 }
-trap 'status status=error finished_at="$(date -Iseconds)" message="$(tail_for_editors)"' ERR
+
+# the moment before content is read: everything saved earlier is in this build
+# момент до чтения контента: всё, что сохранили раньше, попадает в эту сборку
+SINCE=$(date +%H:%M)
+
+# a change during a running build is not lost: the loop below runs once more
+# изменение во время сборки не теряется: цикл ниже соберёт ещё раз
+touch "$AGAIN"
+exec 9>"$LOCK"
+if ! flock -n 9; then
+  echo "сборка уже идёт, повторю после неё"
+  status summary="Идёт сборка. Правки, сохранённые после её начала, соберутся сразу следом — перезагрузите страницу через минуту."
+  exit 0
+fi
+
+trap 'status status=error finished_at="$(date -Iseconds)" summary="Сборка не удалась, на сайте осталась прежняя версия. Правки после $SINCE не опубликованы." message="$(tail_for_editors)"' ERR
 
 build() {
-  cd "$REPO"
-  set -a; . "$REPO/.env"; set +a
-  local started stamp
+  local started stamp report
   started=$(date +%s)
-  status status=building started_at="$(date -Iseconds)" finished_at= seconds= message=
+  SINCE=$(date +%H:%M)
+  status status=building started_at="$(date -Iseconds)" finished_at= seconds= message= \
+    summary="Собираю правки, сохранённые до $SINCE. Обычно 10–30 секунд, с новыми фото — до минуты."
   : >"$LOG"
   pnpm install --frozen-lockfile --prefer-offline 2>&1 | tee -a "$LOG"
   pnpm build 2>&1 | tee -a "$LOG"
@@ -70,7 +80,11 @@ build() {
   ln -sfn "$RELEASES/$stamp" "$ROOT/current.tmp" && mv -T "$ROOT/current.tmp" "$ROOT/current"
   # keep the last five releases / оставляем пять последних релизов
   ls -1dt "$RELEASES"/* | tail -n +6 | xargs -r rm -rf
-  status status=ok finished_at="$(date -Iseconds)" seconds=$(($(date +%s) - started)) release="$stamp"
+  # what is still a placeholder on the published site; a failed report is not an error
+  # что на опубликованном сайте ещё стоит заглушкой; сбой отчёта — не ошибка
+  report=$(node scripts/site-report.mjs 2>>"$LOG" || true)
+  status status=ok finished_at="$(date -Iseconds)" seconds=$(($(date +%s) - started)) release="$stamp" \
+    summary="На сайте всё, что сохранено до $SINCE. Сборка заняла $(($(date +%s) - started)) с.${report:+ $report}"
   echo "релиз $stamp"
 }
 

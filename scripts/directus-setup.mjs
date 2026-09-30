@@ -76,7 +76,9 @@ if (!bpolicy) {
   console.log('+ policy Сборщик');
 }
 const bexisting = await api('GET', `/permissions?filter[policy][_eq]=${bpolicy.id}&limit=-1`);
-const bperms = [...CONTENT, ...SINGLE, 'directus_files']
+// the watchdog reads the activity log to see whether a change missed a build
+// сторож читает журнал действий, чтобы понять, не прошла ли правка мимо сборки
+const bperms = [...CONTENT, ...SINGLE, 'directus_files', 'directus_activity']
   .filter((c) => !bexisting.some((p) => p.collection === c))
   .map((c) => ({ policy: bpolicy.id, collection: c, action: 'read', fields: ['*'] }));
 // PATCH on an empty singleton creates the row, hence `create`
@@ -106,7 +108,16 @@ if (!builder) {
 
 // 4. flow «Пересборка сайта»: any content change → POST to the rebuild hook
 //    Flow: любое изменение контента → POST на вебхук пересборки
+// items.sort: a reorder by drag-and-drop is not an update, without it the new
+// order waited for the nightly build
+// items.sort: перетаскивание порядка — не update, без него новый порядок ждал
+// ночной сборки
+const FLOW_SCOPE = ['items.create', 'items.update', 'items.delete', 'items.sort'];
 let flow = await findOne('/flows', { name: { _eq: 'Пересборка сайта' } });
+if (flow && FLOW_SCOPE.some((event) => !flow.options?.scope?.includes(event))) {
+  await api('PATCH', `/flows/${flow.id}`, { options: { ...flow.options, scope: FLOW_SCOPE } });
+  console.log('= flow Пересборка сайта: scope дополнен');
+}
 if (!flow) {
   flow = await api('POST', '/flows', {
     name: 'Пересборка сайта', icon: 'published_with_changes', color: '#6F7546', status: 'active',
@@ -114,7 +125,7 @@ if (!flow) {
     trigger: 'event', accountability: 'all',
     options: {
       type: 'action',
-      scope: ['items.create', 'items.update', 'items.delete'],
+      scope: FLOW_SCOPE,
       collections: [...CONTENT, ...SINGLE, 'directus_files'],
     },
   });
