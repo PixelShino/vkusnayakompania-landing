@@ -14,7 +14,7 @@
  * идут до края окна; внутренний отступ выравнивает содержимое по контейнеру
  * страницы. Направление без меню сохраняет свою строку.
  */
-import { menuFor, menusFor } from '../lib/select';
+import { menusFor } from '../lib/select';
 import Icon from './Icon.astro';
 import { typo, type Content, type Direction } from '../lib/content';
 
@@ -27,23 +27,17 @@ const { settings, home, directions, menus } = content;
 
 const KEYS: Direction['key'][] = ['cafe', 'restaurant', 'confectionery'];
 
-// dates come as YYYY-MM-DD; UTC keeps the day from sliding on a western builder
-// даты приходят как YYYY-MM-DD; UTC не даёт дню съехать на сборке западнее
-const day = (date: string) =>
-  new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', timeZone: 'UTC' }).format(
-    new Date(`${date}T00:00:00Z`),
-  );
-
-// a direction may carry several menus (food and bar): the freshest one drives
-// the tag, every one gets its link
-// у направления может быть несколько меню (основное и барное): ярлык — по самому
-// свежему, ссылка — у каждого
+// A direction may carry several menus (food and bar): every real one gets its
+// link. A placeholder file is not linked at all — the sheet behind it is blank,
+// and service marks («образец», «обновлено …») belong in the admin, not here.
+// У направления может быть несколько меню (основное и барное): ссылка у каждого
+// настоящего. Файл-заглушка не линкуется вовсе — за ним пустой лист, а служебные
+// пометки («образец», «обновлено …») место в админке, не на странице.
 const cards = KEYS.map((key) => directions.find((item) => item.key === key))
   .filter((direction) => direction !== undefined)
   .map((direction) => ({
     direction,
-    list: menusFor(menus, direction.id),
-    menu: menuFor(menus, direction.id),
+    list: menusFor(menus, direction.id).filter((menu) => !menu.file.placeholder),
   }));
 
 // one menu: the link says what opens; several: each link is named after its menu
@@ -68,7 +62,7 @@ const label = (menu: (typeof menus)[number], alone: boolean) =>
   <div class="mn__sheet">
     <ul class="mn__list" data-reveal>
       {
-        cards.map(({ direction, list, menu }) => (
+        cards.map(({ direction, list }) => (
           <li class="mn__row">
             <div class="mn__name">
               <h3 class="mn__title display">{direction.title}</h3>
@@ -76,13 +70,7 @@ const label = (menu: (typeof menus)[number], alone: boolean) =>
             </div>
 
             <div class="mn__side-col">
-              <span class="tag mn__tag">
-                {/* дата у файла-заглушки соврала бы: под кнопкой пустой лист
-                    a date on a stub file would lie: the sheet under the link is blank */}
-                {!menu ? 'скоро' : menu.file.placeholder ? 'образец' : `обновлено ${day(menu.updated)}`}
-              </span>
-
-              {menu ? (
+              {list.length ? (
                 <div class="mn__acts">
                   {list.map((item) => (
                     <a
@@ -211,20 +199,11 @@ const label = (menu: (typeof menus)[number], alone: boolean) =>
     gap: 16px;
   }
 
-  /* the date is one token: «обновлено 30 сентября» broken over two lines read
-     as two tags next to a column of links
-     дата — одно целое: «обновлено 30 сентября» в две строки читалось как два
-     ярлыка рядом со столбиком ссылок */
-  .mn__tag {
-    white-space: nowrap;
-  }
-
   /* several menus of one venue stand in a row and wrap on a narrow screen
      несколько меню одной точки стоят в ряд и переносятся на узком экране */
   .mn__acts {
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-end;
     gap: 6px 18px;
   }
 
@@ -285,7 +264,8 @@ const label = (menu: (typeof menus)[number], alone: boolean) =>
       font-size: 24px;
     }
 
-    .mn__side-col {
+    .mn__side-col,
+    .mn__acts {
       justify-content: flex-end;
       gap: 22px;
     }
