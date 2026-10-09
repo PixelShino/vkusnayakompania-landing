@@ -73,7 +73,11 @@ build() {
     summary="Собираю правки, сохранённые до $SINCE. Обычно 10–30 секунд, с новыми фото — до минуты."
   : >"$LOG"
   pnpm install --frozen-lockfile --prefer-offline 2>&1 | tee -a "$LOG"
-  pnpm build 2>&1 | tee -a "$LOG"
+  # Astro prints the full image URL, token included, in its revalidation warnings:
+  # mask it before it reaches build.log / watch.log
+  # Astro печатает в предупреждениях о ревалидации полный адрес картинки вместе с
+  # токеном: маскируем до того, как он попадёт в build.log / watch.log
+  pnpm build 2>&1 | sed -uE 's/access_token=[^ &"]+/access_token=***/g' | tee -a "$LOG"
   stamp=$(date +%Y%m%d-%H%M%S)
   mkdir -p "$RELEASES"
   cp -r dist "$RELEASES/$stamp"
