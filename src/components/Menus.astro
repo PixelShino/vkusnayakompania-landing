@@ -2,17 +2,18 @@
 /**
  * Menus as a split spread (Ballena): the left half is an olive panel with the
  * head pressed to its top-left corner and the shop stamp at its foot, the
- * right half a paper panel that carries the three menus as a printed carte —
- * name in the display face, the kind beside it, the honesty tag and the PDF
- * as an underlined text link. Both halves bleed to the viewport edge; their
- * inner padding lines the content up with the page container. A direction
- * without a published menu keeps its line.
+ * right half a paper panel that carries the menus as a printed carte — name in
+ * the display face, the kind beside it and the PDF as an underlined text link.
+ * Both halves bleed to the viewport edge; their inner padding lines the content
+ * up with the page container. The cafe, the restaurant and the confectionery
+ * keep their lines without a menu; banquets join only with a real one.
  * Меню разворотом из двух половин (Ballena): слева оливковая панель с
  * заголовком, прижатым к верхнему левому углу, и оттиском магазина у низа,
- * справа бумажная панель с тремя меню печатной картой — название антиквой,
- * рядом тип, честный ярлык и PDF подчёркнутой текстовой ссылкой. Обе половины
- * идут до края окна; внутренний отступ выравнивает содержимое по контейнеру
- * страницы. Направление без меню сохраняет свою строку.
+ * справа бумажная панель с меню печатной картой — название антиквой, рядом
+ * тип и PDF подчёркнутой текстовой ссылкой. Обе половины идут до края окна;
+ * внутренний отступ выравнивает содержимое по контейнеру страницы. Кафе,
+ * ресторан и кондитерская держат строку и без меню; банкеты появляются только
+ * с настоящим.
  */
 import { menusFor } from '../lib/select';
 import Icon from './Icon.astro';
@@ -25,7 +26,25 @@ interface Props {
 const { content } = Astro.props;
 const { settings, home, directions, menus } = content;
 
-const KEYS: Direction['key'][] = ['cafe', 'restaurant', 'confectionery'];
+const KEYS: Direction['key'][] = ['cafe', 'restaurant', 'confectionery', 'banquets'];
+
+// Banquets are a service, not a place on the map: «Меню скоро появится» under
+// them would promise a carte nobody plans, so their line shows only with a file.
+// Банкеты — услуга, а не точка на карте: «Меню скоро появится» под ними обещало
+// бы карту, которую никто не готовит, поэтому строка есть только с файлом.
+const OPTIONAL = new Set<Direction['key']>(['banquets']);
+
+// The kind under the name: a direction listed here takes its line from the
+// map, a venue from its place. The confectionery's line used to be the fallback
+// for every direction without a place, so banquets would have read «Пирожные,
+// торты, конфеты».
+// Тип под названием: направление из этой карты берёт строку отсюда, точка — из
+// своего адреса. Строка кондитерской раньше была запасной для любого
+// направления без адреса, и у банкетов стояло бы «Пирожные, торты, конфеты».
+const KIND: Partial<Record<Direction['key'], string>> = {
+  confectionery: 'Пирожные, торты, конфеты',
+  banquets: 'Залы обеих точек и выезд',
+};
 
 // A direction may carry several menus (food and bar): every real one gets its
 // link. A placeholder file is not linked at all — the sheet behind it is blank,
@@ -37,8 +56,10 @@ const cards = KEYS.map((key) => directions.find((item) => item.key === key))
   .filter((direction) => direction !== undefined)
   .map((direction) => ({
     direction,
+    kind: KIND[direction.key] ?? direction.place?.kind,
     list: menusFor(menus, direction.id).filter((menu) => !menu.file.placeholder),
-  }));
+  }))
+  .filter(({ direction, list }) => list.length > 0 || !OPTIONAL.has(direction.key));
 
 // one menu: the link says what opens; several: each link is named after its menu
 // одно меню: ссылка говорит, что откроется; несколько: каждая названа по меню
@@ -62,11 +83,11 @@ const label = (menu: (typeof menus)[number], alone: boolean) =>
   <div class="mn__sheet">
     <ul class="mn__list" data-reveal>
       {
-        cards.map(({ direction, list }) => (
+        cards.map(({ direction, kind, list }) => (
           <li class="mn__row">
             <div class="mn__name">
               <h3 class="mn__title display">{direction.title}</h3>
-              <span class="mn__kind">{direction.place?.kind ?? 'Пирожные, торты, конфеты'}</span>
+              {kind && <span class="mn__kind">{kind}</span>}
             </div>
 
             <div class="mn__side-col">

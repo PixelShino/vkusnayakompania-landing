@@ -35,7 +35,20 @@ type Action = {
 
 const at = (key: Direction['key']) => directions.find((item) => item.key === key);
 
-const menuHref = (direction: Direction) => menuFor(menus, direction.id)?.file.href ?? null;
+// Only a real file earns a link: behind a placeholder lies a blank 600-byte
+// sheet, and «Меню» leading there is a dead end. The freshest real menu wins,
+// so a stub uploaded later does not hide the real one under it.
+// Ссылку получает только настоящий файл: за заглушкой пустой лист на 600 байт,
+// и «Меню» туда — тупик. Берётся самое свежее настоящее меню, чтобы заглушка,
+// загруженная позже, не прятала настоящее под собой.
+const realMenus = menus.filter((menu) => !menu.file.placeholder);
+const menuHref = (direction: Direction) => menuFor(realMenus, direction.id)?.file.href ?? null;
+
+/** Ссылка на меню первым действием услуги; без настоящего файла — ничего. */
+const menuAction = (direction: Direction, label: string): Action[] => {
+  const href = menuHref(direction);
+  return href ? [{ label, href, external: true }] : [];
+};
 
 // Keep 1–2 sentences: the section carried 167 words and read as a wall.
 // Nothing is rewritten — only the tail of the admin text is dropped.
@@ -89,7 +102,7 @@ const SERVICES: { key: Direction['key']; icon: string; phone?: boolean; actions:
     icon: cake,
     phone: true,
     actions: (direction) => [
-      ...(menuHref(direction) ? [{ label: 'Меню', href: menuHref(direction)!, external: true }] : []),
+      ...menuAction(direction, 'Меню'),
       { label: 'В приложении', href: settings.shop_url, external: true },
     ],
   },
@@ -102,7 +115,10 @@ const SERVICES: { key: Direction['key']; icon: string; phone?: boolean; actions:
   {
     key: 'banquets',
     icon: glasses,
-    actions: () => [
+    // the banquet menu goes first: a guest weighs the dishes before the talk
+    // банкетное меню первым: гость смотрит блюда до разговора о дате
+    actions: (direction) => [
+      ...menuAction(direction, 'Банкетное меню'),
       { label: 'Обсудить банкет', book: 'Банкет', note: 'Скажите дату, число гостей и повод' },
     ],
   },
