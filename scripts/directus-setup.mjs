@@ -76,7 +76,7 @@ const dirMissing = dirUpdate?.fields?.includes('*')
   ? []
   : DIRECTION_FIELDS.filter((f) => !dirUpdate?.fields?.includes(f));
 if (dirUpdate && dirMissing.length) {
-  await api('PATCH', `/permissions/${dirUpdate.id}`, { fields: [...dirUpdate.fields, ...dirMissing] });
+  await api('PATCH', `/permissions/${dirUpdate.id}`, { fields: [...(dirUpdate.fields ?? []), ...dirMissing] });
   console.log(`= permissions Редактор: directions update + ${dirMissing.join(', ')}`);
 }
 

@@ -38,7 +38,9 @@ const frame = (owner: string, shot: Shot) => {
   const stub = shot.image.placeholder;
   return {
     photo: shot.image,
-    title: shot.caption || owner,
+    // a stub without a caption says «Фото», not the owner twice over
+    // заглушка без подписи говорит «Фото», а не владельца дважды
+    title: shot.caption || (stub ? 'Фото' : owner),
     // на плашке предмет кадра уже стоит крупно: под ней остаётся один владелец
     // the plaque already carries the subject: only the owner stays below it
     caption: stub ? owner : [owner, shot.caption].filter(Boolean).join(' · '),

@@ -11,7 +11,7 @@
  */
 import Photo from './Photo.astro';
 import OpenStatus from './OpenStatus.astro';
-import { menuFor } from '../lib/select';
+import { menusFor } from '../lib/select';
 import { typo, type Content, type Direction } from '../lib/content';
 import cake from '../assets/icons/cake.svg?raw';
 import cloche from '../assets/icons/cloche.svg?raw';
@@ -39,10 +39,11 @@ const at = (key: Direction['key']) => directions.find((item) => item.key === key
 // sheet, and «Меню» leading there is a dead end. The freshest real menu wins,
 // so a stub uploaded later does not hide the real one under it.
 // Ссылку получает только настоящий файл: за заглушкой пустой лист на 600 байт,
-// и «Меню» туда — тупик. Берётся самое свежее настоящее меню, чтобы заглушка,
-// загруженная позже, не прятала настоящее под собой.
+// и «Меню» туда — тупик. Берётся первое настоящее меню в порядке админки — то
+// же, что стоит первым в разделе «Меню», а не самое свежее по дате.
 const realMenus = menus.filter((menu) => !menu.file.placeholder);
-const menuHref = (direction: Direction) => menuFor(realMenus, direction.id)?.file.href ?? null;
+const menuHref = (direction: Direction) =>
+  menusFor(realMenus, direction.id)[0]?.file.href ?? null;
 
 /** Ссылка на меню первым действием услуги; без настоящего файла — ничего. */
 const menuAction = (direction: Direction, label: string): Action[] => {

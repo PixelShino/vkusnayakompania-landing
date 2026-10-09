@@ -289,11 +289,17 @@ command="cd /srv/vkus/site && git pull --ff-only && deploy/build.sh",restrict ss
   и распаковать `uploads-<дата>.tar.gz` в `directus/`.
 - **Схема поменялась** (новое поле): изменить в локальном Directus, выгрузить
   `GET /schema/snapshot?export=yaml` в `directus/snapshot.yaml`, закоммитить,
-  на сервере `schema apply` из шага 3. CLI работает отдельным процессом, а
-  кеш схемы у запущенного Directus в памяти: до `docker compose restart directus`
-  новая коллекция для API «не существует» (`FORBIDDEN`). Новой коллекции
-  нужны права и место в Flow — после рестарта `pnpm setup` (дописывает только
-  недостающее).
+  на сервере — строго в таком порядке:
+  1. `schema apply` из шага 3;
+  2. сбросить кеш схемы: `curl -X POST -H "Authorization: Bearer <admin>" \
+     http://127.0.0.1:8055/utils/cache/clear?system` или
+     `docker compose restart directus`. CLI работает отдельным процессом, а
+     кеш схемы у запущенного Directus в памяти: до сброса новая коллекция для
+     API «не существует» (`FORBIDDEN`);
+  3. `node scripts/directus-setup.mjs` (`pnpm setup`) — права редактора и
+     сборщика на новую коллекцию, её место в Flow; дописывает только недостающее;
+  4. `sudo -u deploy deploy/build.sh` — иначе сайт соберётся только по
+     следующей правке или по сторожу.
 - **Токены**: сборщика — в `/srv/vkus/site/.env` и в переменных Vercel;
   секрет вебхука — в `/etc/default/webhook` и в Flow «Пересборка сайта».
   Отозвать токен сборщика: «Пользователи → Сборщик сайта → Token».

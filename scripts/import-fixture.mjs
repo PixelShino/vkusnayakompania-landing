@@ -71,9 +71,17 @@ console.log(`= точки: ${placeIds.size}`);
 
 const dirIds = new Map();
 for (const d of fixture.directions) {
+  const { gallery, ...rest } = strip(d);
   const found = await exists('directions', 'key', d.key);
-  const id = found ? found.id : (await api('POST', '/items/directions', { ...strip(d), photo: await file(d.photo), place: d.place ? placeIds.get(d.place) : null })).id;
+  const id = found ? found.id : (await api('POST', '/items/directions', { ...rest, photo: await file(d.photo), place: d.place ? placeIds.get(d.place) : null })).id;
   dirIds.set(d.id, id);
+  // the gallery goes with a new direction only, as with places: an existing one keeps the editors' photos
+  // галерея — только вместе с новым направлением, как у точек: у существующего остаются фото редакторов
+  if (!found) {
+    for (const g of gallery ?? []) {
+      await api('POST', '/items/directions_files', { directions_id: id, directus_files_id: await file(g.directus_files_id), sort: g.sort, caption: g.caption });
+    }
+  }
 }
 console.log(`= направления: ${dirIds.size}`);
 

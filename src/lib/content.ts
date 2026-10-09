@@ -240,7 +240,7 @@ type RawHome = Omit<Home, 'hero_image' | 'og_image' | 'app_screenshot'> & {
   app_screenshot?: RawFile;
 };
 /** Строка связки `places_files` / `directions_files`: файл с порядком и подписью. */
-type RawShot = { sort?: number; caption?: string; directus_files_id: RawFile };
+type RawShot = { sort?: number; caption?: string; directus_files_id: RawFile | null };
 type RawPlace = Omit<Place, 'n' | 'schedule' | 'gallery' | 'phone' | 'phoneHref'> & {
   phone?: string | null;
   hours: HoursRow[];
@@ -337,11 +337,17 @@ export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraTo
   const img = (file: RawFile | null | undefined) => toImg(file, resolveImage);
   // one rule for venue and direction galleries; `where` names the record in the error
   // одно правило для галерей точек и направлений; `where` называет запись в ошибке
+  // a row whose file was deleted in the library keeps `directus_files_id: null`:
+  // it is skipped, not fatal — one removed photo must not take the site down
+  // строка, чей файл удалили из библиотеки, остаётся с `directus_files_id: null`:
+  // она пропускается, а не валит сборку — одно удалённое фото не должно класть сайт
   const shots = (rows: RawShot[] | null | undefined, where: string): Shot[] =>
-    (rows ?? []).map((row) => ({
-      image: need(img(row.directus_files_id), `${where}: пустое фото в галерее`),
-      caption: row.caption,
-    }));
+    (rows ?? [])
+      .filter((row) => row.directus_files_id)
+      .map((row) => ({
+        image: need(img(row.directus_files_id), `${where}: пустое фото в галерее`),
+        caption: row.caption,
+      }));
 
   const mainPhone = need(raw.settings.phone, 'settings.phone: не заполнен телефон');
   const places: Place[] = raw.places.map((place, i) => {

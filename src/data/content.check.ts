@@ -99,6 +99,28 @@ const [shot] = normalize(
 assert.equal(shot.caption, 'Бокс', 'directions.gallery: подпись из строки связки');
 assert.equal(shot.image.alt, 'Бокс с закусками', 'directions.gallery: фото из directus_files_id');
 assert.equal(shot.image.placeholder, false, 'directions.gallery: файл без пометки — не заглушка');
+// строка связки без файла (фото удалили из библиотеки) пропускается, а не валит сборку
+assert.deepEqual(
+  normalize(
+    {
+      ...raw,
+      directions: raw.directions.map((direction, i) =>
+        i === catering
+          ? {
+              ...direction,
+              gallery: [
+                { sort: 1, caption: 'Пусто', directus_files_id: null },
+                { sort: 2, caption: 'Бокс', directus_files_id: box },
+              ],
+            }
+          : direction,
+      ),
+    },
+    resolve,
+  ).directions[catering].gallery.map((item) => item.caption),
+  ['Бокс'],
+  'directions.gallery: строка с удалённым файлом пропускается',
+);
 
 // пустой alt подменяется заголовком файла; без заголовка нормализация валится с именем файла
 const hero = raw.home.hero_image;
