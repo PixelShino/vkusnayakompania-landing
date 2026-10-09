@@ -72,6 +72,34 @@ assert.deepEqual(
   'directions: нужны ровно пять направлений с разными ключами',
 );
 
+// галерея направления: в фикстуре поля нет — пустой массив, кадр — фото с подписью
+for (const direction of content.directions)
+  assert.ok(Array.isArray(direction.gallery), `directions «${direction.title}»: нет массива gallery`);
+assert.deepEqual(
+  normalize(
+    { ...raw, directions: raw.directions.map(({ gallery: _, ...direction }) => direction) },
+    resolve,
+  ).directions.map((direction) => direction.gallery),
+  raw.directions.map(() => []),
+  'directions: без поля gallery — пустая галерея',
+);
+const catering = raw.directions.findIndex((direction) => direction.key === 'catering');
+const box = { ...raw.cakes[0].photo, title: 'Бокс с закусками', alt: 'Бокс с закусками' };
+const [shot] = normalize(
+  {
+    ...raw,
+    directions: raw.directions.map((direction, i) =>
+      i === catering
+        ? { ...direction, gallery: [{ sort: 1, caption: 'Бокс', directus_files_id: box }] }
+        : direction,
+    ),
+  },
+  resolve,
+).directions[catering].gallery;
+assert.equal(shot.caption, 'Бокс', 'directions.gallery: подпись из строки связки');
+assert.equal(shot.image.alt, 'Бокс с закусками', 'directions.gallery: фото из directus_files_id');
+assert.equal(shot.image.placeholder, false, 'directions.gallery: файл без пометки — не заглушка');
+
 // пустой alt подменяется заголовком файла; без заголовка нормализация валится с именем файла
 const hero = raw.home.hero_image;
 assert.equal(

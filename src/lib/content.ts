@@ -132,6 +132,9 @@ export type Home = {
   contacts_note?: string;
 };
 
+/** Кадр галереи: фото и необязательная подпись из строки связки. */
+export type Shot = { image: Img; caption?: string };
+
 export type Place = {
   id: number;
   /** порядковый номер точки строкой — им подписаны метки на карте */
@@ -147,7 +150,7 @@ export type Place = {
   lng: number;
   yandex_org: string;
   rating?: string;
-  gallery: { image: Img; caption?: string }[];
+  gallery: Shot[];
 };
 
 export type Direction = {
@@ -157,6 +160,13 @@ export type Direction = {
   text: string;
   photo?: Img;
   place?: Place;
+  /**
+   * Shots of the direction itself (catering boxes, a banquet table) for the
+   * shared «Фотогалерея»; they follow the venues' shots. Empty when none.
+   * Кадры самого направления (боксы кейтеринга, банкетный стол) для общей
+   * «Фотогалереи»; идут после кадров точек. Пусто, если их нет.
+   */
+  gallery: Shot[];
 };
 
 // Only the title is required: an announcement («новое меню») may have no date,
@@ -229,12 +239,20 @@ type RawHome = Omit<Home, 'hero_image' | 'og_image' | 'app_screenshot'> & {
   og_image?: RawFile;
   app_screenshot?: RawFile;
 };
+/** Строка связки `places_files` / `directions_files`: файл с порядком и подписью. */
+type RawShot = { sort?: number; caption?: string; directus_files_id: RawFile };
 type RawPlace = Omit<Place, 'n' | 'schedule' | 'gallery' | 'phone' | 'phoneHref'> & {
   phone?: string | null;
   hours: HoursRow[];
-  gallery?: { sort?: number; caption?: string; directus_files_id: RawFile }[];
+  gallery?: RawShot[];
 };
-type RawDirection = Omit<Direction, 'photo' | 'place'> & { photo?: RawFile; place?: number };
+// `gallery` is optional: the fixture and a Directus without the field have none
+// `gallery` необязательна: в фикстуре и в Directus без этого поля её нет
+type RawDirection = Omit<Direction, 'photo' | 'place' | 'gallery'> & {
+  photo?: RawFile;
+  place?: number;
+  gallery?: RawShot[];
+};
 type RawAfisha = Omit<Afisha, 'poster' | 'place'> & Dated & { poster?: RawFile; place?: number };
 type RawPromo = Omit<Promo, 'place'> & Dated & { place?: number; sort?: number };
 type RawMenu = Omit<Menu, 'file'> & { file: RawFile };
@@ -317,6 +335,13 @@ const samaraToday = () =>
 /** Сырой ответ → то, чем пользуются компоненты. Пустое нужное поле валит сборку. */
 export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraToday()): Content => {
   const img = (file: RawFile | null | undefined) => toImg(file, resolveImage);
+  // one rule for venue and direction galleries; `where` names the record in the error
+  // одно правило для галерей точек и направлений; `where` называет запись в ошибке
+  const shots = (rows: RawShot[] | null | undefined, where: string): Shot[] =>
+    (rows ?? []).map((row) => ({
+      image: need(img(row.directus_files_id), `${where}: пустое фото в галерее`),
+      caption: row.caption,
+    }));
 
   const mainPhone = need(raw.settings.phone, 'settings.phone: не заполнен телефон');
   const places: Place[] = raw.places.map((place, i) => {
@@ -329,10 +354,7 @@ export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraTo
       phone,
       phoneHref: telHref(phone),
       schedule: scheduleOf(place),
-      gallery: (place.gallery ?? []).map((row) => ({
-        image: need(img(row.directus_files_id), `places «${place.name}»: пустое фото в галерее`),
-        caption: row.caption,
-      })),
+      gallery: shots(place.gallery, `places «${place.name}»`),
     };
   });
   const byId = new Map(places.map((place) => [place.id, place]));
@@ -364,6 +386,7 @@ export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraTo
       ...direction,
       photo: img(direction.photo),
       place: at(direction.place, `directions «${direction.title}»`),
+      gallery: shots(direction.gallery, `directions «${direction.title}»`),
     })),
     afisha: current && {
       ...current,

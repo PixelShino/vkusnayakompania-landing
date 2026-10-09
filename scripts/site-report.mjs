@@ -40,6 +40,7 @@ const left = [
   ['меню', published(menus).map((m) => m.file).filter(stub).length],
   ['торты', published(cakes).map((c) => c.photo).filter(stub).length],
   ['фото точек', places.flatMap((p) => p.gallery ?? []).map((g) => g.directus_files_id).filter(stub).length],
+  ['фото направлений', directions.flatMap((d) => d.gallery ?? []).map((g) => g.directus_files_id).filter(stub).length],
 ].filter(([, n]) => n > 0);
 
 if (left.length) {

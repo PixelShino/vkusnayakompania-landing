@@ -26,10 +26,15 @@ const findOne = async (path, filter) =>
   (await api('GET', `${path}?filter=${encodeURIComponent(JSON.stringify(filter))}&limit=1`))[0];
 
 // editors manage these freely / редактор правит свободно
-const CONTENT = ['afisha', 'promos', 'menus', 'cakes', 'places_files'];
+const CONTENT = ['afisha', 'promos', 'menus', 'cakes', 'places_files', 'directions_files'];
 // editors may only update these / редактор только меняет, не создаёт и не удаляет
 const SINGLE = ['settings', 'home', 'places', 'directions'];
 const ALL = ['create', 'read', 'update', 'delete'];
+// the direction key drives the card buttons; editors must not change it.
+// `gallery` is the M2M alias: without it the editor sees the photos but cannot add any
+// ключ направления определяет кнопки карточки, редактору его менять нельзя.
+// `gallery` — алиас M2M: без него редактор видит фото, но добавить не может
+const DIRECTION_FIELDS = ['title', 'text', 'photo', 'place', 'sort', 'gallery'];
 
 // 1. policy + role «Редактор»
 let policy = await findOne('/policies', { name: { _eq: 'Редактор' } });
@@ -53,9 +58,7 @@ const add = (collection, action, fields = ['*']) => {
 for (const c of CONTENT) for (const a of ALL) add(c, a);
 for (const c of SINGLE) {
   add(c, 'read');
-  // the direction key drives the card buttons; editors must not change it
-  // ключ направления определяет кнопки карточки, редактору его менять нельзя
-  add(c, 'update', c === 'directions' ? ['title', 'text', 'photo', 'place', 'sort'] : ['*']);
+  add(c, 'update', c === 'directions' ? DIRECTION_FIELDS : ['*']);
 }
 for (const a of ALL) add('directus_files', a);
 for (const a of ['create', 'read', 'update']) add('directus_folders', a);
@@ -65,6 +68,16 @@ add('site_build', 'read');
 if (perms.length) {
   await api('POST', '/permissions', perms);
   console.log(`+ ${perms.length} permissions Редактор`);
+}
+// an older install has the direction update with a shorter field list: widen it
+// в старой инсталляции update направлений с коротким списком полей — дополнить
+const dirUpdate = existing.find((p) => p.collection === 'directions' && p.action === 'update');
+const dirMissing = dirUpdate?.fields?.includes('*')
+  ? []
+  : DIRECTION_FIELDS.filter((f) => !dirUpdate?.fields?.includes(f));
+if (dirUpdate && dirMissing.length) {
+  await api('PATCH', `/permissions/${dirUpdate.id}`, { fields: [...dirUpdate.fields, ...dirMissing] });
+  console.log(`= permissions Редактор: directions update + ${dirMissing.join(', ')}`);
 }
 
 // 3. builder: read-only policy (plus its own build status), role, user with a static token
@@ -113,10 +126,22 @@ if (!builder) {
 // items.sort: перетаскивание порядка — не update, без него новый порядок ждал
 // ночной сборки
 const FLOW_SCOPE = ['items.create', 'items.update', 'items.delete', 'items.sort'];
+const FLOW_COLLECTIONS = [...CONTENT, ...SINGLE, 'directus_files'];
 let flow = await findOne('/flows', { name: { _eq: 'Пересборка сайта' } });
 if (flow && FLOW_SCOPE.some((event) => !flow.options?.scope?.includes(event))) {
-  await api('PATCH', `/flows/${flow.id}`, { options: { ...flow.options, scope: FLOW_SCOPE } });
+  flow.options = { ...flow.options, scope: FLOW_SCOPE };
+  await api('PATCH', `/flows/${flow.id}`, { options: flow.options });
   console.log('= flow Пересборка сайта: scope дополнен');
+}
+// a collection added after the first setup (directions_files) joins the trigger;
+// what was added by hand in the admin stays
+// коллекция, появившаяся после первой настройки (directions_files), входит в
+// триггер; добавленное руками в админке остаётся
+const flowMissing = FLOW_COLLECTIONS.filter((c) => !flow?.options?.collections?.includes(c));
+if (flow && flowMissing.length) {
+  flow.options = { ...flow.options, collections: [...(flow.options.collections ?? []), ...flowMissing] };
+  await api('PATCH', `/flows/${flow.id}`, { options: flow.options });
+  console.log(`= flow Пересборка сайта: collections + ${flowMissing.join(', ')}`);
 }
 if (!flow) {
   flow = await api('POST', '/flows', {
@@ -126,7 +151,7 @@ if (!flow) {
     options: {
       type: 'action',
       scope: FLOW_SCOPE,
-      collections: [...CONTENT, ...SINGLE, 'directus_files'],
+      collections: FLOW_COLLECTIONS,
     },
   });
   const op = await api('POST', '/operations', {

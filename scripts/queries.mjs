@@ -36,11 +36,17 @@ export const docTarget = (file) =>
 const img = (f) => FILE_FIELDS.map((x) => `${f}.${x}`).join(',');
 const q = (fields, extra = '') => `fields=${fields}&limit=-1${extra}`;
 
+// a gallery is a junction row (sort, caption) around a file; `deep` keeps the
+// owner's drag order, otherwise rows come back in insertion order
+// галерея — строка связки (порядок, подпись) вокруг файла; `deep` сохраняет
+// порядок, выставленный перетаскиванием, иначе строки идут в порядке вставки
+const gallery = `gallery.id,gallery.sort,gallery.caption,${img('gallery.directus_files_id')}`;
+
 export const QUERIES = {
   settings: `/items/settings?${q(`*,${img('policy_file')},${img('offer_file')}`)}`,
   home: `/items/home?${q(`*,${img('hero_image')},${img('og_image')},${img('app_screenshot')}`)}`,
-  places: `/items/places?${q(`*,gallery.id,gallery.sort,gallery.caption,${img('gallery.directus_files_id')}`, '&sort=id&deep[gallery][_sort]=sort')}`,
-  directions: `/items/directions?${q(`*,${img('photo')}`, '&sort=sort')}`,
+  places: `/items/places?${q(`*,${gallery}`, '&sort=id&deep[gallery][_sort]=sort')}`,
+  directions: `/items/directions?${q(`*,${img('photo')},${gallery}`, '&sort=sort&deep[gallery][_sort]=sort')}`,
   afisha: `/items/afisha?${q(`*,${img('poster')}`, '&sort=date')}`,
   promos: `/items/promos?${q('*', '&sort=sort')}`,
   menus: `/items/menus?${q(`*,${img('file')}`)}`,

@@ -1,24 +1,26 @@
 ---
 /**
- * Film strip over the photos of every venue: one large frame on the central
+ * Film strip over the photos of every venue, then of the directions (catering
+ * boxes, banquet tables): one large frame on the central
  * axis, the neighbours peek in cropped by the viewport edge (Green Park,
  * Levantine). Cream circle arrows sit on the frames, a progress line below; swipe on
  * touch, drag with the mouse, arrows and keys page by frame. A frame with no
  * photo yet is a hatched plate of the same ratio that says so.
- * Кинолента по фото всех точек: один крупный кадр по центральной оси, соседние
+ * Кинолента по фото всех точек, за ними — фото направлений (боксы кейтеринга,
+ * банкетные столы): один крупный кадр по центральной оси, соседние
  * подглядывают, обрезанные краем окна (Green Park, Levantine). Кремовые круглые
  * стрелки лежат на кадрах, прогресс-линия под лентой; свайп, перетаскивание мышью,
  * стрелки и клавиши листают по кадру. Кадр без фото — штрихованная плашка той
  * же пропорции, которая об этом говорит.
  */
 import Photo from './Photo.astro';
-import type { Content } from '../lib/content.ts';
+import type { Content, Shot } from '../lib/content.ts';
 
 interface Props {
   content: Content;
 }
 
-const { places } = Astro.props.content;
+const { places, directions } = Astro.props.content;
 
 // ширина кадра = ширина центрального слота: 60 % окна с 1200 (до 860 px),
 // 72 % с 768, 86 % на телефоне
@@ -28,21 +30,32 @@ const SIZES = ['(min-width: 1200px) min(860px, 60vw)', '(min-width: 768px) 72vw'
   ', ',
 );
 
-const shots = places.flatMap((place) =>
-  place.gallery.map((shot) => {
-    // заглушку отмечает `[заглушка]` в заголовке файла, не alt: у заменённого
-    // фото alt остаётся прежним / the title marks a stub, a replaced photo keeps its alt
-    const stub = shot.image.placeholder;
-    return {
-      photo: shot.image,
-      title: shot.caption || place.name,
-      // на плашке предмет кадра уже стоит крупно: под ней остаётся один адрес
-      // the plaque already carries the subject: only the address stays below it
-      caption: stub ? place.name : [place.name, shot.caption].filter(Boolean).join(' · '),
-      stub,
-    };
-  }),
-);
+// `owner` is who the shot belongs to: a venue name or a direction title
+// `owner` — чей кадр: название точки или направления
+const frame = (owner: string, shot: Shot) => {
+  // заглушку отмечает `[заглушка]` в заголовке файла, не alt: у заменённого
+  // фото alt остаётся прежним / the title marks a stub, a replaced photo keeps its alt
+  const stub = shot.image.placeholder;
+  return {
+    photo: shot.image,
+    title: shot.caption || owner,
+    // на плашке предмет кадра уже стоит крупно: под ней остаётся один владелец
+    // the plaque already carries the subject: only the owner stays below it
+    caption: stub ? owner : [owner, shot.caption].filter(Boolean).join(' · '),
+    stub,
+  };
+};
+
+// venues first, then directions in their admin order (`directions` arrive
+// sorted by `sort`, each gallery by its own `sort`)
+// сначала точки, за ними направления в порядке админки (`directions` приходят
+// по `sort`, кадры каждой галереи — по своему `sort`)
+const shots = [
+  ...places.flatMap((place) => place.gallery.map((shot) => frame(place.name, shot))),
+  ...directions.flatMap((direction) =>
+    direction.gallery.map((shot) => frame(direction.title, shot)),
+  ),
+];
 
 // a general photo gallery, not a tour of the halls: the client asked for the
 // plain name so any shot — a dish, the showcase, the entrance — fits under it
@@ -71,7 +84,7 @@ const many = shots.length > 1;
           data-slider-rail
           tabindex="0"
           role="group"
-          aria-label="Фотографии залов"
+          aria-label="Фотографии точек и направлений"
         >
           {shots.map((shot, i) => (
             <div class="gl__slide">

@@ -30,7 +30,7 @@ pending=$(node -e '
     if (!r.ok) throw new Error(`${path} → ${r.status}`);
     return (await r.json()).data;
   };
-  const collections = "afisha,promos,menus,cakes,places_files,settings,home,places,directions,directus_files,texts";
+  const collections = "afisha,promos,menus,cakes,places_files,directions_files,settings,home,places,directions,directus_files,texts";
   const [build, [last]] = await Promise.all([
     get("/items/site_build"),
     get(`/activity?filter[collection][_in]=${collections}&filter[action][_in]=create,update,delete&sort=-timestamp&limit=1&fields=timestamp`),
