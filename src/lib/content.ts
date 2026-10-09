@@ -52,7 +52,9 @@ const cleanTitle = (title?: string | null) => (title ?? '').replace(/^\[загл
  */
 const altOf = (file: RawFile, placeholder: boolean) => {
   const alt = file.alt?.trim() ?? '';
-  const stale = !placeholder && (isPlaceholder(alt) || alt.includes('фото появится позже'));
+  // «[заглушка] …», «Фото афиши (заглушка)», «… — фото появится позже»: any seed wording
+  // «[заглушка] …», «Фото афиши (заглушка)», «… — фото появится позже»: любая формулировка посева
+  const stale = !placeholder && /заглушк|появится позже/i.test(alt);
   return alt && !stale ? alt : cleanTitle(file.title);
 };
 

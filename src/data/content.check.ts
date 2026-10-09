@@ -154,6 +154,11 @@ assert.equal(untouched.alt, 'Торт «Медовик» — фото появи
 const real = cakeOf({ ...stamped, uploaded_on: '2026-09-29T12:30:15.516Z' });
 assert.equal(real.placeholder, false, 'заменённый файл — не заглушка');
 assert.equal(real.alt, 'Торт «Медовик»', 'посевной alt под настоящим фото уступает заголовку');
+assert.equal(
+  cakeOf({ ...stamped, alt: 'Фото торта (заглушка)', uploaded_on: '2026-09-29T12:30:15.516Z' }).alt,
+  'Торт «Медовик»',
+  'alt «(заглушка)» без префикса тоже уступает заголовку',
+);
 
 console.log(
   `контент фикстуры: ${content.places.length} точки, ${content.directions.length} направлений, ` +
