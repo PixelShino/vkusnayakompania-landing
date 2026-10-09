@@ -1510,7 +1510,7 @@ fields:
         Фото в общую «Фотогалерею» сайта, после фото точек; подпись у каждого
         фото
       options:
-        template: '{{directus_files_id.title}}'
+        template: '{{caption}} · {{directus_files_id.title}}'
       readonly: false
       required: false
       searchable: true
@@ -3353,7 +3353,7 @@ fields:
       interface: files
       note: Фото зала этой точки, подпись у каждого фото
       options:
-        template: '{{directus_files_id.title}}'
+        template: '{{caption}} · {{directus_files_id.title}}'
       readonly: false
       required: false
       searchable: true
