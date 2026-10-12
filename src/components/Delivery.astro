@@ -10,6 +10,7 @@
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import { typo, type Content } from '../lib/content';
+import { BASE } from '../lib/base.ts';
 import appstore from '../assets/icons/appstore.svg?raw';
 import googleplay from '../assets/icons/googleplay.svg?raw';
 
@@ -25,6 +26,7 @@ const STORES = [
   { label: 'App Store', href: settings.app_ios, icon: appstore },
   { label: 'Google Play', href: settings.app_android, icon: googleplay },
 ].filter((store) => Boolean(store.href));
+const hasCatalog = content.catalog.count > 0;
 ---
 
 <section class="section strip-ink dl-strip" id="delivery">
@@ -49,10 +51,31 @@ const STORES = [
             </a>
           ))
         }
-        <a class="btn btn--ghost-light" href={settings.shop_url} target="_blank" rel="noopener">
-          Открыть магазин
-        </a>
+        {/* with our own catalog the second button stays on the site — the
+            order lands in the admin; the shop becomes a quiet text link. The
+            stores stay the section's main action (the app gives the discount)
+            со своим каталогом вторая кнопка остаётся на сайте — заказ падает в
+            админку, а магазин становится тихой текстовой ссылкой. Магазины
+            приложений остаются главным действием секции (скидка — в приложении) */}
+        {
+          hasCatalog ? (
+            <a class="btn btn--ghost-light" href={`${BASE}catalog/`}>
+              Заказать на сайте
+            </a>
+          ) : (
+            <a class="btn btn--ghost-light" href={settings.shop_url} target="_blank" rel="noopener">
+              Открыть магазин
+            </a>
+          )
+        }
       </div>
+      {
+        hasCatalog && (
+          <a class="tlink tlink--go dl__site" href={settings.shop_url} target="_blank" rel="noopener">
+            <span>Или в интернет-магазине доставки</span>
+          </a>
+        )
+      }
     </div>
 
     {
@@ -160,6 +183,18 @@ const STORES = [
     flex-wrap: wrap;
     gap: 10px;
     margin-top: 20px;
+  }
+
+  /* `.tlink` is set for cream paper; on ink it takes the strip's own cream */
+  .dl__site {
+    margin-top: 22px;
+    color: var(--on-ink);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .dl__site:hover {
+      color: var(--terracotta-on-ink);
+    }
   }
 
   /* иконка слева: паддинг с её стороны на 2 px меньше — оптическая балансировка

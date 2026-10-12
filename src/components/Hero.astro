@@ -17,6 +17,7 @@ import phoneIcon from '../assets/icons/phone.svg?raw';
 import OpenStatus from './OpenStatus.astro';
 import { HERO_SIZES } from '../lib/hero.ts';
 import { typo, type Content } from '../lib/content.ts';
+import { orderLinkFor } from '../lib/nav.ts';
 
 interface Props {
   content: Content;
@@ -24,6 +25,7 @@ interface Props {
 
 const { content } = Astro.props;
 const { home, settings, places, cakes } = content;
+const order = orderLinkFor(content);
 
 // The sticker leads to the cakes: the section when it renders, the shop page
 // otherwise, and nothing at all when neither exists — «48 часов» comes from
@@ -59,9 +61,9 @@ const stickerExternal = cakes.length === 0;
       </button>
       <a
         class="btn btn--ghost-light"
-        href={settings.shop_url}
-        target="_blank"
-        rel="noopener"
+        href={order.href}
+        target={order.external ? '_blank' : undefined}
+        rel={order.external ? 'noopener' : undefined}
       >
         <Icon name="delivery" class="ico--go" />
         Заказать доставку

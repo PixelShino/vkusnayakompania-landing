@@ -10,13 +10,19 @@
 import Photo from './Photo.astro';
 import Icon from './Icon.astro';
 import type { Cake, Content } from '../lib/content.ts';
+import { catalogSectionHref } from '../lib/nav.ts';
 
 interface Props {
   content: Content;
 }
 
 const { cakes, settings, home } = Astro.props.content;
-const shop = settings.shop_cakes_ready ?? settings.shop_url;
+// «Торты в наличии» is a section of our own catalog now; the shop page stays
+// the answer while the catalog has no such section
+// «Торты в наличии» — теперь раздел своего каталога; страница магазина
+// остаётся ответом, пока такого раздела в каталоге нет
+const own = catalogSectionHref(Astro.props.content, 'torty-v-nalichii');
+const shop = own ?? settings.shop_cakes_ready ?? settings.shop_url;
 
 // one rule for every block: normalization decides what is a placeholder
 // одно правило на все блоки: что заглушка, решает нормализация
@@ -41,7 +47,12 @@ const SIZES = '(min-width: 1200px) 309px, (min-width: 768px) 243px, 45vw';
         >
           Торт на заказ
         </button>
-        <a class="btn btn--secondary" href={shop} target="_blank" rel="noopener">
+        <a
+          class="btn btn--secondary"
+          href={shop}
+          target={own ? undefined : '_blank'}
+          rel={own ? undefined : 'noopener'}
+        >
           Торты в наличии
         </a>
       </div>
