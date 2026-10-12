@@ -78,15 +78,25 @@ const STORES = [
           <b class="tnum" data-total></b>
         </p>
         <p class="sum__note">Стоимость доставки и оплату уточним при звонке</p>
+        {/* no order endpoint on this build (PUBLIC_DIRECTUS_URL is empty): the
+            cart is still a list to dictate over the phone, or the shop
+            у этой сборки нет адреса для заказов (PUBLIC_DIRECTUS_URL пуст):
+            корзина остаётся списком, который можно продиктовать по телефону,
+            или магазин */}
         {
           endpoint ? (
             <button type="button" class="btn btn--primary btn--block" data-to-checkout>
               Оформить заказ
             </button>
           ) : (
-            <a class="btn btn--primary btn--block" href={settings.shop_url} target="_blank" rel="noopener">
-              Оформить в магазине
-            </a>
+            <div class="drawer__fallback">
+              <a class="btn btn--primary btn--block" href={settings.phoneHref}>
+                Позвонить <span class="tnum">{settings.phone}</span>
+              </a>
+              <a class="btn btn--secondary btn--block" href={settings.shop_url} target="_blank" rel="noopener">
+                Оформить в магазине
+              </a>
+            </div>
           )
         }
         <button type="button" class="tlink drawer__clear" data-clear>

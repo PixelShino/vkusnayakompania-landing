@@ -1160,6 +1160,14 @@ html:has(.dlg[open]) {
 
 /* ── корзина ─────────────────────────────────────────────────────────────── */
 
+/* without an order endpoint: call first, the shop second */
+/* без адреса для заказов: сначала звонок, потом магазин */
+.drawer__fallback {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+
 /* «Оформить заказ» while a dish in the cart is gone: visibly off, the notice
    above says why
    «Оформить заказ», пока в корзине закончившееся блюдо: видно, что выключена,
