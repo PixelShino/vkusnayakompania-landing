@@ -101,4 +101,47 @@ for (const m of fixture.menus) {
   if (await exists('menus', 'title', m.title)) continue;
   await api('POST', '/items/menus', { ...strip(m), file: await file(m.file), direction: dirIds.get(m.direction) });
 }
+// Catering, when the fixture has it and the schema already does: the page only
+// while it is still empty (an editor's text is never overwritten), formats by
+// slug, steps by title, questions by wording. The usual source is
+// `import-catering.mjs` from the old site; this is the way without it.
+// Кейтеринг — если он есть в фикстуре и уже есть в схеме: страница только
+// пока пустая (текст редактора не перезаписывается), форматы по slug, шаги по
+// заголовку, вопросы по формулировке. Обычный источник — `import-catering.mjs`
+// со старого сайта; это путь без него.
+const cp = fixture.catering_page;
+const cateringReady = await api('GET', '/items/catering_page').then(() => true, () => false);
+if (cp && !Array.isArray(cp) && cateringReady) {
+  const current = await api('GET', '/items/catering_page');
+  if (!current?.hero_title) {
+    const { gallery, ...rest } = strip(cp);
+    await api('PATCH', '/items/catering_page', {
+      ...rest,
+      hero_image: await file(cp.hero_image),
+      request_image: await file(cp.request_image),
+    });
+    for (const g of gallery ?? []) {
+      await api('POST', '/items/catering_page_files', {
+        catering_page_id: current?.id ?? 1,
+        directus_files_id: await file(g.directus_files_id),
+        sort: g.sort,
+        caption: g.caption,
+      });
+    }
+  }
+  const formatIds = new Map();
+  for (const f of fixture.catering_formats ?? []) {
+    const found = await exists('catering_formats', 'slug', f.slug);
+    formatIds.set(f.id, found ? found.id : (await api('POST', '/items/catering_formats', { ...strip(f), photo: await file(f.photo) })).id);
+  }
+  for (const step of fixture.catering_steps ?? []) {
+    if (await exists('catering_steps', 'title', step.title)) continue;
+    await api('POST', '/items/catering_steps', strip(step));
+  }
+  for (const q of fixture.catering_faq ?? []) {
+    if (await exists('catering_faq', 'question', q.question)) continue;
+    await api('POST', '/items/catering_faq', { ...strip(q), format: q.format ? (formatIds.get(q.format) ?? null) : null });
+  }
+  console.log(`= кейтеринг: форматов ${formatIds.size}, вопросов ${(fixture.catering_faq ?? []).length}`);
+}
 console.log('import: готово');
