@@ -32,12 +32,13 @@ banquets — two locations in Samara, Russia.<br>
 
 Thirteen sections, one scroll: hero, five directions (café, restaurant,
 confectionery, catering, banquets), a strip of figures, a photo slider of both rooms,
-poster of the month, text-only promos per location, PDF menus, cake showcase, app and
-delivery, reviews, a marquee of occasions, contacts with both locations on one map.
+poster of the month, text-only promos per location, PDF menus, cake showcase, delivery
+and pickup, reviews, a marquee of occasions, contacts with both locations on one map.
 Light and ink sections alternate, never more than two light ones in a row. The actions
-are the same everywhere: book a table (Telegram, Max or a call), order delivery in the
-app, open the catering site. No forms, no cart, no prices. A 404 page carries the same
-two actions.
+are the same everywhere: book a table (Telegram, Max or a call), order delivery from the
+site's own catalog at `/catalog/` (a cart, confirmed by a call), open the catering site.
+The checkout in the catalog cart is the only form. A 404 page carries the same two
+actions. Since 12.10.2026 the site does not mention the mobile app or the old shop.
 
 Editors change posters, promos, menus, photos, texts and contacts in Directus; a save
 triggers a rebuild and the static site updates within a minute.
@@ -175,11 +176,13 @@ Directus. Step by step: [docs/DIRECTUS.md](docs/DIRECTUS.md).
 
 Тринадцать секций одним скроллом: первый экран, пять направлений (кафе, ресторан,
 кондитерская, кейтеринг, банкеты), полоса цифр, слайдер фото обоих залов, афиша
-месяца, акции по адресам текстом, PDF меню, витрина тортов, приложение и доставка,
+месяца, акции по адресам текстом, PDF меню, витрина тортов, доставка и самовывоз,
 отзывы, бегущая строка поводов, контакты с обеими точками на одной карте. Светлые и
 чернильные секции чередуются, подряд светлых не больше двух. Действия везде одни:
-забронировать стол (Telegram, Max или звонок), заказать доставку в приложении, перейти
-на сайт кейтеринга. Без форм, корзины и цен. У страницы 404 те же два действия.
+забронировать стол (Telegram, Max или звонок), заказать доставку из каталога на сайте
+`/catalog/` (корзина, заказ подтверждается звонком), перейти на сайт кейтеринга.
+Единственная форма — оформление заказа в корзине каталога. У страницы 404 те же два
+действия. С 12.10.2026 сайт не упоминает приложение и старый магазин.
 
 Редакторы меняют афишу, акции, меню, фото, тексты и контакты в Directus; сохранение
 запускает пересборку, и статический сайт обновляется в пределах минуты.
@@ -313,7 +316,7 @@ pnpm fixture                  # выгрузка Directus → src/data/fixture.j
 
 | | |
 |---|---|
-| Delivery shop · Магазин доставки | [vkusdostavka.shop](https://vkusdostavka.shop/) |
+| Old delivery shop, catalog import source · Старый магазин доставки, источник импорта каталога (сайт на него не ссылается) | [vkusdostavka.shop](https://vkusdostavka.shop/) |
 | Catering · Кейтеринг и банкеты | [vkusnayakompania.ru](https://vkusnayakompania.ru/) |
-| Apps · Приложение | [App Store](https://apps.apple.com/app/id6477568088) · [Google Play](https://play.google.com/store/apps/details?id=com.foodpicasso.cateringvkusnaya) |
+| Apps, not linked from the site · Приложение, сайт на него не ссылается | [App Store](https://apps.apple.com/app/id6477568088) · [Google Play](https://play.google.com/store/apps/details?id=com.foodpicasso.cateringvkusnaya) |
 | Social · Соцсети | [VK](https://vk.ru/vkusnayakompania) · [Telegram](https://t.me/vkusnayakompania) |
