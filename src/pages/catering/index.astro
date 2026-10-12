@@ -1,0 +1,203 @@
+---
+/**
+ * Catering and banquets on the company's own site (moved from the old
+ * WordPress site on 12.10.2026): the first screen with the facts, the formats
+ * with prices, four steps, the priorities, photos from the parties, the
+ * request form, the main questions and the two halls. Every text comes from
+ * the admin («Кейтеринг и банкеты»); the formats are told in full on
+ * `/catering/services/`, every question is on `/catering/faq/`. With nothing
+ * in the admin the page still builds: it says to call and stays out of search.
+ * Кейтеринг и банкеты на сайте компании (перенесено со старого сайта на
+ * WordPress 12.10.2026): первый экран с цифрами, форматы с ценами, четыре
+ * шага, приоритеты, фото с праздников, форма заявки, главные вопросы и два
+ * зала. Каждый текст — из админки («Кейтеринг и банкеты»); форматы подробно —
+ * на `/catering/services/`, все вопросы — на `/catering/faq/`. Пустая админка
+ * не роняет сборку: страница предлагает позвонить и не идёт в поиск.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Photo from '../../components/Photo.astro';
+import Icon from '../../components/Icon.astro';
+import CateringTop from '../../components/catering/CateringTop.astro';
+import FormatRows from '../../components/catering/FormatRows.astro';
+import Steps from '../../components/catering/Steps.astro';
+import Priorities from '../../components/catering/Priorities.astro';
+import PhotoRail from '../../components/catering/PhotoRail.astro';
+import RequestSection from '../../components/catering/RequestSection.astro';
+import QuestionList from '../../components/catering/QuestionList.astro';
+import Visit from '../../components/catering/Visit.astro';
+import { BASE } from '../../lib/base.ts';
+import { BRAND } from '../../data/site.ts';
+import { CATERING } from '../../lib/nav.ts';
+import { getContent, typo } from '../../lib/content.ts';
+import { cateringJsonLd } from '../../lib/catering-seo.ts';
+import { shareImage } from '../../lib/share-image.ts';
+import '../../styles/catering.css';
+
+const content = await getContent();
+const { catering, settings } = content;
+const { page, formats, featured, questions } = catering;
+
+const title = page?.seo.title ?? `Кейтеринг и банкеты в Самаре — ${BRAND.name}`;
+const description =
+  page?.seo.description ??
+  'Банкеты в наших залах, фуршеты, кофе-брейки и доставка боксов по Самаре. Оставьте заявку — перезвоним и посчитаем смету.';
+
+const site = Astro.site ?? new URL('https://vkus-com.ru');
+// the business picture for search is the first screen's photo
+// картинка заведения для поиска — фото первого экрана
+const heroUrl = await shareImage(page?.heroImage, site);
+const jsonLd = cateringJsonLd(content, site, 'overview', heroUrl);
+---
+
+<BaseLayout
+  content={content}
+  title={title}
+  description={description}
+  noindex={!catering.ready}
+  landing={false}
+  ogImage={page?.heroImage}
+  stickyAction={{ label: 'Оставить заявку', href: '#request' }}
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} is:inline />
+  <Header content={content} over={false} />
+
+  <main id="main" class="cg" tabindex="-1">
+    <CateringTop current="overview" />
+
+    <section class="cg-hero" id="top" aria-labelledby="cg-title">
+      <div class="container cg-hero__grid">
+        <div class="cg-hero__text" data-reveal>
+          <span class="mark cg-mark" aria-hidden="true"></span>
+          <h1 class="display-caps cg-hero__title" id="cg-title">
+            {typo(page?.heroTitle ?? 'Кейтеринг и банкеты')}
+          </h1>
+          {
+            page?.heroText && <p class="lead cg-hero__lead">{typo(page.heroText)}</p>
+          }
+          <div class="cg-hero__cta">
+            <a class="btn btn--primary" href="#request">Оставить заявку</a>
+            <a class="btn btn--secondary" href={settings.phoneHref}>
+              <Icon name="phone" class="ico--tilt" />
+              <span class="tnum">{settings.phone}</span>
+            </a>
+          </div>
+          {
+            page?.hoursNote && (
+              <p class="cg-hero__note">
+                <Icon name="clock" />
+                Менеджер на связи {page.hoursNote}
+              </p>
+            )
+          }
+        </div>
+        <div class="cg-hero__frame" data-reveal="self">
+          {
+            page?.heroImage && !page.heroImage.placeholder ? (
+              <Photo
+                photo={page.heroImage}
+                ratio="4 / 3"
+                ratioMd="1 / 1"
+                radius="var(--r-sq)"
+                sizes="(min-width: 1200px) 600px, (min-width: 768px) 46vw, 100vw"
+                eager
+                priority="high"
+                class="cg-hero__photo"
+              />
+            ) : (
+              <div class="stub stub--ink cg-hero__stub">
+                <span class="stub__title">Банкетный зал</span>
+                <span class="stub__meta">фото скоро появится</span>
+              </div>
+            )
+          }
+        </div>
+      </div>
+    </section>
+
+    {
+      page && page.facts.length > 0 && (
+        <section class="strip-ink cg-facts" aria-label="Коротко о нас">
+          <ul class="container cg-facts__row" role="list">
+            {page.facts.map((fact) => (
+              <li class="cg-fact">
+                <span class="cg-fact__value display tnum">{fact.value}</span>
+                <span class="cg-fact__label">{fact.label}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      formats.length > 0 ? (
+        <section class="cg-sec strip-paper cg-formats" id="formats" aria-labelledby="formats-title">
+          <div class="container">
+            <div class="head" data-reveal>
+              <span class="mark" aria-hidden="true" />
+              <h2 class="display-caps" id="formats-title">
+                {typo(page?.formatsTitle ?? 'Форматы и цены')}
+              </h2>
+              {page?.formatsText && <p class="lead">{typo(page.formatsText)}</p>}
+            </div>
+            <FormatRows formats={formats} />
+            <p class="cg-formats__more">
+              <a class="tlink tlink--go" href={`${CATERING}services/`}>
+                <span>Все форматы подробно</span>
+              </a>
+            </p>
+          </div>
+        </section>
+      ) : (
+        <section class="cg-sec strip-paper cg-empty" id="formats" aria-label="Форматы">
+          <div class="container cg-empty__panel">
+            <Icon name="cloche" />
+            <p class="display cg-empty__title">Форматы и цены скоро появятся</p>
+            <p>Пока расскажем всё по телефону: форматы, даты, залы и смету.</p>
+            <a class="btn btn--primary" href={settings.phoneHref}>
+              Позвонить {settings.phone}
+            </a>
+          </div>
+        </section>
+      )
+    }
+
+    <Steps content={content} />
+    <Priorities content={content} />
+    <PhotoRail shots={catering.gallery} />
+    <RequestSection content={content} />
+
+    {
+      featured.length > 0 && (
+        <section class="cg-sec cg-faq" id="faq" aria-labelledby="faq-title">
+          <div class="container cg-faq__in">
+            <div class="head" data-reveal>
+              <span class="mark" aria-hidden="true" />
+              <h2 class="display-caps" id="faq-title">
+                Вопросы и ответы
+              </h2>
+            </div>
+            <QuestionList questions={featured} />
+            {questions.length > featured.length && (
+              <p class="cg-faq__more">
+                <a class="btn btn--secondary btn--md" href={`${CATERING}faq/`}>
+                  Все вопросы — {questions.length}
+                </a>
+              </p>
+            )}
+          </div>
+        </section>
+      )
+    }
+
+    <Visit content={content} />
+  </main>
+
+  <Footer content={content} base={BASE} />
+</BaseLayout>
+
+<script>
+  import '../../scripts/catering';
+</script>

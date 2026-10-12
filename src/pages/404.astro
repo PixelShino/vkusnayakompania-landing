@@ -9,6 +9,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { BASE } from '../lib/base.ts';
+import { CATERING } from '../lib/nav.ts';
 import { getContent } from '../lib/content.ts';
 
 const content = await getContent();
@@ -23,7 +24,8 @@ const { settings, places } = content;
       <h1 class="nf__title">Такой страницы нет</h1>
       <p class="lead nf__lead">
         Возможно, адрес набран с опечаткой или страница переехала. Всё о кафе,
-        ресторане и кондитерской — на главной.
+        ресторане и кондитерской — на главной, о банкетах и выездных праздниках —
+        в разделе <a class="nf__link" href={CATERING}>«Кейтеринг»</a>.
       </p>
 
       <div class="nf__actions">
@@ -50,6 +52,14 @@ const { settings, places } = content;
 </BaseLayout>
 
 <style>
+  /* the catering page used to be a site of its own: old links land here
+     кейтеринг раньше был отдельным сайтом: старые ссылки приходят сюда */
+  .nf__link {
+    color: var(--text);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
   /* шапка липкая: без отступа заголовок уезжает под неё */
   .nf {
     display: flex;

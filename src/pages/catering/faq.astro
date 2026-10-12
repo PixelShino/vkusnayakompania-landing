@@ -1,0 +1,146 @@
+---
+/**
+ * Every question about catering and banquets (the old site's «FAQ»), grouped
+ * by topic. A search field narrows the list as the guest types and opens what
+ * matches; «Развернуть все» opens everything for reading or printing. The
+ * topic index jumps to a group. `FAQPage` markup carries every answer, so the
+ * same text is in search as on the page.
+ * Все вопросы о кейтеринге и банкетах (страница «FAQ» старого сайта) по темам.
+ * Поле поиска сужает список по мере набора и раскрывает найденное; «Развернуть
+ * все» открывает всё — прочитать или распечатать. Оглавление тем ведёт к
+ * группе. Разметка `FAQPage` несёт каждый ответ, поэтому в поиске тот же
+ * текст, что на странице.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Icon from '../../components/Icon.astro';
+import CateringTop from '../../components/catering/CateringTop.astro';
+import QuestionList from '../../components/catering/QuestionList.astro';
+import RequestSection from '../../components/catering/RequestSection.astro';
+import { BASE } from '../../lib/base.ts';
+import { BRAND, plural } from '../../data/site.ts';
+import { getContent, typo } from '../../lib/content.ts';
+import { cateringJsonLd } from '../../lib/catering-seo.ts';
+import { shareImage } from '../../lib/share-image.ts';
+import '../../styles/catering.css';
+
+const content = await getContent();
+const { catering, settings } = content;
+const { page, topics, questions } = catering;
+
+const title = page?.seo.faqTitle ?? `Вопросы о кейтеринге и банкетах — ${BRAND.name}`;
+const description =
+  page?.seo.faqDescription ??
+  'Цены и предоплата, дегустация, пробковый сбор, официанты, доставка по области: ответы о банкетах и кейтеринге в Самаре.';
+
+const site = Astro.site ?? new URL('https://vkus-com.ru');
+// the business picture for search is the first screen's photo
+// картинка заведения для поиска — фото первого экрана
+const heroUrl = await shareImage(page?.heroImage, site);
+const jsonLd = cateringJsonLd(content, site, 'faq', heroUrl);
+const count = `${questions.length} ${plural(questions.length, 'ответ', 'ответа', 'ответов')}`;
+---
+
+<BaseLayout
+  content={content}
+  title={title}
+  description={description}
+  noindex={questions.length === 0}
+  landing={false}
+  ogImage={page?.heroImage}
+  stickyAction={{ label: 'Задать вопрос', href: '#request' }}
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} is:inline />
+  <Header content={content} over={false} />
+
+  <main id="main" class="cg" tabindex="-1">
+    <CateringTop current="faq" />
+
+    <section class="cg-intro" id="top" aria-labelledby="faq-title">
+      <div class="container">
+        <div class="cg-intro__text" data-reveal>
+          <span class="mark cg-mark" aria-hidden="true"></span>
+          <h1 class="display-caps cg-intro__title" id="faq-title">Вопросы и ответы</h1>
+          <p class="lead cg-intro__lead">
+            {
+              questions.length
+                ? typo(`${count} о банкетах и кейтеринге: цены, залы, меню, персонал. Не нашли свой — спросите менеджера.`)
+                : 'Ответы переносим на сайт. Пока спросите менеджера по телефону.'
+            }
+          </p>
+        </div>
+
+        {
+          questions.length > 0 && (
+            <div class="faq-tools" data-faq-tools hidden>
+              <div class="faq-search">
+                <Icon name="search" />
+                <label class="sr-only" for="faq-q">
+                  Найти вопрос
+                </label>
+                <input
+                  id="faq-q"
+                  type="search"
+                  placeholder="Найти: дегустация, парковка…"
+                  autocomplete="off"
+                  enterkeyhint="search"
+                  data-faq-search
+                />
+              </div>
+              <button type="button" class="tlink faq-tools__all" data-faq-all aria-pressed="false">
+                Развернуть все
+              </button>
+            </div>
+          )
+        }
+
+        {
+          topics.length > 1 && (
+            <nav class="cg-index cg-index--topics" aria-label="Темы вопросов">
+              <ol role="list">
+                {topics.map((topic) => (
+                  <li data-topic-link={topic.slug}>
+                    <a href={`#${topic.slug}`}>
+                      <span class="cg-index__name">{topic.title}</span>
+                      <span class="cg-index__price tnum">{topic.questions.length}</span>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          )
+        }
+      </div>
+    </section>
+
+    <div class="container faq-topics" data-faq>
+      {
+        topics.map((topic) => (
+          <section class="faq-topic" id={topic.slug} aria-labelledby={`t-${topic.slug}`} data-topic>
+            <h2 class="display faq-topic__title" id={`t-${topic.slug}`}>
+              {topic.title}
+            </h2>
+            <QuestionList questions={topic.questions} level={3} />
+          </section>
+        ))
+      }
+      <div class="faq-empty" data-faq-empty hidden>
+        <p class="display faq-empty__title">Такого вопроса пока нет</p>
+        <p>
+          Спросите менеджера: позвоните <a class="tnum" href={settings.phoneHref}>{settings.phone}</a> или оставьте заявку
+          ниже — ответим.
+        </p>
+      </div>
+      <p class="sr-only" aria-live="polite" data-faq-status></p>
+    </div>
+
+    <RequestSection content={content} />
+  </main>
+
+  <Footer content={content} base={BASE} />
+</BaseLayout>
+
+<script>
+  import '../../scripts/catering';
+</script>

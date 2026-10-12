@@ -11,6 +11,14 @@ import { BASE } from './base.ts';
 import { currentAfisha, livePromos, type Dated } from './select.ts';
 import { OPTIONAL, QUERIES, docKind, docTarget } from '../../scripts/queries.mjs';
 import { normalizeCatalog, type Catalog, type RawCategory, type RawProduct } from './catalog.ts';
+import {
+  normalizeCatering,
+  type Catering,
+  type RawCateringFaq,
+  type RawCateringFormat,
+  type RawCateringPage,
+  type RawCateringStep,
+} from './catering.ts';
 import fixture from '../data/fixture.json' with { type: 'json' };
 
 /** Файл-заглушка помечен в админке: с этой пометкой сайт не выдаёт его за готовый. */
@@ -97,8 +105,12 @@ export type Settings = {
   shop_url?: string | null;
   app_ios?: string | null;
   app_android?: string | null;
-  catering_url: string;
-  catering_services_url?: string;
+  // the old catering site: the fields stay in the admin, the site links to its
+  // own `/catering/` now and prints neither
+  // старый сайт кейтеринга: поля остаются в админке, сайт ведёт на свой
+  // `/catering/` и не выводит ни одного из них
+  catering_url?: string | null;
+  catering_services_url?: string | null;
   shop_cakes_ready?: string | null;
   shop_cakes_custom?: string | null;
   shop_pastry?: string | null;
@@ -221,6 +233,8 @@ export type Content = {
   cakes: Cake[];
   /** каталог доставки; пустой, если в админке его нет или он не заполнен */
   catalog: Catalog;
+  /** кейтеринг и банкеты (`/catering/`); пустой, если в админке раздела нет */
+  catering: Catering;
   /** сегодня в часовом поясе точек — от него считаются окна показа */
   today: string;
 };
@@ -281,6 +295,12 @@ export type Raw = {
   // необязательны: в старой фикстуре и в Directus без каталога их нет
   product_categories?: RawCategory[] | null;
   products?: RawProduct[] | null;
+  // optional too: a Directus without the catering collections gives an empty section
+  // тоже необязательны: Directus без коллекций кейтеринга даёт пустой раздел
+  catering_page?: RawCateringPage | RawCateringPage[] | null;
+  catering_formats?: RawCateringFormat[] | null;
+  catering_steps?: RawCateringStep[] | null;
+  catering_faq?: RawCateringFaq[] | null;
 };
 
 /** Файл Directus → то, что кладётся в `Img.src`. */
@@ -424,17 +444,18 @@ export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraTo
   };
 
   const current = currentAfisha(raw.afisha, today);
+  const directions: Direction[] = raw.directions.map((direction) => ({
+    ...direction,
+    photo: img(direction.photo),
+    place: at(direction.place, `directions «${direction.title}»`),
+    gallery: shots(direction.gallery, `directions «${direction.title}»`),
+  }));
 
   return {
     settings,
     home,
     places,
-    directions: raw.directions.map((direction) => ({
-      ...direction,
-      photo: img(direction.photo),
-      place: at(direction.place, `directions «${direction.title}»`),
-      gallery: shots(direction.gallery, `directions «${direction.title}»`),
-    })),
+    directions,
     afisha: current && {
       ...current,
       poster: img(current.poster),
@@ -459,6 +480,25 @@ export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraTo
       .filter((cake) => cake.status === 'published')
       .map((cake) => ({ ...cake, photo: need(img(cake.photo), `торт «${cake.title}»: нет фото`) })),
     catalog: normalizeCatalog(raw.product_categories, raw.products, (file, alt) => catalogImg(file, alt, resolveImage), warn),
+    // the catering page is strict about its photos like the rest of the page
+    // (alt, dimensions); the shots of the catering and banquet directions
+    // follow its own in the strip
+    // страница кейтеринга строга к своим фото, как и вся страница (alt,
+    // размеры); кадры направлений «Кейтеринг» и «Банкеты» идут в ленте за её
+    // собственными
+    catering: normalizeCatering(
+      {
+        page: raw.catering_page,
+        formats: raw.catering_formats,
+        steps: raw.catering_steps,
+        faq: raw.catering_faq,
+        directions: directions
+          .filter((direction) => direction.key === 'catering' || direction.key === 'banquets')
+          .map((direction) => ({ title: direction.title, gallery: direction.gallery })),
+      },
+      (file) => img(file as unknown as RawFile | null),
+      log,
+    ),
     today,
   };
 };
@@ -536,12 +576,13 @@ const fromDirectus = async (base: string, token: string): Promise<Raw> => {
     Object.entries(QUERIES).map(async ([key, path]) => {
       const response = await fetchPatient(base + path, { headers: { Authorization: `Bearer ${token}` } });
       if (!response.ok) {
-        // the catalog is an addition, not the site: a schema not yet applied or a
-        // builder without the new rights gives an empty catalog and a loud log line
-        // каталог — дополнение, а не сайт: не применённая схема или сборщик без
-        // новых прав дают пустой каталог и громкую строку в логе
+        // the catalog and catering are additions, not the site: a schema not yet
+        // applied or a builder without the new rights gives an empty section and
+        // a loud log line
+        // каталог и кейтеринг — дополнения, а не сайт: не применённая схема или
+        // сборщик без новых прав дают пустой раздел и громкую строку в логе
         if (OPTIONAL.has(key)) {
-          console.warn(`контент: ${key} недоступен (${response.status}) — каталог соберётся пустым`);
+          console.warn(`контент: ${key} недоступен (${response.status}) — раздел соберётся пустым`);
           return [key, []] as const;
         }
         throw new Error(`Directus ${path} → ${response.status}: ${await response.text()}`);

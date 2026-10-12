@@ -1,0 +1,93 @@
+---
+/**
+ * From the request to the party in four steps, on an ink band: large antiqua
+ * numerals down the right, the heading and an example of the first message on
+ * the left, the honest postscript across the foot. The example is labelled as
+ * one — it shows how the talk starts, it is not a review.
+ * От заявки до праздника в четыре шага, на чернильной полосе: крупные цифры
+ * антиквой справа, заголовок и пример первой переписки слева, честный
+ * постскриптум по низу. Пример подписан как пример — он показывает, как
+ * начинается разговор, и не выдаёт себя за отзыв.
+ */
+import { typo, type Content } from '../../lib/content.ts';
+
+interface Props {
+  content: Content;
+}
+
+const { settings, catering } = Astro.props.content;
+const { steps, page } = catering;
+const dialog = page?.dialog ?? [];
+
+// «Наш честный постскриптум: если…» — the lead-in becomes a label over the text
+// «Наш честный постскриптум: если…» — зачин становится подписью над текстом
+const note = page?.stepsNote;
+const split = note?.match(/^([^:]{4,40}):\s+(.+)$/s);
+const noteLabel = split?.[1];
+const noteText = split ? split[2].charAt(0).toUpperCase() + split[2].slice(1) : note;
+---
+
+{
+  steps.length > 0 && (
+    <section class="cg-sec strip-ink cg-steps" id="steps" aria-labelledby="steps-title">
+      <div class="container cg-steps__grid">
+        <div class="cg-steps__head" data-reveal>
+          <span class="mark cg-mark" aria-hidden="true" />
+          <h2 class="display-caps cg-steps__title" id="steps-title">
+            {typo(page?.stepsTitle ?? 'Как мы работаем')}
+          </h2>
+        </div>
+
+        <ol class="steps" role="list" data-reveal="grid">
+          {steps.map((step) => (
+            <li class="step">
+              <span class="step__n display tnum" aria-hidden="true">
+                {step.n}
+              </span>
+              <div class="step__body">
+                <h3 class="step__title display">{typo(step.title)}</h3>
+                {step.text && <p class="step__text">{typo(step.text)}</p>}
+                {step.contacts && (
+                  <p class="step__contacts">
+                    <a class="tlink" href={settings.phoneHref}>
+                      {settings.phone}
+                    </a>
+                    {settings.telegram && (
+                      <a class="tlink tlink--go tlink--out" href={settings.telegram} target="_blank" rel="noopener">
+                        <span>Telegram</span>
+                      </a>
+                    )}
+                    {settings.max && (
+                      <a class="tlink tlink--go tlink--out" href={settings.max} target="_blank" rel="noopener">
+                        <span>Max</span>
+                      </a>
+                    )}
+                  </p>
+                )}
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        {dialog.length > 0 && (
+          <figure class="chat" data-reveal>
+            <figcaption class="label chat__label">Так начинается разговор · пример</figcaption>
+            {dialog.map((message) => (
+              <p class:list={['chat__msg', `chat__msg--${message.who}`]}>
+                <span class="chat__who">{message.who === 'guest' ? 'Гость' : 'Менеджер'}</span>
+                {typo(message.text)}
+              </p>
+            ))}
+          </figure>
+        )}
+
+        {noteText && (
+          <div class="cg-steps__ps" data-reveal>
+            {noteLabel && <p class="label cg-steps__ps-label">{noteLabel}</p>}
+            <p class="cg-steps__ps-text">{typo(noteText)}</p>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}

@@ -1,0 +1,54 @@
+---
+/**
+ * Questions as an accordion: a heading with a button, the answer in a region
+ * under it (the WAI-ARIA pattern). The markup ships open: without scripts
+ * every answer is simply readable; `catering.ts` folds them on load with
+ * `hidden="until-found"`, so the browser's own search still finds an answer and
+ * opens it. A question named in the address (`#q-…`) stays open.
+ * Вопросы аккордеоном: заголовок с кнопкой, ответ в области под ним (шаблон
+ * WAI-ARIA). Разметка уходит раскрытой: без скриптов каждый ответ просто
+ * читается; `catering.ts` сворачивает их при загрузке через
+ * `hidden="until-found"`, поэтому поиск браузера по странице всё равно находит
+ * ответ и раскрывает его. Вопрос из адреса (`#q-…`) остаётся открытым.
+ */
+import { typo } from '../../lib/content.ts';
+import type { CateringQuestion } from '../../lib/catering.ts';
+
+interface Props {
+  questions: CateringQuestion[];
+  /** уровень заголовка вопроса: 3 под заголовком секции, 4 под темой */
+  level?: 3 | 4;
+  /** префикс id, если один вопрос стоит на странице дважды (у формата и в общем списке) */
+  prefix?: string;
+  class?: string;
+}
+
+const { questions, level = 3, prefix = '', class: className = '' } = Astro.props;
+const Heading = `h${level}` as 'h3' | 'h4';
+// paragraphs of an answer: the admin field is plain text
+// абзацы ответа: поле в админке — простой текст
+const paragraphs = (text: string) => text.split(/\n\s*\n/).map((part) => part.trim()).filter(Boolean);
+---
+
+<div class:list={['qa-list', className]} data-accordion>
+  {
+    questions.map((item) => {
+      const id = `${prefix}q-${item.slug}`;
+      return (
+        <div class="qa" id={id} data-qa data-search={`${item.question} ${item.answer}`.toLowerCase()}>
+          <Heading class="qa__h">
+            <button type="button" class="qa__btn" id={`${id}-btn`} aria-expanded="true" aria-controls={`${id}-a`} data-qa-btn>
+              <span class="qa__q">{typo(item.question)}</span>
+              <span class="qa__icon" aria-hidden="true" />
+            </button>
+          </Heading>
+          <div class="qa__a" id={`${id}-a`} role="region" aria-labelledby={`${id}-btn`} data-qa-a>
+            {paragraphs(item.answer).map((part) => (
+              <p>{typo(part)}</p>
+            ))}
+          </div>
+        </div>
+      );
+    })
+  }
+</div>

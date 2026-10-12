@@ -1,10 +1,10 @@
 ---
 /**
- * Footer: both venues with their own phone and hours, section links, the
- * catering site, legal line. Legal data and documents come from the admin panel,
- * so an unfilled field simply does not render.
- * Подвал: обе точки со своими телефонами и часами, разделы, сайт кейтеринга,
- * юрстрока. Реквизиты и документы приходят из админки — незаполненное
+ * Footer: both venues with their own phone and hours, section links (the
+ * catalog and catering among them), legal line. Legal data and documents come
+ * from the admin panel, so an unfilled field simply does not render.
+ * Подвал: обе точки со своими телефонами и часами, разделы (среди них каталог и
+ * кейтеринг), юрстрока. Реквизиты и документы приходят из админки — незаполненное
  * поле просто не рисуется, заглушек «ИНН —» не бывает.
  */
 import { BRAND, hoursRows } from '../data/site';
@@ -22,7 +22,7 @@ const { settings, places, home } = content;
 
 // «Главная» внизу страницы не нужна — подвал и так конец
 const sections = navFor(content, base).filter((link) => !link.href.endsWith('#top'));
-const { social, more } = footerGroupsFor(content);
+const { social } = footerGroupsFor(content);
 const year = new Date().getFullYear();
 
 // 15 digits is an individual entrepreneur's number / 15 цифр — номер ИП
@@ -85,17 +85,6 @@ const docs = [
         <nav class="footer__list" aria-label="Разделы">
           {sections.map((link) => <a href={link.href}>{link.label}</a>)}
         </nav>
-        {
-          more.length > 0 && (
-            <nav class="footer__list" aria-label="Другие сайты">
-              {more.map((link) => (
-                <a href={link.href} target="_blank" rel="noopener">
-                  {link.label}
-                </a>
-              ))}
-            </nav>
-          )
-        }
       </div>
     </div>
 

@@ -80,7 +80,7 @@ import StickyBar from '../components/StickyBar.astro';
 import { BRAND, schemaHours, yandexOrgUrl } from '../data/site';
 import { HERO_SIZES, widthsFor } from '../lib/hero.ts';
 import { orderLinkFor } from '../lib/nav.ts';
-import type { Content } from '../lib/content.ts';
+import type { Content, Img } from '../lib/content.ts';
 
 interface Props {
   content: Content;
@@ -98,9 +98,13 @@ interface Props {
    * пришедший в каталог из поиска, не должен ждать ни того, ни другого.
    */
   landing?: boolean;
+  /** превью ссылки своей страницы (кейтеринг — фото первого экрана); без него — из «Главной» */
+  ogImage?: Img;
+  /** своё действие нижней полосы на телефоне вместо «Заказать доставку» */
+  stickyAction?: { label: string; href: string };
 }
 
-const { content, stickyBar = true, landing = true } = Astro.props;
+const { content, stickyBar = true, landing = true, stickyAction } = Astro.props;
 const { home, settings, places } = content;
 
 const title = Astro.props.title ?? home.seo_title;
@@ -127,11 +131,12 @@ const heroSrcset = (
 ).srcSet.attribute;
 
 // OG-картинка режется под 1200×630; без неё остаётся статичная из `public`
-const ogImage = home.og_image
+const ogSource = Astro.props.ogImage ?? home.og_image;
+const ogImage = ogSource
   ? new URL(
       (
         await getImage({
-          src: home.og_image.src,
+          src: ogSource.src,
           width: 1200,
           height: 630,
           fit: 'cover',
@@ -274,7 +279,7 @@ const jsonLd = {
       )
     }
 
-    {stickyBar && <StickyBar settings={settings} order={orderLinkFor(content)} />}
+    {stickyBar && <StickyBar settings={settings} order={orderLinkFor(content)} action={stickyAction} />}
     <script>
       import '../scripts/reveal';
     </script>

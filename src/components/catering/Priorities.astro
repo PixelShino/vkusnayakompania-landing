@@ -1,0 +1,67 @@
+---
+/**
+ * About the company: the heading and the opening paragraph on the left, the
+ * priorities as a numbered ledger on the right (on a desktop), one column with
+ * «Показать ещё» on a phone. Text only: the halls and the parties are in the
+ * photo strip below.
+ * О компании: заголовок и вступление слева, приоритеты нумерованным реестром
+ * справа (на десктопе), на телефоне одна колонка с «Показать ещё». Только
+ * текст: залы и праздники — в ленте фото ниже.
+ */
+import { typo, type Content } from '../../lib/content.ts';
+
+interface Props {
+  content: Content;
+}
+
+const page = Astro.props.content.catering.page;
+const priorities = page?.priorities ?? [];
+// a phone shows the first three; the rest open with a button (with scripting
+// only — without it everything is shown)
+// телефон показывает первые три, остальные открывает кнопка (только со
+// скриптом — без него видно всё)
+const SHOWN = 3;
+const folded = priorities.length > SHOWN + 1;
+---
+
+{
+  page && (priorities.length > 0 || page.intro) && (
+    <section class="cg-sec cg-about" id="about" aria-labelledby="about-title">
+      <div class="container cg-about__grid">
+        <div class="head cg-about__head" data-reveal>
+          <span class="mark" aria-hidden="true" />
+          <h2 class="display-caps" id="about-title">
+            {page.prioritiesTitle ?? 'О нас'}
+          </h2>
+          {page.intro && <p class="lead cg-about__intro">{typo(page.intro)}</p>}
+        </div>
+        {priorities.length > 0 && (
+          <div class="cg-about__list">
+            <ol class:list={['prios', folded && 'is-short']} id="prios" role="list" data-reveal="grid">
+              {priorities.map((item, i) => (
+                <li class="prio">
+                  <span class="prio__n tnum" aria-hidden="true">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <h3 class="prio__title display">{typo(item.title)}</h3>
+                  {item.text && <p class="prio__text">{typo(item.text)}</p>}
+                </li>
+              ))}
+            </ol>
+            {folded && (
+              <button
+                type="button"
+                class="btn btn--secondary btn--md cg-about__more"
+                aria-controls="prios"
+                aria-expanded="false"
+                data-prios-more
+              >
+                Показать ещё {priorities.length - SHOWN}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}

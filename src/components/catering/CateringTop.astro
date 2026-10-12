@@ -1,0 +1,50 @@
+---
+/**
+ * The top of every catering page: breadcrumbs and the section's own three
+ * tabs — the overview, formats and prices, questions. Words under a hairline,
+ * the current one underlined in terracotta (the site's `.tabs`).
+ * Верх каждой страницы кейтеринга: хлебные крошки и три вкладки раздела —
+ * обзор, форматы и цены, вопросы. Слова под волосяной линией, текущая
+ * подчёркнута терракотой (общие `.tabs` сайта).
+ */
+import { BASE } from '../../lib/base.ts';
+import { CATERING } from '../../lib/nav.ts';
+
+interface Props {
+  current: 'overview' | 'services' | 'faq';
+}
+
+const { current } = Astro.props;
+
+const TABS = [
+  { key: 'overview', label: 'Обзор', crumb: 'Кейтеринг и банкеты', href: CATERING },
+  { key: 'services', label: 'Форматы и цены', crumb: 'Форматы и цены', href: `${CATERING}services/` },
+  { key: 'faq', label: 'Вопросы', crumb: 'Вопросы и ответы', href: `${CATERING}faq/` },
+] as const;
+const here = TABS.find((tab) => tab.key === current)!;
+---
+
+<div class="container cg-top">
+  <nav class="crumbs" aria-label="Вы здесь">
+    <a href={BASE}>Главная</a>
+    <span aria-hidden="true">/</span>
+    {
+      current !== 'overview' && (
+        <>
+          <a href={CATERING}>Кейтеринг</a>
+          <span aria-hidden="true">/</span>
+        </>
+      )
+    }
+    <span aria-current="page">{here.crumb}</span>
+  </nav>
+  <nav class="tabs cg-tabs" aria-label="Разделы кейтеринга">
+    {
+      TABS.map((tab) => (
+        <a class="tab" href={tab.href} aria-current={tab.key === current ? 'page' : undefined}>
+          {tab.label}
+        </a>
+      ))
+    }
+  </nav>
+</div>

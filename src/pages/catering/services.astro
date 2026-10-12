@@ -1,0 +1,240 @@
+---
+/**
+ * Formats and prices in full (the old site's «Услуги»): every format is a
+ * spread — the frame to one side, to the other the price, the guests, the
+ * lead time, the description, everything that is included and the questions
+ * about it. An index at the top jumps to a format; «Обсудить» picks it in the
+ * request form that closes the page.
+ * Форматы и цены подробно (страница «Услуги» старого сайта): каждый формат —
+ * разворот: кадр с одной стороны, с другой цена, гости, срок, описание, всё,
+ * что входит, и вопросы о нём. Оглавление сверху ведёт к формату; «Обсудить»
+ * выбирает его в форме заявки, которой страница заканчивается.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Photo from '../../components/Photo.astro';
+import Icon from '../../components/Icon.astro';
+import CateringTop from '../../components/catering/CateringTop.astro';
+import QuestionList from '../../components/catering/QuestionList.astro';
+import RequestSection from '../../components/catering/RequestSection.astro';
+import { BASE } from '../../lib/base.ts';
+import { BRAND } from '../../data/site.ts';
+import { CATERING } from '../../lib/nav.ts';
+import { getContent, typo } from '../../lib/content.ts';
+import { priceLine } from '../../lib/catering.ts';
+import { cateringJsonLd } from '../../lib/catering-seo.ts';
+import { shareImage } from '../../lib/share-image.ts';
+import '../../styles/catering.css';
+
+const content = await getContent();
+const { catering, settings } = content;
+const { page, formats } = catering;
+
+const title = page?.seo.servicesTitle ?? `Форматы и цены кейтеринга — ${BRAND.name}`;
+const description =
+  page?.seo.servicesDescription ??
+  'Доставка боксов, фуршет, кофе-брейк, праздники и корпоративы в Самаре: что входит в каждый формат, сколько гостей и как заказать.';
+
+const site = Astro.site ?? new URL('https://vkus-com.ru');
+// the business picture for search is the first screen's photo
+// картинка заведения для поиска — фото первого экрана
+const heroUrl = await shareImage(page?.heroImage, site);
+const jsonLd = cateringJsonLd(content, site, 'services', heroUrl);
+const total = String(formats.length).padStart(2, '0');
+---
+
+<BaseLayout
+  content={content}
+  title={title}
+  description={description}
+  noindex={formats.length === 0}
+  landing={false}
+  ogImage={formats.find((format) => format.photo && !format.photo.placeholder)?.photo ?? page?.heroImage}
+  stickyAction={{ label: 'Оставить заявку', href: '#request' }}
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} is:inline />
+  <Header content={content} over={false} />
+
+  <main id="main" class="cg" tabindex="-1">
+    <CateringTop current="services" />
+
+    <section class="cg-intro" id="top" aria-labelledby="svc-title">
+      <div class="container">
+        <div class="cg-intro__text" data-reveal>
+          <span class="mark cg-mark" aria-hidden="true"></span>
+          <h1 class="display-caps cg-intro__title" id="svc-title">Форматы и цены</h1>
+          <p class="lead cg-intro__lead">
+            {
+              typo(
+                formats.length
+                  ? (page?.formatsText ??
+                      'Что входит в каждый формат, сколько гостей он вмещает и с какой цены начинается.')
+                  : 'Форматы и цены переносим на сайт. Пока расскажем всё по телефону.',
+              )
+            }
+          </p>
+        </div>
+        {
+          formats.length > 0 && (
+            <nav class="cg-index" aria-label="Форматы на странице">
+              <ol role="list">
+                {formats.map((format, i) => (
+                  <li>
+                    <a href={`#${format.slug}`}>
+                      <span class="cg-index__n tnum" aria-hidden="true">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <span class="cg-index__name">{format.title}</span>
+                      <span class="cg-index__price tnum">{priceLine(format) ?? 'по смете'}</span>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          )
+        }
+      </div>
+    </section>
+
+    {
+      formats.length === 0 && (
+        <section class="cg-sec cg-empty" aria-label="Форматы">
+          <div class="container cg-empty__panel">
+            <Icon name="cloche" />
+            <p class="display cg-empty__title">Форматы и цены скоро появятся</p>
+            <a class="btn btn--primary" href={settings.phoneHref}>
+              Позвонить {settings.phone}
+            </a>
+          </div>
+        </section>
+      )
+    }
+
+    {
+      formats.map((format, i) => (
+        <section class="svc" id={format.slug} aria-labelledby={`svc-${format.slug}`}>
+          <div class:list={['container', 'svc__grid', i % 2 === 1 && 'svc__grid--flip']}>
+            <div class="svc__frame" data-reveal="self">
+              {format.photo && !format.photo.placeholder ? (
+                <Photo
+                  photo={format.photo}
+                  ratio="4 / 3"
+                  ratioMd="4 / 5"
+                  radius="var(--r-sq)"
+                  sizes="(min-width: 1200px) 520px, (min-width: 768px) 42vw, 100vw"
+                  eager={i === 0}
+                  class="svc__photo"
+                />
+              ) : (
+                <div class:list={['stub', 'svc__stub', i % 2 === 0 && 'stub--ink']}>
+                  <span class="stub__title">{format.title}</span>
+                  <span class="stub__meta">фото скоро появится</span>
+                </div>
+              )}
+            </div>
+
+            <div class="svc__body">
+              <p class="svc__n tnum" aria-hidden="true">
+                {String(i + 1).padStart(2, '0')} / {total}
+              </p>
+              <h2 class="display-caps svc__title" id={`svc-${format.slug}`} tabindex="-1">
+                {format.title}
+              </h2>
+
+              <dl class="svc__facts">
+                <div>
+                  <dt class="label">Цена</dt>
+                  <dd>
+                    {format.price ? (
+                      <>
+                        <span class="display tnum svc__price">{format.price.text}</span> {format.price.unit}
+                        {format.price.note && <span class="svc__note">{typo(format.price.note)}</span>}
+                      </>
+                    ) : (
+                      <>
+                        <span class="display svc__price">По смете</span>
+                        <span class="svc__note">посчитаем под ваш план</span>
+                      </>
+                    )}
+                  </dd>
+                </div>
+                {format.guests && (
+                  <div>
+                    <dt class="label">Гостей</dt>
+                    <dd>{format.guests}</dd>
+                  </div>
+                )}
+                {format.leadTime && (
+                  <div>
+                    <dt class="label">Срок</dt>
+                    <dd>{format.leadTime}</dd>
+                  </div>
+                )}
+              </dl>
+
+              {format.description.length > 0 && (
+                <div class="svc__text">
+                  {format.description.map((part) => (
+                    <p>{typo(part)}</p>
+                  ))}
+                </div>
+              )}
+
+              {format.includes.length > 0 && (
+                <div class="svc__block">
+                  <h3 class="label svc__block-title">Что входит</h3>
+                  <ul class="svc__inc" role="list">
+                    {format.includes.map((item) => (
+                      <li>
+                        <Icon name="check" />
+                        <span>{typo(item)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <div class="svc__actions">
+                {/* the name is in the heading above; spoken, it stays in the label
+                    имя — в заголовке над кнопкой; для чтения вслух оно остаётся в подписи */}
+                <a class="btn btn--primary" href="#request" data-pick-format={format.id}>
+                  Обсудить формат<span class="sr-only"> «{format.title}»</span>
+                </a>
+                <a class="btn btn--secondary" href={settings.phoneHref}>
+                  <Icon name="phone" class="ico--tilt" />
+                  Позвонить
+                </a>
+              </div>
+
+              {format.questions.length > 0 && (
+                <div class="svc__block svc__qa">
+                  <h3 class="label svc__block-title">Частые вопросы</h3>
+                  <QuestionList questions={format.questions} level={4} prefix={`${format.slug}-`} class="qa-list--compact" />
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      ))
+    }
+
+    {
+      formats.length > 0 && (
+        <p class="container cg-formats__more cg-formats__more--page">
+          <a class="tlink tlink--go" href={`${CATERING}faq/`}>
+            <span>Все вопросы о банкетах и кейтеринге</span>
+          </a>
+        </p>
+      )
+    }
+
+    <RequestSection content={content} />
+  </main>
+
+  <Footer content={content} base={BASE} />
+</BaseLayout>
+
+<script>
+  import '../../scripts/catering';
+</script>

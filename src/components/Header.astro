@@ -13,7 +13,7 @@ import { Image } from 'astro:assets';
 import logo from '../assets/logo.png';
 import { BRAND } from '../data/site';
 import { BASE } from '../lib/base.ts';
-import { navFor, orderLinkFor } from '../lib/nav.ts';
+import { currentOf, navFor, orderLinkFor } from '../lib/nav.ts';
 import Icon from './Icon.astro';
 import type { Content } from '../lib/content.ts';
 
@@ -60,7 +60,7 @@ const showCart = content.catalog.count > 0;
       <nav class="header__nav" aria-label="Основная навигация">
         {
           nav.map((item) => (
-            <a href={item.href} aria-current={item.href === here ? 'page' : undefined}>
+            <a href={item.href} aria-current={currentOf(item.href, here)}>
               {item.label}
             </a>
           ))
@@ -406,9 +406,13 @@ const showCart = content.catalog.count > 0;
        По центру между логотипом и действиями, прописными вразрядку: так
        навигацию ставят референсы (Green Park, Levantine); мелкие пункты,
        прижатые к логотипу, читались конструктором. */
+    /* Seven sections since «Кейтеринг» joined: at 768-1023 the step and the
+       tracking tighten so the row still holds the call button.
+       Семь разделов с приходом «Кейтеринга»: на 768-1023 шаг и разрядка
+       ужимаются, чтобы в строке осталась трубка. */
     .header__nav {
       flex-direction: row;
-      gap: 14px;
+      gap: 11px;
       margin-inline: auto;
     }
 
@@ -416,7 +420,7 @@ const showCart = content.catalog.count > 0;
       padding-block: 4px;
       font-size: 10.5px;
       font-weight: 500;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
       white-space: nowrap;
       border-bottom: 1px solid transparent;
@@ -465,7 +469,8 @@ const showCart = content.catalog.count > 0;
       display: none;
     }
 
-    .header__nav a[aria-current='page'] {
+    .header__nav a[aria-current='page'],
+    .header__nav a[aria-current='true'] {
       color: var(--text);
       border-bottom-color: var(--terracotta);
     }

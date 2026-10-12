@@ -11,21 +11,31 @@ interface Props {
   settings: Settings;
   /** куда ведёт «Заказать доставку»: каталог на сайте (`orderLinkFor`) */
   order: { href: string; external: boolean };
+  /** своё главное действие страницы: у кейтеринга — «Оставить заявку» к форме */
+  action?: { label: string; href: string };
 }
 
-const { settings, order } = Astro.props;
+const { settings, order, action } = Astro.props;
 ---
 
 <div class="bar" id="sticky-bar">
   <a class="btn btn--secondary" href={settings.phoneHref}>Позвонить</a>
-  <a
-    class="btn btn--primary"
-    href={order.href}
-    target={order.external ? '_blank' : undefined}
-    rel={order.external ? 'noopener' : undefined}
-  >
-    Заказать доставку
-  </a>
+  {
+    action ? (
+      <a class="btn btn--primary" href={action.href}>
+        {action.label}
+      </a>
+    ) : (
+      <a
+        class="btn btn--primary"
+        href={order.href}
+        target={order.external ? '_blank' : undefined}
+        rel={order.external ? 'noopener' : undefined}
+      >
+        Заказать доставку
+      </a>
+    )
+  }
 </div>
 
 <style>

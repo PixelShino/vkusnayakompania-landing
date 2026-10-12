@@ -1,0 +1,78 @@
+---
+/**
+ * «Come over»: the two halls as the place for a tasting, a look at the room or
+ * a meeting with the manager. The same ledger as the site's contacts — the
+ * address in caps antiqua, the kind, the phone and the hours under small caps
+ * labels, a framed route button and a link to the card on Maps.
+ * «Приезжайте к нам»: два зала — место для дегустации, просмотра площадки или
+ * встречи с менеджером. Тот же реестр, что в контактах сайта: адрес прописной
+ * антиквой, тип, телефон и часы под мелкими подписями, кнопка маршрута в рамке
+ * и ссылка на карточку в Картах.
+ */
+import Icon from '../Icon.astro';
+import { hoursRows, yandexOrgUrl, yandexRouteUrl } from '../../data/site.ts';
+import { typo, type Content } from '../../lib/content.ts';
+
+interface Props {
+  content: Content;
+}
+
+const { places, catering } = Astro.props.content;
+const text = catering.page?.contactsText;
+---
+
+<section class="cg-sec strip-paper cg-visit" id="contacts" aria-labelledby="visit-title">
+  <div class="container">
+    <div class="head" data-reveal>
+      <span class="mark" aria-hidden="true"></span>
+      <h2 class="display-caps" id="visit-title">Приезжайте к нам</h2>
+      {text && <p class="lead">{typo(text)}</p>}
+    </div>
+    <div class="visit">
+      {
+        places.map((place) => (
+          <article class="visit__place" data-reveal>
+            <h3 class="visit__name display display-caps">{place.name}</h3>
+            <p class="visit__kind">{place.kind}</p>
+            <dl class="visit__facts">
+              <div>
+                <dt class="label">
+                  <Icon name="phone" />
+                  Телефон
+                </dt>
+                <dd>
+                  <a class="visit__tel display tnum" href={place.phoneHref}>
+                    {place.phone}
+                  </a>
+                </dd>
+              </div>
+              <div>
+                <dt class="label">
+                  <Icon name="clock" />
+                  Часы
+                </dt>
+                <dd>
+                  {hoursRows(place.schedule).map((row) => (
+                    <span class="visit__hours">
+                      <span>{row.days}</span>
+                      <span class="tnum">{row.hours}</span>
+                    </span>
+                  ))}
+                </dd>
+              </div>
+            </dl>
+            <div class="visit__actions">
+              <a class="btn btn--secondary btn--md" href={yandexRouteUrl(place)} target="_blank" rel="noopener">
+                <Icon name="pin" />
+                Построить маршрут
+              </a>
+              <a class="tlink tlink--go tlink--out" href={yandexOrgUrl(place.yandex_org)} target="_blank" rel="noopener">
+                <span>На Яндекс Картах</span>
+              </a>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>

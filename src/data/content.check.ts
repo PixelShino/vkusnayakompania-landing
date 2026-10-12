@@ -210,10 +210,13 @@ assert.equal(
   // catalog; the settings keep the app links for the admin and are not printed
   // что печатает страница: тексты главной, акции, направления, афиша, торты,
   // каталог; ссылки на приложение в настройках остаются для админки и не выводятся
+  // the catering section too, and the old catering site is not linked from anywhere
+  // раздел кейтеринга тоже, и на старый сайт кейтеринга ничто не ссылается
   for (const shown of [content, fromAdmin]) {
     const { app_screenshot: _shot, ...homeShown } = shown.home;
-    const printed = JSON.stringify([homeShown, shown.promos, shown.directions, shown.afisha, shown.cakes, shown.catalog]);
-    const leak = printed.match(/[^"]{0,40}(приложени|app\s?store|google\s?play|apps\.apple|play\.google|vkusdostavka)[^"]{0,40}/i);
+    const { catering_url: _c, catering_services_url: _s, ...settingsShown } = shown.settings;
+    const printed = JSON.stringify([homeShown, settingsShown, shown.promos, shown.directions, shown.afisha, shown.cakes, shown.catalog, shown.catering]);
+    const leak = printed.match(/[^"]{0,40}(приложени|app\s?store|google\s?play|apps\.apple|play\.google|vkusdostavka|vkusnayakompania\.ru)[^"]{0,40}/i);
     assert.equal(leak, null, `на сайте осталось упоминание приложения: «${leak?.[0]}»`);
   }
 }
@@ -464,3 +467,231 @@ if (rawCats.length && rawDishes.length) {
 console.log(
   `каталог фикстуры: разделов ${catalog.categories.length}, блюд ${catalog.count} — проверки каталога, корзины и заказа прошли`,
 );
+
+// ── кейтеринг и банкеты ──────────────────────────────────────────────────────
+// Раздел /catering/ собирается из пяти коллекций; любой из них может не быть
+// (схема ещё не применена) — тогда раздел пустой, а сборка не падает.
+{
+  const { guestsText, priceLine } = await import('../lib/catering.ts');
+  const { catering: c } = content;
+  const rawFaq = raw.catering_faq ?? [];
+
+  // фикстура: страница, пять форматов, четыре шага, все вопросы, кроме вопроса про приложение
+  assert.ok(c.ready, 'кейтеринг: в фикстуре раздел не готов (нет страницы или форматов)');
+  assert.ok(c.page?.heroImage, 'кейтеринг: нет фото первого экрана');
+  assert.equal(c.formats.length, 5, 'кейтеринг: со старого сайта перенесены пять форматов');
+  assert.equal(c.steps.length, 4, 'кейтеринг: четыре шага');
+  assert.deepEqual(c.steps.map((step) => step.n), ['01', '02', '03', '04']);
+  assert.equal(c.questions.length, rawFaq.filter((row) => row.status === 'published').length, 'кейтеринг: вопрос потерялся по дороге');
+  assert.ok(c.questions.length >= 39, `кейтеринг: вопросов ${c.questions.length}, со старого сайта перенесено 39`);
+  assert.ok(c.topics.length > 1, 'кейтеринг: вопросы не разложены по темам');
+  assert.equal(
+    c.topics.reduce((sum, topic) => sum + topic.questions.length, 0),
+    c.questions.length,
+    'кейтеринг: вопрос не попал ни в одну тему или попал в две',
+  );
+  assert.ok(c.featured.length > 0 && c.featured.length <= 8, `кейтеринг: на обзорной ${c.featured.length} вопросов`);
+  assert.ok(c.gallery.length > 0, 'кейтеринг: пустая лента фото');
+
+  // якоря: форматы, вопросы и темы — без повторов и без имён секций страницы
+  for (const list of [c.formats.map((f) => f.slug), c.questions.map((q) => q.slug), c.topics.map((t) => t.slug)])
+    assert.equal(new Set(list).size, list.length, `кейтеринг: повтор якоря среди ${list.join(', ')}`);
+  for (const slug of c.formats.map((f) => f.slug))
+    assert.ok(!['request', 'formats', 'faq', 'top', 'contacts'].includes(slug), `кейтеринг: якорь формата «${slug}» занят секцией`);
+
+  // цены и гости: «от 3 500 ₽» и «за гостя», «до 140 гостей»; без цены — «по смете»
+  for (const format of c.formats) {
+    if (format.price) assert.match(format.price.text, /^от \d[\d   ]* ₽$/, `формат «${format.title}»: цена ${format.price.text}`);
+    assert.ok(format.includes.length > 0, `формат «${format.title}»: пустое «что входит»`);
+    assert.ok(format.description.length > 0, `формат «${format.title}»: нет описания`);
+  }
+  assert.ok(c.formats.some((format) => !format.price), 'кейтеринг: кофе-брейк идёт без цены — «по смете»');
+  const party = c.formats.find((format) => format.guestsTo === 140);
+  assert.ok(party, 'кейтеринг: нет формата «до 140 гостей»');
+  assert.equal(priceLine(party!), `${party!.price!.text} за гостя`);
+  assert.equal(guestsText(undefined, 140), 'до 140 гостей');
+  assert.equal(guestsText(20, 140), 'от 20 до 140 гостей');
+  assert.equal(guestsText(1), 'от 1 гостя');
+  assert.equal(guestsText(undefined, 21), 'до 21 гостя');
+  assert.equal(guestsText(), undefined);
+
+  // SEO трёх страниц — в пределах выдачи
+  for (const [name, text, max] of [
+    ['seo_title', c.page?.seo.title, 60],
+    ['seo_description', c.page?.seo.description, 160],
+    ['services_seo_title', c.page?.seo.servicesTitle, 60],
+    ['services_seo_description', c.page?.seo.servicesDescription, 160],
+    ['faq_seo_title', c.page?.seo.faqTitle, 60],
+    ['faq_seo_description', c.page?.seo.faqDescription, 160],
+  ] as const) {
+    assert.ok(text, `catering_page.${name}: пусто`);
+    assert.ok(text!.length <= max, `catering_page.${name}: ${text!.length} символов, максимум ${max}`);
+  }
+
+  // схема не применена: коллекций нет вовсе или Directus отдал пустые списки
+  for (const missing of [
+    { catering_page: undefined, catering_formats: undefined, catering_steps: undefined, catering_faq: undefined },
+    { catering_page: [], catering_formats: [], catering_steps: [], catering_faq: [] },
+  ]) {
+    const empty = check({ ...raw, ...missing } as unknown as Raw, resolve).catering;
+    assert.equal(empty.ready, false, 'кейтеринг: без коллекций раздел не готов');
+    assert.equal(empty.page, null);
+    assert.deepEqual([empty.formats, empty.questions, empty.steps], [[], [], []]);
+  }
+  // страница без заголовка — пустой раздел и заметка в журнале сборки
+  const untitled = check({ ...raw, catering_page: { ...raw.catering_page!, hero_title: ' ' } } as unknown as Raw, resolve);
+  assert.equal(untitled.catering.page, null);
+  assert.ok(notes.some((note) => note.includes('нет заголовка первого экрана')), 'кейтеринг: пустая страница не записана в журнал');
+
+  // вопрос про приложение (был на старом сайте) на сайт не попадает и пишется в журнал
+  const appQuestion = {
+    ...rawFaq[0],
+    id: 9101,
+    question: 'Можно ли заказать через приложение?',
+    answer: 'Да, скачайте наше приложение.',
+    featured: true,
+  };
+  const withApp = check({ ...raw, catering_faq: [...rawFaq, appQuestion] } as unknown as Raw, resolve).catering;
+  assert.ok(!withApp.questions.some((q) => q.id === appQuestion.id), 'кейтеринг: вопрос про приложение попал на сайт');
+  assert.ok(notes.some((note) => note.includes(appQuestion.question)), 'кейтеринг: вопрос про приложение не записан в журнал');
+  // черновик не выводится; без отмеченных на обзорной — первые шесть
+  const drafts = check(
+    { ...raw, catering_faq: rawFaq.map((row, i) => ({ ...row, status: i === 0 ? 'draft' : row.status, featured: false })) } as unknown as Raw,
+    resolve,
+  ).catering;
+  assert.equal(drafts.questions.length, c.questions.length - 1, 'кейтеринг: черновик вопроса на сайте');
+  assert.deepEqual(drafts.featured.map((q) => q.id), drafts.questions.slice(0, 6).map((q) => q.id));
+  // формат без названия пропущен, одинаковые slug разведены
+  const twins = check(
+    {
+      ...raw,
+      catering_formats: [
+        ...(raw.catering_formats ?? []),
+        { ...raw.catering_formats![0], id: 9201, sort: 99 },
+        { ...raw.catering_formats![0], id: 9202, title: '', sort: 100 },
+      ],
+    } as unknown as Raw,
+    resolve,
+  ).catering;
+  assert.equal(twins.formats.length, c.formats.length + 1, 'кейтеринг: формат без названия не пропущен');
+  assert.equal(new Set(twins.formats.map((f) => f.slug)).size, twins.formats.length, 'кейтеринг: одинаковые slug не разведены');
+}
+
+// ── заявка на кейтеринг: сайт и хук `request-guard` ──────────────────────────
+{
+  const { validateRequest, buildRequest, REQUEST_LIMITS, samaraToday, latestDate, guestsWord, dateWords } = await import(
+    '../lib/request.ts'
+  );
+  type RequestForm = Parameters<typeof validateRequest>[0];
+  const { normalizePhone } = await import('../lib/order.ts');
+  const guard = await import('../../directus/extensions/request-guard/index.js');
+  const today = '2026-10-12';
+  const base = {
+    name: ' Анна ',
+    phone: '8 (987) 955 25 65',
+    date: '2026-12-20',
+    guests: '40',
+    format: 3,
+    where: 'place:1' as const,
+    address: 'не нужен',
+    wishes: '  Юбилей  ',
+    consent: true,
+  };
+
+  assert.deepEqual(validateRequest(base, today), {}, 'заявка: заполненная форма проходит');
+  const payload = buildRequest(base, '1210-0001');
+  assert.deepEqual(payload, {
+    number: '1210-0001',
+    name: 'Анна',
+    phone: '+7 987 955-25-65',
+    event_date: '2026-12-20',
+    guests: 40,
+    format: 3,
+    venue: 'hall',
+    place: 1,
+    address: null,
+    wishes: 'Юбилей',
+    consent: true,
+  });
+  assert.equal(buildRequest({ ...base, where: 'offsite', address: ' Дача ' }, 'x').address, 'Дача', 'заявка: адрес выезда');
+  assert.deepEqual(
+    (({ venue, place, address }) => ({ venue, place, address }))(buildRequest({ ...base, where: 'unknown' }, 'x')),
+    { venue: 'unknown', place: null, address: null },
+  );
+  // только имя, телефон и согласие — дата, гости и формат необязательны
+  const bare = { name: 'Анна', phone: '9879552565', where: 'unknown' as const, consent: true };
+  assert.deepEqual(validateRequest(bare, today), {});
+  assert.deepEqual(
+    (({ event_date, guests, format, wishes }) => ({ event_date, guests, format, wishes }))(buildRequest(bare, 'x')),
+    { event_date: null, guests: null, format: null, wishes: null },
+  );
+
+  // ошибки по полям
+  assert.deepEqual(
+    Object.keys(validateRequest({ name: ' ', phone: '123', where: 'unknown', consent: false }, today)).sort(),
+    ['consent', 'name', 'phone'],
+  );
+  assert.ok(validateRequest({ ...base, date: '2026-10-11' }, today).date, 'заявка: прошедшая дата прошла');
+  assert.ok(!validateRequest({ ...base, date: today }, today).date, 'заявка: сегодняшняя дата не прошла');
+  assert.ok(validateRequest({ ...base, date: '2026-02-30' }, today).date, 'заявка: 30 февраля прошло');
+  assert.ok(validateRequest({ ...base, date: '2029-01-01' }, today).date, 'заявка: дата через три года прошла');
+  assert.equal(latestDate(today), '2028-10-11');
+  for (const guests of ['0', '2001', '4,5'])
+    assert.ok(validateRequest({ ...base, guests }, today).guests, `заявка: гостей «${guests}» прошло`);
+  assert.ok(!validateRequest({ ...base, guests: '' }, today).guests, 'заявка: пустое число гостей не прошло');
+  assert.equal(guestsWord(1), '1\u00a0гость');
+  assert.equal(guestsWord(40), '40\u00a0гостей');
+  assert.equal(dateWords('2026-12-20'), 'вс, 20 декабря');
+  assert.match(samaraToday(new Date('2026-10-12T21:30:00Z')), /^2026-10-13$/, 'заявка: «сегодня» считается по Самаре');
+
+  // хук повторяет правила сайта: то, что сайт пропустил, сервер принимает,
+  // и наоборот; пределы и «сегодня» одни и те же
+  assert.deepEqual(guard.LIMITS, REQUEST_LIMITS, 'заявка: пределы сайта и хука расходятся');
+  assert.equal(guard.samaraToday(new Date('2026-10-12T21:30:00Z')), samaraToday(new Date('2026-10-12T21:30:00Z')));
+  for (const sample of ['8 (987) 955 25 65', '+7 987 955-25-65', '9879552565', '+7 (123) 955-25-65', '12345', ''])
+    assert.equal(guard.normalizePhone(sample), normalizePhone(sample), `телефон «${sample}»: сайт и хук заявок расходятся`);
+  const samples: RequestForm[] = [
+    base,
+    bare,
+    { ...base, where: 'offsite' as const, address: 'Дача в Царевщине' },
+    { ...base, date: '2026-10-11' },
+    { ...base, date: '2029-01-01' },
+    { ...base, guests: '0' },
+    { ...base, guests: '2001' },
+    { ...base, phone: '+7 (123) 955-25-65' },
+    { ...base, name: '   ' },
+    { ...base, consent: false },
+  ];
+  // what a script would send bypassing the form: the fields as typed
+  // то, что пришлёт скрипт в обход формы: поля как набраны
+  const asTyped = (form: RequestForm) => ({
+    ...buildRequest(form, 'x'),
+    name: form.name,
+    phone: form.phone,
+    event_date: form.date ?? null,
+    guests: form.guests ?? null,
+    consent: form.consent,
+  });
+  for (const form of samples) {
+    const siteOk = Object.keys(validateRequest(form, today)).length === 0;
+    let serverOk = true;
+    let reason = '';
+    try {
+      const clean = guard.checkRequest(siteOk ? buildRequest(form, 'x') : asTyped(form), today);
+      if (siteOk) assert.equal(clean.phone, buildRequest(form, 'x').phone, 'заявка: хук переписал телефон');
+    } catch (error) {
+      serverOk = false;
+      reason = (error as Error).message;
+      assert.equal((error as { status?: number }).status, 400, 'заявка: отказ хука — не 400');
+    }
+    assert.equal(serverOk, siteOk, `заявка ${JSON.stringify(form)}: сайт ${siteOk ? 'пропускает' : 'не пускает'}, хук — ${reason || 'принимает'}`);
+  }
+  // зал без номера и формат строкой — только от скрипта в обход формы
+  assert.throws(() => guard.checkRequest({ ...buildRequest(base, 'x'), place: null }, today), /зал/);
+  assert.throws(() => guard.checkRequest({ ...buildRequest(base, 'x'), format: 'фуршет' }, today), /формат/i);
+  // лишние поля и чужой статус хук не пропускает
+  const forged = guard.checkRequest({ ...buildRequest(base, 'x'), status: 'done', manager_note: 'x' }, today);
+  assert.ok(!('status' in forged) && !('manager_note' in forged), 'заявка: хук пропустил статус от гостя');
+}
+
+console.log('кейтеринг фикстуры и заявка: проверки прошли');

@@ -1,0 +1,85 @@
+---
+/**
+ * Photos from the parties as a rail of upright frames: the old site's shots
+ * are portraits, and a wide film frame would crop the faces out. Several
+ * frames in view on a desktop, one and a peek on a phone; swipe, drag, the
+ * arrows and the keys page by frame (`catering.ts`: the rail starts at the
+ * container edge, so it pages from the left, not from the centre like the
+ * landing's film strip). A caption under a frame only when the admin has one.
+ * Фото с праздников лентой вертикальных кадров: снимки старого сайта
+ * портретные, и широкий кинокадр срезал бы лица. На десктопе в кадре
+ * несколько, на телефоне один и краешек следующего; свайп, перетаскивание,
+ * стрелки и клавиши листают по кадру (`catering.ts`: лента начинается от края
+ * контейнера и листается слева, а не от центра, как кинолента лендинга).
+ * Подпись под кадром — только если она есть в админке.
+ */
+import Photo from '../Photo.astro';
+import type { Shot } from '../../lib/content.ts';
+
+interface Props {
+  shots: Shot[];
+  title?: string;
+}
+
+const { shots, title = 'Фото с наших праздников' } = Astro.props;
+const many = shots.length > 1;
+const CHEVRON = { prev: 'M14.5 5.5 8 12l6.5 6.5', next: 'M9.5 5.5 16 12l-6.5 6.5' };
+---
+
+{
+  shots.length > 0 && (
+    <section class="cg-sec cg-gallery" id="gallery" aria-labelledby="gallery-title" data-rail-root>
+      <div class="container cg-gallery__head" data-reveal>
+        <div>
+          <span class="mark cg-mark" aria-hidden="true" />
+          <h2 class="display-caps" id="gallery-title">
+            {title}
+          </h2>
+        </div>
+        {many && (
+          <div class="cg-gallery__nav">
+            <span class="cg-gallery__bar" aria-hidden="true">
+              <span class="cg-gallery__fill" data-rail-fill />
+            </span>
+            {(['prev', 'next'] as const).map((side) => (
+              <button
+                type="button"
+                class="slider-arrow"
+                {...{ [`data-rail-${side}`]: true }}
+                aria-disabled={side === 'prev' ? 'true' : undefined}
+                aria-label={side === 'prev' ? 'Предыдущие фото' : 'Следующие фото'}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d={CHEVRON[side]} />
+                </svg>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <div class="cg-rail" data-rail tabindex="0" role="group" aria-label="Фото с праздников и залов, листается стрелками">
+        {shots.map((shot, i) => (
+          <figure class="cg-rail__item">
+            {shot.image.placeholder ? (
+              <div class:list={['stub', 'cg-rail__stub', i % 2 === 0 && 'stub--ink']}>
+                <span class="stub__title">{shot.caption ?? 'Фото'}</span>
+                <span class="stub__meta">фото скоро появится</span>
+              </div>
+            ) : (
+              <Photo
+                photo={shot.image}
+                ratio="4 / 5"
+                radius="var(--r-sq)"
+                sizes="(min-width: 1200px) 320px, (min-width: 768px) 36vw, 70vw"
+                class="cg-rail__photo"
+                eager={i < 3}
+                priority="low"
+              />
+            )}
+            {shot.caption && !shot.image.placeholder && <figcaption class="tag cg-rail__caption">{shot.caption}</figcaption>}
+          </figure>
+        ))}
+      </div>
+    </section>
+  )
+}

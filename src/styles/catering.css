@@ -1,0 +1,2283 @@
+/* Catering and banquets: /catering/, /catering/services/, /catering/faq/.
+   One sheet, like the catalog's: the request form's states and the accordion
+   are toggled by the page script, and Astro's scoped styles would not reach
+   what it changes. The vocabulary is the landing's (`docs/DESIGN.md`): paper
+   and ink bands, Prata caps for headings, the mark over them, hairlines
+   instead of card frames, squared 3 px stamps, terracotta as a signal and
+   olive as the action.
+   Кейтеринг и банкеты: /catering/, /catering/services/, /catering/faq/.
+   Один файл, как у каталога: состояния формы заявки и аккордеон переключает
+   скрипт страницы, и скоуповые стили Astro до того, что он меняет, не
+   дотянулись бы. Словарь — лендинга (`docs/DESIGN.md`): бумажные и
+   чернильные полосы, прописная Prata в заголовках, марка над ними, волосяные
+   линии вместо рамок-карточек, квадратные оттиски 3 px, терракота — сигнал,
+   олива — действие. */
+
+/* `hidden` wins over component display rules (`.btn` is inline-flex), except
+   the folded answer: `until-found` must stay searchable, so it keeps the
+   browser's own `content-visibility: hidden` instead of `display: none`
+   `hidden` сильнее правил отображения (`.btn` — inline-flex), кроме
+   свёрнутого ответа: `until-found` должен оставаться находимым поиском,
+   поэтому у него браузерное `content-visibility: hidden`, а не `display: none` */
+.cg [hidden]:not([hidden='until-found']) {
+  display: none !important;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* the mark at the left edge: these blocks read left-aligned, not on the axis
+   марка у левого края: эти блоки читаются слева, а не по оси */
+.cg-mark {
+  margin-inline: 0;
+}
+
+.cg-sec {
+  padding-block: var(--sec-pad);
+}
+
+/* ── верх: крошки и вкладки раздела ──────────────────────────────────────── */
+
+.cg-top {
+  padding-top: 16px;
+}
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+
+/* цель нажатия 44 px при строке 15: паддинг растит зону, не сдвигая строку */
+.crumbs a {
+  margin-block: -14px;
+  padding-block: 14px;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--line-4);
+  text-underline-offset: 3px;
+  transition: color 0.16s ease;
+}
+
+.crumbs [aria-current] {
+  color: var(--text-2);
+}
+
+/* the section's own tabs: words under a hairline; on a phone the row may
+   scroll sideways rather than wrap into a ragged second line
+   вкладки раздела: слова под волосяной линией; на телефоне строка скорее
+   уедет вбок, чем переломится рваной второй строкой */
+.cg-tabs {
+  flex-wrap: nowrap;
+  gap: 0 22px;
+  margin-top: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.cg-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.cg-tabs .tab {
+  flex: none;
+  text-decoration: none;
+}
+
+.cg-tabs .tab[aria-current='page'] {
+  color: var(--text);
+  border-bottom-color: var(--terracotta);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .crumbs a:hover {
+    color: var(--terracotta-text);
+  }
+}
+
+/* ── первый экран ─────────────────────────────────────────────────────────── */
+
+.cg-hero {
+  padding-block: 26px 0;
+}
+
+.cg-hero__grid {
+  display: grid;
+  gap: 26px;
+}
+
+.cg-hero__title {
+  max-width: 18ch;
+  margin-top: 18px;
+  font-size: clamp(26px, 7.6vw, 34px);
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.cg-hero__lead {
+  margin-top: 14px;
+  max-width: 44ch;
+}
+
+.cg-hero__cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.cg-hero__cta .btn {
+  flex: 1 1 auto;
+}
+
+.cg-hero__note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-3);
+}
+
+.cg-hero__note .ico {
+  width: 18px;
+  height: 18px;
+  color: var(--olive);
+}
+
+/* on a phone the photo runs to both screen edges — the frame is the first
+   thing the thumb scrolls into
+   на телефоне фото идёт до обоих краёв экрана — первое, во что упирается
+   прокрутка большим пальцем */
+.cg-hero__frame {
+  margin-inline: calc(var(--pad) * -1);
+}
+
+.cg-hero__frame .media {
+  --radius: 0;
+}
+
+.cg-hero__stub {
+  aspect-ratio: 4 / 3;
+  border-radius: 0;
+}
+
+/* ── цифры под первым экраном ─────────────────────────────────────────────── */
+
+.cg-facts {
+  padding-block: 8px;
+}
+
+.cg-facts__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-block: 0;
+  list-style: none;
+}
+
+.cg-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 12px 18px 0;
+}
+
+/* hairlines between the cells, never around them
+   волосяные линии между ячейками, но не вокруг */
+.cg-fact:nth-child(even) {
+  padding-left: 18px;
+  border-left: 1px solid rgb(247 241 226 / 0.16);
+}
+
+.cg-fact:nth-child(n + 3) {
+  border-top: 1px solid rgb(247 241 226 / 0.16);
+}
+
+.cg-fact__value {
+  font-size: clamp(26px, 7vw, 32px);
+  line-height: 1;
+  color: var(--on-ink);
+  white-space: nowrap;
+}
+
+.cg-fact__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  color: var(--on-ink-2);
+}
+
+/* ── форматы: строки прейскуранта ─────────────────────────────────────────── */
+
+.fmts {
+  margin: 30px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fmt {
+  display: grid;
+  gap: 18px;
+  padding-block: 26px;
+  border-top: 1px solid var(--line-4);
+  scroll-margin-top: calc(var(--header-h) + 12px);
+}
+
+.fmt:last-child {
+  border-bottom: 1px solid var(--line-4);
+}
+
+.fmt__frame .media img {
+  outline: 1px solid rgb(0 0 0 / 0.08);
+  outline-offset: -1px;
+}
+
+.fmt__stub {
+  aspect-ratio: 4 / 3;
+}
+
+.fmt__n {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--terracotta-text);
+}
+
+.fmt__title {
+  margin-top: 6px;
+  font-size: clamp(24px, 6.4vw, 28px);
+  line-height: 1.1;
+}
+
+.fmt__text {
+  max-width: 58ch;
+  margin-top: 10px;
+  font-size: var(--fs-body);
+  color: var(--text-2);
+}
+
+.fmt__inc,
+.svc__inc {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fmt__inc li,
+.svc__inc li {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+/* on a phone a row shows three lines of what is included: the full list is on
+   «Форматы и цены», and four made every row a screen long
+   на телефоне строка показывает три пункта «что входит»: полный список — на
+   «Форматах и ценах», а четыре делали каждую строку длиной в экран */
+@media (max-width: 767px) {
+  .fmt__inc li:nth-child(n + 4) {
+    display: none;
+  }
+}
+
+.fmt__inc .ico,
+.svc__inc .ico {
+  width: 20px;
+  height: 20px;
+  color: var(--olive);
+}
+
+/* the price as a menu sets it: the figure in antiqua, what it is for in small
+   type under it
+   цена, как её ставит меню: цифра антиквой, за что — мелким под ней */
+.fmt__aside {
+  padding-top: 18px;
+  border-top: 1px dashed var(--line-4);
+}
+
+/* the figure over what it is for, in every row alike: side by side the unit
+   wrapped under one price and not under another
+   цифра над тем, за что она, во всех строках одинаково: в строку единица
+   переносилась под одной ценой и не переносилась под другой */
+.fmt__price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.fmt__sum {
+  font-size: 28px;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+
+.fmt__unit {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-3);
+}
+
+.fmt__note {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-3);
+}
+
+.fmt__meta {
+  display: grid;
+  gap: 6px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fmt__meta li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.fmt__meta .ico {
+  width: 18px;
+  height: 18px;
+  color: var(--olive);
+}
+
+.fmt__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 22px;
+  margin-top: 18px;
+}
+
+.cg-formats__more {
+  margin-top: 26px;
+  text-align: center;
+}
+
+.cg-formats__more--page {
+  padding-block: 8px var(--sec-pad);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .fmt:hover .fmt__frame .media img {
+    scale: 1.045;
+  }
+
+  .fmt:hover .fmt__stub {
+    background-position: 26px 26px;
+  }
+}
+
+/* ── шаги на чернилах ─────────────────────────────────────────────────────── */
+
+.cg-steps__grid {
+  display: grid;
+  grid-template-areas: 'head' 'steps' 'chat' 'ps';
+  gap: 28px;
+}
+
+.cg-steps__head {
+  grid-area: head;
+}
+
+.cg-steps .mark {
+  color: var(--terracotta-on-ink);
+}
+
+.cg-steps__title {
+  max-width: 20ch;
+  margin-top: 16px;
+  font-size: var(--fs-h2);
+}
+
+.steps {
+  grid-area: steps;
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  align-content: start;
+  gap: 14px;
+  padding-block: 22px;
+  border-top: 1px solid rgb(247 241 226 / 0.16);
+}
+
+.step__n {
+  font-size: 40px;
+  line-height: 0.9;
+  color: var(--terracotta-on-ink);
+}
+
+.step__title {
+  font-size: 22px;
+  line-height: 1.15;
+  color: var(--on-ink);
+}
+
+.step__text {
+  max-width: 54ch;
+  margin-top: 8px;
+  font-size: var(--fs-body);
+  line-height: 1.55;
+}
+
+.step__contacts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 20px;
+  margin-top: 12px;
+}
+
+.strip-ink .tlink {
+  color: var(--on-ink);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .strip-ink .tlink:hover {
+    color: var(--terracotta-on-ink);
+  }
+}
+
+/* An example of the first message, labelled as one: the guest on paper, the
+   manager in olive, squared like everything else on the page.
+   Пример первой переписки, подписанный как пример: гость на бумаге, менеджер
+   оливой, квадратные, как всё на странице. */
+.chat {
+  grid-area: chat;
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.chat__label {
+  margin-bottom: 4px;
+  color: var(--on-ink-2);
+}
+
+.chat__msg {
+  max-width: 34ch;
+  padding: 12px 14px;
+  border-radius: var(--r-sq);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.strip-ink .chat__msg--guest {
+  justify-self: start;
+  background: var(--on-ink);
+  color: var(--text);
+}
+
+.strip-ink .chat__msg--manager {
+  justify-self: end;
+  background: var(--olive);
+  color: var(--bg);
+}
+
+.chat__who {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.cg-steps__ps {
+  grid-area: ps;
+  padding-top: 22px;
+  border-top: 1px solid rgb(247 241 226 / 0.16);
+}
+
+.cg-steps__ps-label {
+  color: var(--terracotta-on-ink);
+}
+
+.strip-ink .cg-steps__ps-text {
+  max-width: 62ch;
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-size: clamp(18px, 4.6vw, 22px);
+  line-height: 1.4;
+  color: var(--on-ink);
+}
+
+/* ── о нас: приоритеты реестром ───────────────────────────────────────────── */
+
+/* left-aligned, unlike the other section heads: a long paragraph centred
+   read as a ragged block
+   по левому краю, в отличие от других заголовков секций: длинный абзац по
+   центру читался рваным пятном */
+.cg-about__head {
+  text-align: left;
+}
+
+.cg-about__head .mark,
+.cg-about__head h2,
+.cg-about__head .lead {
+  margin-inline: 0;
+}
+
+.cg-about__intro {
+  max-width: 62ch;
+}
+
+.cg-about__more {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .js .prios.is-short .prio:nth-child(n + 4) {
+    display: none;
+  }
+
+  .js .prios.is-short + .cg-about__more {
+    display: inline-flex;
+    margin-top: 18px;
+  }
+
+  .prios.is-short .prio:nth-child(3) {
+    border-bottom: 1px solid var(--line-4);
+  }
+}
+
+.prios {
+  display: grid;
+  margin: 30px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prio {
+  padding-block: 22px;
+  border-top: 1px solid var(--line-4);
+}
+
+.prio__n {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--terracotta-text);
+}
+
+.prio__title {
+  margin-top: 6px;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.prio__text {
+  max-width: 52ch;
+  margin-top: 8px;
+  font-size: 14.5px;
+  color: var(--text-2);
+}
+
+/* ── лента фото ───────────────────────────────────────────────────────────── */
+
+.cg-gallery {
+  --rail-pad: max(var(--pad), calc((100% - var(--content)) / 2));
+  padding-top: 0;
+}
+
+.cg-gallery__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.cg-gallery__head h2 {
+  margin-top: 16px;
+}
+
+.cg-gallery__nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+/* where the strip is: the filled part is what is in view
+   где лента: залитый отрезок — то, что сейчас в кадре */
+.cg-gallery__bar {
+  position: relative;
+  width: 96px;
+  height: 1px;
+  margin-right: 8px;
+  overflow: hidden;
+  background: var(--line-4);
+}
+
+.cg-gallery__fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--seen, 0.3) * 100%);
+  height: 1px;
+  background: var(--olive-dark);
+  transform: translateX(calc(var(--at, 0) / var(--seen, 0.3) * 100%));
+  transition: transform 0.3s var(--ease-out);
+}
+
+.cg-rail {
+  display: flex;
+  gap: var(--gap);
+  margin-top: 24px;
+  padding-inline: var(--rail-pad);
+  scroll-padding-inline: var(--rail-pad);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cg-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.cg-rail.is-dragging {
+  scroll-snap-type: none;
+  cursor: grabbing;
+}
+
+.cg-rail:focus-visible {
+  outline-offset: -2px;
+}
+
+.cg-rail img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.cg-rail__item {
+  flex: 0 0 68vw;
+  min-width: 0;
+  margin: 0;
+  scroll-snap-align: start;
+}
+
+.cg-rail__item .media img {
+  outline: 1px solid rgb(0 0 0 / 0.08);
+  outline-offset: -1px;
+}
+
+.cg-rail__stub {
+  aspect-ratio: 4 / 5;
+}
+
+.cg-rail__caption {
+  margin-top: 10px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cg-rail {
+    cursor: grab;
+  }
+
+  .cg-rail__item:hover .media img {
+    scale: 1.045;
+  }
+}
+
+/* ── заявка: чернила и бумажная панель ────────────────────────────────────── */
+
+.cg-request__grid {
+  display: grid;
+  gap: 30px;
+}
+
+.cg-request__talk {
+  position: relative;
+}
+
+.cg-request .mark {
+  color: var(--terracotta-on-ink);
+}
+
+.cg-request__title {
+  max-width: 18ch;
+  margin-top: 16px;
+}
+
+.cg-request__lead {
+  margin-top: 12px;
+}
+
+.strip-ink .cg-request__lead {
+  color: var(--on-ink-2);
+}
+
+/* The coupon from the old site: the percent stamped large in light terracotta,
+   the condition beside it, a double hairline around like a tear-off ticket.
+   Купон со старого сайта: процент оттиском крупно светлой терракотой, условие
+   рядом, вокруг двойная волосяная линия, как у отрывного талона. */
+.coupon {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  margin-top: 22px;
+  padding: 14px 16px;
+  border: 3px double rgb(247 241 226 / 0.34);
+  border-radius: var(--r-sq);
+}
+
+.coupon__value {
+  font-size: 34px;
+  line-height: 1;
+  color: var(--terracotta-on-ink);
+  white-space: nowrap;
+}
+
+.strip-ink .coupon__text {
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--on-ink);
+}
+
+.coupon:not(:has(.coupon__value)) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* under 420 px the condition beside the percent ran five lines in a narrow
+   column: the percent goes on top, the text takes the width
+   уже 420 px условие рядом с процентом шло пятью строками узкой колонкой:
+   процент встаёт сверху, текст берёт ширину */
+@media (max-width: 419px) {
+  .coupon {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    padding: 16px;
+  }
+}
+
+.cg-request__direct {
+  margin-top: 26px;
+}
+
+.strip-ink .cg-request__direct .label {
+  color: var(--on-ink-2);
+}
+
+.cg-request__tel {
+  display: inline-block;
+  margin-top: 6px;
+  padding-block: 4px;
+  font-size: clamp(24px, 6.6vw, 30px);
+  color: var(--on-ink);
+  text-decoration: none;
+}
+
+.cg-request__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 22px;
+  margin-top: 6px;
+}
+
+.cg-request__hours {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.strip-ink .cg-request__hours {
+  color: var(--on-ink-2);
+}
+
+.cg-request__hours .ico {
+  width: 18px;
+  height: 18px;
+  color: var(--terracotta-on-ink);
+}
+
+/* the dish without a background from the old site's block, only where there
+   is room for it beside the form
+   блюдо без фона из блока старого сайта — только там, где рядом с формой
+   есть для него место */
+.cg-request__dish {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .cg-request__tel {
+    padding-block: 6px;
+    min-height: 44px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cg-request__tel:hover {
+    color: var(--terracotta-on-ink);
+  }
+}
+
+/* the panel is paper on ink: the form reads as a sheet to fill in
+   панель — бумага на чернилах: форма читается листом, который заполняют */
+.cg-request__panel {
+  padding: 22px 18px 24px;
+  border-radius: var(--r-sq);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.cg-request__panel :where(p, li, dd) {
+  color: inherit;
+}
+
+.rq__offline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  border-radius: var(--r-sq);
+  background: var(--surface-warm);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--terracotta-text);
+}
+
+.rq__pair {
+  display: grid;
+  gap: 0 14px;
+}
+
+.rq__pair--tight {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.rq__fs {
+  margin-top: 4px;
+}
+
+/* chips for the format: wrap freely, a pressed one is ink like the cart's segments
+   чипы формата: переносятся свободно, выбранный — чернилами, как сегменты корзины */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  position: relative;
+}
+
+.chip input,
+.tile input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.chip span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: var(--r-sq);
+  box-shadow: inset 0 0 0 1px var(--line-4);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-2);
+  transition-property: background-color, color, box-shadow;
+  transition-duration: 0.16s;
+}
+
+.chip input:checked + span {
+  background: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+  color: var(--on-ink);
+}
+
+.chip input:focus-visible + span,
+.tile input:focus-visible ~ .tile__name {
+  outline: 2px solid var(--terracotta);
+  outline-offset: 2px;
+}
+
+/* where: two of our halls, the guest's venue, «not decided» — tiles 2 × 2
+   где: два наших зала, площадка гостя, «пока не знаю» — плитки 2 × 2 */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 60px;
+  padding: 11px 12px;
+  border-radius: var(--r-sq);
+  box-shadow: inset 0 0 0 1px var(--line-4);
+  cursor: pointer;
+  transition-property: background-color, box-shadow;
+  transition-duration: 0.16s;
+}
+
+.tile__name {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.tile__meta {
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--text-4);
+}
+
+.tile:has(input:checked) {
+  background: var(--olive-tint);
+  box-shadow: inset 0 0 0 2px var(--olive);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .chip:hover input:not(:checked) + span {
+    box-shadow: inset 0 0 0 1px var(--text-4);
+    color: var(--text);
+  }
+
+  .tile:hover:not(:has(input:checked)) {
+    box-shadow: inset 0 0 0 1px var(--text-4);
+  }
+}
+
+.rq__address {
+  margin-top: 12px;
+}
+
+.rq__consent-err {
+  margin: 6px 0 0 30px;
+}
+
+.rq__submit {
+  margin-top: 20px;
+}
+
+.rq__foot {
+  margin-top: 10px;
+  font-size: 12.5px;
+  text-align: center;
+  color: var(--text-4);
+}
+
+/* без адреса для заявок — звонок и мессенджер вместо формы */
+.rq-call {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding-block: 12px;
+  text-align: center;
+  color: var(--text-2);
+}
+
+.rq-call .ico {
+  width: 30px;
+  height: 30px;
+  color: var(--olive);
+}
+
+.rq-call__title {
+  max-width: 22ch;
+  font-size: 24px;
+  color: var(--text);
+}
+
+.rq-call__actions {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* ── поля формы (тот же вид, что у оформления в каталоге) ─────────────────── */
+
+.fs {
+  min-width: 0;
+  margin: 0 0 18px;
+  padding: 0;
+  border: 0;
+}
+
+.fs__legend {
+  margin-bottom: 10px;
+  padding: 0;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  margin-bottom: 14px;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.field__opt {
+  font-weight: 400;
+  color: var(--text-4);
+}
+
+/* Fields sit on a shade of paper, not on white: there is no white on this
+   site, and an empty field still reads as a place to write.
+   Поля лежат на оттенке бумаги, а не на белом: белого на сайте нет, а пустое
+   поле всё равно читается местом, куда писать. */
+.field input,
+.field textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-4);
+  border-radius: var(--r-sq);
+  background: color-mix(in srgb, var(--surface) 45%, var(--bg));
+  color: var(--text);
+  font: inherit;
+  /* 16 px: iOS не увеличивает страницу при фокусе */
+  font-size: 16px;
+  line-height: 1.3;
+  transition-property: border-color, box-shadow, background-color;
+  transition-duration: 0.16s;
+}
+
+/* the date field keeps its own picker; its height must match the others
+   поле даты сохраняет свой календарь; высота — как у остальных */
+.field input[type='date'] {
+  appearance: none;
+  -webkit-appearance: none;
+  min-height: 48px;
+}
+
+.field textarea {
+  min-height: 104px;
+  resize: vertical;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--text-5);
+  opacity: 0.8;
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--olive);
+  background-color: var(--bg);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--olive) 22%, transparent);
+}
+
+.field [aria-invalid='true'] {
+  border-color: var(--terracotta);
+}
+
+.field__hint {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--text-4);
+}
+
+.field__err {
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--terracotta-text);
+}
+
+/* the error says what the hint said, sharper: one line, not two */
+/* ошибка говорит то же, что подсказка, только жёстче: одна строка, а не две */
+.field:has(.field__err:not([hidden])) .field__hint {
+  display: none;
+}
+
+.consent {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 10px;
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.consent input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--olive);
+}
+
+.consent a {
+  color: var(--text);
+  text-underline-offset: 3px;
+}
+
+/* поле-ловушка: человеку не видно и не достать Tab-ом */
+.hp {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.alert {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: var(--r-sq);
+  background: var(--surface-warm);
+  box-shadow: inset 0 0 0 1px var(--line-warm);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.alert__title {
+  margin-bottom: 4px;
+  font-weight: 700;
+  color: var(--terracotta-text);
+}
+
+.alert__actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* sending: the label stays, a hairline sweep runs under it — no spinner in the middle of a button */
+/* отправка: подпись остаётся, под ней бежит волосяная полоса — без спиннера посреди кнопки */
+[data-submit] {
+  position: relative;
+  overflow: hidden;
+}
+
+[data-submit][aria-busy='true'] {
+  cursor: progress;
+}
+
+[data-submit][aria-busy='true']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 40%;
+  height: 2px;
+  background: var(--bg);
+  animation: cg-sending 1.1s var(--ease-in-out) infinite;
+}
+
+@keyframes cg-sending {
+  from {
+    translate: -100% 0;
+  }
+
+  to {
+    translate: 260% 0;
+  }
+}
+
+/* ── заявка принята ───────────────────────────────────────────────────────── */
+
+.rq-done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-block: 18px 6px;
+  text-align: center;
+  animation: cg-in 0.45s var(--ease-out) both;
+}
+
+@keyframes cg-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.rq-done__title {
+  margin-top: 16px;
+  font-size: clamp(26px, 7vw, 32px);
+}
+
+.rq-done__title:focus {
+  outline: none;
+}
+
+.rq-done__number {
+  display: grid;
+  gap: 4px;
+  margin-top: 16px;
+}
+
+.rq-done__number .display {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.rq-done__text {
+  max-width: 40ch;
+  margin-top: 14px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--text-2);
+}
+
+.rq-done__facts {
+  display: grid;
+  width: 100%;
+  max-width: 420px;
+  margin: 18px 0 0;
+  text-align: left;
+}
+
+.rq-done__facts div {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 12px;
+  padding-block: 10px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.rq-done__facts div:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.rq-done__facts dt {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.9;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+
+.rq-done__facts dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.rq-done__call {
+  margin: 18px 0 16px;
+  font-size: 13.5px;
+  color: var(--text-3);
+}
+
+.rq-done__call a {
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rq-done {
+    animation: none;
+  }
+}
+
+/* ── вопросы аккордеоном ──────────────────────────────────────────────────── */
+
+.cg-faq__in {
+  max-width: calc(860px + var(--pad) * 2);
+}
+
+.qa-list {
+  margin-top: 26px;
+  border-bottom: 1px solid var(--line-4);
+}
+
+.qa {
+  border-top: 1px solid var(--line-4);
+  scroll-margin-top: calc(var(--header-h) + 12px);
+}
+
+.qa__h {
+  margin: 0;
+  font: inherit;
+  letter-spacing: normal;
+}
+
+.qa__btn {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 56px;
+  padding: 14px 0;
+  border: 0;
+  background: none;
+  font-size: 15.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: left;
+  color: var(--text);
+  cursor: pointer;
+  transition: color 0.16s ease;
+}
+
+.qa__btn:focus-visible {
+  outline-offset: 4px;
+}
+
+/* plus that folds into a minus: two hairlines, the vertical one turns flat
+   плюс, который складывается в минус: две волосяные линии, вертикальная ложится */
+.qa__icon {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-pill);
+  box-shadow: inset 0 0 0 1px var(--line-4);
+  transition: background-color 0.16s ease;
+}
+
+.qa__icon::before,
+.qa__icon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 11px;
+  height: 1.5px;
+  margin: -0.75px 0 0 -5.5px;
+  border-radius: 1px;
+  background: currentColor;
+  transition: rotate 0.24s var(--ease-out);
+}
+
+.qa__icon::after {
+  rotate: 90deg;
+}
+
+.qa__btn[aria-expanded='true'] .qa__icon::after {
+  rotate: 0deg;
+}
+
+.qa__btn[aria-expanded='true'] .qa__icon {
+  background: var(--ink);
+  box-shadow: none;
+  color: var(--on-ink);
+}
+
+.qa__a {
+  padding: 0 44px 18px 0;
+}
+
+.qa__a p {
+  max-width: 68ch;
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+.qa__a p + p {
+  margin-top: 10px;
+}
+
+/* the answer arrives, it does not pop: a short rise, opacity only
+   ответ приходит, а не выскакивает: короткий подъём, только прозрачность и сдвиг */
+.qa.is-open .qa__a {
+  animation: cg-in 0.26s var(--ease-out) both;
+}
+
+.qa-list--compact .qa__btn {
+  min-height: 52px;
+  font-size: 14.5px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .qa__btn:hover {
+    color: var(--terracotta-text);
+  }
+
+  .qa__btn:hover .qa__icon {
+    box-shadow: inset 0 0 0 1px var(--text-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qa.is-open .qa__a {
+    animation: none;
+  }
+}
+
+.cg-faq__more {
+  margin-top: 24px;
+  text-align: center;
+}
+
+/* ── «Приезжайте к нам» ───────────────────────────────────────────────────── */
+
+.visit {
+  display: grid;
+  margin-top: 26px;
+}
+
+.visit__place {
+  display: flex;
+  flex-direction: column;
+  padding-block: 24px;
+  border-top: 1px solid var(--line-4);
+}
+
+.visit__place:last-child {
+  border-bottom: 1px solid var(--line-4);
+}
+
+.visit__name {
+  font-size: clamp(22px, 6vw, 28px);
+}
+
+.visit__kind {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-3);
+}
+
+.visit__facts {
+  display: grid;
+  gap: 16px;
+  margin: 18px 0 0;
+}
+
+.visit__facts dt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.visit__facts dt .ico {
+  width: 16px;
+  height: 16px;
+  color: var(--olive);
+}
+
+.visit__facts dd {
+  margin: 6px 0 0;
+}
+
+.visit__tel {
+  display: inline-block;
+  padding-block: 11px;
+  margin-block: -11px;
+  font-size: 22px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.visit__hours {
+  display: flex;
+  gap: 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+.visit__hours span:first-child {
+  min-width: 56px;
+  color: var(--text-4);
+}
+
+/* pushed to the bottom: one hall has three rows of hours and the other one,
+   and the route buttons stood at two heights
+   прижаты книзу: у одного зала три строки часов, у другого одна, и кнопки
+   маршрута стояли на разной высоте */
+.visit__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 22px;
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .visit__tel:hover {
+    color: var(--terracotta-text);
+  }
+}
+
+/* ── пустой раздел ────────────────────────────────────────────────────────── */
+
+.cg-empty__panel {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  max-width: 560px;
+  text-align: center;
+  color: var(--text-2);
+}
+
+.cg-empty__panel .ico {
+  width: 34px;
+  height: 34px;
+  color: var(--olive);
+}
+
+.cg-empty__title {
+  font-size: 26px;
+  color: var(--text);
+}
+
+/* ── вложенные страницы: заголовок и оглавление ───────────────────────────── */
+
+.cg-intro {
+  padding-block: 26px 10px;
+}
+
+.cg-intro__title {
+  margin-top: 16px;
+  font-size: clamp(30px, 8.4vw, 40px);
+}
+
+.cg-intro__lead {
+  margin-top: 12px;
+  max-width: 58ch;
+}
+
+/* the index of formats or topics: a ledger of links, the price or the count
+   on the right — a table of contents, not a row of pills
+   оглавление форматов или тем: реестр ссылок, цена или число справа —
+   содержание, а не ряд пилюль */
+.cg-index {
+  margin-top: 24px;
+}
+
+.cg-index ol {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-bottom: 1px solid var(--line-4);
+}
+
+.cg-index li {
+  border-top: 1px solid var(--line-4);
+}
+
+.cg-index a {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 12px;
+  min-height: 48px;
+  padding: 13px 0;
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.16s ease;
+}
+
+.cg-index--topics a {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.cg-index__n {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--terracotta-text);
+}
+
+.cg-index__name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.cg-index__price {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cg-index a:hover {
+    color: var(--terracotta-text);
+  }
+}
+
+/* ── форматы подробно ─────────────────────────────────────────────────────── */
+
+.svc {
+  padding-block: 34px;
+  border-top: 1px solid var(--line-4);
+  scroll-margin-top: var(--header-h);
+}
+
+.svc:first-of-type {
+  margin-top: 26px;
+}
+
+.svc__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 22px;
+}
+
+.svc__frame .media img {
+  outline: 1px solid rgb(0 0 0 / 0.08);
+  outline-offset: -1px;
+}
+
+.svc__stub {
+  aspect-ratio: 4 / 3;
+}
+
+.svc__n {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--terracotta-text);
+}
+
+.svc__title {
+  margin-top: 10px;
+  font-size: var(--fs-h2);
+}
+
+.svc__title:focus {
+  outline: none;
+}
+
+.svc__facts {
+  display: grid;
+  gap: 14px;
+  margin: 20px 0 0;
+  padding-block: 16px;
+  border-block: 1px solid var(--line-4);
+}
+
+.svc__facts dd {
+  margin: 4px 0 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.svc__price {
+  font-size: 26px;
+  color: var(--text);
+}
+
+.svc__note {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-3);
+}
+
+.svc__text {
+  margin-top: 18px;
+}
+
+.svc__text p {
+  max-width: 62ch;
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+.svc__text p + p {
+  margin-top: 10px;
+}
+
+.svc__block {
+  margin-top: 22px;
+}
+
+.svc__block-title {
+  margin: 0;
+}
+
+.svc__inc {
+  margin-top: 12px;
+}
+
+.svc__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.svc__actions .btn {
+  flex: 1 1 auto;
+}
+
+.svc__qa .qa-list {
+  margin-top: 8px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .svc__frame:hover .media img {
+    scale: 1.045;
+  }
+}
+
+/* ── страница вопросов ────────────────────────────────────────────────────── */
+
+.faq-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 22px;
+  margin-top: 22px;
+}
+
+.faq-search {
+  position: relative;
+  flex: 1 1 280px;
+  max-width: 520px;
+}
+
+.faq-search .ico {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  width: 20px;
+  height: 20px;
+  translate: 0 -50%;
+  color: var(--text-4);
+  pointer-events: none;
+}
+
+.faq-search input {
+  width: 100%;
+  min-height: 50px;
+  padding: 12px 14px 12px 44px;
+  border: 1px solid var(--line-4);
+  border-radius: var(--r-sq);
+  background: color-mix(in srgb, var(--surface) 45%, var(--bg));
+  color: var(--text);
+  font: inherit;
+  font-size: 16px;
+  transition-property: border-color, box-shadow, background-color;
+  transition-duration: 0.16s;
+}
+
+.faq-search input:focus {
+  outline: none;
+  border-color: var(--olive);
+  background-color: var(--bg);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--olive) 22%, transparent);
+}
+
+.faq-tools__all {
+  margin-block: 0;
+}
+
+.faq-topics {
+  padding-block: 10px var(--sec-pad);
+}
+
+.faq-topic {
+  padding-top: 30px;
+  scroll-margin-top: calc(var(--header-h) + 8px);
+}
+
+.faq-topic__title {
+  font-size: clamp(22px, 6vw, 28px);
+  line-height: 1.15;
+}
+
+.faq-topic .qa-list {
+  margin-top: 14px;
+}
+
+.faq-empty {
+  display: grid;
+  gap: 8px;
+  max-width: 560px;
+  padding-top: 30px;
+  color: var(--text-2);
+}
+
+.faq-empty__title {
+  font-size: 24px;
+  color: var(--text);
+}
+
+.faq-empty a {
+  color: var(--text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── планшет ──────────────────────────────────────────────────────────────── */
+
+@media (min-width: 768px) {
+  .cg-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 24px;
+    padding-top: 20px;
+  }
+
+  .cg-tabs {
+    margin-top: 0;
+    border-bottom: 0;
+  }
+
+  .cg-hero {
+    padding-top: 34px;
+  }
+
+  .cg-hero__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 36px;
+  }
+
+  .cg-hero__title {
+    font-size: clamp(32px, 4.4vw, 40px);
+  }
+
+  /* 768-1199: the two buttons do not fit side by side in the half column and
+     wrap; stretched, they stack as one block instead of two widths
+     768-1199: две кнопки не помещаются рядом в половине строки и переносятся;
+     растянутые, они встают одним блоком, а не двумя ширинами */
+  .cg-hero__cta .btn {
+    flex: 1 1 100%;
+  }
+
+  .cg-hero__frame {
+    margin-inline: 0;
+  }
+
+  .cg-hero__frame .media {
+    --radius: var(--r-sq);
+  }
+
+  .cg-hero__stub {
+    aspect-ratio: 1 / 1;
+    border-radius: var(--r-sq);
+  }
+
+  .cg-hero {
+    padding-bottom: 40px;
+  }
+
+  .cg-facts__row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .cg-fact,
+  .cg-fact:nth-child(even),
+  .cg-fact:nth-child(n + 3) {
+    padding: 22px 18px;
+    border-top: 0;
+  }
+
+  .cg-fact:first-child {
+    padding-left: 0;
+  }
+
+  .cg-fact + .cg-fact {
+    border-left: 1px solid rgb(247 241 226 / 0.16);
+  }
+
+  .fmt {
+    grid-template-columns: 232px minmax(0, 1fr);
+    gap: 18px 28px;
+  }
+
+  .fmt__frame {
+    grid-row: span 2;
+  }
+
+  .fmt__aside {
+    grid-column: 2;
+  }
+
+  .steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 32px;
+  }
+
+  .step {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .chat {
+    max-width: 560px;
+  }
+
+  .prios {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 36px;
+  }
+
+  .cg-rail__item {
+    flex-basis: 36vw;
+  }
+
+  .cg-request__panel {
+    padding: 30px 30px 32px;
+  }
+
+  .rq__pair {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .tiles {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .visit {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 40px;
+  }
+
+  .visit__place:last-child {
+    border-bottom: 0;
+  }
+
+  .visit {
+    border-bottom: 1px solid var(--line-4);
+  }
+
+  .visit__facts {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .cg-intro {
+    padding-top: 34px;
+  }
+
+  .cg-intro__title {
+    font-size: clamp(40px, 5.2vw, 52px);
+  }
+
+  .cg-index ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 32px;
+    border-bottom: 0;
+  }
+
+  .cg-index li:nth-last-child(-n + 2) {
+    border-bottom: 1px solid var(--line-4);
+  }
+
+  /* an odd count leaves the last item alone in its row: it takes the line
+     нечётное число оставляет последний пункт одного в ряду: он берёт строку */
+  .cg-index li:nth-child(odd):last-child {
+    grid-column: 1 / -1;
+  }
+
+  .svc {
+    padding-block: 44px;
+  }
+
+  .svc__grid {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: start;
+    gap: 40px;
+  }
+
+  .svc__frame {
+    position: sticky;
+    top: calc(var(--header-h) + 20px);
+  }
+
+  .svc__grid--flip .svc__frame {
+    order: 2;
+  }
+
+  .svc__stub {
+    aspect-ratio: 4 / 5;
+  }
+
+  .svc__facts {
+    grid-template-columns: repeat(3, minmax(0, auto));
+    justify-content: start;
+    column-gap: 36px;
+  }
+
+  .svc__actions .btn {
+    flex: 0 0 auto;
+  }
+}
+
+/* ── десктоп ──────────────────────────────────────────────────────────────── */
+
+@media (min-width: 1200px) {
+  .cg-hero {
+    padding-block: 44px 56px;
+  }
+
+  .cg-hero__grid {
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: 72px;
+  }
+
+  .cg-hero__title {
+    font-size: clamp(44px, 3.6vw, 52px);
+  }
+
+  .cg-hero__cta .btn {
+    flex: 0 0 auto;
+  }
+
+  .cg-fact {
+    padding-block: 26px;
+  }
+
+  .cg-fact__value {
+    font-size: 40px;
+  }
+
+  .fmt {
+    grid-template-columns: 300px minmax(0, 1fr) 260px;
+    gap: 0 40px;
+    padding-block: 30px;
+    align-items: start;
+  }
+
+  .fmt__frame {
+    grid-row: auto;
+  }
+
+  .fmt__aside {
+    grid-column: 3;
+    align-self: stretch;
+    padding: 0 0 0 28px;
+    border-top: 0;
+    border-left: 1px solid var(--line-4);
+  }
+
+  .fmt__title {
+    font-size: 30px;
+  }
+
+  .fmt__sum {
+    font-size: 30px;
+  }
+
+  .cg-steps__grid {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    grid-template-areas: 'head steps' 'chat steps' 'ps ps';
+    grid-template-rows: auto 1fr auto;
+    column-gap: 72px;
+    row-gap: 32px;
+  }
+
+  .chat {
+    align-self: start;
+    position: sticky;
+    top: calc(var(--header-h) + 28px);
+  }
+
+  .steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .step {
+    grid-template-columns: 76px minmax(0, 1fr);
+    gap: 22px;
+    padding-block: 26px;
+  }
+
+  .step:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .step__n {
+    font-size: 56px;
+  }
+
+  .step__title {
+    font-size: 26px;
+  }
+
+  /* the heading holds the left while the priorities run down the right
+     заголовок держит левую колонку, пока приоритеты идут по правой */
+  .cg-about__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    column-gap: 72px;
+    align-items: start;
+  }
+
+  .cg-about__head {
+    position: sticky;
+    top: calc(var(--header-h) + 28px);
+  }
+
+  .prios {
+    margin-top: 0;
+    column-gap: 48px;
+  }
+
+  .prio:nth-child(-n + 2) {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .cg-rail__item {
+    flex-basis: 300px;
+  }
+
+  .cg-request__grid {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    column-gap: 72px;
+    align-items: start;
+  }
+
+  .cg-request__talk {
+    position: sticky;
+    top: calc(var(--header-h) + 28px);
+    padding-bottom: 210px;
+  }
+
+  .cg-request__dish {
+    display: block;
+    position: absolute;
+    left: -12px;
+    bottom: 0;
+    width: 300px;
+    height: auto;
+    pointer-events: none;
+  }
+
+  .cg-request__panel {
+    padding: 36px 40px 38px;
+  }
+
+  .visit {
+    column-gap: 72px;
+  }
+
+  .cg-index ol {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 40px;
+  }
+
+  /* A topic is a spread: its name holds the left column while the questions
+     run down the right — a full-width row sent the eye 1300 px from the
+     question to its plus.
+     Тема — разворот: название держит левую колонку, пока вопросы идут по
+     правой: строка во всю ширину гнала взгляд на 1300 px от вопроса к плюсу. */
+  .faq-topic {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    column-gap: 72px;
+    align-items: start;
+    padding-top: 48px;
+  }
+
+  .faq-topic__title {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+    padding-top: 12px;
+  }
+
+  .faq-topic .qa-list {
+    margin-top: 0;
+  }
+
+  .cg-index li:nth-last-child(-n + 3) {
+    border-bottom: 1px solid var(--line-4);
+  }
+
+  .cg-index li:nth-child(odd):last-child {
+    grid-column: auto;
+  }
+
+  .svc__grid {
+    grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+    gap: 72px;
+  }
+
+  .svc__grid--flip {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 520px);
+  }
+}
+
+/* The panel is paper inside an ink band: the band's colour rules (cream
+   headings, muted paragraphs, light terracotta) must not leak onto it.
+   Панель — бумага внутри чернильной полосы: правила цвета полосы (кремовые
+   заголовки, приглушённые абзацы, светлая терракота) не должны на неё
+   протекать. */
+.cg-request__panel :where(h1, h2, h3, h4, .display) {
+  color: var(--text);
+}
+
+.cg-request__panel .mark {
+  color: var(--terracotta);
+}
+
+/* a folded answer keeps no padding: `until-found` hides the content, not the box
+   у свёрнутого ответа нет полей: `until-found` прячет содержимое, а не бокс */
+.qa__a[hidden] {
+  padding: 0;
+}

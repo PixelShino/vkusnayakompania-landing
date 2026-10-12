@@ -1,0 +1,119 @@
+---
+/**
+ * Formats as the rows of a printed price list, not a grid of cards: the frame,
+ * the name with what it is and what is in it, and on the right edge the price
+ * the way a menu sets it — «от 3 500 ₽ за гостя», then guests and the lead
+ * time. Five comparable things read down one column; a grid of equal cards
+ * would make the eye hop. «Обсудить» picks the format in the form below.
+ * Форматы строками печатного прейскуранта, а не сеткой карточек: кадр,
+ * название с тем, что это и что входит, а у правого края цена, как её ставит
+ * меню, — «от 3 500 ₽ за гостя», под ней гости и срок. Пять сравнимых вещей
+ * читаются вниз одной колонкой; сетка одинаковых карточек заставила бы взгляд
+ * прыгать. «Обсудить» выбирает формат в форме ниже.
+ */
+import Photo from '../Photo.astro';
+import Icon from '../Icon.astro';
+import { typo } from '../../lib/content.ts';
+import { CATERING } from '../../lib/nav.ts';
+import type { CateringFormat } from '../../lib/catering.ts';
+
+interface Props {
+  formats: CateringFormat[];
+  /** сколько пунктов «что входит» показать; на обзоре — четыре, остальное на странице форматов */
+  includes?: number;
+}
+
+const { formats, includes = 4 } = Astro.props;
+---
+
+<ol class="fmts" role="list">
+  {
+    formats.map((format, i) => {
+      const shown = format.includes.slice(0, includes);
+      return (
+        <li class="fmt" id={`format-${format.slug}`}>
+          <div class="fmt__frame">
+            {format.photo && !format.photo.placeholder ? (
+              <Photo
+                photo={format.photo}
+                ratio="4 / 3"
+                radius="var(--r-sq)"
+                sizes="(min-width: 1200px) 320px, (min-width: 768px) 260px, 100vw"
+                class="fmt__photo"
+              />
+            ) : (
+              <div class:list={['stub', 'fmt__stub', i % 2 === 0 && 'stub--ink']}>
+                <span class="stub__title">{format.title}</span>
+                <span class="stub__meta">фото скоро появится</span>
+              </div>
+            )}
+          </div>
+
+          <div class="fmt__body">
+            <p class="fmt__n tnum" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </p>
+            <h3 class="fmt__title display">{format.title}</h3>
+            {format.summary && <p class="fmt__text">{typo(format.summary)}</p>}
+            {shown.length > 0 && (
+              <ul class="fmt__inc" role="list" aria-label={`Что входит в формат «${format.title}»`}>
+                {shown.map((item) => (
+                  <li>
+                    <Icon name="check" />
+                    <span>{typo(item)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div class="fmt__aside">
+            <p class="fmt__price">
+              {format.price ? (
+                <>
+                  <span class="fmt__sum display tnum">{format.price.text}</span>
+                  {format.price.unit && <span class="fmt__unit">{format.price.unit}</span>}
+                </>
+              ) : (
+                <>
+                  <span class="fmt__sum display">По смете</span>
+                  <span class="fmt__unit">посчитаем под ваш план</span>
+                </>
+              )}
+            </p>
+            {format.price?.note && <p class="fmt__note">{typo(format.price.note)}</p>}
+            {(format.guests || format.leadTime) && (
+              <ul class="fmt__meta" role="list">
+                {format.guests && (
+                  <li>
+                    <Icon name="users" />
+                    <span>{format.guests}</span>
+                  </li>
+                )}
+                {format.leadTime && (
+                  <li>
+                    <Icon name="clock" />
+                    <span>{format.leadTime}</span>
+                  </li>
+                )}
+              </ul>
+            )}
+            <div class="fmt__actions">
+              <a
+                class="btn btn--primary btn--md"
+                href="#request"
+                data-pick-format={format.id}
+                aria-label={`Обсудить формат «${format.title}» — перейти к заявке`}
+              >
+                Обсудить
+              </a>
+              <a class="tlink tlink--go" href={`${CATERING}services/#${format.slug}`}>
+                <span>Подробнее</span>
+              </a>
+            </div>
+          </div>
+        </li>
+      );
+    })
+  }
+</ol>

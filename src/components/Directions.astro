@@ -12,7 +12,7 @@
 import Photo from './Photo.astro';
 import OpenStatus from './OpenStatus.astro';
 import { menusFor } from '../lib/select';
-import { catalogSectionHref } from '../lib/nav.ts';
+import { CATERING, catalogSectionHref } from '../lib/nav.ts';
 import { BASE } from '../lib/base.ts';
 import { typo, type Content, type Direction } from '../lib/content';
 import cake from '../assets/icons/cake.svg?raw';
@@ -115,16 +115,24 @@ const SERVICES: { key: Direction['key']; icon: string; phone?: boolean; actions:
     key: 'catering',
     icon: cloche,
     phone: true,
-    actions: () => [{ label: 'На сайт кейтеринга', href: settings.catering_url, external: true }],
+    // catering is a page of this site since 12.10.2026: formats with prices
+    // and the request form at its foot; one link and the number keep the row
+    // on one line like its neighbours
+    // кейтеринг с 12.10.2026 — страница этого сайта: форматы с ценами и форма
+    // заявки внизу; одна ссылка и номер держат строку в одну линию, как у соседей
+    actions: () => [{ label: 'Форматы и цены', href: CATERING }],
   },
   {
     key: 'banquets',
     icon: glasses,
-    // the banquet menu goes first: a guest weighs the dishes before the talk
-    // банкетное меню первым: гость смотрит блюда до разговора о дате
+    // the banquet menu goes first: a guest weighs the dishes before the talk;
+    // the request for a date is the catering page's form
+    // банкетное меню первым: гость смотрит блюда до разговора о дате; заявка
+    // на дату — форма страницы кейтеринга
     actions: (direction) => [
       ...menuAction(direction, 'Банкетное меню'),
-      { label: 'Обсудить банкет', book: 'Банкет', note: 'Скажите дату, число гостей и повод' },
+      { label: 'Банкеты и цены', href: `${CATERING}#formats` },
+      { label: 'Заявка на банкет', href: `${CATERING}#request` },
     ],
   },
 ];

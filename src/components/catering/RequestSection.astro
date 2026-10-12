@@ -1,0 +1,340 @@
+---
+/**
+ * The request for an event: an ink band, the talk on the left (what we offer,
+ * the coupon, the direct numbers), the form on a paper panel on the right.
+ * The form posts to `PUBLIC_DIRECTUS_URL/items/catering_requests` from the
+ * browser; the public role may only create, `request-guard` checks the rest.
+ * Without that address the panel offers the call and the messengers instead —
+ * a half-configured site never takes a request it cannot deliver. The same
+ * section closes all three catering pages.
+ * Заявка на мероприятие: чернильная полоса, слева разговор (что предложим,
+ * купон, прямые номера), справа форма на бумажной панели. Форма отправляет
+ * `PUBLIC_DIRECTUS_URL/items/catering_requests` прямо из браузера; публичная
+ * роль может только создать, остальное проверяет `request-guard`. Без этого
+ * адреса панель предлагает звонок и мессенджеры — недонастроенный сайт не
+ * примет заявку, которую не сможет доставить. Та же секция закрывает все три
+ * страницы кейтеринга.
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Icon from '../Icon.astro';
+import { typo, type Content } from '../../lib/content.ts';
+import { latestDate, samaraToday, REQUEST_LIMITS } from '../../lib/request.ts';
+
+interface Props {
+  content: Content;
+}
+
+const { settings, places, catering } = Astro.props.content;
+const page = catering.page;
+const directus = (import.meta.env.PUBLIC_DIRECTUS_URL as string | undefined)?.replace(/\/+$/, '');
+const endpoint = directus ? `${directus}/items/catering_requests` : '';
+
+const title = page?.requestTitle ?? 'Обсудим ваш праздник';
+const hours = page?.hoursNote;
+// The coupon: the percent of the offer stands out like the first offer's
+// stamp in «Акции»; without a percent the line stays a line.
+// Купон: процент предложения выходит крупно, как оттиск первой акции в
+// «Акциях»; без процента строка остаётся строкой.
+const bonus = page?.requestBonus;
+const percent = bonus?.match(/(\d+)\s?%/)?.[1];
+
+// the date picker starts today in Samara and ends where the server stops
+// календарь начинается сегодня по Самаре и кончается там, где отказывает сервер
+const today = samaraToday();
+const latest = latestDate(today);
+---
+
+<section class="cg-sec strip-ink cg-request" id="request" aria-labelledby="request-title">
+  <div class="container cg-request__grid">
+    <div class="cg-request__talk" data-reveal>
+      <span class="mark cg-mark" aria-hidden="true"></span>
+      <h2 class="display-caps cg-request__title" id="request-title">{typo(title)}</h2>
+      {page?.requestText && <p class="lead cg-request__lead">{typo(page.requestText)}</p>}
+
+      {
+        bonus && (
+          <p class="coupon">
+            {percent && (
+              <span class="coupon__value display tnum" aria-hidden="true">
+                −{percent}&thinsp;%
+              </span>
+            )}
+            <span class="coupon__text">{typo(bonus)}</span>
+          </p>
+        )
+      }
+
+      <div class="cg-request__direct">
+        <p class="label">Или напрямую</p>
+        <a class="cg-request__tel display tnum" href={settings.phoneHref}>{settings.phone}</a>
+        <p class="cg-request__links">
+          {
+            settings.telegram && (
+              <a class="tlink tlink--go tlink--out" href={settings.telegram} target="_blank" rel="noopener">
+                <span>Telegram</span>
+              </a>
+            )
+          }
+          {
+            settings.max && (
+              <a class="tlink tlink--go tlink--out" href={settings.max} target="_blank" rel="noopener">
+                <span>Max</span>
+              </a>
+            )
+          }
+        </p>
+        {
+          hours && (
+            <p class="cg-request__hours">
+              <Icon name="clock" />
+              <span>
+                Менеджер на связи {hours}. Заявки с сайта принимаем круглосуточно.
+              </span>
+            </p>
+          )
+        }
+      </div>
+
+      {
+        page?.requestImage && !page.requestImage.placeholder && (
+          <Image
+            src={page.requestImage.src as ImageMetadata}
+            alt=""
+            width={page.requestImage.width}
+            height={page.requestImage.height}
+            widths={[320, 480, Math.min(640, page.requestImage.width)]}
+            sizes="(min-width: 1200px) 320px, 0px"
+            format="webp"
+            quality={70}
+            loading="lazy"
+            class="cg-request__dish"
+          />
+        )
+      }
+    </div>
+
+    <div class="cg-request__panel" data-request-root>
+      {
+        endpoint ? (
+          <>
+            <form class="rq" id="request-form" novalidate data-request data-endpoint={endpoint} aria-labelledby="request-title">
+              <p class="rq__offline" data-offline hidden>
+                <Icon name="wifi-off" />
+                <span>Нет интернета. Форма сохранится — отправьте, когда связь вернётся.</span>
+              </p>
+
+              <div class="rq__pair">
+                <div class="field">
+                  <label for="rq-name">Имя</label>
+                  <input
+                    id="rq-name"
+                    name="name"
+                    autocomplete="name"
+                    maxlength={REQUEST_LIMITS.name}
+                    required
+                    aria-describedby="rq-name-err"
+                  />
+                  <p class="field__err" id="rq-name-err" data-err="name" hidden />
+                </div>
+                <div class="field">
+                  <label for="rq-phone">Телефон</label>
+                  <input
+                    id="rq-phone"
+                    name="phone"
+                    type="tel"
+                    inputmode="tel"
+                    autocomplete="tel"
+                    placeholder="+7 (___) ___-__-__"
+                    required
+                    aria-describedby="rq-phone-hint rq-phone-err"
+                  />
+                  <p class="field__hint" id="rq-phone-hint">
+                    Перезвоним на него{hours ? ` ${hours}` : ''}
+                  </p>
+                  <p class="field__err" id="rq-phone-err" data-err="phone" hidden />
+                </div>
+              </div>
+
+              <div class="rq__pair rq__pair--tight">
+                <div class="field">
+                  <label for="rq-date">
+                    Дата <span class="field__opt">если знаете</span>
+                  </label>
+                  <input id="rq-date" name="date" type="date" min={today} max={latest} aria-describedby="rq-date-err" />
+                  <p class="field__err" id="rq-date-err" data-err="date" hidden />
+                </div>
+                <div class="field">
+                  <label for="rq-guests">
+                    Гостей <span class="field__opt">примерно</span>
+                  </label>
+                  <input
+                    id="rq-guests"
+                    name="guests"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    maxlength="4"
+                    placeholder="Например, 40"
+                    autocomplete="off"
+                    aria-describedby="rq-guests-err"
+                  />
+                  <p class="field__err" id="rq-guests-err" data-err="guests" hidden />
+                </div>
+              </div>
+
+              {
+                catering.formats.length > 0 && (
+                  <fieldset class="fs rq__fs">
+                    <legend class="fs__legend">Формат</legend>
+                    <div class="chips">
+                      {catering.formats.map((format) => (
+                        <label class="chip">
+                          <input type="radio" name="format" value={format.id} data-format-slug={format.slug} />
+                          <span>{format.title}</span>
+                        </label>
+                      ))}
+                      <label class="chip">
+                        <input type="radio" name="format" value="" checked />
+                        <span>Ещё не решили</span>
+                      </label>
+                    </div>
+                  </fieldset>
+                )
+              }
+
+              <fieldset class="fs rq__fs">
+                <legend class="fs__legend">Где праздник</legend>
+                <div class="tiles">
+                  {places.map((place) => (
+                    <label class="tile">
+                      <input type="radio" name="where" value={`place:${place.id}`} />
+                      <span class="tile__name">{place.name}</span>
+                      <span class="tile__meta">наш зал</span>
+                    </label>
+                  ))}
+                  <label class="tile">
+                    <input type="radio" name="where" value="offsite" />
+                    <span class="tile__name">Выезд к вам</span>
+                    <span class="tile__meta">дом, офис, загород</span>
+                  </label>
+                  <label class="tile">
+                    <input type="radio" name="where" value="unknown" checked />
+                    <span class="tile__name">Пока не знаю</span>
+                    <span class="tile__meta">подскажем</span>
+                  </label>
+                </div>
+                <div class="field rq__address" data-for="offsite" hidden>
+                  <label for="rq-address">
+                    Где пройдёт <span class="field__opt">необязательно</span>
+                  </label>
+                  <input
+                    id="rq-address"
+                    name="address"
+                    maxlength={REQUEST_LIMITS.address}
+                    autocomplete="street-address"
+                    placeholder="Город, адрес или площадка"
+                  />
+                </div>
+              </fieldset>
+
+              <div class="field">
+                <label for="rq-wishes">
+                  Пожелания <span class="field__opt">необязательно</span>
+                </label>
+                <textarea
+                  id="rq-wishes"
+                  name="wishes"
+                  rows="4"
+                  maxlength={REQUEST_LIMITS.wishes}
+                  placeholder="Повод, меню, бюджет — опишите все самые смелые пожелания к мероприятию"
+                />
+              </div>
+
+              {/* a field people never see: a form-filling bot fills it and is turned away
+                  поле, которого люди не видят: бот, заполняющий формы, заполнит его и получит отказ */}
+              <div class="hp" aria-hidden="true">
+                <label for="rq-company">Компания</label>
+                <input id="rq-company" name="company" tabindex="-1" autocomplete="off" />
+              </div>
+
+              <label class="consent">
+                <input type="checkbox" name="consent" aria-describedby="rq-consent-err" />
+                <span>
+                  Согласен на обработку персональных данных, чтобы со мной связались по заявке
+                  {
+                    settings.policy && (
+                      <>
+                        {' '}— по{' '}
+                        <a href={settings.policy.href} target="_blank" rel="noopener">
+                          политике конфиденциальности
+                        </a>
+                      </>
+                    )
+                  }
+                </span>
+              </label>
+              <p class="field__err rq__consent-err" id="rq-consent-err" data-err="consent" hidden />
+
+              <div class="alert" data-error role="alert" hidden>
+                <p class="alert__title" data-error-title>Заявка не отправилась</p>
+                <p data-error-text />
+                <div class="alert__actions">
+                  <a class="btn btn--secondary btn--sm" href={settings.phoneHref}>
+                    Позвонить {settings.phone}
+                  </a>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn--primary btn--block rq__submit" data-submit>
+                <span data-submit-label>Отправить заявку</span>
+              </button>
+              <p class="rq__foot">Заявка ни к чему не обязывает: сначала обсудим, потом смета</p>
+            </form>
+
+            <section class="rq-done" data-done hidden aria-labelledby="rq-done-title">
+              <span class="mark" aria-hidden="true" />
+              <h3 class="display display-caps rq-done__title" id="rq-done-title" tabindex="-1">
+                Заявка принята
+              </h3>
+              <p class="rq-done__number">
+                <span class="label">Номер заявки</span>
+                <span class="display tnum" data-done-number />
+              </p>
+              <p class="rq-done__text">
+                Перезвоним на <b class="tnum" data-done-phone />
+                {hours ? ` ${hours}` : ''}, чтобы обсудить дату, меню и бюджет.
+              </p>
+              <dl class="rq-done__facts" data-done-facts />
+              <p class="rq-done__call">
+                Не хотите ждать — позвоните сами:{' '}
+                <a class="tnum" href={settings.phoneHref}>
+                  {settings.phone}
+                </a>
+              </p>
+              <button type="button" class="btn btn--secondary btn--md" data-again>
+                Отправить ещё одну заявку
+              </button>
+            </section>
+          </>
+        ) : (
+          <div class="rq-call">
+            <Icon name="chat" />
+            <p class="display rq-call__title">Позвоните или напишите — обсудим праздник</p>
+            <p>Менеджер расскажет про форматы, даты и залы и посчитает смету.</p>
+            <div class="rq-call__actions">
+              <a class="btn btn--primary btn--block" href={settings.phoneHref}>
+                Позвонить {settings.phone}
+              </a>
+              {settings.telegram && (
+                <a class="btn btn--secondary btn--block" href={settings.telegram} target="_blank" rel="noopener">
+                  Написать в Telegram
+                </a>
+              )}
+            </div>
+          </div>
+        )
+      }
+    </div>
+  </div>
+  <p class="sr-only" aria-live="polite" data-announce></p>
+</section>
