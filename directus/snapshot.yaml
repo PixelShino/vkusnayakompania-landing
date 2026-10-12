@@ -21,7 +21,7 @@ collections:
         дате
       preview_url: null
       singleton: false
-      sort: 2
+      sort: 3
       sort_field: null
       translations:
         - language: ru-RU
@@ -49,7 +49,7 @@ collections:
       note: Витрина работ на заказ, без цен
       preview_url: null
       singleton: false
-      sort: 5
+      sort: 6
       sort_field: sort
       translations:
         - language: ru-RU
@@ -79,7 +79,7 @@ collections:
         «Заказы»
       preview_url: null
       singleton: false
-      sort: 6
+      sort: 7
       sort_field: null
       translations:
         - language: ru-RU
@@ -88,6 +88,208 @@ collections:
           translation: Каталог доставки
       unarchive_value: null
       versioning: false
+  - collection: catering
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: catering
+      color: null
+      display_template: null
+      group: null
+      hidden: false
+      icon: celebration
+      item_duplication_fields: null
+      note: >-
+        Страница /catering/: тексты, форматы с ценами, шаги, вопросы и фото.
+        Заявки с сайта — в разделе «Заявки на кейтеринг»
+      preview_url: null
+      singleton: false
+      sort: 8
+      sort_field: null
+      translations:
+        - language: ru-RU
+          plural: Кейтеринг и банкеты
+          singular: Кейтеринг и банкеты
+          translation: Кейтеринг и банкеты
+      unarchive_value: null
+      versioning: false
+  - collection: catering_faq
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: status
+      archive_value: archived
+      collapse: open
+      collection: catering_faq
+      color: null
+      display_template: '{{question}}'
+      group: catering
+      hidden: false
+      icon: quiz
+      item_duplication_fields: null
+      note: >-
+        Вопросы и ответы раздела. Темы идут в порядке первого вопроса темы. «На
+        обзорной» — вопрос виден и на /catering/
+      preview_url: null
+      singleton: false
+      sort: 4
+      sort_field: sort
+      translations:
+        - language: ru-RU
+          plural: Вопросы
+          singular: Вопрос
+          translation: Вопросы
+      unarchive_value: draft
+      versioning: false
+    schema:
+      name: catering_faq
+  - collection: catering_formats
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: status
+      archive_value: archived
+      collapse: open
+      collection: catering_formats
+      color: null
+      display_template: '{{title}}'
+      group: catering
+      hidden: false
+      icon: room_service
+      item_duplication_fields: null
+      note: >-
+        Форматы банкетов и кейтеринга: карточки на странице и список в форме
+        заявки. Порядок — перетаскиванием
+      preview_url: null
+      singleton: false
+      sort: 2
+      sort_field: sort
+      translations:
+        - language: ru-RU
+          plural: Форматы
+          singular: Формат
+          translation: Форматы
+      unarchive_value: draft
+      versioning: false
+    schema:
+      name: catering_formats
+  - collection: catering_page
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: catering_page
+      color: null
+      display_template: null
+      group: catering
+      hidden: false
+      icon: web
+      item_duplication_fields: null
+      note: 'Тексты страницы кейтеринга: первый экран, «О нас», шаги, заявка, SEO'
+      preview_url: null
+      singleton: true
+      sort: 1
+      sort_field: null
+      translations:
+        - language: ru-RU
+          plural: Страница кейтеринга
+          singular: Страница кейтеринга
+          translation: Страница кейтеринга
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: catering_page
+  - collection: catering_page_files
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: catering_page_files
+      color: null
+      display_template: null
+      group: null
+      hidden: true
+      icon: import_export
+      item_duplication_fields: null
+      note: null
+      preview_url: null
+      singleton: false
+      sort: null
+      sort_field: null
+      translations:
+        - language: ru-RU
+          plural: Фото страницы кейтеринга
+          singular: Фото страницы кейтеринга
+          translation: Фото страницы кейтеринга
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: catering_page_files
+  - collection: catering_requests
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: catering_requests
+      color: null
+      display_template: '{{number}} · {{name}}'
+      group: null
+      hidden: false
+      icon: celebration
+      item_duplication_fields: null
+      note: >-
+        Заявки с сайта на банкет и кейтеринг. Новая — позвоните гостю, обсудите
+        дату, формат и бюджет
+      preview_url: null
+      singleton: false
+      sort: 2
+      sort_field: null
+      translations:
+        - language: ru-RU
+          plural: Заявки на кейтеринг
+          singular: Заявка на кейтеринг
+          translation: Заявки на кейтеринг
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: catering_requests
+  - collection: catering_steps
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: catering_steps
+      color: null
+      display_template: '{{title}}'
+      group: catering
+      hidden: false
+      icon: format_list_numbered
+      item_duplication_fields: null
+      note: Шаги «от заявки до праздника». Номера сайт ставит сам по порядку
+      preview_url: null
+      singleton: false
+      sort: 3
+      sort_field: sort
+      translations:
+        - language: ru-RU
+          plural: Шаги
+          singular: Шаг
+          translation: Шаги
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: catering_steps
   - collection: directions
     meta:
       accountability: all
@@ -107,7 +309,7 @@ collections:
         Добавлять и удалять нельзя, кнопки зашиты по ключу
       preview_url: null
       singleton: false
-      sort: 8
+      sort: 10
       sort_field: sort
       translations:
         - language: ru-RU
@@ -163,7 +365,7 @@ collections:
       note: Первый экран, SEO и тексты секций
       preview_url: null
       singleton: true
-      sort: 9
+      sort: 11
       sort_field: null
       translations:
         - language: ru-RU
@@ -191,7 +393,7 @@ collections:
       note: 'PDF меню по направлению: кафе, ресторан, кондитерская'
       preview_url: null
       singleton: false
-      sort: 4
+      sort: 5
       sort_field: null
       translations:
         - language: ru-RU
@@ -249,7 +451,7 @@ collections:
       note: 'Две точки: адреса, часы, координаты, галерея'
       preview_url: null
       singleton: false
-      sort: 7
+      sort: 9
       sort_field: null
       translations:
         - language: ru-RU
@@ -363,7 +565,7 @@ collections:
       note: Карточки акций, сгруппированы по адресу
       preview_url: null
       singleton: false
-      sort: 3
+      sort: 4
       sort_field: sort
       translations:
         - language: ru-RU
@@ -391,7 +593,7 @@ collections:
       note: Контакты, ссылки, юрлицо, цифры Яндекса
       preview_url: null
       singleton: true
-      sort: 10
+      sort: 12
       sort_field: null
       translations:
         - language: ru-RU
@@ -1243,6 +1445,3905 @@ fields:
       data_type: timestamp with time zone
       default_value: null
       max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_faq
+    field: id
+    type: integer
+    meta:
+      collection: catering_faq
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: catering_faq
+      data_type: integer
+      default_value: nextval('catering_faq_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_faq
+    field: status
+    type: string
+    meta:
+      collection: catering_faq
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - background: '#6F7546'
+            foreground: '#FFFFFF'
+            text: Опубликовано
+            value: published
+          - background: '#D3DAE4'
+            foreground: '#18222F'
+            text: Черновик
+            value: draft
+          - background: '#A2B5CD'
+            foreground: '#FFFFFF'
+            text: Архив
+            value: archived
+        showAsDot: true
+      field: status
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Опубликовано
+            value: published
+          - text: Черновик
+            value: draft
+          - text: Архив
+            value: archived
+      readonly: false
+      required: true
+      searchable: true
+      sort: 2
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Статус
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: status
+      table: catering_faq
+      data_type: character varying
+      default_value: published
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_faq
+    field: sort
+    type: integer
+    meta:
+      collection: catering_faq
+      conditions: null
+      display: null
+      display_options: null
+      field: sort
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 3
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: sort
+      table: catering_faq
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_faq
+    field: topic
+    type: string
+    meta:
+      collection: catering_faq
+      conditions: null
+      display: null
+      display_options: null
+      field: topic
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        allowOther: true
+        choices:
+          - text: Локация, охват и оперативность
+            value: Локация, охват и оперативность
+          - text: Цены, финансы и правила бронирования
+            value: Цены, финансы и правила бронирования
+          - text: Меню, алкоголь и дегустация
+            value: Меню, алкоголь и дегустация
+          - text: Сервис, оборудование и гарантии
+            value: Сервис, оборудование и гарантии
+          - text: Персонал и обслуживание
+            value: Персонал и обслуживание
+          - text: Оборудование и площадки
+            value: Оборудование и площадки
+          - text: Дополнительные услуги и возможности
+            value: Дополнительные услуги и возможности
+          - text: Гарантии и качество
+            value: Гарантии и качество
+      readonly: false
+      required: true
+      searchable: true
+      sort: 4
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Тема
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: topic
+      table: catering_faq
+      data_type: character varying
+      default_value: null
+      max_length: 120
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_faq
+    field: featured
+    type: boolean
+    meta:
+      collection: catering_faq
+      conditions: null
+      display: boolean
+      display_options: null
+      field: featured
+      group: null
+      hidden: false
+      interface: boolean
+      note: Хорошо смотрятся 6–8 главных вопросов
+      options:
+        label: Показывать на /catering/
+      readonly: false
+      required: false
+      searchable: true
+      sort: 5
+      special:
+        - cast-boolean
+      translations:
+        - language: ru-RU
+          translation: На обзорной
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: featured
+      table: catering_faq
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_faq
+    field: question
+    type: string
+    meta:
+      collection: catering_faq
+      conditions: null
+      display: null
+      display_options: null
+      field: question
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 6
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Вопрос
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: question
+      table: catering_faq
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_faq
+    field: answer
+    type: text
+    meta:
+      collection: catering_faq
+      conditions: null
+      display: null
+      display_options: null
+      field: answer
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 7
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Ответ
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: answer
+      table: catering_faq
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_faq
+    field: format
+    type: integer
+    meta:
+      collection: catering_faq
+      conditions: null
+      display: related-values
+      display_options:
+        template: '{{title}}'
+      field: format
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: 'Необязательно: вопрос покажется и у формата на странице «Форматы и цены»'
+      options:
+        template: '{{title}}'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 8
+      special:
+        - m2o
+      translations:
+        - language: ru-RU
+          translation: Формат
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: format
+      table: catering_faq
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: catering_formats
+      foreign_key_column: id
+  - collection: catering_faq
+    field: import_key
+    type: string
+    meta:
+      collection: catering_faq
+      conditions: null
+      display: null
+      display_options: null
+      field: import_key
+      group: null
+      hidden: true
+      interface: input
+      note: Связь со старым сайтом для повторного импорта
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 9
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Метка импорта
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: import_key
+      table: catering_faq
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_formats
+    field: id
+    type: integer
+    meta:
+      collection: catering_formats
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: catering_formats
+      data_type: integer
+      default_value: nextval('catering_formats_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_formats
+    field: status
+    type: string
+    meta:
+      collection: catering_formats
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - background: '#6F7546'
+            foreground: '#FFFFFF'
+            text: Опубликовано
+            value: published
+          - background: '#D3DAE4'
+            foreground: '#18222F'
+            text: Черновик
+            value: draft
+          - background: '#A2B5CD'
+            foreground: '#FFFFFF'
+            text: Архив
+            value: archived
+        showAsDot: true
+      field: status
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Опубликовано
+            value: published
+          - text: Черновик
+            value: draft
+          - text: Архив
+            value: archived
+      readonly: false
+      required: true
+      searchable: true
+      sort: 2
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Статус
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: status
+      table: catering_formats
+      data_type: character varying
+      default_value: published
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_formats
+    field: sort
+    type: integer
+    meta:
+      collection: catering_formats
+      conditions: null
+      display: null
+      display_options: null
+      field: sort
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 3
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: sort
+      table: catering_formats
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_formats
+    field: title
+    type: string
+    meta:
+      collection: catering_formats
+      conditions: null
+      display: null
+      display_options: null
+      field: title
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 4
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Название
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: title
+      table: catering_formats
+      data_type: character varying
+      default_value: null
+      max_length: 80
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_formats
+    field: slug
+    type: string
+    meta:
+      collection: catering_formats
+      conditions: null
+      display: null
+      display_options: null
+      field: slug
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Латиницей. Ссылка: vkus-com.ru/catering/services/#адрес. Пусто — сайт
+        сделает сам
+      options:
+        font: monospace
+        slug: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 5
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Адрес
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: slug
+      table: catering_formats
+      data_type: character varying
+      default_value: null
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: true
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_formats
+    field: summary
+    type: text
+    meta:
+      collection: catering_formats
+      conditions: null
+      display: null
+      display_options: null
+      field: summary
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: Одно-два предложения для карточки на обзорной странице
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 6
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Коротко
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: summary
+      table: catering_formats
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_formats
+    field: description
+    type: text
+    meta:
+      collection: catering_formats
+      conditions: null
+      display: null
+      display_options: null
+      field: description
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: Для страницы «Форматы и цены». Абзацы — через пустую строку
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 7
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Подробно
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: description
+      table: catering_formats
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_formats
+    field: includes
+    type: json
+    meta:
+      collection: catering_formats
+      conditions: null
+      display: null
+      display_options: null
+      field: includes
+      group: null
+      hidden: false
+      interface: list
+      note: >-
+        Коротко, по одному на строку. На обзорной видны первые четыре (на
+        телефоне три), на странице «Форматы и цены» — все
+      options:
+        addLabel: Добавить пункт
+        fields:
+          - field: text
+            meta:
+              interface: input
+              required: false
+              width: full
+            name: Пункт
+            type: string
+        template: '{{text}}'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 8
+      special:
+        - cast-json
+      translations:
+        - language: ru-RU
+          translation: Что входит
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: includes
+      table: catering_formats
+      data_type: json
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_formats
+    field: price_from
+    type: integer
+    meta:
+      collection: catering_formats
+      conditions: null
+      display: null
+      display_options: null
+      field: price_from
+      group: null
+      hidden: false
+      interface: input
+      note: Целое число. Пусто — «стоимость по смете»
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 9
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Цена от, ₽
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: price_from
+      table: catering_formats
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_formats
+    field: price_unit
+    type: string
+    meta:
+      collection: catering_formats
+      conditions: null
+      display: null
+      display_options: null
+      field: price_unit
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        allowOther: true
+        choices:
+          - text: за гостя
+            value: за гостя
+          - text: за бокс
+            value: за бокс
+          - text: за заказ
+            value: за заказ
+      readonly: false
+      required: false
+      searchable: true
+      sort: 10
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Цена за
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: price_unit
+      table: catering_formats
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_formats
+    field: price_note
+    type: string
+    meta:
+      collection: catering_formats
+      conditions: null
+      display: null
+      display_options: null
+      field: price_note
+      group: null
+      hidden: false
+      interface: input
+      note: 'Например: «в наших залах, с обслуживанием»'
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 11
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Пояснение к цене
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: price_note
+      table: catering_formats
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_formats
+    field: guests_from
+    type: integer
+    meta:
+      collection: catering_formats
+      conditions: null
+      display: null
+      display_options: null
+      field: guests_from
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 12
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Гостей от
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: guests_from
+      table: catering_formats
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_formats
+    field: guests_to
+    type: integer
+    meta:
+      collection: catering_formats
+      conditions: null
+      display: null
+      display_options: null
+      field: guests_to
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 13
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Гостей до
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: guests_to
+      table: catering_formats
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_formats
+    field: lead_time
+    type: string
+    meta:
+      collection: catering_formats
+      conditions: null
+      display: null
+      display_options: null
+      field: lead_time
+      group: null
+      hidden: false
+      interface: input
+      note: 'Например: «Готовим от 2 часов»'
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 14
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Срок
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: lead_time
+      table: catering_formats
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_formats
+    field: photo
+    type: uuid
+    meta:
+      collection: catering_formats
+      conditions: null
+      display: image
+      display_options: null
+      field: photo
+      group: null
+      hidden: false
+      interface: file-image
+      note: Вертикальное или горизонтальное — сайт обрежет кадр сам
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 15
+      special:
+        - file
+      translations:
+        - language: ru-RU
+          translation: Фото
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: photo
+      table: catering_formats
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_files
+      foreign_key_column: id
+  - collection: catering_formats
+    field: import_key
+    type: string
+    meta:
+      collection: catering_formats
+      conditions: null
+      display: null
+      display_options: null
+      field: import_key
+      group: null
+      hidden: true
+      interface: input
+      note: Связь со старым сайтом для повторного импорта
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 16
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Метка импорта
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: import_key
+      table: catering_formats
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: id
+    type: integer
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: catering_page
+      data_type: integer
+      default_value: nextval('catering_page_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: page_hint
+    type: alias
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: page_hint
+      group: null
+      hidden: false
+      interface: presentation-notice
+      note: null
+      options:
+        color: info
+        icon: web
+        text: >-
+          Страница vkus-com.ru/catering/ и две вложенные: /catering/services/
+          (форматы подробно) и /catering/faq/ (все вопросы). Форматы, шаги и
+          вопросы — отдельными разделами слева. Пустое поле на сайте просто не
+          печатается.
+      readonly: false
+      required: false
+      searchable: true
+      sort: 1
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: catering_page
+    field: grp_hero
+    type: alias
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: grp_hero
+      group: null
+      hidden: false
+      interface: group-detail
+      note: null
+      options:
+        headerIcon: wallpaper
+        start: open
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special:
+        - alias
+        - no-data
+        - group
+      translations:
+        - language: ru-RU
+          translation: Первый экран
+      validation: null
+      validation_message: null
+      width: full
+  - collection: catering_page
+    field: grp_about
+    type: alias
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: grp_about
+      group: null
+      hidden: false
+      interface: group-detail
+      note: null
+      options:
+        headerIcon: favorite
+        start: open
+      readonly: false
+      required: false
+      searchable: true
+      sort: 3
+      special:
+        - alias
+        - no-data
+        - group
+      translations:
+        - language: ru-RU
+          translation: О нас
+      validation: null
+      validation_message: null
+      width: full
+  - collection: catering_page
+    field: grp_steps
+    type: alias
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: grp_steps
+      group: null
+      hidden: false
+      interface: group-detail
+      note: null
+      options:
+        headerIcon: route
+        start: open
+      readonly: false
+      required: false
+      searchable: true
+      sort: 5
+      special:
+        - alias
+        - no-data
+        - group
+      translations:
+        - language: ru-RU
+          translation: Как мы работаем
+      validation: null
+      validation_message: null
+      width: full
+  - collection: catering_page
+    field: grp_request
+    type: alias
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: grp_request
+      group: null
+      hidden: false
+      interface: group-detail
+      note: null
+      options:
+        headerIcon: contact_phone
+        start: open
+      readonly: false
+      required: false
+      searchable: true
+      sort: 6
+      special:
+        - alias
+        - no-data
+        - group
+      translations:
+        - language: ru-RU
+          translation: Заявка и контакты
+      validation: null
+      validation_message: null
+      width: full
+  - collection: catering_page
+    field: grp_gallery
+    type: alias
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: grp_gallery
+      group: null
+      hidden: false
+      interface: group-detail
+      note: null
+      options:
+        headerIcon: photo_library
+        start: open
+      readonly: false
+      required: false
+      searchable: true
+      sort: 7
+      special:
+        - alias
+        - no-data
+        - group
+      translations:
+        - language: ru-RU
+          translation: Фото
+      validation: null
+      validation_message: null
+      width: full
+  - collection: catering_page
+    field: grp_seo
+    type: alias
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: grp_seo
+      group: null
+      hidden: false
+      interface: group-detail
+      note: null
+      options:
+        headerIcon: travel_explore
+        start: closed
+      readonly: false
+      required: false
+      searchable: true
+      sort: 8
+      special:
+        - alias
+        - no-data
+        - group
+      translations:
+        - language: ru-RU
+          translation: SEO
+      validation: null
+      validation_message: null
+      width: full
+  - collection: catering_page
+    field: date_updated
+    type: timestamp
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: date_updated
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 20
+      special:
+        - date-updated
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: date_updated
+      table: catering_page
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: hero_title
+    type: string
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: hero_title
+      group: grp_hero
+      hidden: false
+      interface: input
+      note: Крупно на первом экране, до 60 знаков
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 1
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Заголовок
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: hero_title
+      table: catering_page
+      data_type: character varying
+      default_value: null
+      max_length: 120
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: hero_text
+    type: text
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: hero_text
+      group: grp_hero
+      hidden: false
+      interface: input-multiline
+      note: Одно-два предложения под заголовком
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Подзаголовок
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: hero_text
+      table: catering_page
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: hero_image
+    type: uuid
+    meta:
+      collection: catering_page
+      conditions: null
+      display: image
+      display_options: null
+      field: hero_image
+      group: grp_hero
+      hidden: false
+      interface: file-image
+      note: >-
+        Зал или накрытый стол, по горизонтали или квадрат. Это же фото уходит в
+        превью ссылки в мессенджерах
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 3
+      special:
+        - file
+      translations:
+        - language: ru-RU
+          translation: Фото первого экрана
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: hero_image
+      table: catering_page
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_files
+      foreign_key_column: id
+  - collection: catering_page
+    field: facts
+    type: json
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: facts
+      group: grp_hero
+      hidden: false
+      interface: list
+      note: >-
+        Три-четыре факта: «6 лет» — «делаем праздники». Только то, что можно
+        подтвердить
+      options:
+        addLabel: Добавить цифру
+        fields:
+          - field: value
+            meta:
+              interface: input
+              required: false
+              width: half
+            name: Цифра
+            type: string
+          - field: label
+            meta:
+              interface: input
+              required: false
+              width: half
+            name: Подпись
+            type: string
+        template: '{{value}} — {{label}}'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 4
+      special:
+        - cast-json
+      translations:
+        - language: ru-RU
+          translation: Цифры под заголовком
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: facts
+      table: catering_page
+      data_type: json
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: intro
+    type: text
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: intro
+      group: grp_about
+      hidden: false
+      interface: input-multiline
+      note: Абзац о компании над приоритетами
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Вступление
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: intro
+      table: catering_page
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: priorities_title
+    type: string
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: priorities_title
+      group: grp_about
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Заголовок приоритетов
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: priorities_title
+      table: catering_page
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: priorities
+    type: json
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: priorities
+      group: grp_about
+      hidden: false
+      interface: list
+      note: >-
+        Пункты печатаются нумерованным списком в этом порядке; хорошо смотрятся
+        3 или 6
+      options:
+        addLabel: Добавить пункт
+        fields:
+          - field: title
+            meta:
+              interface: input
+              required: false
+              width: full
+            name: Заголовок
+            type: string
+          - field: text
+            meta:
+              interface: input-multiline
+              required: false
+              width: full
+            name: Текст
+            type: text
+        template: '{{title}}'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 3
+      special:
+        - cast-json
+      translations:
+        - language: ru-RU
+          translation: Приоритеты
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: priorities
+      table: catering_page
+      data_type: json
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: steps_title
+    type: string
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: steps_title
+      group: grp_steps
+      hidden: false
+      interface: input
+      note: Сами шаги — в разделе «Шаги»
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Заголовок шагов
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: steps_title
+      table: catering_page
+      data_type: character varying
+      default_value: null
+      max_length: 120
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: steps_note
+    type: text
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: steps_note
+      group: grp_steps
+      hidden: false
+      interface: input-multiline
+      note: Абзац под шагами
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Постскриптум
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: steps_note
+      table: catering_page
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: dialog
+    type: json
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: dialog
+      group: grp_steps
+      hidden: false
+      interface: list
+      note: >-
+        Пузыри переписки рядом с шагами — как начинается разговор с менеджером.
+        Пусто — блока нет
+      options:
+        addLabel: Добавить сообщение
+        fields:
+          - field: who
+            meta:
+              interface: select-dropdown
+              options:
+                choices:
+                  - text: Гость
+                    value: guest
+                  - text: Менеджер
+                    value: manager
+              required: false
+              width: half
+            name: Кто пишет
+            type: string
+          - field: text
+            meta:
+              interface: input-multiline
+              required: false
+              width: full
+            name: Сообщение
+            type: text
+        template: '{{who}}: {{text}}'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 3
+      special:
+        - cast-json
+      translations:
+        - language: ru-RU
+          translation: Пример переписки
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: dialog
+      table: catering_page
+      data_type: json
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: request_title
+    type: string
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: request_title
+      group: grp_request
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Заголовок формы
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: request_title
+      table: catering_page
+      data_type: character varying
+      default_value: null
+      max_length: 120
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: request_text
+    type: text
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: request_text
+      group: grp_request
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Текст у формы
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: request_text
+      table: catering_page
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: request_bonus
+    type: text
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: request_bonus
+      group: grp_request
+      hidden: false
+      interface: input-multiline
+      note: Строка-купон у формы. Пусто — купона нет
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 3
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Подарок за заявку
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: request_bonus
+      table: catering_page
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: hours_note
+    type: string
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: hours_note
+      group: grp_request
+      hidden: false
+      interface: input
+      note: >-
+        Например: «с 09:00 до 20:00». Печатается у формы и на экране «Заявка
+        принята»
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 4
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Когда на связи менеджер
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: hours_note
+      table: catering_page
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: contacts_text
+    type: text
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: contacts_text
+      group: grp_request
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 5
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Текст над адресами
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: contacts_text
+      table: catering_page
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: gallery
+    type: alias
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: gallery
+      group: grp_gallery
+      hidden: false
+      interface: files
+      note: >-
+        Лента фото на странице. За ними сайт сам ставит фото направлений
+        «Кейтеринг» и «Банкеты». Подпись необязательна
+      options:
+        template: '{{caption}} · {{directus_files_id.title}}'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 1
+      special:
+        - files
+      translations:
+        - language: ru-RU
+          translation: Фото с праздников
+      validation: null
+      validation_message: null
+      width: full
+  - collection: catering_page
+    field: seo_title
+    type: string
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: seo_title
+      group: grp_seo
+      hidden: false
+      interface: input
+      note: До 60 знаков
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Title страницы
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: seo_title
+      table: catering_page
+      data_type: character varying
+      default_value: null
+      max_length: 120
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: seo_description
+    type: text
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: seo_description
+      group: grp_seo
+      hidden: false
+      interface: input-multiline
+      note: До 160 знаков
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Description страницы
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: seo_description
+      table: catering_page
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: services_seo_title
+    type: string
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: services_seo_title
+      group: grp_seo
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 3
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Title «Форматы и цены»
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: services_seo_title
+      table: catering_page
+      data_type: character varying
+      default_value: null
+      max_length: 120
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: services_seo_description
+    type: text
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: services_seo_description
+      group: grp_seo
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 4
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Description «Форматы и цены»
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: services_seo_description
+      table: catering_page
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: faq_seo_title
+    type: string
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: faq_seo_title
+      group: grp_seo
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 5
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Title «Вопросы и ответы»
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: faq_seo_title
+      table: catering_page
+      data_type: character varying
+      default_value: null
+      max_length: 120
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: faq_seo_description
+    type: text
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: faq_seo_description
+      group: grp_seo
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 6
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Description «Вопросы и ответы»
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: faq_seo_description
+      table: catering_page
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: grp_formats
+    type: alias
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: grp_formats
+      group: null
+      hidden: false
+      interface: group-detail
+      note: null
+      options:
+        headerIcon: room_service
+        start: open
+      readonly: false
+      required: false
+      searchable: true
+      sort: 4
+      special:
+        - alias
+        - no-data
+        - group
+      translations:
+        - language: ru-RU
+          translation: Форматы
+      validation: null
+      validation_message: null
+      width: full
+  - collection: catering_page
+    field: formats_title
+    type: string
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: formats_title
+      group: grp_formats
+      hidden: false
+      interface: input
+      note: Сами форматы, цены и фото — в разделе «Форматы»
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Заголовок форматов
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: formats_title
+      table: catering_page
+      data_type: character varying
+      default_value: null
+      max_length: 120
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: formats_text
+    type: text
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: formats_text
+      group: grp_formats
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Текст под заголовком
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: formats_text
+      table: catering_page
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page
+    field: request_image
+    type: uuid
+    meta:
+      collection: catering_page
+      conditions: null
+      display: image
+      display_options: null
+      field: request_image
+      group: grp_request
+      hidden: false
+      interface: file-image
+      note: >-
+        Блюдо без фона (PNG с прозрачностью) смотрится лучше всего. Пусто — без
+        картинки
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 6
+      special:
+        - file
+      translations:
+        - language: ru-RU
+          translation: Картинка у формы
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: request_image
+      table: catering_page
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_files
+      foreign_key_column: id
+  - collection: catering_page_files
+    field: id
+    type: integer
+    meta:
+      collection: catering_page_files
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: catering_page_files
+      data_type: integer
+      default_value: nextval('catering_page_files_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page_files
+    field: catering_page_id
+    type: integer
+    meta:
+      collection: catering_page_files
+      conditions: null
+      display: null
+      display_options: null
+      field: catering_page_id
+      group: null
+      hidden: true
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: catering_page_id
+      table: catering_page_files
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: catering_page
+      foreign_key_column: id
+  - collection: catering_page_files
+    field: directus_files_id
+    type: uuid
+    meta:
+      collection: catering_page_files
+      conditions: null
+      display: null
+      display_options: null
+      field: directus_files_id
+      group: null
+      hidden: true
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 3
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: directus_files_id
+      table: catering_page_files
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_files
+      foreign_key_column: id
+  - collection: catering_page_files
+    field: sort
+    type: integer
+    meta:
+      collection: catering_page_files
+      conditions: null
+      display: null
+      display_options: null
+      field: sort
+      group: null
+      hidden: true
+      interface: null
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 4
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: sort
+      table: catering_page_files
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_page_files
+    field: caption
+    type: string
+    meta:
+      collection: catering_page_files
+      conditions: null
+      display: null
+      display_options: null
+      field: caption
+      group: null
+      hidden: false
+      interface: input
+      note: Короткая подпись под фото, необязательно
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 5
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Подпись
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: caption
+      table: catering_page_files
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_requests
+    field: id
+    type: integer
+    meta:
+      collection: catering_requests
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: catering_requests
+      data_type: integer
+      default_value: nextval('catering_requests_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_requests
+    field: number
+    type: string
+    meta:
+      collection: catering_requests
+      conditions: null
+      display: null
+      display_options: null
+      field: number
+      group: null
+      hidden: false
+      interface: input
+      note: Тот же номер гость видит на экране «Заявка принята»
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 2
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Номер
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: number
+      table: catering_requests
+      data_type: character varying
+      default_value: null
+      max_length: 24
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_requests
+    field: status
+    type: string
+    meta:
+      collection: catering_requests
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - background: '#F6E3D3'
+            color: '#C67139'
+            foreground: '#8A4A22'
+            text: Новая
+            value: new
+          - background: '#E7E9D6'
+            color: '#6F7546'
+            foreground: '#474C2B'
+            text: В работе
+            value: in_work
+          - background: '#DCE8F1'
+            color: '#3F6C8C'
+            foreground: '#264A63'
+            text: Договор
+            value: contract
+          - background: '#E2E3DA'
+            color: '#333721'
+            foreground: '#333721'
+            text: Выполнена
+            value: done
+          - background: '#EEE8DD'
+            color: '#A79C8A'
+            foreground: '#6E655A'
+            text: Отменена
+            value: cancelled
+        showAsDot: false
+      field: status
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Новая
+            value: new
+          - text: В работе
+            value: in_work
+          - text: Договор
+            value: contract
+          - text: Выполнена
+            value: done
+          - text: Отменена
+            value: cancelled
+      readonly: false
+      required: true
+      searchable: true
+      sort: 3
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Статус
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: status
+      table: catering_requests
+      data_type: character varying
+      default_value: new
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_requests
+    field: date_created
+    type: timestamp
+    meta:
+      collection: catering_requests
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: date_created
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 4
+      special:
+        - date-created
+      translations:
+        - language: ru-RU
+          translation: Пришла
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_created
+      table: catering_requests
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_requests
+    field: source
+    type: string
+    meta:
+      collection: catering_requests
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - background: '#6F7546'
+            text: Сайт
+            value: site
+          - background: '#C67139'
+            text: Телефон
+            value: phone
+          - background: '#3F6C8C'
+            text: Мессенджер
+            value: messenger
+        showAsDot: true
+      field: source
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Сайт
+            value: site
+          - text: Телефон
+            value: phone
+          - text: Мессенджер
+            value: messenger
+      readonly: false
+      required: false
+      searchable: true
+      sort: 5
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Источник
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: source
+      table: catering_requests
+      data_type: character varying
+      default_value: phone
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_requests
+    field: call_hint
+    type: alias
+    meta:
+      collection: catering_requests
+      conditions:
+        - hidden: true
+          name: Не новая
+          rule:
+            status:
+              _neq: new
+      display: null
+      display_options: null
+      field: call_hint
+      group: null
+      hidden: false
+      interface: presentation-notice
+      note: null
+      options:
+        color: warning
+        icon: call
+        text: >-
+          Гость ждёт звонка. Позвоните, уточните дату, число гостей, формат и
+          бюджет — и переведите заявку в «В работе». Договор подписан —
+          «Договор».
+      readonly: false
+      required: false
+      searchable: true
+      sort: 6
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: catering_requests
+    field: name
+    type: string
+    meta:
+      collection: catering_requests
+      conditions: null
+      display: null
+      display_options: null
+      field: name
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 7
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Имя
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: name
+      table: catering_requests
+      data_type: character varying
+      default_value: null
+      max_length: 80
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_requests
+    field: phone
+    type: string
+    meta:
+      collection: catering_requests
+      conditions: null
+      display: null
+      display_options: null
+      field: phone
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 8
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Телефон
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: phone
+      table: catering_requests
+      data_type: character varying
+      default_value: null
+      max_length: 32
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_requests
+    field: event_date
+    type: date
+    meta:
+      collection: catering_requests
+      conditions: null
+      display: datetime
+      display_options:
+        format: long
+      field: event_date
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 9
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Дата праздника
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: event_date
+      table: catering_requests
+      data_type: date
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_requests
+    field: guests
+    type: integer
+    meta:
+      collection: catering_requests
+      conditions: null
+      display: null
+      display_options: null
+      field: guests
+      group: null
+      hidden: false
+      interface: input
+      note: Примерно, со слов гостя
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 10
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Гостей
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: guests
+      table: catering_requests
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_requests
+    field: format
+    type: integer
+    meta:
+      collection: catering_requests
+      conditions: null
+      display: related-values
+      display_options:
+        template: '{{title}}'
+      field: format
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: Пусто — гость ещё не решил
+      options:
+        template: '{{title}}'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 11
+      special:
+        - m2o
+      translations:
+        - language: ru-RU
+          translation: Формат
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: format
+      table: catering_requests
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: catering_formats
+      foreign_key_column: id
+  - collection: catering_requests
+    field: venue
+    type: string
+    meta:
+      collection: catering_requests
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: В нашем зале
+            value: hall
+          - text: Выездное
+            value: offsite
+          - text: Пока не знает
+            value: unknown
+        showAsDot: false
+      field: venue
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: В нашем зале
+            value: hall
+          - text: Выездное
+            value: offsite
+          - text: Пока не знает
+            value: unknown
+      readonly: false
+      required: false
+      searchable: true
+      sort: 12
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Где
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: venue
+      table: catering_requests
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_requests
+    field: place
+    type: integer
+    meta:
+      collection: catering_requests
+      conditions:
+        - hidden: true
+          name: Не зал
+          rule:
+            venue:
+              _neq: hall
+      display: related-values
+      display_options:
+        template: '{{name}}'
+      field: place
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{name}}'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 13
+      special:
+        - m2o
+      translations:
+        - language: ru-RU
+          translation: Зал
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: place
+      table: catering_requests
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: places
+      foreign_key_column: id
+  - collection: catering_requests
+    field: address
+    type: string
+    meta:
+      collection: catering_requests
+      conditions:
+        - hidden: true
+          name: Не выезд
+          rule:
+            venue:
+              _neq: offsite
+      display: null
+      display_options: null
+      field: address
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 14
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Адрес выезда
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: address
+      table: catering_requests
+      data_type: character varying
+      default_value: null
+      max_length: 200
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_requests
+    field: wishes
+    type: text
+    meta:
+      collection: catering_requests
+      conditions: null
+      display: null
+      display_options: null
+      field: wishes
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 15
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Пожелания
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: wishes
+      table: catering_requests
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_requests
+    field: consent
+    type: boolean
+    meta:
+      collection: catering_requests
+      conditions: null
+      display: boolean
+      display_options: null
+      field: consent
+      group: null
+      hidden: false
+      interface: boolean
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 16
+      special:
+        - cast-boolean
+      translations:
+        - language: ru-RU
+          translation: Согласие на обработку данных
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: consent
+      table: catering_requests
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_requests
+    field: manager_note
+    type: text
+    meta:
+      collection: catering_requests
+      conditions: null
+      display: null
+      display_options: null
+      field: manager_note
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: Видна только в админке
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 17
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Заметка менеджера
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: manager_note
+      table: catering_requests
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_requests
+    field: date_updated
+    type: timestamp
+    meta:
+      collection: catering_requests
+      conditions: null
+      display: null
+      display_options: null
+      field: date_updated
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 18
+      special:
+        - date-updated
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: date_updated
+      table: catering_requests
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_requests
+    field: user_updated
+    type: uuid
+    meta:
+      collection: catering_requests
+      conditions: null
+      display: null
+      display_options: null
+      field: user_updated
+      group: null
+      hidden: true
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{first_name}} {{last_name}}'
+      readonly: true
+      required: false
+      searchable: true
+      sort: 19
+      special:
+        - user-updated
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: user_updated
+      table: catering_requests
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
+  - collection: catering_steps
+    field: id
+    type: integer
+    meta:
+      collection: catering_steps
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: catering_steps
+      data_type: integer
+      default_value: nextval('catering_steps_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_steps
+    field: sort
+    type: integer
+    meta:
+      collection: catering_steps
+      conditions: null
+      display: null
+      display_options: null
+      field: sort
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: sort
+      table: catering_steps
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_steps
+    field: title
+    type: string
+    meta:
+      collection: catering_steps
+      conditions: null
+      display: null
+      display_options: null
+      field: title
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 3
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Заголовок
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: title
+      table: catering_steps
+      data_type: character varying
+      default_value: null
+      max_length: 120
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_steps
+    field: text
+    type: text
+    meta:
+      collection: catering_steps
+      conditions: null
+      display: null
+      display_options: null
+      field: text
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 4
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Текст
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: text
+      table: catering_steps
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_steps
+    field: contacts
+    type: boolean
+    meta:
+      collection: catering_steps
+      conditions: null
+      display: boolean
+      display_options: null
+      field: contacts
+      group: null
+      hidden: false
+      interface: boolean
+      note: Показать под шагом номер, Telegram и Max
+      options:
+        label: Показывать
+      readonly: false
+      required: false
+      searchable: true
+      sort: 5
+      special:
+        - cast-boolean
+      translations:
+        - language: ru-RU
+          translation: Телефон и мессенджеры
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: contacts
+      table: catering_steps
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: catering_steps
+    field: import_key
+    type: string
+    meta:
+      collection: catering_steps
+      conditions: null
+      display: null
+      display_options: null
+      field: import_key
+      group: null
+      hidden: true
+      interface: input
+      note: Связь со старым сайтом для повторного импорта
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 6
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Метка импорта
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: import_key
+      table: catering_steps
+      data_type: character varying
+      default_value: null
+      max_length: 255
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
@@ -6398,7 +10499,7 @@ fields:
       display_options: null
       field: links
       group: null
-      hidden: false
+      hidden: true
       interface: group-detail
       note: null
       options:
@@ -6427,7 +10528,7 @@ fields:
       display_options: null
       field: shop
       group: null
-      hidden: false
+      hidden: true
       interface: group-detail
       note: null
       options:
@@ -6714,13 +10815,15 @@ fields:
       display_options: null
       field: shop_url
       group: links
-      hidden: false
+      hidden: true
       interface: input
-      note: null
+      note: >-
+        Больше не используется: с 12.10.2026 сайт не ссылается на приложение и
+        старый магазин, доставка — каталог на сайте. Поле оставлено для истории.
       options:
         placeholder: https://…
       readonly: false
-      required: true
+      required: false
       searchable: true
       sort: 8
       special: null
@@ -6738,7 +10841,7 @@ fields:
       max_length: 255
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_indexed: false
       is_primary_key: false
@@ -6757,13 +10860,15 @@ fields:
       display_options: null
       field: app_ios
       group: links
-      hidden: false
+      hidden: true
       interface: input
-      note: null
+      note: >-
+        Больше не используется: с 12.10.2026 сайт не ссылается на приложение и
+        старый магазин, доставка — каталог на сайте. Поле оставлено для истории.
       options:
         placeholder: https://…
       readonly: false
-      required: true
+      required: false
       searchable: true
       sort: 9
       special: null
@@ -6781,7 +10886,7 @@ fields:
       max_length: 255
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_indexed: false
       is_primary_key: false
@@ -6800,13 +10905,15 @@ fields:
       display_options: null
       field: app_android
       group: links
-      hidden: false
+      hidden: true
       interface: input
-      note: null
+      note: >-
+        Больше не используется: с 12.10.2026 сайт не ссылается на приложение и
+        старый магазин, доставка — каталог на сайте. Поле оставлено для истории.
       options:
         placeholder: https://…
       readonly: false
-      required: true
+      required: false
       searchable: true
       sort: 10
       special: null
@@ -6824,7 +10931,7 @@ fields:
       max_length: 255
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_indexed: false
       is_primary_key: false
@@ -6843,13 +10950,15 @@ fields:
       display_options: null
       field: catering_url
       group: links
-      hidden: false
+      hidden: true
       interface: input
-      note: null
+      note: >-
+        Больше не используется: кейтеринг и банкеты теперь в разделе /catering/
+        этого сайта. Поле оставлено для истории.
       options:
         placeholder: https://…
       readonly: false
-      required: true
+      required: false
       searchable: true
       sort: 11
       special: null
@@ -6867,7 +10976,7 @@ fields:
       max_length: 255
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_indexed: false
       is_primary_key: false
@@ -6886,9 +10995,11 @@ fields:
       display_options: null
       field: catering_services_url
       group: links
-      hidden: false
+      hidden: true
       interface: input
-      note: null
+      note: >-
+        Больше не используется: кейтеринг и банкеты теперь в разделе /catering/
+        этого сайта. Поле оставлено для истории.
       options:
         placeholder: https://…
       readonly: false
@@ -6929,9 +11040,11 @@ fields:
       display_options: null
       field: shop_cakes_ready
       group: shop
-      hidden: false
+      hidden: true
       interface: input
-      note: null
+      note: >-
+        Больше не используется: с 12.10.2026 сайт не ссылается на приложение и
+        старый магазин, доставка — каталог на сайте. Поле оставлено для истории.
       options:
         placeholder: https://…
       readonly: false
@@ -6972,9 +11085,11 @@ fields:
       display_options: null
       field: shop_cakes_custom
       group: shop
-      hidden: false
+      hidden: true
       interface: input
-      note: null
+      note: >-
+        Больше не используется: с 12.10.2026 сайт не ссылается на приложение и
+        старый магазин, доставка — каталог на сайте. Поле оставлено для истории.
       options:
         placeholder: https://…
       readonly: false
@@ -7015,9 +11130,11 @@ fields:
       display_options: null
       field: shop_pastry
       group: shop
-      hidden: false
+      hidden: true
       interface: input
-      note: null
+      note: >-
+        Больше не используется: с 12.10.2026 сайт не ссылается на приложение и
+        старый магазин, доставка — каталог на сайте. Поле оставлено для истории.
       options:
         placeholder: https://…
       readonly: false
@@ -7058,9 +11175,11 @@ fields:
       display_options: null
       field: shop_breakfasts
       group: shop
-      hidden: false
+      hidden: true
       interface: input
-      note: null
+      note: >-
+        Больше не используется: с 12.10.2026 сайт не ссылается на приложение и
+        старый магазин, доставка — каталог на сайте. Поле оставлено для истории.
       options:
         placeholder: https://…
       readonly: false
@@ -8143,6 +12262,195 @@ relations:
       foreign_key_table: directus_files
       foreign_key_column: id
       constraint_name: cakes_photo_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: catering_faq
+    field: format
+    related_collection: catering_formats
+    meta:
+      junction_field: null
+      many_collection: catering_faq
+      many_field: format
+      one_allowed_collections: null
+      one_collection: catering_formats
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: catering_faq
+      column: format
+      foreign_key_table: catering_formats
+      foreign_key_column: id
+      constraint_name: catering_faq_format_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: catering_formats
+    field: photo
+    related_collection: directus_files
+    meta:
+      junction_field: null
+      many_collection: catering_formats
+      many_field: photo
+      one_allowed_collections: null
+      one_collection: directus_files
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: catering_formats
+      column: photo
+      foreign_key_table: directus_files
+      foreign_key_column: id
+      constraint_name: catering_formats_photo_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: catering_page
+    field: hero_image
+    related_collection: directus_files
+    meta:
+      junction_field: null
+      many_collection: catering_page
+      many_field: hero_image
+      one_allowed_collections: null
+      one_collection: directus_files
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: catering_page
+      column: hero_image
+      foreign_key_table: directus_files
+      foreign_key_column: id
+      constraint_name: catering_page_hero_image_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: catering_page
+    field: request_image
+    related_collection: directus_files
+    meta:
+      junction_field: null
+      many_collection: catering_page
+      many_field: request_image
+      one_allowed_collections: null
+      one_collection: directus_files
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: catering_page
+      column: request_image
+      foreign_key_table: directus_files
+      foreign_key_column: id
+      constraint_name: catering_page_request_image_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: catering_page_files
+    field: catering_page_id
+    related_collection: catering_page
+    meta:
+      junction_field: directus_files_id
+      many_collection: catering_page_files
+      many_field: catering_page_id
+      one_allowed_collections: null
+      one_collection: catering_page
+      one_collection_field: null
+      one_deselect_action: delete
+      one_field: gallery
+      sort_field: sort
+    schema:
+      table: catering_page_files
+      column: catering_page_id
+      foreign_key_table: catering_page
+      foreign_key_column: id
+      constraint_name: catering_page_files_catering_page_id_foreign
+      on_update: NO ACTION
+      on_delete: CASCADE
+  - collection: catering_page_files
+    field: directus_files_id
+    related_collection: directus_files
+    meta:
+      junction_field: catering_page_id
+      many_collection: catering_page_files
+      many_field: directus_files_id
+      one_allowed_collections: null
+      one_collection: directus_files
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: catering_page_files
+      column: directus_files_id
+      foreign_key_table: directus_files
+      foreign_key_column: id
+      constraint_name: catering_page_files_directus_files_id_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: catering_requests
+    field: format
+    related_collection: catering_formats
+    meta:
+      junction_field: null
+      many_collection: catering_requests
+      many_field: format
+      one_allowed_collections: null
+      one_collection: catering_formats
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: catering_requests
+      column: format
+      foreign_key_table: catering_formats
+      foreign_key_column: id
+      constraint_name: catering_requests_format_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: catering_requests
+    field: place
+    related_collection: places
+    meta:
+      junction_field: null
+      many_collection: catering_requests
+      many_field: place
+      one_allowed_collections: null
+      one_collection: places
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: catering_requests
+      column: place
+      foreign_key_table: places
+      foreign_key_column: id
+      constraint_name: catering_requests_place_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: catering_requests
+    field: user_updated
+    related_collection: directus_users
+    meta:
+      junction_field: null
+      many_collection: catering_requests
+      many_field: user_updated
+      one_allowed_collections: null
+      one_collection: directus_users
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: catering_requests
+      column: user_updated
+      foreign_key_table: directus_users
+      foreign_key_column: id
+      constraint_name: catering_requests_user_updated_foreign
       on_update: NO ACTION
       on_delete: SET NULL
   - collection: directions

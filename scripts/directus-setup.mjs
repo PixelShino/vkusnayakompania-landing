@@ -30,6 +30,9 @@ const CONTENT = [
   'afisha', 'promos', 'menus', 'cakes', 'places_files', 'directions_files',
   // the delivery catalog: sections and dishes / каталог доставки: разделы и блюда
   'product_categories', 'products',
+  // the catering page: formats, steps, questions and its photos
+  // страница кейтеринга: форматы, шаги, вопросы и её фото
+  'catering_formats', 'catering_steps', 'catering_faq', 'catering_page_files',
 ];
 // Orders hold names, phones and addresses: editors take and close them (and
 // enter phone orders), nobody deletes them — a cancelled order is a status.
@@ -45,8 +48,21 @@ const ORDER_FIELDS_PUBLIC = [
   // ставит хук `order-guard`, он работает до проверки прав
   'status', 'source', 'manager_note',
 ];
+// Catering requests hold names, phones and dates: the same rules as orders —
+// editors take and close them (and enter requests taken by phone), nobody
+// deletes them, the builder never reads them, the public may only create one.
+// В заявках на кейтеринг имена, телефоны и даты: правила те же, что у заказов —
+// редактор принимает и закрывает их (и вбивает заявки с телефона), удалять не
+// может никто, сборщик их не читает, публичная роль может только создать.
+const REQUESTS = 'catering_requests';
+const REQUEST_FIELDS_PUBLIC = [
+  'name', 'phone', 'event_date', 'guests', 'format', 'venue', 'place', 'address', 'wishes', 'consent',
+  // set by the `request-guard` hook, which runs before permissions are checked
+  // ставит хук `request-guard`, он работает до проверки прав
+  'number', 'status', 'source', 'manager_note',
+];
 // editors may only update these / редактор только меняет, не создаёт и не удаляет
-const SINGLE = ['settings', 'home', 'places', 'directions'];
+const SINGLE = ['settings', 'home', 'places', 'directions', 'catering_page'];
 const ALL = ['create', 'read', 'update', 'delete'];
 // the direction key drives the card buttons; editors must not change it.
 // `gallery` is the M2M alias: without it the editor sees the photos but cannot add any
@@ -79,6 +95,7 @@ for (const c of SINGLE) {
   add(c, 'update', c === 'directions' ? DIRECTION_FIELDS : ['*']);
 }
 for (const a of ['create', 'read', 'update']) add(ORDERS, a);
+for (const a of ['create', 'read', 'update']) add(REQUESTS, a);
 for (const a of ALL) add('directus_files', a);
 for (const a of ['create', 'read', 'update']) add('directus_folders', a);
 // build status is written by the builder, editors only watch it
@@ -160,19 +177,39 @@ const publicOrder = {
     ],
   },
 };
-const pcreate = pexisting.find((p) => p.collection === ORDERS && p.action === 'create');
-if (!pcreate) {
-  await api('POST', '/permissions', { policy: publicAccess.policy, collection: ORDERS, action: 'create', ...publicOrder });
-  console.log('+ permission Публичная: orders create');
-} else if (ORDER_FIELDS_PUBLIC.some((f) => !pcreate.fields?.includes(f))) {
-  await api('PATCH', `/permissions/${pcreate.id}`, publicOrder);
-  console.log('= permission Публичная: orders create — поля обновлены');
-}
-// anything else on orders for the public is a leak: remove it
-// любое другое право публичной роли на заказы — утечка: убрать
-for (const p of pexisting.filter((p) => p.collection === ORDERS && p.action !== 'create')) {
-  await api('DELETE', `/permissions/${p.id}`);
-  console.log(`- permission Публичная: orders ${p.action}`);
+const publicRequest = {
+  fields: REQUEST_FIELDS_PUBLIC,
+  presets: { status: 'new', source: 'site' },
+  validation: {
+    _and: [
+      { status: { _eq: 'new' } },
+      { source: { _eq: 'site' } },
+      { consent: { _eq: true } },
+      { name: { _nempty: true } },
+      { phone: { _nempty: true } },
+    ],
+  },
+};
+// one rule for orders and catering requests: create with the listed fields,
+// anything else for the public is a leak and goes
+// одно правило для заказов и заявок: создание с перечисленными полями, любое
+// другое право публичной роли — утечка и убирается
+for (const [collection, rule] of [
+  [ORDERS, publicOrder],
+  [REQUESTS, publicRequest],
+]) {
+  const pcreate = pexisting.find((p) => p.collection === collection && p.action === 'create');
+  if (!pcreate) {
+    await api('POST', '/permissions', { policy: publicAccess.policy, collection, action: 'create', ...rule });
+    console.log(`+ permission Публичная: ${collection} create`);
+  } else if (rule.fields.some((f) => !pcreate.fields?.includes(f))) {
+    await api('PATCH', `/permissions/${pcreate.id}`, rule);
+    console.log(`= permission Публичная: ${collection} create — поля обновлены`);
+  }
+  for (const p of pexisting.filter((p) => p.collection === collection && p.action !== 'create')) {
+    await api('DELETE', `/permissions/${p.id}`);
+    console.log(`- permission Публичная: ${collection} ${p.action}`);
+  }
 }
 
 // 3b. how the lists open: orders newest first with the columns a manager
@@ -201,6 +238,38 @@ const PRESETS = [
     layout_options: { tabular: { widths: { photo: 64, title: 300, category: 160, price: 100, weight: 130, available: 100, status: 150 } } },
   },
   { collection: 'products', bookmark: 'Нет в наличии', icon: 'remove_shopping_cart', filter: { available: { _eq: false } } },
+  // catering requests: newest first, the columns a manager calls from and
+  // plans by; formats with a photo and the price; questions by topic
+  // заявки на кейтеринг: свежие сверху, с колонками, по которым менеджер звонит
+  // и планирует; форматы — с фото и ценой; вопросы — по темам
+  {
+    collection: REQUESTS,
+    layout_query: {
+      tabular: {
+        fields: ['status', 'number', 'date_created', 'name', 'phone', 'event_date', 'guests', 'format', 'venue'],
+        sort: ['-date_created'],
+        limit: 50,
+      },
+    },
+    layout_options: {
+      tabular: { widths: { status: 120, number: 110, date_created: 140, name: 170, phone: 160, event_date: 150, guests: 90, format: 170, venue: 140 } },
+    },
+  },
+  { collection: REQUESTS, bookmark: 'Новые', icon: 'fiber_new', color: '#C67139', filter: { status: { _eq: 'new' } } },
+  { collection: REQUESTS, bookmark: 'В работе', icon: 'pending_actions', color: '#6F7546', filter: { status: { _in: ['in_work', 'contract'] } } },
+  {
+    collection: 'catering_formats',
+    layout_query: {
+      tabular: { fields: ['photo', 'title', 'price_from', 'price_unit', 'guests_to', 'status'], sort: ['sort'], limit: 50 },
+    },
+    layout_options: { tabular: { widths: { photo: 64, title: 260, price_from: 120, price_unit: 120, guests_to: 110, status: 150 } } },
+  },
+  {
+    collection: 'catering_faq',
+    layout_query: { tabular: { fields: ['question', 'topic', 'featured', 'status'], sort: ['sort'], limit: 100 } },
+    layout_options: { tabular: { widths: { question: 420, topic: 260, featured: 120, status: 150 } } },
+  },
+  { collection: 'catering_faq', bookmark: 'На обзорной', icon: 'star', filter: { featured: { _eq: true } } },
 ];
 const presetsNow = await api('GET', `/presets?filter[user][_null]=true&filter[role][_null]=true&limit=-1`);
 for (const preset of PRESETS) {
@@ -217,8 +286,8 @@ for (const preset of PRESETS) {
 // items.sort: перетаскивание порядка — не update, без него новый порядок ждал
 // ночной сборки
 const FLOW_SCOPE = ['items.create', 'items.update', 'items.delete', 'items.sort'];
-// orders are not here: a new order changes nothing on the site
-// заказов здесь нет: новый заказ ничего на сайте не меняет
+// orders and catering requests are not here: a new one changes nothing on the site
+// заказов и заявок здесь нет: новый заказ или заявка ничего на сайте не меняют
 const FLOW_COLLECTIONS = [...CONTENT, ...SINGLE, 'directus_files'];
 let flow = await findOne('/flows', { name: { _eq: 'Пересборка сайта' } });
 if (flow && FLOW_SCOPE.some((event) => !flow.options?.scope?.includes(event))) {

@@ -7,3 +7,4 @@ uploads/
 extensions/*
 !extensions/optimize-upload/
 !extensions/order-guard/
+!extensions/request-guard/

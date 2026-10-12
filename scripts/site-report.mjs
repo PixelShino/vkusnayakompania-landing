@@ -30,6 +30,12 @@ const [home, directions, afisha, menus, cakes, places] = await Promise.all(
 // the catalog may be missing from the schema: then there is nothing to count
 // каталога может не быть в схеме — тогда и считать нечего
 const products = await get(QUERIES.products).catch(() => []);
+// the same for catering: before `schema apply` its collections are not there
+// то же для кейтеринга: до `schema apply` его коллекций нет
+const [cateringPage, cateringFormats] = await Promise.all([
+  get(QUERIES.catering_page).catch(() => null),
+  get(QUERIES.catering_formats).catch(() => []),
+]);
 
 const published = (items) => items.filter((item) => !item.status || item.status === 'published');
 const stub = (file) => Boolean(file) && placeholderFile(file);
@@ -47,6 +53,13 @@ const left = [
   // a dish with no photo at all stands as a plate on the catalog page too
   // блюдо вовсе без фото тоже стоит плашкой на странице каталога
   ['блюда без фото', published(products).filter((p) => !p.photo || stub(p.photo)).length],
+  // a catering format without a photo is a plate on /catering/ and on its own spread
+  // формат кейтеринга без фото — плашка на /catering/ и на своём развороте
+  ['форматы кейтеринга без фото', published(cateringFormats).filter((f) => !f.photo || stub(f.photo)).length],
+  [
+    'фото кейтеринга',
+    [cateringPage?.hero_image, ...(cateringPage?.gallery ?? []).map((g) => g.directus_files_id)].filter(stub).length,
+  ],
 ].filter(([, n]) => n > 0);
 
 if (left.length) {

@@ -60,10 +60,30 @@ export const QUERIES = {
     `id,status,sort,category,title,slug,description,composition,weight,price,old_price,variants,fillings,available,badges,${img('photo')}`,
     '&sort=sort,id',
   )}`,
+  // catering and banquets: the page singleton with its gallery, the formats,
+  // the steps and the questions; the requests are not here — the builder
+  // token never reads them
+  // кейтеринг и банкеты: синглтон страницы с галереей, форматы, шаги и вопросы;
+  // заявок здесь нет — токен сборщика их не читает
+  catering_page: `/items/catering_page?${q(
+    `*,${img('hero_image')},${img('request_image')},${gallery}`,
+    '&deep[gallery][_sort]=sort',
+  )}`,
+  catering_formats: `/items/catering_formats?${q(
+    `id,status,sort,title,slug,summary,description,includes,price_from,price_unit,price_note,guests_from,guests_to,lead_time,${img('photo')}`,
+    '&sort=sort,id',
+  )}`,
+  catering_steps: `/items/catering_steps?${q('id,sort,title,text,contacts', '&sort=sort,id')}`,
+  catering_faq: `/items/catering_faq?${q('id,status,sort,topic,question,answer,featured,format', '&sort=sort,id')}`,
 };
 
-// Collections the site builds without: a missing one means an empty catalog,
-// not a failed build (schema not applied yet, builder without the new rights).
-// Коллекции, без которых сайт собирается: недоступная — это пустой каталог, а
-// не упавшая сборка (схема ещё не применена, у сборщика нет новых прав).
-export const OPTIONAL = new Set(['product_categories', 'products']);
+// Collections the site builds without: a missing one means an empty catalog or
+// an empty catering section, not a failed build (schema not applied yet,
+// builder without the new rights).
+// Коллекции, без которых сайт собирается: недоступная — это пустой каталог или
+// пустой раздел кейтеринга, а не упавшая сборка (схема ещё не применена, у
+// сборщика нет новых прав).
+export const OPTIONAL = new Set([
+  'product_categories', 'products',
+  'catering_page', 'catering_formats', 'catering_steps', 'catering_faq',
+]);
