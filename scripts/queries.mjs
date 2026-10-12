@@ -51,4 +51,19 @@ export const QUERIES = {
   promos: `/items/promos?${q('*', '&sort=sort')}`,
   menus: `/items/menus?${q(`*,${img('file')}`)}`,
   cakes: `/items/cakes?${q(`*,${img('photo')}`, '&sort=sort')}`,
+  // the delivery catalog: sections, then dishes with their photo; the manager's
+  // orders are not here — the builder token never reads them
+  // каталог доставки: разделы, затем блюда с фото; заказов здесь нет — токен
+  // сборщика их не читает
+  product_categories: `/items/product_categories?${q('id,status,sort,title,slug,description', '&sort=sort,id')}`,
+  products: `/items/products?${q(
+    `id,status,sort,category,title,slug,description,composition,weight,price,old_price,variants,fillings,available,badges,${img('photo')}`,
+    '&sort=sort,id',
+  )}`,
 };
+
+// Collections the site builds without: a missing one means an empty catalog,
+// not a failed build (schema not applied yet, builder without the new rights).
+// Коллекции, без которых сайт собирается: недоступная — это пустой каталог, а
+// не упавшая сборка (схема ещё не применена, у сборщика нет новых прав).
+export const OPTIONAL = new Set(['product_categories', 'products']);

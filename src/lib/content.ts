@@ -9,7 +9,8 @@ import type { ImageMetadata } from 'astro';
 import { toSchedule, type HoursRow, type Schedule } from '../data/site.ts';
 import { BASE } from './base.ts';
 import { currentAfisha, livePromos, type Dated } from './select.ts';
-import { QUERIES, docKind, docTarget } from '../../scripts/queries.mjs';
+import { OPTIONAL, QUERIES, docKind, docTarget } from '../../scripts/queries.mjs';
+import { normalizeCatalog, type Catalog, type RawCategory, type RawProduct } from './catalog.ts';
 import fixture from '../data/fixture.json' with { type: 'json' };
 
 /** Файл-заглушка помечен в админке: с этой пометкой сайт не выдаёт его за готовый. */
@@ -214,6 +215,8 @@ export type Content = {
   promos: Promo[];
   menus: Menu[];
   cakes: Cake[];
+  /** каталог доставки; пустой, если в админке его нет или он не заполнен */
+  catalog: Catalog;
   /** сегодня в часовом поясе точек — от него считаются окна показа */
   today: string;
 };
@@ -270,6 +273,10 @@ export type Raw = {
   promos: RawPromo[];
   menus: RawMenu[];
   cakes: RawCake[];
+  // optional: an older fixture and a Directus without the catalog have neither
+  // необязательны: в старой фикстуре и в Directus без каталога их нет
+  product_categories?: RawCategory[] | null;
+  products?: RawProduct[] | null;
 };
 
 /** Файл Directus → то, что кладётся в `Img.src`. */
@@ -413,9 +420,29 @@ export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraTo
     cakes: raw.cakes
       .filter((cake) => cake.status === 'published')
       .map((cake) => ({ ...cake, photo: need(img(cake.photo), `торт «${cake.title}»: нет фото`) })),
+    catalog: normalizeCatalog(raw.product_categories, raw.products, (file, alt) => catalogImg(file, alt, resolveImage), warn),
     today,
   };
 };
+
+/**
+ * A dish photo is lenient where the rest of the page is strict: without alt the
+ * dish name describes it, without dimensions the card shows a plate. One bad
+ * file in a hundred and fifty must not cost the site its build.
+ * Фото блюда снисходительнее остальных кадров страницы: без alt его описывает
+ * название блюда, без размеров карточка встаёт плашкой. Один плохой файл из
+ * полутора сотен не должен стоить сайту сборки.
+ */
+const catalogImg = (file: Record<string, unknown>, alt: string, resolve: ResolveImage): Img | undefined => {
+  const raw = file as RawFile;
+  if (!raw.id || !raw.filename_download || !raw.width || !raw.height) return undefined;
+  const placeholder = placeholderFile(raw);
+  return { src: resolve(raw), width: raw.width, height: raw.height, alt: altOf(raw, placeholder) || alt, placeholder };
+};
+
+// warnings of the build go to the log, not to the page
+// предупреждения сборки идут в лог, а не на страницу
+const warn = (message: string) => console.warn(message);
 
 // Astro exposes .env as import.meta.env, plain Node (checks) has only process.env;
 // keys are static because Vite rejects dynamic `import.meta.env[key]` in dev
@@ -452,12 +479,35 @@ const remoteImage =
   (file) =>
     `${base}/assets/${file.id}?access_token=${token}`;
 
+// Directus answers 503 «Under pressure» when its event loop lags — a busy
+// moment on a 2-vCPU server (an import, a burst of saves). It passes in a
+// second or two, so the build waits instead of failing the release.
+// Directus отвечает 503 «Under pressure», когда у него отстаёт цикл событий —
+// загруженная минута на сервере в 2 ядра (импорт, пачка сохранений). Это
+// проходит за секунду-другую, поэтому сборка ждёт, а не роняет релиз.
+const fetchPatient = async (url: string, init: RequestInit, tries = 4): Promise<Response> => {
+  for (let attempt = 1; ; attempt += 1) {
+    const response = await fetch(url, init);
+    if (response.status !== 503 || attempt >= tries) return response;
+    await new Promise((resolve) => setTimeout(resolve, 1000 * 2 ** (attempt - 1)));
+  }
+};
+
 const fromDirectus = async (base: string, token: string): Promise<Raw> => {
   const entries = await Promise.all(
     Object.entries(QUERIES).map(async ([key, path]) => {
-      const response = await fetch(base + path, { headers: { Authorization: `Bearer ${token}` } });
-      if (!response.ok)
+      const response = await fetchPatient(base + path, { headers: { Authorization: `Bearer ${token}` } });
+      if (!response.ok) {
+        // the catalog is an addition, not the site: a schema not yet applied or a
+        // builder without the new rights gives an empty catalog and a loud log line
+        // каталог — дополнение, а не сайт: не применённая схема или сборщик без
+        // новых прав дают пустой каталог и громкую строку в логе
+        if (OPTIONAL.has(key)) {
+          console.warn(`контент: ${key} недоступен (${response.status}) — каталог соберётся пустым`);
+          return [key, []] as const;
+        }
         throw new Error(`Directus ${path} → ${response.status}: ${await response.text()}`);
+      }
       return [key, (await response.json()).data] as const;
     }),
   );

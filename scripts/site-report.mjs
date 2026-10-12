@@ -27,6 +27,9 @@ const get = async (path) => {
 const [home, directions, afisha, menus, cakes, places] = await Promise.all(
   ['home', 'directions', 'afisha', 'menus', 'cakes', 'places'].map((key) => get(QUERIES[key])),
 );
+// the catalog may be missing from the schema: then there is nothing to count
+// каталога может не быть в схеме — тогда и считать нечего
+const products = await get(QUERIES.products).catch(() => []);
 
 const published = (items) => items.filter((item) => !item.status || item.status === 'published');
 const stub = (file) => Boolean(file) && placeholderFile(file);
@@ -41,6 +44,9 @@ const left = [
   ['торты', published(cakes).map((c) => c.photo).filter(stub).length],
   ['фото точек', places.flatMap((p) => p.gallery ?? []).map((g) => g.directus_files_id).filter(stub).length],
   ['фото направлений', directions.flatMap((d) => d.gallery ?? []).map((g) => g.directus_files_id).filter(stub).length],
+  // a dish with no photo at all stands as a plate on the catalog page too
+  // блюдо вовсе без фото тоже стоит плашкой на странице каталога
+  ['блюда без фото', published(products).filter((p) => !p.photo || stub(p.photo)).length],
 ].filter(([, n]) => n > 0);
 
 if (left.length) {
