@@ -12,6 +12,8 @@
 import Photo from './Photo.astro';
 import OpenStatus from './OpenStatus.astro';
 import { menusFor } from '../lib/select';
+import { catalogSectionHref } from '../lib/nav.ts';
+import { BASE } from '../lib/base.ts';
 import { typo, type Content, type Direction } from '../lib/content';
 import cake from '../assets/icons/cake.svg?raw';
 import cloche from '../assets/icons/cloche.svg?raw';
@@ -104,7 +106,9 @@ const SERVICES: { key: Direction['key']; icon: string; phone?: boolean; actions:
     phone: true,
     actions: (direction) => [
       ...menuAction(direction, 'Меню'),
-      { label: 'В приложении', href: settings.shop_url, external: true },
+      // the confectionery's dishes are in our catalog: the pastries section, or the page
+      // блюда кондитерской — в нашем каталоге: раздел пирожных или сама страница
+      { label: 'Заказать доставку', href: catalogSectionHref(content, 'pirojnye') ?? `${BASE}catalog/` },
     ],
   },
   {

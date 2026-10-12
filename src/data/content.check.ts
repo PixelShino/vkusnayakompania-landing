@@ -26,7 +26,14 @@ const resolve: ResolveImage = (file) => {
 };
 
 const raw = fixture as unknown as Raw;
-const content = normalize(raw, resolve);
+// the fixture is normalized many times below; its content notes (an app-only
+// offer hidden, …) are collected once and asserted, not printed every time
+// фикстура ниже нормализуется много раз; её заметки (скрытая акция приложения
+// и т. п.) собираются один раз и проверяются, а не печатаются каждый раз
+const notes: string[] = [];
+const check = (data: Raw, images: ResolveImage, today?: string) =>
+  normalize(data, images, today, (message) => notes.push(message));
+const content = check(raw, resolve);
 
 // контакты: без телефона страница теряет главное действие
 assert.match(
@@ -43,7 +50,7 @@ for (const place of content.places)
     `places «${place.name}»: «${place.phone}» не похож на телефон`,
   );
 assert.equal(
-  normalize({ ...raw, places: raw.places.map((place) => ({ ...place, phone: null })) }, resolve)
+  check({ ...raw, places: raw.places.map((place) => ({ ...place, phone: null })) }, resolve)
     .places[1].phone,
   content.settings.phone,
   'places: точка без своего телефона берёт общий',
@@ -76,7 +83,7 @@ assert.deepEqual(
 for (const direction of content.directions)
   assert.ok(Array.isArray(direction.gallery), `directions «${direction.title}»: нет массива gallery`);
 assert.deepEqual(
-  normalize(
+  check(
     { ...raw, directions: raw.directions.map(({ gallery: _, ...direction }) => direction) },
     resolve,
   ).directions.map((direction) => direction.gallery),
@@ -85,7 +92,7 @@ assert.deepEqual(
 );
 const catering = raw.directions.findIndex((direction) => direction.key === 'catering');
 const box = { ...raw.cakes[0].photo, title: 'Бокс с закусками', alt: 'Бокс с закусками' };
-const [shot] = normalize(
+const [shot] = check(
   {
     ...raw,
     directions: raw.directions.map((direction, i) =>
@@ -101,7 +108,7 @@ assert.equal(shot.image.alt, 'Бокс с закусками', 'directions.galle
 assert.equal(shot.image.placeholder, false, 'directions.gallery: файл без пометки — не заглушка');
 // строка связки без файла (фото удалили из библиотеки) пропускается, а не валит сборку
 assert.deepEqual(
-  normalize(
+  check(
     {
       ...raw,
       directions: raw.directions.map((direction, i) =>
@@ -125,13 +132,13 @@ assert.deepEqual(
 // пустой alt подменяется заголовком файла; без заголовка нормализация валится с именем файла
 const hero = raw.home.hero_image;
 assert.equal(
-  normalize({ ...raw, home: { ...raw.home, hero_image: { ...hero, alt: '' } } }, resolve).home
+  check({ ...raw, home: { ...raw.home, hero_image: { ...hero, alt: '' } } }, resolve).home
     .hero_image.alt,
   hero.title,
 );
 assert.throws(
   () =>
-    normalize(
+    check(
       { ...raw, home: { ...raw.home, hero_image: { ...hero, alt: '', title: '' } } },
       resolve,
     ),
@@ -147,7 +154,7 @@ const stamped = {
   created_on: '2026-09-23T10:26:53.000Z',
 };
 const cakeOf = (photo: typeof stamped) =>
-  normalize({ ...raw, cakes: [{ ...raw.cakes[0], photo }] }, resolve).cakes[0].photo;
+  check({ ...raw, cakes: [{ ...raw.cakes[0], photo }] }, resolve).cakes[0].photo;
 const untouched = cakeOf({ ...stamped, uploaded_on: '2026-09-23T10:26:53.006Z' });
 assert.equal(untouched.placeholder, true, 'посевной файл остаётся заглушкой');
 assert.equal(untouched.alt, 'Торт «Медовик» — фото появится позже');
@@ -159,6 +166,57 @@ assert.equal(
   'Торт «Медовик»',
   'alt «(заглушка)» без префикса тоже уступает заголовку',
 );
+
+// ── без приложения: каталог на сайте теперь и есть магазин ──────────────────
+// The site sends no one to the app or the old shop. Texts written for the app
+// still live in the admin: a sentence about it drops out, an app-only offer is
+// not shown. Whatever the page prints must not mention the app.
+// Сайт никого не отправляет в приложение или старый магазин. Тексты под
+// приложение ещё живут в админке: предложение про него выпадает, акция только
+// для приложения не показывается. Ничто из выводимого не упоминает приложение.
+{
+  const { withoutApp, mentionsApp } = await import('../lib/content.ts');
+  assert.equal(withoutApp('Меню в PDF, чтобы посмотреть заранее. Заказать на доставку — в приложении.'), 'Меню в PDF, чтобы посмотреть заранее.');
+  assert.equal(withoutApp('Скачайте приложение в App Store.'), undefined, 'текст только про приложение выпадает целиком');
+  assert.equal(withoutApp('Торты за 48 часов.'), 'Торты за 48 часов.');
+  assert.ok(mentionsApp('Ссылка: https://vkusdostavka.shop/'), 'старый магазин тоже считается');
+
+  // the admin as the app left it: a sentence about the app in the menu text,
+  // an app-only offer at the top of the list
+  // админка, какой её оставило приложение: предложение про приложение в
+  // тексте меню и акция только для приложения первой в списке
+  const appOffer = {
+    ...(raw.promos ?? [])[0],
+    id: 9001,
+    title: 'Скидка 20 % на первый бокс',
+    text: 'При заказе из приложения «Вкусная Компания».',
+    place: undefined,
+    sort: 0,
+  };
+  const fromAdmin = check(
+    {
+      ...raw,
+      home: { ...raw.home, menu_text: 'Меню в PDF, чтобы посмотреть заранее. Заказать на доставку — в приложении.' },
+      promos: [appOffer, ...(raw.promos ?? [])],
+    },
+    resolve,
+  );
+  assert.equal(fromAdmin.home.menu_text, 'Меню в PDF, чтобы посмотреть заранее.', 'предложение про приложение выпало');
+  assert.ok(!fromAdmin.promos.some((shown) => shown.id === appOffer.id), 'акция про приложение попала на сайт');
+  assert.equal(fromAdmin.promos.length, content.promos.length, 'остальные акции на месте');
+  assert.ok(notes.some((note) => note.includes(appOffer.title)), 'скрытая акция не записана в лог сборки');
+
+  // what the page prints: home texts, offers, directions, poster, cakes, the
+  // catalog; the settings keep the app links for the admin and are not printed
+  // что печатает страница: тексты главной, акции, направления, афиша, торты,
+  // каталог; ссылки на приложение в настройках остаются для админки и не выводятся
+  for (const shown of [content, fromAdmin]) {
+    const { app_screenshot: _shot, ...homeShown } = shown.home;
+    const printed = JSON.stringify([homeShown, shown.promos, shown.directions, shown.afisha, shown.cakes, shown.catalog]);
+    const leak = printed.match(/[^"]{0,40}(приложени|app\s?store|google\s?play|apps\.apple|play\.google|vkusdostavka)[^"]{0,40}/i);
+    assert.equal(leak, null, `на сайте осталось упоминание приложения: «${leak?.[0]}»`);
+  }
+}
 
 console.log(
   `контент фикстуры: ${content.places.length} точки, ${content.directions.length} направлений, ` +
@@ -177,7 +235,7 @@ assert.equal(
   'catalog.count: сумма блюд по разделам',
 );
 assert.equal(
-  normalize({ ...raw, product_categories: undefined, products: undefined }, resolve).catalog.count,
+  check({ ...raw, product_categories: undefined, products: undefined }, resolve).catalog.count,
   0,
   'каталог: без коллекций каталога сайт собирается с пустым каталогом',
 );
@@ -203,7 +261,7 @@ if (rawCats.length && rawDishes.length) {
   // черновик блюда и черновик раздела не видны; раздел без блюд не рисуется
   const firstCat = rawCats.find((category) => category.status === 'published')!;
   const dish = rawDishes.find((product) => product.status === 'published' && product.category === firstCat.id)!;
-  const hidden = normalize(
+  const hidden = check(
     { ...raw, products: rawDishes.map((product) => (product.id === dish.id ? { ...product, status: 'draft' } : product)) },
     resolve,
   ).catalog;
@@ -211,7 +269,7 @@ if (rawCats.length && rawDishes.length) {
     !hidden.categories.some((category) => category.products.some((product) => product.id === dish.id)),
     'каталог: черновик блюда не попадает на страницу',
   );
-  const noCat = normalize(
+  const noCat = check(
     { ...raw, product_categories: rawCats.map((category) => (category.id === firstCat.id ? { ...category, status: 'draft' } : category)) },
     resolve,
   ).catalog;
@@ -229,7 +287,7 @@ if (rawCats.length && rawDishes.length) {
   assert.equal(broken.count, catalog.count - 2 + 0, 'каталог: два битых блюда пропущены, остальные на месте');
 
   // нет в наличии — уходит в конец раздела, но остаётся на странице
-  const out = normalize(
+  const out = check(
     { ...raw, products: rawDishes.map((product) => (product.id === dish.id ? { ...product, available: false } : product)) },
     resolve,
   ).catalog.categories.find((category) => category.id === firstCat.id)!;
@@ -241,7 +299,7 @@ if (rawCats.length && rawDishes.length) {
   if (withPhoto) {
     type Photo = NonNullable<(typeof rawDishes)[number]['photo']>;
     const photoOf = (photo: Photo) =>
-      normalize({ ...raw, products: rawDishes.map((product) => (product.id === withPhoto.id ? { ...product, photo } : product)) }, resolve)
+      check({ ...raw, products: rawDishes.map((product) => (product.id === withPhoto.id ? { ...product, photo } : product)) }, resolve)
         .catalog.categories.flatMap((category) => category.products)
         .find((product) => product.id === withPhoto.id)?.photo;
     assert.equal(photoOf({ ...withPhoto.photo!, alt: '', title: '' })?.alt, withPhoto.title, 'каталог: фото без alt — по названию блюда');

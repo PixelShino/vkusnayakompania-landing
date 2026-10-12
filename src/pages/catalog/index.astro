@@ -19,7 +19,7 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import Icon from '../../components/Icon.astro';
 import DishCard from '../../components/catalog/DishCard.astro';
-import CatalogApp from '../../components/catalog/CatalogApp.astro';
+import CatalogHelp from '../../components/catalog/CatalogHelp.astro';
 import SectionTiles from '../../components/catalog/SectionTiles.astro';
 import SectionsSheet from '../../components/catalog/SectionsSheet.astro';
 import CartDrawer from '../../components/catalog/CartDrawer.astro';
@@ -31,7 +31,7 @@ import { positions } from '../../lib/catalog.ts';
 import '../../styles/catalog.css';
 
 const content = await getContent();
-const { catalog, settings, places, home } = content;
+const { catalog, settings, places } = content;
 const empty = catalog.count === 0;
 
 const title = `Доставка еды в Самаре — каталог и цены | ${BRAND.name}`;
@@ -168,8 +168,8 @@ let rendered = 0;
           {
             typo(
               empty
-                ? 'Каталог на сайте обновляется. Пока заказать можно в приложении, в интернет-магазине или по телефону.'
-                : 'Те же блюда и десерты, что в нашем приложении. Соберите корзину — мы перезвоним, подтвердим состав, сумму и время.',
+                ? 'Каталог на сайте обновляется. Пока заказать можно по телефону.'
+                : 'Всё меню доставки — от завтраков до праздничных тортов. Соберите корзину, мы перезвоним и подтвердим состав, сумму и время.',
             )
           }
         </p>
@@ -178,35 +178,16 @@ let rendered = 0;
       <ul class="facts" aria-label="Как это работает">
         <li>
           <Icon name="phone" />
-          <span><b>Подтверждаем звонком.</b> Оплату и доставку обсудим при звонке</span>
+          <span><b>Подтверждаем звонком.</b> Перезвоним, уточним состав и время</span>
+        </li>
+        <li>
+          <Icon name="delivery" />
+          <span><b>Доставка по Самаре.</b> Стоимость и оплату назовём при звонке</span>
         </li>
         <li>
           <Icon name="pin" />
           <span><b>Самовывоз:</b> {places.map((place) => place.name).join(' и ')}</span>
         </li>
-        {
-          home.delivery_note && (
-            <li>
-              <Icon name="app" />
-              <span>
-                <b>{home.delivery_note}.</b>{' '}
-                {[
-                  settings.app_ios && { label: 'App\u00a0Store', href: settings.app_ios },
-                  settings.app_android && { label: 'Google\u00a0Play', href: settings.app_android },
-                ]
-                  .filter((store): store is { label: string; href: string } => Boolean(store))
-                  .map((store, i) => (
-                    <>
-                      {i > 0 && ' · '}
-                      <a href={store.href} target="_blank" rel="noopener">
-                        {store.label}
-                      </a>
-                    </>
-                  ))}
-              </span>
-            </li>
-          )
-        }
       </ul>
     </section>
 
@@ -216,12 +197,9 @@ let rendered = 0;
           <div class="cat-empty__panel">
             <Icon name="cloche" />
             <p class="display cat-empty__title">Каталог скоро появится</p>
-            <p>Блюда и цены переносим из приложения. Заказать можно уже сейчас:</p>
+            <p>Блюда и цены уже переносим. Заказать можно по телефону — менеджер подскажет, что есть сегодня.</p>
             <div class="cat-empty__actions">
-              <a class="btn btn--primary" href={settings.shop_url} target="_blank" rel="noopener">
-                Открыть магазин
-              </a>
-              <a class="btn btn--secondary" href={settings.phoneHref}>
+              <a class="btn btn--primary" href={settings.phoneHref}>
                 Позвонить {settings.phone}
               </a>
             </div>
@@ -288,7 +266,7 @@ let rendered = 0;
       )
     }
 
-    <CatalogApp content={content} />
+    <CatalogHelp content={content} />
     {/* «наверх» appears once the first screen is gone: this mark is where it ends
         «наверх» появляется, когда первый экран ушёл: эта метка — его конец */}
     <span class="totop-mark" aria-hidden="true" data-totop-mark></span>

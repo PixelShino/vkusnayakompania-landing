@@ -1,10 +1,10 @@
 ---
 /**
- * Footer: both venues with their own phone and hours, section links, the app
- * and partners, legal line. Legal data and documents come from the admin panel,
+ * Footer: both venues with their own phone and hours, section links, the
+ * catering site, legal line. Legal data and documents come from the admin panel,
  * so an unfilled field simply does not render.
- * Подвал: обе точки со своими телефонами и часами, разделы, приложение и
- * партнёры, юрстрока. Реквизиты и документы приходят из админки — незаполненное
+ * Подвал: обе точки со своими телефонами и часами, разделы, сайт кейтеринга,
+ * юрстрока. Реквизиты и документы приходят из админки — незаполненное
  * поле просто не рисуется, заглушек «ИНН —» не бывает.
  */
 import { BRAND, hoursRows } from '../data/site';
@@ -87,7 +87,7 @@ const docs = [
         </nav>
         {
           more.length > 0 && (
-            <nav class="footer__list" aria-label="Приложение и партнёры">
+            <nav class="footer__list" aria-label="Другие сайты">
               {more.map((link) => (
                 <a href={link.href} target="_blank" rel="noopener">
                   {link.label}

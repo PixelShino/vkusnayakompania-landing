@@ -1,14 +1,14 @@
 ---
 /**
  * Menus as a split spread (Ballena): the left half is an olive panel with the
- * head pressed to its top-left corner and the shop stamp at its foot, the
+ * head pressed to its top-left corner and the delivery stamp at its foot, the
  * right half a paper panel that carries the menus as a printed carte — name in
  * the display face, the kind beside it and the PDF as an underlined text link.
  * Both halves bleed to the viewport edge; their inner padding lines the content
  * up with the page container. The cafe, the restaurant and the confectionery
  * keep their lines without a menu; banquets join only with a real one.
  * Меню разворотом из двух половин (Ballena): слева оливковая панель с
- * заголовком, прижатым к верхнему левому углу, и оттиском магазина у низа,
+ * заголовком, прижатым к верхнему левому углу, и оттиском доставки у низа,
  * справа бумажная панель с меню печатной картой — название антиквой, рядом
  * тип и PDF подчёркнутой текстовой ссылкой. Обе половины идут до края окна;
  * внутренний отступ выравнивает содержимое по контейнеру страницы. Кафе,
@@ -18,13 +18,15 @@
 import { menusFor } from '../lib/select';
 import Icon from './Icon.astro';
 import { typo, type Content, type Direction } from '../lib/content';
+import { orderLinkFor } from '../lib/nav.ts';
 
 interface Props {
   content: Content;
 }
 
 const { content } = Astro.props;
-const { settings, home, directions, menus } = content;
+const { home, directions, menus } = content;
+const order = orderLinkFor(content);
 
 const KEYS: Direction['key'][] = ['cafe', 'restaurant', 'confectionery', 'banquets'];
 
@@ -73,9 +75,9 @@ const label = (menu: (typeof menus)[number], alone: boolean) =>
     <h2 class="display-caps mn__h">Меню</h2>
     {home.menu_text && <p class="mn__lead">{typo(home.menu_text)}</p>}
     <div class="mn__cta">
-      <a class="btn btn--light" href={settings.shop_url} target="_blank" rel="noopener">
-        <Icon name="app" class="ico--tilt" />
-        Заказать в приложении
+      <a class="btn btn--light" href={order.href}>
+        <Icon name="delivery" class="ico--go" />
+        Заказать доставку
       </a>
     </div>
   </div>

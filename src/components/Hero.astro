@@ -17,24 +17,23 @@ import phoneIcon from '../assets/icons/phone.svg?raw';
 import OpenStatus from './OpenStatus.astro';
 import { HERO_SIZES } from '../lib/hero.ts';
 import { typo, type Content } from '../lib/content.ts';
-import { orderLinkFor } from '../lib/nav.ts';
+import { catalogSectionHref, orderLinkFor } from '../lib/nav.ts';
 
 interface Props {
   content: Content;
 }
 
 const { content } = Astro.props;
-const { home, settings, places, cakes } = content;
+const { home, places, cakes } = content;
 const order = orderLinkFor(content);
 
-// The sticker leads to the cakes: the section when it renders, the shop page
-// otherwise, and nothing at all when neither exists — «48 часов» comes from
-// the content, the same figure as in `home.cakes_text` and the numbers strip.
-// Стикер ведёт к тортам: в секцию, когда она есть, иначе на страницу магазина,
-// а без того и другого не рисуется — «48 часов» из контента, та же цифра, что в
-// `home.cakes_text` и в полосе цифр.
-const stickerHref = cakes.length > 0 ? '#cakes' : settings.shop_cakes_custom;
-const stickerExternal = cakes.length === 0;
+// The sticker leads to the cakes: the section when it renders, the festive
+// cakes of the catalog otherwise, and nothing when neither exists — «48 часов»
+// comes from the content, the same figure as in `home.cakes_text`.
+// Стикер ведёт к тортам: в секцию, когда она есть, иначе в праздничные торты
+// каталога, а без того и другого не рисуется — «48 часов» из контента, та же
+// цифра, что в `home.cakes_text`.
+const stickerHref = cakes.length > 0 ? '#cakes' : catalogSectionHref(content, 'prazdnichnye-torty');
 ---
 
 <section class="hero" id="top">
@@ -107,8 +106,6 @@ const stickerExternal = cakes.length === 0;
       <a
         class="hero__sticker"
         href={stickerHref}
-        target={stickerExternal ? '_blank' : undefined}
-        rel={stickerExternal ? 'noopener' : undefined}
         aria-label="Торт на заказ за 48 часов — к витрине тортов"
       >
         {/* The promise runs round the seal and turns slowly; the arrow in the

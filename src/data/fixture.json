@@ -6,15 +6,15 @@
     "telegram": "https://t.me/vkusnayakompania",
     "max": "https://max.ru/",
     "vk": "https://vk.ru/vkusnayakompania",
-    "shop_url": "https://vkusdostavka.shop/",
-    "app_ios": "https://apps.apple.com/app/id6477568088",
-    "app_android": "https://play.google.com/store/apps/details?id=com.foodpicasso.cateringvkusnaya&hl=ru",
+    "shop_url": null,
+    "app_ios": null,
+    "app_android": null,
     "catering_url": "https://vkusnayakompania.ru/",
     "catering_services_url": "https://vkusnayakompania.ru/services/",
-    "shop_cakes_ready": "https://vkusdostavka.shop/s/torty-v-nalichii_31",
-    "shop_cakes_custom": "https://vkusdostavka.shop/s/prazdnichnye-torty_26",
-    "shop_pastry": "https://vkusdostavka.shop/s/pirojnye_30",
-    "shop_breakfasts": "https://vkusdostavka.shop/s/zavtraki_1",
+    "shop_cakes_ready": null,
+    "shop_cakes_custom": null,
+    "shop_pastry": null,
+    "shop_breakfasts": null,
     "legal_name": "ИП Стрельникова Екатерина Александровна",
     "inn": "631895460666",
     "ogrn": "319631300064539",
@@ -58,12 +58,12 @@
     "robots_index": true,
     "about_title": "Одна кухня, пять поводов зайти",
     "about_text": "Две точки в Самаре и всё, что вокруг них: кафе, ресторан, кондитерская, выездные праздники и банкеты.",
-    "menu_text": "Меню в PDF, чтобы посмотреть заранее. Заказать на доставку — в приложении.",
+    "menu_text": "Меню в PDF, чтобы посмотреть заранее.",
     "cakes_title": "Торты на заказ",
     "cakes_text": "Двенадцать моделей в постоянном меню, каждая за 48 часов. Цвет и надпись меняем под повод, остальное как на фото.",
-    "delivery_title": "Приложение и интернет-магазин",
-    "delivery_text": "История заказов, любимые позиции и статус доставки — в приложении «Вкусная компания». Завтраки, супы, паста, торты в наличии и пирожные с доставкой по Самаре или самовывозом.",
-    "delivery_note": "Скидка 20 % на первый заказ из приложения",
+    "delivery_title": "Доставка и самовывоз",
+    "delivery_text": "Завтраки, супы, паста, торты в наличии и пирожные с доставкой по Самаре или самовывозом.",
+    "delivery_note": null,
     "contacts_note": "Отвечаем с 9:00 до 21:00, обычно за пару минут",
     "hero_image": {
       "id": "21746dff-6fff-41c3-b1ab-0855c756220a",
@@ -77,17 +77,7 @@
       "uploaded_on": "2026-09-23T10:16:08.099Z"
     },
     "og_image": null,
-    "app_screenshot": {
-      "id": "a595e016-28e2-499b-a6db-30e7b44ea300",
-      "filename_download": "app-screen.png",
-      "title": "Экран приложения «Вкусная компания»",
-      "alt": "Экран приложения «Вкусная компания»",
-      "width": 920,
-      "height": 1993,
-      "type": "image/png",
-      "created_on": "2026-09-23T10:16:08.271Z",
-      "uploaded_on": "2026-09-23T10:16:08.346Z"
-    }
+    "app_screenshot": null
   },
   "places": [
     {
@@ -471,17 +461,6 @@
     }
   ],
   "promos": [
-    {
-      "id": 1,
-      "status": "published",
-      "title": "Скидка 20 % на первый бокс",
-      "text": "При заказе из приложения «Вкусная Компания».",
-      "place": null,
-      "show_from": null,
-      "show_until": null,
-      "sort": 1,
-      "date_updated": null
-    },
     {
       "id": 2,
       "status": "published",

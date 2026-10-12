@@ -8,15 +8,12 @@ import type { Content } from './content.ts';
 import { BASE } from './base.ts';
 
 /**
- * Where «Заказать доставку» leads: our own catalog with the cart once it has
- * dishes, the shop otherwise — an empty catalog must not be a dead end.
- * Куда ведёт «Заказать доставку»: в свой каталог с корзиной, когда в нём есть
- * блюда, иначе в магазин — пустой каталог не должен быть тупиком.
+ * Where «Заказать доставку» leads: our own catalog — it is the shop now. An
+ * empty catalog is not a dead end either: its page says to call.
+ * Куда ведёт «Заказать доставку»: в свой каталог — теперь он и есть магазин.
+ * Пустой каталог тоже не тупик: его страница предлагает позвонить.
  */
-export const orderLinkFor = ({ catalog, settings }: Content) =>
-  catalog.count > 0
-    ? { href: `${BASE}catalog/`, external: false }
-    : { href: settings.shop_url, external: true };
+export const orderLinkFor = (_content: Content) => ({ href: `${BASE}catalog/`, external: false });
 
 /** Ссылка на раздел каталога, если он есть: «Торты в наличии» из секции тортов. */
 export const catalogSectionHref = ({ catalog }: Content, slug: string) =>
@@ -29,8 +26,8 @@ export const catalogSectionHref = ({ catalog }: Content, slug: string) =>
 export const navFor = (content: Content, base = '') => [
   { label: 'Главная', href: `${base}#top` },
   ...(content.afisha ? [{ label: 'Афиша', href: `${base}#afisha` }] : []),
-  // with a catalog «Доставка» is the catalog itself, without — the app strip
-  // с каталогом «Доставка» — это сам каталог, без него — полоса приложения
+  // with a catalog «Доставка» is the catalog itself, without — the delivery section
+  // с каталогом «Доставка» — это сам каталог, без него — секция доставки
   { label: 'Доставка', href: content.catalog.count > 0 ? `${BASE}catalog/` : `${base}#delivery` },
   { label: 'О нас', href: `${base}#about` },
   { label: 'Меню', href: `${base}#menu` },
@@ -48,10 +45,9 @@ export const footerGroupsFor = ({ settings }: Content) => ({
     { label: 'Telegram', href: settings.telegram },
     { label: 'Max', href: settings.max },
   ]),
-  more: filled([
-    { label: 'Магазин доставки', href: settings.shop_url },
-    { label: 'Кейтеринг и банкеты', href: settings.catering_url },
-    { label: 'App Store', href: settings.app_ios },
-    { label: 'Google Play', href: settings.app_android },
-  ]),
+  // other sites of the company; the delivery shop and the app stores are not
+  // here — the catalog on this site is the shop now
+  // другие сайты компании; магазина доставки и магазинов приложений здесь нет —
+  // теперь магазин — это каталог на этом сайте
+  more: filled([{ label: 'Кейтеринг и банкеты', href: settings.catering_url }]),
 });

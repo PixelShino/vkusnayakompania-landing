@@ -423,8 +423,6 @@ if (dataNode && drawer && dishDialog) {
     for (const section of $$('[data-step]', drawer)) section.hidden = section.dataset.step !== next;
     const back = $('[data-back]', drawer);
     if (back) back.hidden = next !== 'checkout';
-    const alt = $('[data-alt]', drawer);
-    if (alt) alt.hidden = next === 'done';
     const title = $('[data-drawer-title]', drawer);
     if (title) title.textContent = TITLES[next];
     if (next === 'checkout') fillTimes();
@@ -643,7 +641,7 @@ if (dataNode && drawer && dishDialog) {
       return;
     }
     if (!endpoint) {
-      showFailure('Заказ на сайте сейчас не принимаем', 'Позвоните нам или оформите заказ в интернет-магазине — корзину соберём по телефону.');
+      showFailure('Заказ на сайте сейчас не принимаем', 'Позвоните нам — продиктуйте корзину, и менеджер примет заказ по телефону.');
       return;
     }
 
@@ -666,7 +664,7 @@ if (dataNode && drawer && dishDialog) {
       const body = await response.json().catch(() => null);
       const reason: string | undefined = body?.errors?.[0]?.extensions?.reason ?? (response.status === 400 ? body?.errors?.[0]?.message : undefined);
       if (response.status === 403)
-        showFailure('Заказ на сайте сейчас не принимаем', 'Позвоните нам или оформите заказ в интернет-магазине — это быстро.');
+        showFailure('Заказ на сайте сейчас не принимаем', 'Позвоните нам — продиктуйте корзину, и менеджер примет заказ по телефону.');
       else if (reason) showFailure('Проверьте заказ', reason);
       else showFailure('Заказ не отправился', 'Сервер не ответил как надо. Попробуйте ещё раз через минуту или позвоните — примем по телефону.');
     } catch (error) {

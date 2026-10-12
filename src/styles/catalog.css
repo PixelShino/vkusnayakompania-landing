@@ -1588,14 +1588,6 @@ html:has(.dlg[open]) {
 
 /* ── корзина ─────────────────────────────────────────────────────────────── */
 
-/* without an order endpoint: call first, the shop second */
-/* без адреса для заказов: сначала звонок, потом магазин */
-.drawer__fallback {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 8px;
-}
-
 /* «Оформить заказ» while a dish in the cart is gone: visibly off, the notice
    above says why
    «Оформить заказ», пока в корзине закончившееся блюдо: видно, что выключена,
@@ -1754,34 +1746,7 @@ html:has(.dlg[open]) {
   display: none;
 }
 
-.drawer__alt {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0 12px;
-  padding: 10px var(--pad) calc(10px + env(safe-area-inset-bottom));
-  background: var(--surface);
-  font-size: 12.5px;
-  color: var(--text-4);
-}
-
-.drawer__alt[hidden] {
-  display: none;
-}
-
 /* the foot already took the safe area: the strip under it does not repeat it */
-.drawer__foot:has(+ .drawer__alt:not([hidden])) {
-  padding-bottom: 14px;
-}
-
-.drawer__alt a {
-  padding-block: 6px;
-  color: var(--text-2);
-  text-decoration: underline;
-  text-decoration-color: var(--line-4);
-  text-underline-offset: 3px;
-}
-
 @media (min-width: 768px) {
   .drawer {
     width: 440px;
@@ -1807,16 +1772,6 @@ html:has(.dlg[open]) {
 
   .drawer__foot {
     padding: 16px 24px 20px;
-  }
-
-  .drawer__alt {
-    padding-inline: 24px;
-  }
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .drawer__alt a:hover {
-    color: var(--terracotta-text);
   }
 }
 
@@ -2402,35 +2357,6 @@ html:has(.dlg[open]) {
   font-weight: 600;
   color: var(--text);
   white-space: nowrap;
-}
-
-.done__apps {
-  width: 100%;
-  margin-top: 22px;
-  padding: 16px;
-  border-radius: var(--r-sq);
-  background: var(--surface);
-  font-size: 13px;
-  color: var(--text-3);
-}
-
-.done__stores {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.store-ico {
-  display: inline-flex;
-  width: 16px;
-  height: 16px;
-}
-
-.store-ico svg {
-  width: 100%;
-  height: 100%;
 }
 
 /* ── нижняя полоса корзины (телефон) ─────────────────────────────────────── */

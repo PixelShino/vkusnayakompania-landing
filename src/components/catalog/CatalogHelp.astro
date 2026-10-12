@@ -1,0 +1,98 @@
+---
+/**
+ * The end of the catalog, on paper: for the guest who scrolled the whole menu
+ * and did not find the thing — a call answers faster than a search, and a
+ * cake for a date has its own way in. Paper, not ink: an ink strip right on
+ * top of the dark footer reads as one heavy slab.
+ * Конец каталога, на бумаге: для гостя, который пролистал всё меню и не нашёл
+ * нужное, — звонок ответит быстрее поиска, а у торта к дате свой вход. Бумага,
+ * а не чернила: тёмная полоса вплотную к тёмному подвалу читается одной
+ * тяжёлой плитой.
+ */
+import Icon from '../Icon.astro';
+import { BASE } from '../../lib/base.ts';
+import { typo, type Content } from '../../lib/content.ts';
+
+interface Props {
+  content: Content;
+}
+
+const { settings, cakes } = Astro.props.content;
+---
+
+<section class="strip-paper cat-help" aria-labelledby="cat-help-title">
+  <div class="container cat-help__in">
+    <div class="cat-help__lead" data-reveal>
+      <span class="mark cat-help__mark" aria-hidden="true"></span>
+      <h2 class="display-caps cat-help__title" id="cat-help-title">Не нашли нужное?</h2>
+      <p class="cat-help__text">
+        {typo('Позвоните — подскажем, что есть сегодня, и примем заказ по телефону. Торт к празднику соберём за 48 часов.')}
+      </p>
+    </div>
+    <div class="cat-help__actions">
+      <a class="btn btn--primary" href={settings.phoneHref}>
+        <Icon name="phone" />
+        Позвонить <span class="tnum">{settings.phone}</span>
+      </a>
+      {
+        cakes.length > 0 && (
+          <a class="btn btn--secondary" href={`${BASE}#cakes`}>
+            <Icon name="cake" />
+            Торты на заказ
+          </a>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .cat-help {
+    padding-block: var(--sec-pad);
+  }
+
+  .cat-help__in {
+    display: grid;
+    gap: 24px;
+  }
+
+  .cat-help__mark {
+    margin-inline: 0;
+  }
+
+  .cat-help__title {
+    margin-top: 14px;
+    font-size: clamp(26px, 6.6vw, 34px);
+  }
+
+  .cat-help__text {
+    max-width: 46ch;
+    margin-top: 12px;
+    font-size: var(--fs-lead);
+    line-height: 1.5;
+    color: var(--text-2);
+  }
+
+  /* phone: one button per row, the whole width — two ragged widths stacked
+     read as leftovers
+     телефон: по кнопке в строку, во всю ширину — две рваные ширины столбиком
+     читаются остатками */
+  .cat-help__actions {
+    display: grid;
+    gap: 10px;
+  }
+
+  @media (min-width: 768px) {
+    .cat-help__in {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 40px;
+      align-items: end;
+    }
+
+    .cat-help__actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+  }
+</style>

@@ -92,15 +92,17 @@ export type Settings = {
   telegram: string;
   max: string;
   vk?: string;
-  shop_url: string;
-  app_ios: string;
-  app_android: string;
+  // the app and the old shop: the fields stay in the admin, the site prints none of them
+  // приложение и старый магазин: поля остаются в админке, сайт их не выводит
+  shop_url?: string | null;
+  app_ios?: string | null;
+  app_android?: string | null;
   catering_url: string;
   catering_services_url?: string;
-  shop_cakes_ready?: string;
-  shop_cakes_custom?: string;
-  shop_pastry?: string;
-  shop_breakfasts?: string;
+  shop_cakes_ready?: string | null;
+  shop_cakes_custom?: string | null;
+  shop_pastry?: string | null;
+  shop_breakfasts?: string | null;
   legal_name?: string;
   inn?: string;
   ogrn?: string;
@@ -128,6 +130,8 @@ export type Home = {
   menu_text?: string;
   cakes_title?: string;
   cakes_text?: string;
+  // the old «app and shop» strip; kept in the admin, not printed
+  // бывшая полоса «приложение и магазин»; в админке остаются, не выводятся
   delivery_title?: string;
   delivery_text?: string;
   delivery_note?: string;
@@ -341,8 +345,36 @@ const scheduleOf = (place: RawPlace): Schedule => {
 const samaraToday = () =>
   new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Samara' }).format(new Date());
 
+/**
+ * The site no longer sends anyone to the app or to the old delivery shop: the
+ * catalog on the site is the shop now. Texts written for the app still sit in
+ * the admin, so they are cleaned on the way in: a sentence about the app is
+ * dropped, an offer that only works in the app is not shown at all (without
+ * the app its condition would promise a discount the site does not give).
+ * Сайт больше не отправляет ни в приложение, ни в старый магазин доставки:
+ * магазин теперь — каталог на сайте. Тексты, написанные под приложение, ещё
+ * лежат в админке, поэтому чистятся на входе: предложение про приложение
+ * выпадает, акция, которая действует только в приложении, не показывается
+ * вовсе (без приложения её условие обещало бы скидку, которой на сайте нет).
+ */
+const APP = /приложени|app\s?store|google\s?play|apps\.apple|play\.google|vkusdostavka/i;
+export const mentionsApp = (text: string | null | undefined) => Boolean(text && APP.test(text));
+export const withoutApp = (text: string | undefined) => {
+  if (!text || !APP.test(text)) return text;
+  const kept = text
+    .split(/(?<=[.!?…])\s+/)
+    .filter((sentence) => !APP.test(sentence))
+    .join(' ')
+    .trim();
+  return kept || undefined;
+};
+const homeWithoutApp = (home: RawHome): RawHome =>
+  Object.fromEntries(
+    Object.entries(home).map(([key, value]) => [key, typeof value === 'string' ? withoutApp(value) : value]),
+  ) as RawHome;
+
 /** Сырой ответ → то, чем пользуются компоненты. Пустое нужное поле валит сборку. */
-export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraToday()): Content => {
+export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraToday(), log = warn): Content => {
   const img = (file: RawFile | null | undefined) => toImg(file, resolveImage);
   // one rule for venue and direction galleries; `where` names the record in the error
   // одно правило для галерей точек и направлений; `where` называет запись в ошибке
@@ -385,7 +417,7 @@ export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraTo
   };
 
   const home: Home = {
-    ...raw.home,
+    ...homeWithoutApp(raw.home),
     hero_image: need(img(raw.home.hero_image), 'home.hero_image: нет фото первого экрана'),
     og_image: img(raw.home.og_image),
     app_screenshot: img(raw.home.app_screenshot),
@@ -408,10 +440,16 @@ export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraTo
       poster: img(current.poster),
       place: at(current.place, `афиша «${current.title}»`),
     },
-    promos: livePromos(raw.promos, today).map((promo) => ({
-      ...promo,
-      place: at(promo.place, `акция «${promo.title}»`),
-    })),
+    promos: livePromos(raw.promos, today)
+      .filter((promo) => {
+        if (!mentionsApp(promo.title) && !mentionsApp(promo.text)) return true;
+        log(`контент: акция «${promo.title}» действует в приложении — на сайте не показана`);
+        return false;
+      })
+      .map((promo) => ({
+        ...promo,
+        place: at(promo.place, `акция «${promo.title}»`),
+      })),
     menus: raw.menus.map((menu) => ({
       ...menu,
       updated: menuUpdated(menu),

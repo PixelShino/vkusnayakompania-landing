@@ -4,21 +4,18 @@
  * checkout form, «order accepted». A side panel on desktop, a full-height
  * sheet on the phone. The form is static markup (labels, places, consent), the
  * page script fills the lines, the days and the times and sends the order to
- * `PUBLIC_DIRECTUS_URL`; without that address the form is replaced by the
- * other ways to order, so a half-configured site never takes an order it
- * cannot deliver.
+ * `PUBLIC_DIRECTUS_URL`; without that address the form is replaced by a call,
+ * so a half-configured site never takes an order it cannot deliver.
  * Выдвижная корзина: один нативный `<dialog>` с тремя шагами — корзина, форма
  * оформления, «заказ принят». Боковая панель на десктопе, лист во всю высоту
  * на телефоне. Форма — статическая разметка (подписи, точки, согласие), скрипт
  * страницы заполняет строки, дни и время и отправляет заказ на
- * `PUBLIC_DIRECTUS_URL`; без этого адреса вместо формы стоят другие способы
- * заказать — недонастроенный сайт не примет заказ, который не сможет доставить.
+ * `PUBLIC_DIRECTUS_URL`; без этого адреса вместо формы — звонок: недонастроенный
+ * сайт не примет заказ, который не сможет доставить.
  */
 import Icon from '../Icon.astro';
 import { hoursRows } from '../../data/site.ts';
 import type { Content } from '../../lib/content.ts';
-import appstore from '../../assets/icons/appstore.svg?raw';
-import googleplay from '../../assets/icons/googleplay.svg?raw';
 
 interface Props {
   content: Content;
@@ -27,11 +24,6 @@ interface Props {
 const { settings, places } = Astro.props.content;
 const directus = (import.meta.env.PUBLIC_DIRECTUS_URL as string | undefined)?.replace(/\/+$/, '');
 const endpoint = directus ? `${directus}/items/orders` : '';
-
-const STORES = [
-  { label: 'App Store', href: settings.app_ios, icon: appstore },
-  { label: 'Google Play', href: settings.app_android, icon: googleplay },
-].filter((store) => Boolean(store.href));
 ---
 
 <dialog id="cart" class="dlg drawer" aria-labelledby="cart-title" data-endpoint={endpoint}>
@@ -79,24 +71,18 @@ const STORES = [
         </p>
         <p class="sum__note">Стоимость доставки и оплату уточним при звонке</p>
         {/* no order endpoint on this build (PUBLIC_DIRECTUS_URL is empty): the
-            cart is still a list to dictate over the phone, or the shop
+            cart is still a list to dictate over the phone
             у этой сборки нет адреса для заказов (PUBLIC_DIRECTUS_URL пуст):
-            корзина остаётся списком, который можно продиктовать по телефону,
-            или магазин */}
+            корзина остаётся списком, который можно продиктовать по телефону */}
         {
           endpoint ? (
             <button type="button" class="btn btn--primary btn--block" data-to-checkout>
               Оформить заказ
             </button>
           ) : (
-            <div class="drawer__fallback">
-              <a class="btn btn--primary btn--block" href={settings.phoneHref}>
-                Позвонить <span class="tnum">{settings.phone}</span>
-              </a>
-              <a class="btn btn--secondary btn--block" href={settings.shop_url} target="_blank" rel="noopener">
-                Оформить в магазине
-              </a>
-            </div>
+            <a class="btn btn--primary btn--block" href={settings.phoneHref}>
+              Позвонить <span class="tnum">{settings.phone}</span>
+            </a>
           )
         }
         <button type="button" class="tlink drawer__clear" data-clear>
@@ -249,9 +235,6 @@ const STORES = [
           <p data-error-text></p>
           <div class="alert__actions">
             <a class="btn btn--secondary btn--sm" href={settings.phoneHref}>Позвонить {settings.phone}</a>
-            <a class="btn btn--secondary btn--sm" href={settings.shop_url} target="_blank" rel="noopener">
-              Оформить в магазине
-            </a>
           </div>
         </div>
       </div>
@@ -290,40 +273,10 @@ const STORES = [
           Не хотите ждать — позвоните сами:
           <a class="tnum" href={settings.phoneHref}>{settings.phone}</a>
         </p>
-        {
-          STORES.length > 0 && (
-            <div class="done__apps">
-              <p>Историю заказов и статус доставки удобно смотреть в приложении</p>
-              <div class="done__stores">
-                {STORES.map((store) => (
-                  <a class="btn btn--secondary btn--sm" href={store.href} target="_blank" rel="noopener">
-                    <span class="store-ico" aria-hidden="true">
-                      <Fragment set:html={store.icon} />
-                    </span>
-                    {store.label}
-                  </a>
-                ))}
-              </div>
-            </div>
-          )
-        }
       </div>
       <footer class="drawer__foot">
         <button type="button" class="btn btn--primary btn--block" data-close>Вернуться в каталог</button>
       </footer>
     </section>
-
-    {/* the other ways to order, under the cart and the form alike
-        другие способы заказать — и под корзиной, и под формой */}
-    <aside class="drawer__alt" data-alt aria-label="Другие способы заказать">
-      <span>Или в приложении:</span>
-      {
-        STORES.map((store) => (
-          <a href={store.href} target="_blank" rel="noopener">
-            {store.label}
-          </a>
-        ))
-      }
-    </aside>
   </div>
 </dialog>
