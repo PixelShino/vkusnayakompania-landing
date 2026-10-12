@@ -332,6 +332,9 @@ if (rawCats.length && rawDishes.length) {
   // телефон: маска и проверка
   assert.equal(maskPhone('89879552565'), '+7 (987) 955-25-65');
   assert.equal(maskPhone('+7 987'), '+7 (987)');
+  // вставка полного номера в поле, где уже стоит «+7 »
+  assert.equal(maskPhone('+7 +7 987 955-25-65'), '+7 (987) 955-25-65');
+  assert.equal(maskPhone('+7 8 987 955-25-65'), '+7 (987) 955-25-65');
   assert.equal(maskPhone('9'), '+7 (9');
   assert.equal(normalizePhone('+7 (987) 955-25-65'), '+7 987 955-25-65');
   assert.equal(normalizePhone('12345'), null);

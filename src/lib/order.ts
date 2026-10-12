@@ -79,8 +79,12 @@ export const normalizePhone = (value: string) => {
 export const maskPhone = (value: string) => {
   let digits = value.replace(/\D/g, '');
   if (!digits) return '';
-  if (digits[0] === '8' || digits[0] === '7') digits = digits.slice(1);
-  digits = digits.slice(0, 10);
+  // the field already shows «+7 » when a guest pastes «+7 987…» from contacts:
+  // with more than ten digits the number is the last ten, whatever precedes them
+  // в поле уже стоит «+7 », когда гость вставляет «+7 987…» из контактов: при
+  // более чем десяти цифрах номер — последние десять, что бы ни шло перед ними
+  if (digits.length > 10) digits = digits.slice(-10);
+  else if (digits[0] === '8' || digits[0] === '7') digits = digits.slice(1);
   let out = '+7';
   if (digits.length) out += ` (${digits.slice(0, 3)}`;
   if (digits.length >= 3) out += ')';
