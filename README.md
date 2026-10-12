@@ -36,9 +36,11 @@ poster of the month, text-only promos per location, PDF menus, cake showcase, de
 and pickup, reviews, a marquee of occasions, contacts with both locations on one map.
 Light and ink sections alternate, never more than two light ones in a row. The actions
 are the same everywhere: book a table (Telegram, Max or a call), order delivery from the
-site's own catalog at `/catalog/` (a cart, confirmed by a call), open the catering site.
-The checkout in the catalog cart is the only form. A 404 page carries the same two
-actions. Since 12.10.2026 the site does not mention the mobile app or the old shop.
+site's own catalog at `/catalog/` (a cart, confirmed by a call), go to catering.
+Catering and banquets live at `/catering/` (overview, formats and prices, questions) with
+a request form that lands in the admin. The forms are two: the catalog checkout and the
+catering request. A 404 page carries the same two actions. Since 12.10.2026 the site does
+not mention the mobile app, the old shop or the old catering site.
 
 Editors change posters, promos, menus, photos, texts and contacts in Directus; a save
 triggers a rebuild and the static site updates within a minute.
@@ -180,9 +182,11 @@ Directus. Step by step: [docs/DIRECTUS.md](docs/DIRECTUS.md).
 отзывы, бегущая строка поводов, контакты с обеими точками на одной карте. Светлые и
 чернильные секции чередуются, подряд светлых не больше двух. Действия везде одни:
 забронировать стол (Telegram, Max или звонок), заказать доставку из каталога на сайте
-`/catalog/` (корзина, заказ подтверждается звонком), перейти на сайт кейтеринга.
-Единственная форма — оформление заказа в корзине каталога. У страницы 404 те же два
-действия. С 12.10.2026 сайт не упоминает приложение и старый магазин.
+`/catalog/` (корзина, заказ подтверждается звонком), перейти в кейтеринг. Кейтеринг
+и банкеты — раздел `/catering/` (обзор, форматы и цены, вопросы) с формой заявки, которая
+падает в админку. Форм две: оформление заказа в корзине каталога и заявка на кейтеринг.
+У страницы 404 те же два действия. С 12.10.2026 сайт не упоминает приложение, старый
+магазин и старый сайт кейтеринга.
 
 Редакторы меняют афишу, акции, меню, фото, тексты и контакты в Directus; сохранение
 запускает пересборку, и статический сайт обновляется в пределах минуты.
@@ -317,6 +321,6 @@ pnpm fixture                  # выгрузка Directus → src/data/fixture.j
 | | |
 |---|---|
 | Old delivery shop, catalog import source · Старый магазин доставки, источник импорта каталога (сайт на него не ссылается) | [vkusdostavka.shop](https://vkusdostavka.shop/) |
-| Catering · Кейтеринг и банкеты | [vkusnayakompania.ru](https://vkusnayakompania.ru/) |
+| Old catering site, import source · Старый сайт кейтеринга, источник импорта `/catering/` (сайт на него не ссылается) | [vkusnayakompania.ru](https://vkusnayakompania.ru/) |
 | Apps, not linked from the site · Приложение, сайт на него не ссылается | [App Store](https://apps.apple.com/app/id6477568088) · [Google Play](https://play.google.com/store/apps/details?id=com.foodpicasso.cateringvkusnaya) |
 | Social · Соцсети | [VK](https://vk.ru/vkusnayakompania) · [Telegram](https://t.me/vkusnayakompania) |
