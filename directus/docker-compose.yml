@@ -68,3 +68,27 @@ services:
       # редакторы видят админку по-русски
       DEFAULT_LANGUAGE: ru-RU
       TELEMETRY: 'false'
+
+      # The site's cart sends orders straight from the visitor's browser
+      # (`POST /items/orders`, public role: create only). Only the site's own
+      # origins may do that; local development puts its preview address into
+      # `.env` (CORS_ORIGIN=http://127.0.0.1:4321).
+      # Корзина сайта отправляет заказ прямо из браузера посетителя
+      # (`POST /items/orders`, публичная роль: только создание). Делать это
+      # можно только с адресов самого сайта; локально адрес превью кладётся
+      # в `.env` (CORS_ORIGIN=http://127.0.0.1:4321).
+      CORS_ENABLED: 'true'
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://vkus-com.ru,https://www.vkus-com.ru}
+      CORS_METHODS: GET,POST
+
+      # Who the visitor is, for the order limit (and the login limit): nginx
+      # appends the real address to `X-Forwarded-For`, so exactly one hop is
+      # trusted — docker's own proxy — and the address a script writes in front
+      # of the header is ignored. Directus's default (`true`) takes the leftmost
+      # one, which anyone can forge.
+      # Кто посетитель — для лимита заказов (и лимита входа): nginx дописывает
+      # настоящий адрес в конец `X-Forwarded-For`, поэтому доверяем ровно
+      # одному звену — прокси самого docker, — а адрес, который скрипт впишет
+      # в начало заголовка, не учитывается. По умолчанию Directus (`true`)
+      # берёт самый левый, а его подделает кто угодно.
+      IP_TRUST_PROXY: ${IP_TRUST_PROXY:-1}

@@ -6,3 +6,4 @@ uploads/
 # extensions Directus installs itself; ours live in the repo / расширения, которые ставит сам Directus; наши — в репо
 extensions/*
 !extensions/optimize-upload/
+!extensions/order-guard/

@@ -1,0 +1,12 @@
+{
+  "name": "directus-extension-order-guard",
+  "version": "1.0.0",
+  "description": "Orders from the site: server-side check, prices from the catalog, notification to editors / заказы с сайта: проверка на сервере, цены из каталога, уведомление редакторам",
+  "type": "module",
+  "directus:extension": {
+    "type": "hook",
+    "path": "index.js",
+    "source": "index.js",
+    "host": "^11.0.0"
+  }
+}

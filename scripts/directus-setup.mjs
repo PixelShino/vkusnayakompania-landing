@@ -26,7 +26,25 @@ const findOne = async (path, filter) =>
   (await api('GET', `${path}?filter=${encodeURIComponent(JSON.stringify(filter))}&limit=1`))[0];
 
 // editors manage these freely / редактор правит свободно
-const CONTENT = ['afisha', 'promos', 'menus', 'cakes', 'places_files', 'directions_files'];
+const CONTENT = [
+  'afisha', 'promos', 'menus', 'cakes', 'places_files', 'directions_files',
+  // the delivery catalog: sections and dishes / каталог доставки: разделы и блюда
+  'product_categories', 'products',
+];
+// Orders hold names, phones and addresses: editors take and close them (and
+// enter phone orders), nobody deletes them — a cancelled order is a status.
+// The builder never reads them, the public may only create one.
+// В заказах имена, телефоны и адреса: редактор принимает и закрывает их (и
+// вбивает заказы по телефону), удалять их не может никто — отмена это статус.
+// Сборщик их не читает, публичная роль может только создать.
+const ORDERS = 'orders';
+const ORDER_FIELDS_PUBLIC = [
+  'number', 'customer_name', 'phone', 'fulfillment', 'place', 'address', 'address_details',
+  'desired_time', 'comment', 'items', 'total', 'consent',
+  // set by the `order-guard` hook, which runs before permissions are checked
+  // ставит хук `order-guard`, он работает до проверки прав
+  'status', 'source', 'manager_note',
+];
 // editors may only update these / редактор только меняет, не создаёт и не удаляет
 const SINGLE = ['settings', 'home', 'places', 'directions'];
 const ALL = ['create', 'read', 'update', 'delete'];
@@ -60,6 +78,7 @@ for (const c of SINGLE) {
   add(c, 'read');
   add(c, 'update', c === 'directions' ? DIRECTION_FIELDS : ['*']);
 }
+for (const a of ['create', 'read', 'update']) add(ORDERS, a);
 for (const a of ALL) add('directus_files', a);
 for (const a of ['create', 'read', 'update']) add('directus_folders', a);
 // build status is written by the builder, editors only watch it
@@ -119,6 +138,78 @@ if (!builder) {
   console.log(`+ user builder@vkus-com.ru\nDIRECTUS_TOKEN=${token}\n  (сохранить в .env сайта, больше не покажется)`);
 }
 
+// 3a. public: create an order and nothing else. Without read the API answers
+//     204 and the visitor never sees anyone's order, his own included. Presets
+//     and validation hold even if the `order-guard` hook is not loaded.
+//     публичная роль: создать заказ — и только. Без чтения API отвечает 204,
+//     и посетитель не видит ничьих заказов, включая свой. Пресеты и проверка
+//     держат даже без загруженного хука `order-guard`.
+const [publicAccess] = await api('GET', `/access?filter[role][_null]=true&filter[user][_null]=true&limit=1`);
+if (!publicAccess) throw new Error('нет публичной политики ($t:public_label)');
+const pexisting = await api('GET', `/permissions?filter[policy][_eq]=${publicAccess.policy}&limit=-1`);
+const publicOrder = {
+  fields: ORDER_FIELDS_PUBLIC,
+  presets: { status: 'new', source: 'site' },
+  validation: {
+    _and: [
+      { status: { _eq: 'new' } },
+      { source: { _eq: 'site' } },
+      { consent: { _eq: true } },
+      { customer_name: { _nempty: true } },
+      { phone: { _nempty: true } },
+    ],
+  },
+};
+const pcreate = pexisting.find((p) => p.collection === ORDERS && p.action === 'create');
+if (!pcreate) {
+  await api('POST', '/permissions', { policy: publicAccess.policy, collection: ORDERS, action: 'create', ...publicOrder });
+  console.log('+ permission Публичная: orders create');
+} else if (ORDER_FIELDS_PUBLIC.some((f) => !pcreate.fields?.includes(f))) {
+  await api('PATCH', `/permissions/${pcreate.id}`, publicOrder);
+  console.log('= permission Публичная: orders create — поля обновлены');
+}
+// anything else on orders for the public is a leak: remove it
+// любое другое право публичной роли на заказы — утечка: убрать
+for (const p of pexisting.filter((p) => p.collection === ORDERS && p.action !== 'create')) {
+  await api('DELETE', `/permissions/${p.id}`);
+  console.log(`- permission Публичная: orders ${p.action}`);
+}
+
+// 3b. how the lists open: orders newest first with the columns a manager
+//     calls from, dishes with a photo; plus a few bookmarks
+//     как открываются списки: заказы — свежие сверху, с колонками, по которым
+//     менеджер звонит; блюда — с фото; и несколько закладок
+const PRESETS = [
+  {
+    collection: ORDERS,
+    layout_query: {
+      tabular: {
+        fields: ['status', 'number', 'date_created', 'customer_name', 'phone', 'fulfillment', 'total'],
+        sort: ['-date_created'],
+        limit: 50,
+      },
+    },
+    layout_options: { tabular: { widths: { status: 120, number: 120, date_created: 150, customer_name: 180, phone: 170, fulfillment: 130, total: 110 } } },
+  },
+  { collection: ORDERS, bookmark: 'Новые', icon: 'fiber_new', color: '#C67139', filter: { status: { _eq: 'new' } } },
+  { collection: ORDERS, bookmark: 'В работе', icon: 'pending_actions', color: '#6F7546', filter: { status: { _eq: 'in_work' } } },
+  {
+    collection: 'products',
+    layout_query: {
+      tabular: { fields: ['photo', 'title', 'category', 'price', 'weight', 'available', 'status'], sort: ['sort'], limit: 100 },
+    },
+    layout_options: { tabular: { widths: { photo: 64, title: 300, category: 160, price: 100, weight: 130, available: 100, status: 150 } } },
+  },
+  { collection: 'products', bookmark: 'Нет в наличии', icon: 'remove_shopping_cart', filter: { available: { _eq: false } } },
+];
+const presetsNow = await api('GET', `/presets?filter[user][_null]=true&filter[role][_null]=true&limit=-1`);
+for (const preset of PRESETS) {
+  const same = presetsNow.find((p) => p.collection === preset.collection && (p.bookmark ?? null) === (preset.bookmark ?? null));
+  if (same) continue;
+  await api('POST', '/presets', { layout: 'tabular', user: null, role: null, bookmark: null, ...preset });
+  console.log(`+ preset ${preset.collection}${preset.bookmark ? ` «${preset.bookmark}»` : ''}`);
+}
+
 // 4. flow «Пересборка сайта»: any content change → POST to the rebuild hook
 //    Flow: любое изменение контента → POST на вебхук пересборки
 // items.sort: a reorder by drag-and-drop is not an update, without it the new
@@ -126,6 +217,8 @@ if (!builder) {
 // items.sort: перетаскивание порядка — не update, без него новый порядок ждал
 // ночной сборки
 const FLOW_SCOPE = ['items.create', 'items.update', 'items.delete', 'items.sort'];
+// orders are not here: a new order changes nothing on the site
+// заказов здесь нет: новый заказ ничего на сайте не меняет
 const FLOW_COLLECTIONS = [...CONTENT, ...SINGLE, 'directus_files'];
 let flow = await findOne('/flows', { name: { _eq: 'Пересборка сайта' } });
 if (flow && FLOW_SCOPE.some((event) => !flow.options?.scope?.includes(event))) {
