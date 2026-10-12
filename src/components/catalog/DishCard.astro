@@ -1,0 +1,130 @@
+---
+/**
+ * One dish in the catalog grid: the photo printed on the paper (multiply makes
+ * the shop's white studio background take the page's cream), a line of marks
+ * and weight, the name, two lines of description and the price with the cart
+ * control. The control is rendered for every state at build time; the page
+ * script only shows the right one, so the grid never jumps when it wakes up.
+ * Одно блюдо в сетке каталога: фото, отпечатанное на бумаге (multiply делает
+ * белый студийный фон магазина кремовым фоном страницы), строка пометок и
+ * веса, название, две строки описания и цена с кнопкой корзины. Кнопка
+ * отрисована на сборке во всех состояниях; скрипт страницы только показывает
+ * нужное, поэтому сетка не прыгает, когда он просыпается.
+ */
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import Icon from '../Icon.astro';
+import { BADGE_LABEL, priceLabel, rub, sizeLabel, type Product } from '../../lib/catalog.ts';
+
+interface Props {
+  product: Product;
+  /** первые карточки страницы грузятся сразу, остальные — по прокрутке */
+  eager?: boolean;
+}
+
+const { product, eager = false } = Astro.props;
+const { photo } = product;
+const href = `#p-${product.slug}`;
+const size = sizeLabel(product);
+// a size or a filling has to be chosen first: the card opens the window instead of adding
+// сначала нужно выбрать размер или начинку: карточка открывает окно, а не кладёт в корзину
+const choose = product.variants.length > 0 || product.fillings.length > 0;
+// webp, not avif: a hundred and fifty dishes encode five times faster, and on
+// a studio shot of a plate the difference in weight is a few kilobytes
+// webp, а не avif: полторы сотни блюд кодируются в пять раз быстрее, а на
+// студийном снимке тарелки разница в весе — несколько килобайт
+const WIDTHS = [240, 360, 540, 720];
+// no upscaling: a 600 px original gets 240, 360, 540 and itself
+// без апскейла: оригинал в 600 px получает 240, 360, 540 и самого себя
+const widths = photo ? [...new Set([...WIDTHS.filter((w) => w < photo.width), Math.min(photo.width, 720)])] : [];
+const SIZES = '(min-width: 1200px) 316px, (min-width: 768px) 30vw, 46vw';
+---
+
+<article
+  class:list={['dish', { 'dish--out': !product.available }]}
+  id={`p-${product.slug}`}
+  data-dish={product.id}
+>
+  {/* the frame repeats the title's link for the mouse; the keyboard and the
+      screen reader go through the title, so the frame is not a second stop
+      кадр повторяет ссылку названия для мыши; клавиатура и скринридер идут
+      через название, поэтому кадр — не вторая остановка */}
+  <a class="dish__frame" href={href} data-open-dish={product.id} tabindex="-1" aria-hidden="true">
+    {
+      photo && !photo.placeholder ? (
+        <Image
+          src={photo.src as ImageMetadata}
+          alt={photo.alt}
+          width={Math.min(photo.width, 720)}
+          height={Math.round((photo.height * Math.min(photo.width, 720)) / photo.width)}
+          widths={widths}
+          sizes={SIZES}
+          format="webp"
+          quality={76}
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
+          fetchpriority={eager ? 'high' : 'auto'}
+        />
+      ) : (
+        <span class="dish__stub">
+          <Icon name="cloche" />
+          <span>Фото скоро</span>
+        </span>
+      )
+    }
+  </a>
+
+  <div class="dish__body">
+    {
+      (product.badges.length > 0 || size || !product.available) && (
+        <p class="dish__meta">
+          {!product.available && <span class="dish__flag dish__flag--out">Нет в наличии</span>}
+          {product.badges.map((badge) => (
+            <span class="dish__flag">{BADGE_LABEL[badge]}</span>
+          ))}
+          {size && <span class="tnum">{size}</span>}
+        </p>
+      )
+    }
+    <h3 class="dish__title">
+      <a href={href} data-open-dish={product.id}>{product.title}</a>
+    </h3>
+    {product.description && <p class="dish__desc">{product.description}</p>}
+
+    <div class="dish__buy">
+      <p class="dish__price tnum">
+        {product.oldPrice && <s class="dish__old" aria-label={`Без скидки ${rub(product.oldPrice)}`}>{rub(product.oldPrice)}</s>}
+        <span>{priceLabel(product)}</span>
+      </p>
+      {
+        !product.available ? null : choose ? (
+          <button type="button" class="btn btn--secondary btn--sm dish__add" data-open-dish={product.id}>
+            Выбрать
+            <span class="dish__in tnum" data-in-cart hidden></span>
+          </button>
+        ) : (
+          <div class="dish__ctl" data-ctl={product.id}>
+            <button
+              type="button"
+              class="btn btn--secondary btn--sm dish__add"
+              data-add={product.id}
+              aria-label={`В корзину: ${product.title}, ${rub(product.price)}`}
+            >
+              <Icon name="plus" />
+              В корзину
+            </button>
+            <div class="qty" data-qty hidden role="group" aria-label={`Количество: ${product.title}`}>
+              <button type="button" class="qty__btn" data-dec={product.id} aria-label="Убрать одну">
+                <Icon name="minus" />
+              </button>
+              <output class="qty__n tnum" data-n aria-live="off">0</output>
+              <button type="button" class="qty__btn" data-inc={product.id} aria-label="Добавить ещё">
+                <Icon name="plus" />
+              </button>
+            </div>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</article>

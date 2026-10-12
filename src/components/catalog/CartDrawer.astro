@@ -1,0 +1,319 @@
+---
+/**
+ * The cart drawer: one native `<dialog>` with three steps — the cart, the
+ * checkout form, «order accepted». A side panel on desktop, a full-height
+ * sheet on the phone. The form is static markup (labels, places, consent), the
+ * page script fills the lines, the days and the times and sends the order to
+ * `PUBLIC_DIRECTUS_URL`; without that address the form is replaced by the
+ * other ways to order, so a half-configured site never takes an order it
+ * cannot deliver.
+ * Выдвижная корзина: один нативный `<dialog>` с тремя шагами — корзина, форма
+ * оформления, «заказ принят». Боковая панель на десктопе, лист во всю высоту
+ * на телефоне. Форма — статическая разметка (подписи, точки, согласие), скрипт
+ * страницы заполняет строки, дни и время и отправляет заказ на
+ * `PUBLIC_DIRECTUS_URL`; без этого адреса вместо формы стоят другие способы
+ * заказать — недонастроенный сайт не примет заказ, который не сможет доставить.
+ */
+import Icon from '../Icon.astro';
+import { hoursRows } from '../../data/site.ts';
+import type { Content } from '../../lib/content.ts';
+import appstore from '../../assets/icons/appstore.svg?raw';
+import googleplay from '../../assets/icons/googleplay.svg?raw';
+
+interface Props {
+  content: Content;
+}
+
+const { settings, places } = Astro.props.content;
+const directus = (import.meta.env.PUBLIC_DIRECTUS_URL as string | undefined)?.replace(/\/+$/, '');
+const endpoint = directus ? `${directus}/items/orders` : '';
+
+const STORES = [
+  { label: 'App Store', href: settings.app_ios, icon: appstore },
+  { label: 'Google Play', href: settings.app_android, icon: googleplay },
+].filter((store) => Boolean(store.href));
+---
+
+<dialog id="cart" class="dlg drawer" aria-labelledby="cart-title" data-endpoint={endpoint}>
+  <div class="drawer__in">
+    <header class="drawer__head">
+      <button type="button" class="round-btn drawer__back" data-back hidden aria-label="Назад к корзине">
+        <Icon name="arrow-left" />
+      </button>
+      <h2 class="drawer__title" id="cart-title" tabindex="-1" data-drawer-title>Корзина</h2>
+      <button type="button" class="round-btn" data-close aria-label="Закрыть">
+        <Icon name="close" />
+      </button>
+    </header>
+
+    <p class="drawer__offline" data-offline hidden>
+      <Icon name="wifi-off" />
+      <span>Нет интернета. Корзина сохранена — отправим заказ, когда связь вернётся.</span>
+    </p>
+
+    {/* ── шаг 1: корзина ─────────────────────────────────────────────── */}
+    <section class="drawer__step" data-step="cart" aria-label="Состав корзины">
+      <div class="drawer__scroll">
+        <p class="drawer__notice" data-dropped hidden></p>
+        <p class="drawer__notice drawer__notice--warn" data-blocked hidden>
+          Часть блюд закончилась — уберите их, чтобы оформить заказ.
+        </p>
+        <ul class="lines" role="list" data-lines></ul>
+
+        <div class="drawer__empty" data-empty hidden>
+          <Icon name="cloche" />
+          <p class="display drawer__empty-title">В корзине пусто</p>
+          <p>Добавьте блюда из каталога — они сохранятся здесь до заказа, даже если закрыть страницу.</p>
+          <div class="suggest" data-suggest hidden>
+            <p class="label">Часто берут</p>
+            <ul class="suggest__list" role="list" data-suggest-list></ul>
+          </div>
+          <button type="button" class="btn btn--secondary" data-close>Смотреть каталог</button>
+        </div>
+      </div>
+
+      <footer class="drawer__foot" data-cart-foot hidden>
+        <p class="sum">
+          <span>Итого <span class="sum__count" data-count></span></span>
+          <b class="tnum" data-total></b>
+        </p>
+        <p class="sum__note">Стоимость доставки и оплату уточним при звонке</p>
+        {
+          endpoint ? (
+            <button type="button" class="btn btn--primary btn--block" data-to-checkout>
+              Оформить заказ
+            </button>
+          ) : (
+            <a class="btn btn--primary btn--block" href={settings.shop_url} target="_blank" rel="noopener">
+              Оформить в магазине
+            </a>
+          )
+        }
+        <button type="button" class="tlink drawer__clear" data-clear>
+          <Icon name="trash" />
+          Очистить корзину
+        </button>
+      </footer>
+    </section>
+
+    {/* ── шаг 2: оформление ──────────────────────────────────────────── */}
+    <form class="drawer__step checkout" data-step="checkout" id="checkout" novalidate hidden aria-label="Оформление заказа">
+      <div class="drawer__scroll">
+        <fieldset class="fs">
+          <legend class="fs__legend">Контакты</legend>
+          <div class="field">
+            <label for="co-name">Имя</label>
+            <input id="co-name" name="name" autocomplete="name" maxlength="80" required aria-describedby="co-name-err" />
+            <p class="field__err" id="co-name-err" data-err="name" hidden></p>
+          </div>
+          <div class="field">
+            <label for="co-phone">Телефон</label>
+            <input
+              id="co-phone"
+              name="phone"
+              type="tel"
+              inputmode="tel"
+              autocomplete="tel"
+              placeholder="+7 (___) ___-__-__"
+              required
+              aria-describedby="co-phone-hint co-phone-err"
+            />
+            <p class="field__hint" id="co-phone-hint">Перезвоним на него, чтобы подтвердить заказ</p>
+            <p class="field__err" id="co-phone-err" data-err="phone" hidden></p>
+          </div>
+        </fieldset>
+
+        <fieldset class="fs">
+          <legend class="fs__legend">Как получить</legend>
+          <div class="seg">
+            <label class="seg__opt">
+              <input type="radio" name="fulfillment" value="delivery" checked />
+              <span>Доставка</span>
+            </label>
+            <label class="seg__opt">
+              <input type="radio" name="fulfillment" value="pickup" />
+              <span>Самовывоз</span>
+            </label>
+          </div>
+
+          <div class="fs__part" data-for="delivery">
+            <div class="field">
+              <label for="co-address">Адрес</label>
+              <input
+                id="co-address"
+                name="address"
+                autocomplete="street-address"
+                placeholder="Улица и дом"
+                maxlength="200"
+                aria-describedby="co-address-err"
+              />
+              <p class="field__err" id="co-address-err" data-err="address" hidden></p>
+            </div>
+            <div class="field">
+              <label for="co-details">Квартира, подъезд, этаж <span class="field__opt">необязательно</span></label>
+              <input id="co-details" name="details" maxlength="120" autocomplete="address-line2" />
+            </div>
+          </div>
+
+          <div class="fs__part" data-for="pickup" hidden>
+            <div class="places" role="radiogroup" aria-label="Откуда заберёте" aria-describedby="co-place-err">
+              {
+                places.map((place) => (
+                  <label class="place-opt">
+                    <input type="radio" name="place" value={place.id} />
+                    <span class="place-opt__name">{place.name}</span>
+                    <span class="place-opt__meta">
+                      {place.kind} · {hoursRows(place.schedule).map((row) => `${row.days} ${row.hours}`).join(', ')}
+                    </span>
+                  </label>
+                ))
+              }
+            </div>
+            <p class="field__err" id="co-place-err" data-err="place" hidden></p>
+          </div>
+        </fieldset>
+
+        <fieldset class="fs">
+          <legend class="fs__legend">Когда</legend>
+          <div class="seg">
+            <label class="seg__opt">
+              <input type="radio" name="when" value="asap" checked />
+              <span>Как можно скорее</span>
+            </label>
+            <label class="seg__opt">
+              <input type="radio" name="when" value="later" />
+              <span>Ко времени</span>
+            </label>
+          </div>
+          <div class="fs__part when" data-for="later" hidden>
+            <div class="field">
+              <label for="co-date">День</label>
+              <select id="co-date" name="date" data-days></select>
+            </div>
+            <div class="field">
+              <label for="co-time">Время</label>
+              <select id="co-time" name="time" data-times aria-describedby="co-time-err"></select>
+            </div>
+            <p class="field__err" id="co-time-err" data-err="time" hidden></p>
+          </div>
+          <p class="field__hint">Точное время подтвердим при звонке</p>
+        </fieldset>
+
+        <div class="field">
+          <label for="co-comment">Комментарий <span class="field__opt">необязательно</span></label>
+          <textarea
+            id="co-comment"
+            name="comment"
+            rows="3"
+            maxlength="1000"
+            placeholder="Например: домофон не работает, позвоните за 10 минут"></textarea>
+        </div>
+
+        {/* a field people never see: a form-filling bot fills it and is turned away
+            поле, которого люди не видят: бот, заполняющий формы, заполнит его и получит отказ */}
+        <div class="hp" aria-hidden="true">
+          <label for="co-company">Компания</label>
+          <input id="co-company" name="company" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <label class="consent">
+          <input type="checkbox" name="consent" aria-describedby="co-consent-err" />
+          <span>
+            Согласен на обработку персональных данных для оформления заказа
+            {
+              settings.policy && (
+                <>
+                  {' '}по{' '}
+                  <a href={settings.policy.href} target="_blank" rel="noopener">
+                    политике конфиденциальности
+                  </a>
+                </>
+              )
+            }
+          </span>
+        </label>
+        <p class="field__err" id="co-consent-err" data-err="consent" hidden></p>
+
+        <div class="alert" data-error role="alert" hidden>
+          <p class="alert__title" data-error-title>Заказ не отправился</p>
+          <p data-error-text></p>
+          <div class="alert__actions">
+            <a class="btn btn--secondary btn--sm" href={settings.phoneHref}>Позвонить {settings.phone}</a>
+            <a class="btn btn--secondary btn--sm" href={settings.shop_url} target="_blank" rel="noopener">
+              Оформить в магазине
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <footer class="drawer__foot">
+        <p class="sum">
+          <span>Сумма <span class="sum__count" data-count></span></span>
+          <b class="tnum" data-total></b>
+        </p>
+        <p class="sum__note">Без стоимости доставки — назовём её при звонке</p>
+        <button type="submit" class="btn btn--primary btn--block" data-submit>
+          <span data-submit-label>Отправить заказ</span>
+        </button>
+      </footer>
+    </form>
+
+    {/* ── шаг 3: заказ принят ────────────────────────────────────────── */}
+    <section class="drawer__step done" data-step="done" hidden aria-labelledby="done-title">
+      <div class="drawer__scroll done__in">
+        <span class="mark" aria-hidden="true"></span>
+        <h3 class="display display-caps done__title" id="done-title" tabindex="-1">Заказ принят</h3>
+        <p class="done__number">
+          <span class="label">Номер заказа</span>
+          <span class="display tnum" data-done-number></span>
+        </p>
+        <p class="done__text">
+          Перезвоним на <b class="tnum" data-done-phone></b>, чтобы подтвердить состав, сумму, адрес и время.
+          Оплату и доставку обсудим там же.
+        </p>
+        <ul class="done__lines" role="list" data-done-lines></ul>
+        <p class="done__total">
+          <span>Сумма заказа</span>
+          <b class="tnum" data-done-total></b>
+        </p>
+        <p class="done__call">
+          Не хотите ждать — позвоните сами:
+          <a class="tnum" href={settings.phoneHref}>{settings.phone}</a>
+        </p>
+        {
+          STORES.length > 0 && (
+            <div class="done__apps">
+              <p>Историю заказов и статус доставки удобно смотреть в приложении</p>
+              <div class="done__stores">
+                {STORES.map((store) => (
+                  <a class="btn btn--secondary btn--sm" href={store.href} target="_blank" rel="noopener">
+                    <span class="store-ico" aria-hidden="true">
+                      <Fragment set:html={store.icon} />
+                    </span>
+                    {store.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )
+        }
+      </div>
+      <footer class="drawer__foot">
+        <button type="button" class="btn btn--primary btn--block" data-close>Вернуться в каталог</button>
+      </footer>
+    </section>
+
+    {/* the other ways to order, under the cart and the form alike
+        другие способы заказать — и под корзиной, и под формой */}
+    <aside class="drawer__alt" data-alt aria-label="Другие способы заказать">
+      <span>Или в приложении:</span>
+      {
+        STORES.map((store) => (
+          <a href={store.href} target="_blank" rel="noopener">
+            {store.label}
+          </a>
+        ))
+      }
+    </aside>
+  </div>
+</dialog>

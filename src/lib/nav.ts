@@ -5,6 +5,22 @@
  * что заполнено в админке, а не от списка в коде.
  */
 import type { Content } from './content.ts';
+import { BASE } from './base.ts';
+
+/**
+ * Where «Заказать доставку» leads: our own catalog with the cart once it has
+ * dishes, the shop otherwise — an empty catalog must not be a dead end.
+ * Куда ведёт «Заказать доставку»: в свой каталог с корзиной, когда в нём есть
+ * блюда, иначе в магазин — пустой каталог не должен быть тупиком.
+ */
+export const orderLinkFor = ({ catalog, settings }: Content) =>
+  catalog.count > 0
+    ? { href: `${BASE}catalog/`, external: false }
+    : { href: settings.shop_url, external: true };
+
+/** Ссылка на раздел каталога, если он есть: «Торты в наличии» из секции тортов. */
+export const catalogSectionHref = ({ catalog }: Content, slug: string) =>
+  catalog.categories.some((category) => category.slug === slug) ? `${BASE}catalog/#${slug}` : undefined;
 
 /**
  * Пункты шапки; «Афиша» появляется только при текущей афише. `base` — префикс
@@ -13,7 +29,9 @@ import type { Content } from './content.ts';
 export const navFor = (content: Content, base = '') => [
   { label: 'Главная', href: `${base}#top` },
   ...(content.afisha ? [{ label: 'Афиша', href: `${base}#afisha` }] : []),
-  { label: 'Доставка', href: `${base}#delivery` },
+  // with a catalog «Доставка» is the catalog itself, without — the app strip
+  // с каталогом «Доставка» — это сам каталог, без него — полоса приложения
+  { label: 'Доставка', href: content.catalog.count > 0 ? `${BASE}catalog/` : `${base}#delivery` },
   { label: 'О нас', href: `${base}#about` },
   { label: 'Меню', href: `${base}#menu` },
   { label: 'Контакты', href: `${base}#contacts` },

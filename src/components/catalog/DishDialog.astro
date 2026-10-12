@@ -1,0 +1,71 @@
+---
+/**
+ * The dish window: one native `<dialog>` for every dish, filled by the page
+ * script from the catalog data and the card's own image. Native, because it
+ * keeps the focus inside, closes on Escape and gives the focus back to the
+ * card — the same reason the booking dialog is native.
+ * Окно блюда: один нативный `<dialog>` на все блюда, его заполняет скрипт
+ * страницы из данных каталога и картинки самой карточки. Нативный — потому что
+ * сам держит фокус внутри, закрывается по Escape и возвращает фокус карточке;
+ * по той же причине нативен диалог брони.
+ */
+import Icon from '../Icon.astro';
+---
+
+<dialog id="dish" class="dlg dish-dlg" aria-labelledby="dish-title">
+  <div class="dish-dlg__in">
+    <button type="button" class="round-btn dlg__close" data-close aria-label="Закрыть">
+      <Icon name="close" />
+    </button>
+
+    <figure class="dish-dlg__photo" data-photo></figure>
+
+    <div class="dish-dlg__body">
+      <p class="label dish-dlg__cat" data-cat></p>
+      <h2 class="dish-dlg__title" id="dish-title" data-title tabindex="-1"></h2>
+      <p class="dish-dlg__meta" data-meta></p>
+      <p class="dish-dlg__desc" data-desc></p>
+      <div class="dish-dlg__comp" data-comp-wrap>
+        <p class="label">Состав</p>
+        <p data-comp></p>
+      </div>
+
+      <fieldset class="variants" data-variants hidden>
+        <legend class="label">Размер</legend>
+        <div class="variants__list" data-variant-list></div>
+      </fieldset>
+
+      <fieldset class="variants variants--fill" data-fillings hidden aria-describedby="dish-fill-err">
+        <legend class="label">Начинка</legend>
+        <p class="field__err variants__err" id="dish-fill-err" data-fill-err hidden>Выберите начинку — без неё торт не собрать</p>
+        <div class="variants__list" data-filling-list></div>
+      </fieldset>
+
+      <p class="dish-dlg__out" data-out hidden>
+        Сейчас нет в наличии. Загляните позже или позвоните — подскажем, чем заменить.
+      </p>
+
+      <span class="dish-dlg__spacer" aria-hidden="true"></span>
+      <div class="dish-dlg__buy" data-buy>
+        <div class="qty qty--lg" role="group" aria-label="Сколько добавить">
+          <button type="button" class="qty__btn" data-dlg-dec aria-label="Меньше">
+            <Icon name="minus" />
+          </button>
+          <output class="qty__n tnum" data-dlg-n>1</output>
+          <button type="button" class="qty__btn" data-dlg-inc aria-label="Больше">
+            <Icon name="plus" />
+          </button>
+        </div>
+        <button type="button" class="btn btn--primary dish-dlg__add" data-dlg-add>
+          <span>В корзину</span>
+          <span class="tnum" data-dlg-price></span>
+        </button>
+      </div>
+      <p class="dish-dlg__incart" data-incart hidden>
+        <Icon name="check" />
+        <span data-incart-text></span>
+        <button type="button" class="tlink" data-cart-open>Открыть корзину</button>
+      </p>
+    </div>
+  </div>
+</dialog>

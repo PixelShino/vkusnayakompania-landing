@@ -1,0 +1,2120 @@
+/* Каталог доставки: страница, карточка блюда, окно блюда, корзина и форма.
+   Один файл, а не стили компонентов: строки корзины, варианты и подсказки
+   рисует скрипт страницы, и скоуповые стили Astro до них бы не дотянулись.
+   The delivery catalog: page, dish card, dish window, cart and checkout. One
+   sheet instead of component styles: the cart lines, variants and suggestions
+   are drawn by the page script, which Astro's scoped styles would not reach.
+   Словарь тот же, что у лендинга (`docs/DESIGN.md`): Prata — заголовки,
+   Montserrat — всё, где цифры и действия; квадратные оттиски 3 px; волосяные
+   линии вместо рамок-карточек; терракота — сигнал, олива — действие. */
+
+/* `hidden` wins over component display rules (`.btn` is inline-flex): the
+   page script toggles the attribute and expects the element gone
+   `hidden` сильнее правил отображения компонентов (`.btn` — inline-flex):
+   скрипт страницы переключает атрибут и ждёт, что элемент исчезнет */
+[hidden] {
+  display: none !important;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── шапка страницы ──────────────────────────────────────────────────────── */
+
+.cat-head {
+  padding-block: 18px 26px;
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+
+/* цель нажатия 44 px при строке 15: паддинг растит зону, не сдвигая строку */
+.crumbs a {
+  margin-block: -14px;
+  padding-block: 14px;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--line-4);
+  text-underline-offset: 3px;
+  transition: color 0.16s ease;
+}
+
+.cat-head__row {
+  margin-top: 20px;
+}
+
+/* the mark sits on the left edge here: the page works left-aligned, with the
+   sections under it, not on the landing's central axis
+   марка здесь у левого края: страница рабочая, выровнена влево вместе с
+   разделами под ней, а не по центральной оси лендинга */
+.cat-head__mark {
+  margin-inline: 0;
+}
+
+.cat-head__title {
+  margin-top: 14px;
+  font-size: clamp(30px, 8.4vw, 40px);
+}
+
+.cat-head__lead {
+  margin-top: 12px;
+  max-width: 54ch;
+}
+
+.facts {
+  display: grid;
+  gap: 12px;
+  margin: 22px 0 0;
+  padding: 18px 0 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.facts li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+.facts .ico {
+  width: 20px;
+  height: 20px;
+  margin-top: 0;
+  color: var(--olive);
+}
+
+.facts b {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.facts a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--line-4);
+  text-underline-offset: 3px;
+}
+
+@media (min-width: 768px) {
+  .cat-head {
+    padding-block: 26px 34px;
+  }
+
+  .cat-head__title {
+    font-size: clamp(40px, 5.2vw, 52px);
+  }
+
+  .facts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    margin-top: 28px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .crumbs a:hover,
+  .facts a:hover {
+    color: var(--terracotta-text);
+  }
+}
+
+/* ── раскладка: разделы и сетка ──────────────────────────────────────────── */
+
+.cat-layout {
+  padding-bottom: var(--sec-pad);
+}
+
+/* Under 1200 the sections are a sticky strip of words under the header (the
+   `.tabs` vocabulary); it bleeds to the screen edges and scrolls sideways.
+   До 1200 разделы — липкая строка слов под шапкой (словарь `.tabs`); она идёт
+   от края до края экрана и листается вбок. */
+.cat-side {
+  position: sticky;
+  top: var(--header-h);
+  z-index: 12;
+  margin-inline: calc(var(--pad) * -1);
+  padding-inline: var(--pad);
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+
+.cat-nav ul {
+  display: flex;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* края строки растворяются: видно, что дальше есть ещё разделы */
+  mask-image: linear-gradient(to right, transparent, #000 14px, #000 calc(100% - 28px), transparent);
+}
+
+.cat-nav ul::-webkit-scrollbar {
+  display: none;
+}
+
+.cat-nav li {
+  flex: none;
+}
+
+.cat-nav a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--text-3);
+  text-decoration: none;
+  transition-property: color, border-color;
+  transition-duration: 0.16s;
+}
+
+.cat-nav li:first-child a {
+  margin-left: 14px;
+}
+
+.cat-nav li:last-child a {
+  margin-right: 28px;
+}
+
+.cat-nav a[aria-current='true'] {
+  color: var(--text);
+  border-bottom-color: var(--terracotta);
+}
+
+.cat-nav__n {
+  display: none;
+}
+
+.minicart {
+  display: none;
+}
+
+.cat-sec {
+  padding-top: 26px;
+  /* шапка + строка разделов: заголовок раздела не уезжает под них */
+  scroll-margin-top: calc(var(--header-h) + 48px);
+}
+
+.cat-sec__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.cat-sec__title {
+  font-size: clamp(24px, 6.6vw, 28px);
+}
+
+.cat-sec__desc {
+  flex-basis: 100%;
+  font-size: 13.5px;
+  color: var(--text-3);
+}
+
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px var(--gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cat-grid > li {
+  display: flex;
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .cat-sec {
+    padding-top: 36px;
+  }
+
+  .cat-sec__title {
+    font-size: 32px;
+  }
+
+  .cat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 40px 20px;
+  }
+}
+
+/* From 1200 the sections become a sticky column on the left (the owner's shop
+   does the same, the list fits a laptop screen whole) with the order under it.
+   С 1200 разделы — липкая колонка слева (так же у магазина владельца, список
+   целиком помещается в экран ноутбука), под ней — ваш заказ. */
+@media (min-width: 1200px) {
+  .cat-layout {
+    display: grid;
+    grid-template-columns: 228px minmax(0, 1fr);
+    gap: 56px;
+    align-items: start;
+  }
+
+  .cat-side {
+    top: calc(var(--header-h) + 22px);
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    max-height: calc(100dvh - var(--header-h) - 44px);
+    margin: 36px 0 0;
+    padding: 2px 4px 2px 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    background: none;
+    border: 0;
+  }
+
+  .cat-nav ul {
+    flex-direction: column;
+    gap: 0;
+    overflow: visible;
+    mask-image: none;
+  }
+
+  /* The current section is marked by the page's own diamond, the one over every
+     heading: a stripe on the side would be a dashboard, not a menu.
+     Текущий раздел отмечен ромбом самой страницы — тем, что стоит над каждым
+     заголовком: полоса сбоку была бы дашбордом, а не меню. */
+  .cat-nav a {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 38px;
+    margin: 0;
+    padding-left: 18px;
+    border-bottom: 1px solid var(--line-3);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    white-space: normal;
+    color: var(--text-2);
+  }
+
+  .cat-nav li:first-child a,
+  .cat-nav li:last-child a {
+    margin: 0;
+  }
+
+  .cat-nav a::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    background: var(--terracotta);
+    translate: 0 -50%;
+    rotate: 45deg;
+    scale: 0;
+    transition: scale 0.22s var(--ease-out);
+  }
+
+  .cat-nav a[aria-current='true'] {
+    font-weight: 600;
+    color: var(--text);
+    border-bottom-color: var(--line-3);
+  }
+
+  .cat-nav a[aria-current='true']::before {
+    scale: 1;
+  }
+
+  .cat-nav__n {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-4);
+  }
+
+  .minicart {
+    display: block;
+    padding: 18px 18px 20px;
+    border-radius: var(--r-sq);
+    background: var(--surface);
+  }
+
+  /* a label, not a heading: the h2 rule would set it in Prata, and caps
+     antiqua is never used under 22px
+     подпись, а не заголовок: правило h2 набрало бы её Pratой, а прописная
+     антиква мельче 22px не берётся */
+  .minicart__title {
+    font-family: var(--font);
+    letter-spacing: 0.1em;
+  }
+
+  .minicart__empty {
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--text-3);
+  }
+
+  .minicart__sum {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    margin: 10px 0 14px;
+    font-size: 13px;
+    color: var(--text-3);
+  }
+
+  .minicart__sum b {
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .cat-sec {
+    scroll-margin-top: calc(var(--header-h) + 8px);
+  }
+
+  .cat-sec__title {
+    font-size: 36px;
+  }
+
+  .cat-grid {
+    gap: 44px 24px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cat-nav a:hover {
+    color: var(--text);
+  }
+}
+
+/* ── карточка блюда ──────────────────────────────────────────────────────── */
+
+.dish {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  scroll-margin-top: calc(var(--header-h) + 64px);
+}
+
+/* The shop shoots on white; `multiply` turns the white into the paper of the
+   frame, so the plate stands on the page instead of in a white hole.
+   Магазин снимает на белом; `multiply` делает белое бумагой рамки, и тарелка
+   стоит на странице, а не в белой дыре. */
+.dish__frame {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  /* the frame is a link: its «Фото скоро» must not get the link underline */
+  /* рамка — ссылка: её «Фото скоро» не должна получать подчёркивание ссылки */
+  text-decoration: none;
+  overflow: hidden;
+  border-radius: var(--r-sq);
+  background: var(--surface);
+}
+
+.dish__frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mix-blend-mode: multiply;
+  /* a hair larger than the frame: some studio shots carry a dark line on the edge */
+  /* на волос крупнее рамки: у части студийных кадров по краю тёмная полоска */
+  scale: 1.02;
+  transition: scale 620ms var(--ease-out), opacity 0.2s ease;
+}
+
+.dish__stub {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  height: 100%;
+  background-color: var(--surface-warm);
+  background-image: var(--hatch);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-4);
+  transition: background-position 620ms var(--ease-out);
+}
+
+.dish__stub .ico {
+  width: 34px;
+  height: 34px;
+  color: var(--text-5);
+}
+
+.dish__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding-top: 12px;
+}
+
+.dish__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin-bottom: 5px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+
+.dish__flag {
+  color: var(--terracotta-text);
+}
+
+.dish__flag--out {
+  color: var(--text);
+}
+
+.dish__title {
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.3;
+  text-wrap: pretty;
+}
+
+.dish__title a {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.16s ease;
+}
+
+.dish__desc {
+  display: none;
+}
+
+.dish__buy {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.dish__price {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.dish__old {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-4);
+}
+
+.dish__add {
+  width: 100%;
+  padding-inline: 12px;
+}
+
+.dish__in:not([hidden]) {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  margin-left: 2px;
+  padding-inline: 5px;
+  border-radius: var(--r-pill);
+  background: var(--olive);
+  color: var(--bg);
+  font-size: 11px;
+  letter-spacing: 0;
+}
+
+.dish__ctl {
+  display: flex;
+  min-width: 0;
+}
+
+.dish__ctl > * {
+  flex: 1;
+}
+
+.dish--out .dish__frame img {
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+.dish--out .dish__title a,
+.dish--out .dish__price {
+  color: var(--text-4);
+}
+
+@media (min-width: 768px) {
+  .dish__title {
+    font-size: 15.5px;
+  }
+
+  .dish__desc {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    margin-top: 6px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--text-3);
+  }
+
+  .dish__buy {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 14px;
+  }
+
+  .dish__price {
+    font-size: 16.5px;
+  }
+
+  .dish__add {
+    width: auto;
+  }
+
+  .dish__ctl > * {
+    flex: none;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dish:hover .dish__frame img {
+    scale: 1.06;
+  }
+
+  .dish:hover .dish__stub {
+    background-position: 26px 26px;
+  }
+
+  .dish__title a:hover {
+    color: var(--terracotta-text);
+  }
+}
+
+/* ── счётчик количества ──────────────────────────────────────────────────── */
+
+/* In the card the counter takes the button's place and its colour turns olive:
+   «in the cart» reads from across the grid, not only from the number.
+   В карточке счётчик встаёт на место кнопки и становится оливковым: «в корзине»
+   читается через всю сетку, а не только по цифре. */
+.qty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+  min-width: 124px;
+  border-radius: var(--r-sq);
+  background: var(--olive);
+  color: var(--bg);
+}
+
+.qty[hidden] {
+  display: none;
+}
+
+.qty__btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-sq);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition-property: background-color, scale;
+  transition-duration: 0.16s, 120ms;
+  transition-timing-function: ease, var(--ease-out);
+}
+
+.qty__btn:active {
+  scale: 0.92;
+}
+
+.qty__btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.qty__btn .ico {
+  width: 18px;
+  height: 18px;
+}
+
+.qty__n {
+  min-width: 2.2ch;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* neutral counters: in the dish window and in the cart lines the action next to them is the olive one */
+/* нейтральные счётчики: в окне блюда и в строках корзины оливковое — действие рядом */
+.qty--lg,
+.qty--sm {
+  background: transparent;
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--line-4);
+}
+
+.qty--lg {
+  height: 48px;
+  min-width: 136px;
+}
+
+.qty--sm {
+  height: 36px;
+  min-width: 108px;
+}
+
+.qty--sm .qty__btn {
+  width: 36px;
+}
+
+@media (pointer: coarse) {
+  .qty,
+  .qty--sm {
+    height: 44px;
+  }
+
+  .qty__btn,
+  .qty--sm .qty__btn {
+    width: 44px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .qty__btn:not(:disabled):hover {
+    background: color-mix(in srgb, var(--ink) 28%, transparent);
+  }
+
+  .qty--lg .qty__btn:not(:disabled):hover,
+  .qty--sm .qty__btn:not(:disabled):hover {
+    background: color-mix(in srgb, var(--text) 7%, transparent);
+  }
+}
+
+/* ── окна: общее ─────────────────────────────────────────────────────────── */
+
+.dlg {
+  max-width: 100%;
+  max-height: 100%;
+  padding: 0;
+  border: 0;
+  background: var(--bg);
+  color: var(--text);
+  overscroll-behavior: contain;
+  opacity: 0;
+  transition-property: opacity, translate, overlay, display;
+  transition-duration: 160ms;
+  transition-timing-function: var(--ease-out);
+  transition-behavior: allow-discrete;
+}
+
+.dlg[open] {
+  opacity: 1;
+  translate: 0 0;
+  transition-duration: 220ms;
+}
+
+.dlg::backdrop {
+  background: rgb(44 41 39 / 0.45);
+  opacity: 0;
+  transition-property: opacity, overlay, display;
+  transition-duration: 160ms;
+  transition-timing-function: var(--ease-out);
+  transition-behavior: allow-discrete;
+}
+
+.dlg[open]::backdrop {
+  opacity: 1;
+  transition-duration: 220ms;
+}
+
+@starting-style {
+  .dlg[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+/* a page under an open window does not scroll / страница под открытым окном не едет */
+html:has(.dlg[open]) {
+  overflow: hidden;
+}
+
+.round-btn {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--bg);
+  color: var(--text-2);
+  cursor: pointer;
+  transition-property: scale, background-color, color;
+  transition-duration: 120ms, 0.16s, 0.16s;
+  transition-timing-function: var(--ease-out), ease, ease;
+}
+
+/* палец берёт 44 px, рамка остаётся 40 */
+.round-btn::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+}
+
+.round-btn[hidden] {
+  display: none;
+}
+
+.round-btn:active {
+  scale: 0.96;
+}
+
+.round-btn .ico {
+  width: 20px;
+  height: 20px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .round-btn:hover {
+    background: color-mix(in srgb, var(--text) 6%, var(--bg));
+    color: var(--text);
+  }
+}
+
+/* ── окно блюда ──────────────────────────────────────────────────────────── */
+
+/* Phone: a sheet from the bottom, the photo on top, the buy row pinned to the
+   bottom edge. Desktop: a squared window, photo left, text right.
+   Телефон: лист снизу, фото сверху, строка покупки прижата к нижнему краю.
+   Десктоп: квадратное окно, фото слева, текст справа. */
+.dish-dlg {
+  width: 100%;
+  max-height: 94dvh;
+  margin: auto auto 0;
+  border-radius: 12px 12px 0 0;
+  overflow: auto;
+  translate: 0 100%;
+}
+
+@starting-style {
+  .dish-dlg[open] {
+    opacity: 0;
+    translate: 0 100%;
+  }
+}
+
+.dish-dlg__in {
+  position: relative;
+}
+
+.dish-dlg .dlg__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+}
+
+.dish-dlg__photo {
+  aspect-ratio: 4 / 3;
+  margin: 0;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.dish-dlg__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mix-blend-mode: multiply;
+}
+
+.dish-dlg__photo .dish__stub {
+  height: 100%;
+}
+
+.dish-dlg__body {
+  display: flex;
+  flex-direction: column;
+  padding: 18px var(--pad) 0;
+}
+
+.dish-dlg__title {
+  margin-top: 6px;
+  font-family: var(--font-display);
+  font-size: clamp(25px, 7vw, 30px);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: var(--ls-display);
+  text-wrap: balance;
+}
+
+.dish-dlg__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin-top: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+
+.dish-dlg__meta:empty {
+  display: none;
+}
+
+.dish-dlg__meta .dish__flag {
+  color: var(--terracotta-text);
+}
+
+.dish-dlg__desc {
+  margin-top: 14px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-2);
+}
+
+.dish-dlg__desc:empty {
+  display: none;
+}
+
+.dish-dlg__comp {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-3);
+}
+
+.dish-dlg__comp[hidden] {
+  display: none;
+}
+
+.dish-dlg__comp p + p {
+  margin-top: 6px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
+.dish-dlg__out {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: var(--r-sq);
+  background: var(--surface-warm);
+  font-size: 13.5px;
+  color: var(--terracotta-text);
+}
+
+.dish-dlg__out[hidden] {
+  display: none;
+}
+
+.variants {
+  min-width: 0;
+  margin: 18px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.variants[hidden] {
+  display: none;
+}
+
+.variants legend {
+  margin-bottom: 8px;
+  padding: 0;
+}
+
+/* scrolled to on a missed choice: clear of the header above and of the pinned
+   buy row below
+   к нему прокручивает пропущенный выбор: с отступом от верха и от прижатой
+   снизу строки покупки */
+.variants {
+  scroll-margin-block: 16px 96px;
+}
+
+.variants__err {
+  margin: -2px 0 8px;
+}
+
+.variants__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 8px;
+}
+
+/* fillings are names, not numbers: two to a row, or they wrap in three lines */
+/* начинки — названия, а не цифры: по две в ряд, иначе переносятся в три строки */
+.variants--fill .variants__list {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+.variant {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: var(--r-sq);
+  box-shadow: inset 0 0 0 1px var(--line-4);
+  cursor: pointer;
+  transition-property: background-color, box-shadow;
+  transition-duration: 0.16s;
+}
+
+.variant input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.variant__name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.variant__price {
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.variant:has(input:checked) {
+  background: var(--olive-tint);
+  box-shadow: inset 0 0 0 2px var(--olive);
+}
+
+.variant:has(input:focus-visible) {
+  outline: 2px solid var(--terracotta);
+  outline-offset: 2px;
+}
+
+/* at least 22px above the buy row, and on the desktop all the slack: a short
+   dish keeps the row at the bottom of the window, a long one never glues to it
+   над строкой покупки не меньше 22px, а на десктопе — весь запас: у короткого
+   блюда строка стоит внизу окна, у длинного не прилипает к начинкам */
+.dish-dlg__spacer {
+  flex: 1 0 22px;
+}
+
+/* the buy row rides the bottom edge of the sheet while the text scrolls */
+/* строка покупки едет по нижнему краю листа, пока текст листается */
+.dish-dlg__buy {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 10px;
+  margin: 0 calc(var(--pad) * -1);
+  padding: 12px var(--pad) calc(12px + env(safe-area-inset-bottom));
+  background: var(--bg);
+  border-top: 1px solid var(--line-3);
+}
+
+.dish-dlg__buy[hidden] {
+  display: none;
+}
+
+.dish-dlg__add {
+  flex: 1;
+  justify-content: space-between;
+  padding-inline: 18px;
+}
+
+.dish-dlg__incart {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin: 0 0 16px;
+  font-size: 13.5px;
+  color: var(--olive-dark);
+}
+
+.dish-dlg__incart[hidden] {
+  display: none;
+}
+
+.dish-dlg__incart .ico {
+  width: 18px;
+  height: 18px;
+}
+
+.dish-dlg__incart .tlink {
+  font-size: 13px;
+}
+
+@media (min-width: 768px) {
+  .dish-dlg {
+    width: min(880px, calc(100vw - 64px));
+    max-height: min(680px, calc(100dvh - 64px));
+    margin: auto;
+    border-radius: var(--r-sq);
+    overflow: hidden;
+    translate: 0 14px;
+  }
+
+  @starting-style {
+    .dish-dlg[open] {
+      opacity: 0;
+      translate: 0 14px;
+    }
+  }
+
+  .dish-dlg__in {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    max-height: min(680px, calc(100dvh - 64px));
+  }
+
+  /* the photo takes the whole left half, however long the text on the right */
+  /* фото занимает всю левую половину, какой бы длины ни был текст справа */
+  .dish-dlg__photo {
+    aspect-ratio: auto;
+    height: 100%;
+    min-height: 440px;
+  }
+
+  .dish-dlg__body {
+    min-height: 0;
+    overflow-y: auto;
+    padding: 30px 30px 0;
+  }
+
+  .dish-dlg__buy {
+    margin: 0 -30px;
+    padding: 16px 30px 22px;
+  }
+
+  .dish-dlg .dlg__close {
+    top: 16px;
+    right: 16px;
+  }
+
+  /* до кнопки «Закрыть» заголовку не дотянуться */
+  .dish-dlg__cat {
+    padding-right: 44px;
+  }
+}
+
+/* ── корзина ─────────────────────────────────────────────────────────────── */
+
+/* «Оформить заказ» while a dish in the cart is gone: visibly off, the notice
+   above says why
+   «Оформить заказ», пока в корзине закончившееся блюдо: видно, что выключена,
+   а почему — говорит плашка сверху */
+.drawer .btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  scale: 1;
+}
+
+.drawer {
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  translate: 0 100%;
+}
+
+@starting-style {
+  .drawer[open] {
+    opacity: 0;
+    translate: 0 100%;
+  }
+}
+
+.drawer__in {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.drawer__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 64px;
+  padding: 10px var(--pad);
+  border-bottom: 1px solid var(--line-3);
+}
+
+.drawer__title {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: var(--ls-display);
+}
+
+.drawer__offline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px var(--pad);
+  background: var(--ink);
+  color: var(--on-ink);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.drawer__offline[hidden] {
+  display: none;
+}
+
+.drawer__offline .ico {
+  width: 20px;
+  height: 20px;
+  color: var(--terracotta-on-ink);
+}
+
+.drawer__step {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.drawer__step[hidden] {
+  display: none;
+}
+
+.drawer__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 14px var(--pad) 22px;
+}
+
+.drawer__foot {
+  padding: 14px var(--pad) calc(14px + env(safe-area-inset-bottom));
+  background: var(--bg);
+  border-top: 1px solid var(--line-3);
+}
+
+.drawer__foot[hidden] {
+  display: none;
+}
+
+.sum {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.sum b {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.sum__count {
+  color: var(--text-4);
+}
+
+.sum__note {
+  margin: 2px 0 12px;
+  font-size: 12.5px;
+  color: var(--text-4);
+}
+
+.drawer__clear {
+  gap: 6px;
+  margin: 6px auto -6px;
+  display: flex;
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.drawer__clear .ico {
+  width: 17px;
+  height: 17px;
+}
+
+.drawer__notice {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-sq);
+  background: var(--olive-tint);
+  box-shadow: inset 0 0 0 1px var(--olive-tint-line);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+.drawer__notice--warn {
+  background: var(--surface-warm);
+  box-shadow: inset 0 0 0 1px var(--line-warm);
+  color: var(--terracotta-text);
+}
+
+.drawer__notice[hidden] {
+  display: none;
+}
+
+.drawer__alt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 12px;
+  padding: 10px var(--pad) calc(10px + env(safe-area-inset-bottom));
+  background: var(--surface);
+  font-size: 12.5px;
+  color: var(--text-4);
+}
+
+.drawer__alt[hidden] {
+  display: none;
+}
+
+/* the foot already took the safe area: the strip under it does not repeat it */
+.drawer__foot:has(+ .drawer__alt:not([hidden])) {
+  padding-bottom: 14px;
+}
+
+.drawer__alt a {
+  padding-block: 6px;
+  color: var(--text-2);
+  text-decoration: underline;
+  text-decoration-color: var(--line-4);
+  text-underline-offset: 3px;
+}
+
+@media (min-width: 768px) {
+  .drawer {
+    width: 440px;
+    margin: 0 0 0 auto;
+    translate: 100% 0;
+  }
+
+  @starting-style {
+    .drawer[open] {
+      opacity: 0;
+      translate: 100% 0;
+    }
+  }
+
+  .drawer__head {
+    min-height: 72px;
+    padding: 12px 24px;
+  }
+
+  .drawer__scroll {
+    padding: 16px 24px 24px;
+  }
+
+  .drawer__foot {
+    padding: 16px 24px 20px;
+  }
+
+  .drawer__alt {
+    padding-inline: 24px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .drawer__alt a:hover {
+    color: var(--terracotta-text);
+  }
+}
+
+/* строки корзины */
+.lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.line {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line-3);
+}
+
+.line:first-child {
+  padding-top: 4px;
+}
+
+.line__img {
+  grid-row: 1 / span 3;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+  border-radius: var(--r-sq);
+  background: var(--surface);
+}
+
+.line__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mix-blend-mode: multiply;
+}
+
+.line__img .ico {
+  width: 26px;
+  height: 26px;
+  margin: 19px;
+  color: var(--text-5);
+}
+
+.line__title {
+  grid-column: 2;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.line__meta,
+.line__flag {
+  grid-column: 2 / -1;
+}
+
+.line__meta {
+  font-size: 12.5px;
+  color: var(--text-4);
+}
+
+.line__sum {
+  grid-column: 3;
+  grid-row: 1;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.line__ctl {
+  grid-column: 2 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.line__remove {
+  border-color: transparent;
+  color: var(--text-4);
+}
+
+.line--out .line__title,
+.line--out .line__sum {
+  color: var(--text-4);
+}
+
+.line--out .line__img img {
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+.line__flag {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--terracotta-text);
+}
+
+/* пустая корзина */
+.drawer__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 36px 6px 8px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-3);
+}
+
+.drawer__empty[hidden] {
+  display: none;
+}
+
+.drawer__empty > .ico {
+  width: 44px;
+  height: 44px;
+  color: var(--olive);
+}
+
+.drawer__empty-title {
+  font-size: 26px;
+  color: var(--text);
+}
+
+.drawer__empty > p {
+  max-width: 32ch;
+}
+
+.drawer__empty .btn {
+  margin-top: 10px;
+}
+
+.suggest {
+  width: 100%;
+  margin-top: 18px;
+  text-align: left;
+}
+
+.suggest[hidden] {
+  display: none;
+}
+
+.suggest__list {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line-3);
+}
+
+.suggest__item {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line-3);
+}
+
+.suggest__item .line__img {
+  width: 48px;
+  height: 48px;
+  grid-row: auto;
+}
+
+.suggest__title {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.suggest__price {
+  font-size: 12.5px;
+  color: var(--text-4);
+}
+
+/* ── форма оформления ────────────────────────────────────────────────────── */
+
+.fs {
+  min-width: 0;
+  margin: 0 0 20px;
+  padding: 0;
+  border: 0;
+}
+
+.fs__legend {
+  margin-bottom: 12px;
+  padding: 0;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+
+.fs__part[hidden] {
+  display: none;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.field__opt {
+  font-weight: 400;
+  color: var(--text-4);
+}
+
+/* Fields sit on a shade of paper, not on white: there is no white on this
+   site, and an empty field still reads as a place to write.
+   Поля лежат на оттенке бумаги, а не на белом: белого на сайте нет, а пустое
+   поле всё равно читается местом, куда писать. */
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-4);
+  border-radius: var(--r-sq);
+  background: color-mix(in srgb, var(--surface) 45%, var(--bg));
+  color: var(--text);
+  font: inherit;
+  /* 16 px: iOS не увеличивает страницу при фокусе */
+  font-size: 16px;
+  line-height: 1.3;
+  transition-property: border-color, box-shadow, background-color;
+  transition-duration: 0.16s;
+}
+
+.field textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.field select {
+  appearance: none;
+  padding-right: 40px;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%235A5348" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 18px;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--text-5);
+  opacity: 0.8;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--olive);
+  background-color: var(--bg);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--olive) 22%, transparent);
+}
+
+.field [aria-invalid='true'] {
+  border-color: var(--terracotta);
+}
+
+.field__hint {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--text-4);
+}
+
+.field__err {
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--terracotta-text);
+}
+
+.field__err[hidden] {
+  display: none;
+}
+
+/* the error says what the hint said, sharper: one line, not two */
+/* ошибка говорит то же, что подсказка, только жёстче: одна строка, а не две */
+.field:has(.field__err:not([hidden])) .field__hint {
+  display: none;
+}
+
+.seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 14px;
+  overflow: hidden;
+  border-radius: var(--r-sq);
+  box-shadow: inset 0 0 0 1px var(--line-4);
+}
+
+.seg__opt {
+  position: relative;
+}
+
+.seg__opt + .seg__opt {
+  border-left: 1px solid var(--line-4);
+}
+
+.seg__opt input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.seg__opt span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-2);
+  transition-property: background-color, color;
+  transition-duration: 0.16s;
+}
+
+/* chosen = ink, the same «selected» as the active tab of the reviews */
+.seg__opt input:checked + span {
+  background: var(--ink);
+  color: var(--on-ink);
+}
+
+.seg__opt input:focus-visible + span {
+  outline: 2px solid var(--terracotta);
+  outline-offset: -4px;
+}
+
+.places {
+  display: grid;
+  gap: 8px;
+}
+
+.place-opt {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 2px 10px;
+  padding: 12px 14px;
+  border-radius: var(--r-sq);
+  box-shadow: inset 0 0 0 1px var(--line-4);
+  cursor: pointer;
+  transition-property: background-color, box-shadow;
+  transition-duration: 0.16s;
+}
+
+.place-opt input {
+  grid-row: span 2;
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+  accent-color: var(--olive);
+}
+
+.place-opt__name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.place-opt__meta {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--text-4);
+}
+
+.place-opt:has(input:checked) {
+  background: var(--olive-tint);
+  box-shadow: inset 0 0 0 2px var(--olive);
+}
+
+.when {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 10px;
+}
+
+.when .field__err {
+  grid-column: 1 / -1;
+  margin: -6px 0 10px;
+}
+
+.consent {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 10px;
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.consent input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--olive);
+}
+
+.consent a {
+  color: var(--text);
+  text-underline-offset: 3px;
+}
+
+.consent + .field__err {
+  margin: 6px 0 0 30px;
+}
+
+/* поле-ловушка: человеку не видно и не достать Tab-ом */
+.hp {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.alert {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: var(--r-sq);
+  background: var(--surface-warm);
+  box-shadow: inset 0 0 0 1px var(--line-warm);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.alert[hidden] {
+  display: none;
+}
+
+.alert__title {
+  margin-bottom: 4px;
+  font-weight: 700;
+  color: var(--terracotta-text);
+}
+
+/* two ways out of a failed order, each across the whole alert: stacked
+   buttons of two ragged widths read as leftovers
+   два выхода из неотправленного заказа, каждый во всю ширину плашки: стопка
+   кнопок двух рваных ширин читалась остатками */
+.alert__actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* sending: the label stays, a hairline sweep runs under it — no spinner in the middle of a button */
+/* отправка: подпись остаётся, под ней бежит волосяная полоса — без спиннера посреди кнопки */
+[data-submit] {
+  position: relative;
+  overflow: hidden;
+}
+
+[data-submit][aria-busy='true'] {
+  cursor: progress;
+}
+
+[data-submit][aria-busy='true']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 40%;
+  height: 2px;
+  background: var(--bg);
+  animation: sending 1.1s var(--ease-in-out) infinite;
+}
+
+@keyframes sending {
+  from {
+    translate: -100% 0;
+  }
+
+  to {
+    translate: 260% 0;
+  }
+}
+
+/* ── заказ принят ────────────────────────────────────────────────────────── */
+
+.done__in {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 34px;
+  text-align: center;
+}
+
+.done__title {
+  margin-top: 16px;
+  font-size: clamp(28px, 7.4vw, 34px);
+}
+
+.done__number {
+  display: grid;
+  gap: 4px;
+  margin-top: 18px;
+}
+
+.done__number .display {
+  font-size: 34px;
+  line-height: 1;
+}
+
+.done__text {
+  max-width: 34ch;
+  margin-top: 16px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.done__text b {
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.done__lines {
+  width: 100%;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line-3);
+  text-align: left;
+}
+
+.done__lines li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line-3);
+  font-size: 13.5px;
+  color: var(--text-2);
+}
+
+.done__lines b {
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.done__total {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding-top: 10px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.done__call {
+  margin-top: 18px;
+  font-size: 14px;
+  color: var(--text-3);
+}
+
+.done__call a {
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.done__apps {
+  width: 100%;
+  margin-top: 22px;
+  padding: 16px;
+  border-radius: var(--r-sq);
+  background: var(--surface);
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.done__stores {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.store-ico {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+}
+
+.store-ico svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── нижняя полоса корзины (телефон) ─────────────────────────────────────── */
+
+.cartbar {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 15;
+  padding: 8px var(--pad) calc(8px + env(safe-area-inset-bottom));
+  background: var(--bg);
+  border-top: 1px solid var(--line-3);
+  transition: translate 220ms var(--ease-out);
+}
+
+.cartbar[hidden] {
+  display: none;
+}
+
+@starting-style {
+  .cartbar {
+    translate: 0 100%;
+  }
+}
+
+.cartbar__btn {
+  width: 100%;
+  height: 50px;
+  justify-content: space-between;
+  padding-inline: 16px;
+  font-size: 12px;
+}
+
+.cartbar__left,
+.cartbar__right {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 767px) {
+  body:has(.cartbar:not([hidden])) {
+    padding-bottom: calc(66px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (min-width: 768px) {
+  .cartbar {
+    display: none !important;
+  }
+}
+
+/* ── отклик счётчиков ────────────────────────────────────────────────────── */
+
+/* the number that just changed nods once — state, not decoration */
+/* число, которое только что изменилось, кивает один раз — это состояние, а не украшение */
+.bump {
+  animation: bump 320ms var(--ease-out);
+}
+
+@keyframes bump {
+  40% {
+    scale: 1.18;
+  }
+}
+
+/* ── пустой каталог ──────────────────────────────────────────────────────── */
+
+.cat-empty {
+  padding-bottom: var(--sec-pad);
+}
+
+.cat-empty__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 44px 22px;
+  border-radius: var(--r-sq);
+  background-color: var(--surface-warm);
+  background-image: var(--hatch);
+  text-align: center;
+  color: var(--text-2);
+}
+
+.cat-empty__panel > .ico {
+  width: 46px;
+  height: 46px;
+  color: var(--olive);
+}
+
+.cat-empty__title {
+  font-size: clamp(26px, 6vw, 34px);
+  color: var(--text);
+}
+
+.cat-empty__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dish-dlg,
+  .dish-dlg[open],
+  .drawer,
+  .drawer[open] {
+    translate: none;
+  }
+
+  @starting-style {
+    .dish-dlg[open],
+    .drawer[open] {
+      translate: none;
+    }
+  }
+
+  .bump,
+  [data-submit][aria-busy='true']::after {
+    animation: none;
+  }
+}

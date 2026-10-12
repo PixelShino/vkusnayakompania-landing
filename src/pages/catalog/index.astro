@@ -1,0 +1,319 @@
+---
+/**
+ * Delivery catalog: every section and dish from the admin, a cart kept in the
+ * browser and a checkout that leaves an order in Directus for a call-back. The
+ * page is static: cards, prices and the search markup are built here, the
+ * page script (`catalog.ts`) only adds the cart, the dish window and the form.
+ * With an empty catalog the page still builds and says where to order instead.
+ * Каталог доставки: все разделы и блюда из админки, корзина в браузере и
+ * оформление, которое оставляет заказ в Directus для обратного звонка.
+ * Страница статическая: карточки, цены и разметка для поиска собираются
+ * здесь, скрипт страницы (`catalog.ts`) только добавляет корзину, окно блюда и
+ * форму. С пустым каталогом страница всё равно собирается и говорит, где
+ * заказать.
+ */
+import type { ImageMetadata } from 'astro';
+import { getImage } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Icon from '../../components/Icon.astro';
+import DishCard from '../../components/catalog/DishCard.astro';
+import CatalogApp from '../../components/catalog/CatalogApp.astro';
+import CartDrawer from '../../components/catalog/CartDrawer.astro';
+import DishDialog from '../../components/catalog/DishDialog.astro';
+import { BASE } from '../../lib/base.ts';
+import { BRAND } from '../../data/site.ts';
+import { getContent, typo } from '../../lib/content.ts';
+import { positions } from '../../lib/catalog.ts';
+import '../../styles/catalog.css';
+
+const content = await getContent();
+const { catalog, settings, places, home } = content;
+const empty = catalog.count === 0;
+
+const title = `Доставка еды в Самаре — каталог и цены | ${BRAND.name}`;
+const description =
+  'Завтраки, супы, паста, горячее, торты и пирожные с доставкой по Самаре или самовывозом. Соберите корзину — перезвоним и подтвердим заказ.';
+
+const site = Astro.site ?? new URL('https://vkus-com.ru');
+const page = new URL(`${BASE}catalog/`, site);
+
+// The dish photo search engines get is the card's own 720 px copy: the same
+// file the page already ships, so the markup costs no extra encode.
+// Фото блюда для поиска — та же копия 720 px, что у карточки: файл уже есть
+// на странице, разметка не стоит лишнего кодирования.
+const imageOf = async (product: (typeof catalog.categories)[number]['products'][number]) => {
+  const photo = product.photo;
+  if (!photo || photo.placeholder) return undefined;
+  const width = Math.min(photo.width, 720);
+  const image = await getImage({
+    src: photo.src as ImageMetadata,
+    width,
+    height: Math.round((photo.height * width) / photo.width),
+    format: 'webp',
+    quality: 76,
+  });
+  return new URL(image.src, page).href;
+};
+
+let position = 0;
+const itemList = await Promise.all(
+  catalog.categories.flatMap((category) =>
+    category.products.map(async (product) => {
+      const url = `${page.href}#p-${product.slug}`;
+      const availability = `https://schema.org/${product.available ? 'InStock' : 'OutOfStock'}`;
+      const offers =
+        product.variants.length > 1
+          ? {
+              '@type': 'AggregateOffer',
+              priceCurrency: 'RUB',
+              lowPrice: Math.min(...product.variants.map((v) => v.price)),
+              highPrice: Math.max(...product.variants.map((v) => v.price)),
+              offerCount: product.variants.length,
+              availability,
+              url,
+            }
+          : { '@type': 'Offer', priceCurrency: 'RUB', price: product.price, availability, url };
+      return {
+        '@type': 'ListItem',
+        position: ++position,
+        item: {
+          '@type': 'Product',
+          '@id': url,
+          name: product.title,
+          sku: String(product.id),
+          category: category.title,
+          ...(product.description && { description: product.description }),
+          ...(product.weight && { weight: product.weight }),
+          image: await imageOf(product),
+          brand: { '@type': 'Brand', name: BRAND.name },
+          offers,
+        },
+      };
+    }),
+  ),
+);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Главная', item: new URL(BASE, site).href },
+        { '@type': 'ListItem', position: 2, name: 'Доставка', item: page.href },
+      ],
+    },
+    ...(empty
+      ? []
+      : [{ '@type': 'ItemList', name: 'Каталог доставки', numberOfItems: catalog.count, itemListElement: itemList }]),
+  ],
+};
+
+// What the page script needs to price the cart and fill the dish window. Image
+// addresses are not here: the window borrows them from the card already on the page.
+// Что нужно скрипту, чтобы посчитать корзину и заполнить окно блюда. Адресов
+// картинок здесь нет: окно берёт их у карточки, которая уже на странице.
+const data = {
+  products: catalog.categories.flatMap((category) =>
+    category.products.map((product) => ({
+      id: product.id,
+      slug: product.slug,
+      title: product.title,
+      category: category.title,
+      description: product.description ?? null,
+      composition: product.composition ?? null,
+      weight: product.weight ?? null,
+      price: product.price,
+      oldPrice: product.oldPrice ?? null,
+      variants: product.variants,
+      fillings: product.fillings,
+      available: product.available,
+      badges: product.badges,
+    })),
+  ),
+};
+
+// the first row of dishes is above the fold on a phone and a desktop alike
+// первый ряд блюд виден сразу и на телефоне, и на десктопе
+const firstEager = 6;
+let rendered = 0;
+---
+
+<BaseLayout
+  content={content}
+  title={title}
+  description={description}
+  noindex={empty}
+  stickyBar={false}
+  landing={false}
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} is:inline />
+  <Header content={content} over={false} cart={!empty} />
+
+  <main id="main" class="cat" tabindex="-1">
+    <section class="container cat-head" aria-labelledby="cat-title">
+      <nav class="crumbs" aria-label="Вы здесь">
+        <a href={BASE}>Главная</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">Доставка</span>
+      </nav>
+      <div class="cat-head__row" data-reveal>
+        <span class="mark cat-head__mark" aria-hidden="true"></span>
+        <h1 class="display-caps cat-head__title" id="cat-title">Доставка и самовывоз</h1>
+        <p class="lead cat-head__lead">
+          {
+            typo(
+              empty
+                ? 'Каталог на сайте обновляется. Пока заказать можно в приложении, в интернет-магазине или по телефону.'
+                : 'Те же блюда и десерты, что в нашем приложении. Соберите корзину — мы перезвоним, подтвердим состав, сумму и время.',
+            )
+          }
+        </p>
+      </div>
+
+      <ul class="facts" aria-label="Как это работает">
+        <li>
+          <Icon name="phone" />
+          <span><b>Подтверждаем звонком.</b> Оплату и доставку обсудим при звонке</span>
+        </li>
+        <li>
+          <Icon name="pin" />
+          <span><b>Самовывоз:</b> {places.map((place) => place.name).join(' и ')}</span>
+        </li>
+        {
+          home.delivery_note && (
+            <li>
+              <Icon name="app" />
+              <span>
+                <b>{home.delivery_note}.</b>{' '}
+                {[
+                  settings.app_ios && { label: 'App\u00a0Store', href: settings.app_ios },
+                  settings.app_android && { label: 'Google\u00a0Play', href: settings.app_android },
+                ]
+                  .filter((store): store is { label: string; href: string } => Boolean(store))
+                  .map((store, i) => (
+                    <>
+                      {i > 0 && ' · '}
+                      <a href={store.href} target="_blank" rel="noopener">
+                        {store.label}
+                      </a>
+                    </>
+                  ))}
+              </span>
+            </li>
+          )
+        }
+      </ul>
+    </section>
+
+    {
+      empty ? (
+        <section class="container cat-empty" aria-label="Каталог пуст">
+          <div class="cat-empty__panel">
+            <Icon name="cloche" />
+            <p class="display cat-empty__title">Каталог скоро появится</p>
+            <p>Блюда и цены переносим из приложения. Заказать можно уже сейчас:</p>
+            <div class="cat-empty__actions">
+              <a class="btn btn--primary" href={settings.shop_url} target="_blank" rel="noopener">
+                Открыть магазин
+              </a>
+              <a class="btn btn--secondary" href={settings.phoneHref}>
+                Позвонить {settings.phone}
+              </a>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <div class="container cat-layout">
+          <aside class="cat-side">
+            <nav class="cat-nav" aria-label="Разделы каталога" data-cat-nav>
+              <ul role="list">
+                {catalog.categories.map((category, i) => (
+                  <li>
+                    <a href={`#${category.slug}`} data-nav={category.slug} aria-current={i === 0 ? 'true' : undefined}>
+                      <span>{category.title}</span>
+                      <span class="cat-nav__n tnum" aria-hidden="true">
+                        {category.products.length}
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            <section class="minicart" aria-labelledby="minicart-title" data-minicart>
+              <h2 class="label minicart__title" id="minicart-title">Ваш заказ</h2>
+              <p class="minicart__empty" data-mc-empty>
+                Пока пусто. Нажмите «В корзину» у блюда — оно появится здесь.
+              </p>
+              <div class="minicart__full" data-mc-full hidden>
+                <p class="minicart__sum">
+                  <span data-mc-count></span>
+                  <b class="tnum" data-mc-total></b>
+                </p>
+                <button type="button" class="btn btn--primary btn--md btn--block" data-cart-open>
+                  <Icon name="bag" />
+                  Открыть корзину
+                </button>
+              </div>
+            </section>
+          </aside>
+
+          <div class="cat-main">
+            {catalog.categories.map((category) => (
+              <section class="cat-sec" id={category.slug} aria-labelledby={`h-${category.slug}`} data-sec={category.slug}>
+                <header class="cat-sec__head" data-reveal>
+                  <h2 class="display-caps cat-sec__title" id={`h-${category.slug}`}>
+                    {category.title}
+                  </h2>
+                  <span class="tag cat-sec__n">{positions(category.products.length)}</span>
+                  {category.description && <p class="cat-sec__desc">{category.description}</p>}
+                </header>
+                <ul class="cat-grid" role="list">
+                  {category.products.map((product) => (
+                    <li>
+                      <DishCard product={product} eager={rendered++ < firstEager} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    <CatalogApp content={content} />
+  </main>
+
+  <Footer content={content} base={BASE} />
+
+  {
+    !empty && (
+      <>
+        <div class="cartbar" data-cartbar hidden>
+          <button type="button" class="btn btn--primary cartbar__btn" data-cart-open>
+            <span class="cartbar__left">
+              <Icon name="bag" />
+              <span data-bar-count></span>
+            </span>
+            <span class="cartbar__right">
+              <span class="tnum" data-bar-total></span>
+              <span aria-hidden="true">→</span>
+            </span>
+          </button>
+        </div>
+        <DishDialog />
+        <CartDrawer content={content} />
+        <p class="sr-only" aria-live="polite" data-announce></p>
+        <script type="application/json" id="catalog-data" set:html={JSON.stringify(data)} is:inline />
+      </>
+    )
+  }
+</BaseLayout>
+
+<script>
+  import '../../scripts/catalog';
+</script>

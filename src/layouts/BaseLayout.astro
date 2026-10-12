@@ -79,17 +79,32 @@ import BookingDialog from '../components/BookingDialog.astro';
 import StickyBar from '../components/StickyBar.astro';
 import { BRAND, schemaHours, yandexOrgUrl } from '../data/site';
 import { HERO_SIZES, widthsFor } from '../lib/hero.ts';
+import { orderLinkFor } from '../lib/nav.ts';
 import type { Content } from '../lib/content.ts';
 
 interface Props {
   content: Content;
+  /** своя страница (каталог) — свои title и description; без них — из «Главной» */
+  title?: string;
+  description?: string;
+  /** страница, которой нечего показать поиску (пустой каталог) */
+  noindex?: boolean;
+  /** нижняя полоса «Позвонить / Заказать доставку»; у каталога своя — корзина */
+  stickyBar?: boolean;
+  /**
+   * The first screen's photo and the opening curtain belong to the home page:
+   * a shopper landing on the catalog from search waits for neither.
+   * Кадр первого экрана и занавес открытия — принадлежность главной: гость,
+   * пришедший в каталог из поиска, не должен ждать ни того, ни другого.
+   */
+  landing?: boolean;
 }
 
-const { content } = Astro.props;
+const { content, stickyBar = true, landing = true } = Astro.props;
 const { home, settings, places } = content;
 
-const title = home.seo_title;
-const description = home.seo_description;
+const title = Astro.props.title ?? home.seo_title;
+const description = Astro.props.description ?? home.seo_description;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://example.com');
 
 // на превью-сборке сайт лежит в подкаталоге, поэтому файлы из `public` — через `base`
@@ -97,7 +112,7 @@ const asset = (path: string) => `${BASE}${path}`;
 
 // превью не должно попасть в поиск и конкурировать с боевым доменом
 const isPreview = canonical.hostname !== 'vkus-com.ru';
-const noindex = isPreview || !home.robots_index;
+const noindex = isPreview || !home.robots_index || Boolean(Astro.props.noindex);
 
 // preload снимка первого экрана; `sizes` общий с `Hero.astro`
 const heroSrcset = (
@@ -186,13 +201,17 @@ const jsonLd = {
     <link rel="preload" as="font" type="font/woff2" href={montserratCyrillic} crossorigin />
     <link rel="preload" href={prataCyrillic} as="font" type="font/woff2" crossorigin />
 
-    <link
-      rel="preload"
-      as="image"
-      imagesrcset={heroSrcset}
-      imagesizes={HERO_SIZES}
-      fetchpriority="high"
-    />
+    {
+      landing && (
+        <link
+          rel="preload"
+          as="image"
+          imagesrcset={heroSrcset}
+          imagesizes={HERO_SIZES}
+          fetchpriority="high"
+        />
+      )
+    }
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={BRAND.name} />
@@ -216,15 +235,22 @@ const jsonLd = {
         </script>
       )
     }
+    {/* page-specific head: the catalog adds its ItemList of dishes
+        своё для страницы: каталог добавляет список блюд для поиска */}
+    <slot name="head" />
   </head>
   <body>
     {/* Opening curtain: ink with the logo, lifts on its own — never waits for
         anything, so it costs the first paint nothing (CSS only, see global.css).
         Занавес открытия: чернила с логотипом, поднимается сам — ничего не ждёт,
         поэтому первой отрисовке ничего не стоит (только CSS, см. global.css) */}
-    <div class="curtain" aria-hidden="true">
-      <Image src={logo} alt="" width={440} height={192} class="curtain__logo" loading="eager" />
-    </div>
+    {
+      landing && (
+        <div class="curtain" aria-hidden="true">
+          <Image src={logo} alt="" width={440} height={192} class="curtain__logo" loading="eager" />
+        </div>
+      )
+    }
     <a class="skip-link" href="#main">К основному содержимому</a>
     <slot />
 
@@ -248,7 +274,7 @@ const jsonLd = {
       )
     }
 
-    <StickyBar settings={settings} />
+    {stickyBar && <StickyBar settings={settings} order={orderLinkFor(content)} />}
     <script>
       import '../scripts/reveal';
     </script>
