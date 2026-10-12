@@ -14,7 +14,7 @@
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import Icon from '../Icon.astro';
-import { BADGE_LABEL, priceLabel, rub, sizeLabel, type Product } from '../../lib/catalog.ts';
+import { BADGE_LABEL, photoWidths, priceLabel, rub, sizeLabel, type Product } from '../../lib/catalog.ts';
 
 interface Props {
   product: Product;
@@ -33,10 +33,9 @@ const choose = product.variants.length > 0 || product.fillings.length > 0;
 // a studio shot of a plate the difference in weight is a few kilobytes
 // webp, а не avif: полторы сотни блюд кодируются в пять раз быстрее, а на
 // студийном снимке тарелки разница в весе — несколько килобайт
-const WIDTHS = [240, 360, 540, 720];
-// no upscaling: a 600 px original gets 240, 360, 540 and itself
-// без апскейла: оригинал в 600 px получает 240, 360, 540 и самого себя
-const widths = photo ? [...new Set([...WIDTHS.filter((w) => w < photo.width), Math.min(photo.width, 720)])] : [];
+// no upscaling: a 600 px original gets 240, 360, 540 and itself (`photoWidths`)
+// без апскейла: оригинал в 600 px получает 240, 360, 540 и самого себя (`photoWidths`)
+const widths = photo ? photoWidths(photo.width) : [];
 const SIZES = '(min-width: 1200px) 316px, (min-width: 768px) 30vw, 46vw';
 ---
 

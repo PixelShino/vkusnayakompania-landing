@@ -823,65 +823,158 @@ if (dataNode && drawer && dishDialog) {
     if (current) paintDialog();
   });
 
-  // ── section strip: the current section follows the scroll ──────────────
-  const nav = $('[data-cat-nav]');
-  const links = new Map($$<HTMLAnchorElement>('[data-nav]').map((link) => [link.dataset.nav!, link]));
+  // ── sections: the desktop column, the sticky bar, the sheet, «наверх» ───
+  // The observer watches the reading line — a 1 % band a third of the way
+  // down the screen — and says when something crossed it; which section is
+  // current is then measured, not taken from the entries: a jump (a click in
+  // the column, «наверх», the End key) skips sections, and a fast scroll
+  // delivers several entries at once in no useful order. Current = the last
+  // section whose top has passed the line; above the first one it is the
+  // first, below the last one (the help strip, the footer) the last.
+  // Наблюдатель смотрит на линию чтения — полосу в 1 % на трети высоты экрана —
+  // и сообщает, что её что-то пересекло; какой раздел текущий, потом меряется,
+  // а не берётся из записей: прыжок (клик в колонке, «наверх», End) пропускает
+  // разделы, а быстрая прокрутка приносит несколько записей разом и в
+  // бесполезном порядке. Текущий — последний раздел, чей верх прошёл линию;
+  // выше первого — первый, ниже последнего (полоса помощи, подвал) — последний.
   const sections = $$('[data-sec]');
-  const mark = (slug: string) => {
-    for (const [key, link] of links) {
-      if (key === slug) link.setAttribute('aria-current', 'true');
-      else link.removeAttribute('aria-current');
-    }
-    const link = links.get(slug);
-    const strip = nav?.querySelector('ul');
-    // under 1200 the strip scrolls sideways: keep the current word in view
-    // до 1200 строка листается вбок: текущий раздел держим в кадре
-    if (link && strip && strip.scrollWidth > strip.clientWidth) {
-      strip.scrollTo({
-        left: link.offsetLeft - strip.clientWidth / 2 + link.offsetWidth / 2,
-        behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-      });
-    }
-  };
-  // The current section is the last one whose heading has passed the reading
-  // line (a quarter of the screen under the header and the strip). Measured on
-  // scroll, one frame at a time: an observer kept the last section it saw and
-  // left «Наборы» lit at the top of the page.
-  // Текущий раздел — последний, чей заголовок прошёл линию чтения (четверть
-  // экрана под шапкой и строкой разделов). Меряется на прокрутке, раз в кадр:
-  // наблюдатель помнил последний увиденный раздел и оставлял «Наборы»
-  // подсвеченными вверху страницы.
+  const titles = new Map(sections.map((section) => [section.dataset.sec!, $('h2', section)?.textContent?.trim() ?? '']));
+  const marks = new Map<string, HTMLAnchorElement[]>();
+  for (const link of $$<HTMLAnchorElement>('[data-nav], [data-sheet-link]')) {
+    const slug = link.dataset.nav ?? link.dataset.sheetLink!;
+    marks.set(slug, [...(marks.get(slug) ?? []), link]);
+  }
+  const bar = $('[data-secbar]');
+  const barName = $('[data-secbar-name]');
+  const barButton = $('[data-sheet-open]');
+  const sheet = $<HTMLDialogElement>('[data-sheet]');
+  const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   let active = '';
-  const spy = () => {
-    const strip = nav?.getBoundingClientRect();
-    const line = Math.max(strip && strip.height < 120 ? strip.bottom : 0, 80) + window.innerHeight * 0.25;
-    let slug = sections[0]?.dataset.sec ?? '';
-    for (const section of sections) {
-      if (section.getBoundingClientRect().top <= line) slug = section.dataset.sec!;
-      else break;
-    }
-    if (slug && slug !== active) {
-      active = slug;
-      mark(slug);
-    }
+  const mark = (slug: string) => {
+    if (!slug || slug === active) return;
+    active = slug;
+    for (const [key, links] of marks)
+      for (const link of links) {
+        if (key === slug) link.setAttribute('aria-current', 'true');
+        else link.removeAttribute('aria-current');
+      }
+    const title = titles.get(slug) ?? '';
+    if (barName) barName.textContent = title;
+    barButton?.setAttribute('aria-label', `Все разделы. Сейчас: ${title}`);
   };
-  let ticking = false;
-  window.addEventListener(
-    'scroll',
-    () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        ticking = false;
-        spy();
-      });
-    },
-    { passive: true },
-  );
-  spy();
-  nav?.addEventListener('click', (event) => {
-    const link = (event.target as Element).closest<HTMLAnchorElement>('[data-nav]');
-    if (link) mark(link.dataset.nav!);
+  mark(sections[0]?.dataset.sec ?? '');
+
+  // the page script runs where IntersectionObserver exists; without it the
+  // column, the tiles and the sheet still work as plain anchors
+  // скрипт работает там, где есть IntersectionObserver; без него колонка,
+  // плитки и лист всё равно работают как обычные якоря
+  if ('IntersectionObserver' in window) {
+    const measure = () => {
+      const line = window.innerHeight * 0.33;
+      let slug = sections[0]?.dataset.sec ?? '';
+      for (const section of sections) {
+        if (section.getBoundingClientRect().top <= line) slug = section.dataset.sec!;
+        else break;
+      }
+      mark(slug);
+    };
+    const reading = new IntersectionObserver(measure, { rootMargin: '-33% 0px -66% 0px' });
+    for (const section of sections) reading.observe(section);
+    // what follows the last section crosses the line too: a jump to the very
+    // bottom lands there, past every section
+    // то, что идёт за последним разделом, тоже пересекает линию: прыжок в самый
+    // низ попадает туда, мимо всех разделов
+    const after = sections.at(-1)?.closest('.cat-layout')?.nextElementSibling;
+    if (after) reading.observe(after);
+
+    // The bar comes out once the tiles have gone under the header and goes
+    // back once the last section has: over the help strip and the footer a
+    // section name says nothing.
+    // Строка выезжает, когда плитки ушли под шапку, и уезжает, когда под шапку
+    // ушёл последний раздел: над полосой помощи и подвалом имя раздела ни о чём
+    // не говорит.
+    const tiles = $('[data-tiles]');
+    const layout = sections[0]?.closest<HTMLElement>('.cat-layout');
+    const header = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 68;
+    if (bar && tiles && layout) {
+      let tilesGone = false;
+      let sectionsGone = false;
+      const above = (entry: IntersectionObserverEntry) =>
+        !entry.isIntersecting && entry.boundingClientRect.bottom <= (entry.rootBounds?.top ?? 0) + 1;
+      const toggle = () => bar.toggleAttribute('data-on', tilesGone && !sectionsGone);
+      new IntersectionObserver(
+        ([entry]) => {
+          tilesGone = above(entry);
+          toggle();
+        },
+        { rootMargin: `-${Math.round(header)}px 0px 0px 0px` },
+      ).observe(tiles);
+      new IntersectionObserver(
+        ([entry]) => {
+          sectionsGone = above(entry);
+          toggle();
+        },
+        { rootMargin: `-${Math.round(header + 52)}px 0px 0px 0px` },
+      ).observe(layout);
+    }
+
+    // «наверх» — once the first screen is gone: the mark is the first screen's
+    // height, so leaving it is one crossing however far the jump
+    // «наверх» — когда первый экран ушёл: метка высотой в первый экран, и уход
+    // с неё — одно пересечение, как бы далеко ни был прыжок
+    const totop = $('[data-totop]');
+    const firstScreen = $('[data-totop-mark]');
+    if (totop && firstScreen)
+      new IntersectionObserver(([entry]) => totop.toggleAttribute('data-on', !entry.isIntersecting)).observe(firstScreen);
+  }
+
+  // A jump to a section lands its heading right under the header (and the
+  // bar), puts the focus there for a keyboard or a screen reader, and keeps
+  // the address shareable without a history entry per tap.
+  // Переход к разделу ставит его заголовок сразу под шапку (и строку),
+  // переносит туда фокус для клавиатуры и скринридера и оставляет адрес, которым
+  // можно поделиться, не плодя запись в истории на каждое касание.
+  const jumpTo = (slug: string) => {
+    const section = sections.find((item) => item.dataset.sec === slug);
+    if (!section) return;
+    mark(slug);
+    section.scrollIntoView({ behavior: reduce() ? 'auto' : 'smooth', block: 'start' });
+    $<HTMLElement>('h2', section)?.focus({ preventScroll: true });
+    history.replaceState(history.state, '', `#${slug}`);
+    announce(`Раздел «${titles.get(slug)}»`);
+  };
+
+  document.addEventListener('click', (event) => {
+    const target = event.target as Element;
+    const link = target.closest<HTMLAnchorElement>('[data-tile], [data-nav], [data-sheet-link]');
+    if (link) {
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+      event.preventDefault();
+      const slug = link.dataset.tile ?? link.dataset.nav ?? link.dataset.sheetLink!;
+      if (sheet?.open) sheet.close();
+      jumpTo(slug);
+      return;
+    }
+    if (target.closest('[data-sheet-open]') && sheet) {
+      sheet.showModal();
+      // the current section is where the eye and the focus start
+      // текущий раздел — там, откуда начинают взгляд и фокус
+      const current = $<HTMLAnchorElement>('[data-sheet-link][aria-current="true"]', sheet);
+      current?.scrollIntoView({ block: 'center' });
+      current?.focus({ preventScroll: true });
+      return;
+    }
+    if (target.closest('[data-totop]')) {
+      window.scrollTo({ top: 0, behavior: reduce() ? 'auto' : 'smooth' });
+      // back at the top the address no longer points into a section
+      // наверху адрес больше не указывает в раздел
+      history.replaceState(history.state, '', location.pathname + location.search);
+      $<HTMLElement>('#cat-title')?.focus({ preventScroll: true });
+    }
+  });
+  sheet?.addEventListener('click', (event) => {
+    if (event.target === sheet) sheet.close();
   });
 
   // ── first paint and deep links ──────────────────────────────────────────

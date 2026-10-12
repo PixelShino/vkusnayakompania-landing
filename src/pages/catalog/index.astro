@@ -20,6 +20,8 @@ import Footer from '../../components/Footer.astro';
 import Icon from '../../components/Icon.astro';
 import DishCard from '../../components/catalog/DishCard.astro';
 import CatalogApp from '../../components/catalog/CatalogApp.astro';
+import SectionTiles from '../../components/catalog/SectionTiles.astro';
+import SectionsSheet from '../../components/catalog/SectionsSheet.astro';
 import CartDrawer from '../../components/catalog/CartDrawer.astro';
 import DishDialog from '../../components/catalog/DishDialog.astro';
 import { BASE } from '../../lib/base.ts';
@@ -161,7 +163,7 @@ let rendered = 0;
       </nav>
       <div class="cat-head__row" data-reveal>
         <span class="mark cat-head__mark" aria-hidden="true"></span>
-        <h1 class="display-caps cat-head__title" id="cat-title">Доставка и самовывоз</h1>
+        <h1 class="display-caps cat-head__title" id="cat-title" tabindex="-1">Доставка и самовывоз</h1>
         <p class="lead cat-head__lead">
           {
             typo(
@@ -226,6 +228,7 @@ let rendered = 0;
           </div>
         </section>
       ) : (
+        <SectionTiles catalog={catalog} />
         <div class="container cat-layout">
           <aside class="cat-side">
             <nav class="cat-nav" aria-label="Разделы каталога" data-cat-nav>
@@ -265,7 +268,7 @@ let rendered = 0;
             {catalog.categories.map((category) => (
               <section class="cat-sec" id={category.slug} aria-labelledby={`h-${category.slug}`} data-sec={category.slug}>
                 <header class="cat-sec__head" data-reveal>
-                  <h2 class="display-caps cat-sec__title" id={`h-${category.slug}`}>
+                  <h2 class="display-caps cat-sec__title" id={`h-${category.slug}`} tabindex="-1">
                     {category.title}
                   </h2>
                   <span class="tag cat-sec__n">{positions(category.products.length)}</span>
@@ -286,6 +289,9 @@ let rendered = 0;
     }
 
     <CatalogApp content={content} />
+    {/* «наверх» appears once the first screen is gone: this mark is where it ends
+        «наверх» появляется, когда первый экран ушёл: эта метка — его конец */}
+    <span class="totop-mark" aria-hidden="true" data-totop-mark></span>
   </main>
 
   <Footer content={content} base={BASE} />
@@ -305,6 +311,29 @@ let rendered = 0;
             </span>
           </button>
         </div>
+        <div class="secbar" data-secbar>
+          <button
+            type="button"
+            class="container secbar__btn"
+            data-sheet-open
+            aria-haspopup="dialog"
+            aria-controls="sections"
+            aria-label={`Все разделы. Сейчас: ${catalog.categories[0]?.title ?? ''}`}
+          >
+            <span class="secbar__now">
+              <span class="secbar__mark" aria-hidden="true"></span>
+              <span class="secbar__name" data-secbar-name>{catalog.categories[0]?.title}</span>
+            </span>
+            <span class="secbar__all" aria-hidden="true">
+              Разделы
+              <Icon name="widget" />
+            </span>
+          </button>
+        </div>
+        <button type="button" class="round-btn totop" data-totop aria-label="Наверх, к началу каталога">
+          <Icon name="arrow-up" />
+        </button>
+        <SectionsSheet catalog={catalog} />
         <DishDialog />
         <CartDrawer content={content} />
         <p class="sr-only" aria-live="polite" data-announce></p>

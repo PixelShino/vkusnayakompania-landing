@@ -1,0 +1,50 @@
+---
+/**
+ * All sections in one list, from the sticky bar's «Разделы»: a sheet from the
+ * bottom on a phone, a short window on a tablet. Native `<dialog>` — it keeps
+ * the focus inside, closes on Escape and gives the focus back to the bar. The
+ * current section carries the page's diamond and `aria-current`; the page
+ * script keeps both in step with the scroll.
+ * Все разделы одним списком — по кнопке «Разделы» липкой строки: лист снизу на
+ * телефоне, короткое окно на планшете. Нативный `<dialog>` сам держит фокус,
+ * закрывается по Escape и возвращает фокус строке. Текущий раздел несёт ромб
+ * страницы и `aria-current`; скрипт страницы держит их в такт прокрутке.
+ */
+import Icon from '../Icon.astro';
+import { positions, type Catalog } from '../../lib/catalog.ts';
+
+interface Props {
+  catalog: Catalog;
+}
+
+const { catalog } = Astro.props;
+---
+
+<dialog id="sections" class="dlg sheet" aria-labelledby="sheet-title" data-sheet>
+  <div class="sheet__in">
+    <header class="sheet__head">
+      <h2 class="sheet__title" id="sheet-title">Разделы</h2>
+      <span class="sheet__count tnum">{positions(catalog.count)}</span>
+      <button type="button" class="round-btn" data-close aria-label="Закрыть">
+        <Icon name="close" />
+      </button>
+    </header>
+    <ul class="sheet__list" role="list">
+      {
+        catalog.categories.map((category, i) => (
+          <li>
+            <a
+              class="sheet__link"
+              href={`#${category.slug}`}
+              data-sheet-link={category.slug}
+              aria-current={i === 0 ? 'true' : undefined}
+            >
+              <span class="sheet__name">{category.title}</span>
+              <span class="sheet__n tnum">{category.products.length}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</dialog>

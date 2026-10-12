@@ -387,6 +387,22 @@ if (rawCats.length && rawDishes.length) {
   assert.ok(description.length > 50 && description.length <= 160, `catalog description: ${description.length} символов`);
 }
 
+// плитки разделов и лендинг: обложка раздела — хит с фото, ширины — общие
+{
+  const { coverOf, photoWidths } = await import('../lib/catalog.ts');
+  assert.deepEqual(photoWidths(600), [240, 360, 540, 600], 'ширины фото: без апскейла');
+  assert.deepEqual(photoWidths(2400), [240, 360, 540, 720], 'ширины фото: не больше 720');
+  for (const category of catalog.categories) {
+    const cover = coverOf(category);
+    const anyPhoto = category.products.some((product) => product.photo && !product.photo.placeholder);
+    assert.equal(Boolean(cover?.photo), anyPhoto, `раздел «${category.title}»: обложка без фото при фото у блюд`);
+    const hit = category.products.find(
+      (product) => product.available && product.badges.includes('hit') && product.photo && !product.photo.placeholder,
+    );
+    if (hit) assert.equal(cover?.id, hit.id, `раздел «${category.title}»: обложка — не хит`);
+  }
+}
+
 console.log(
   `каталог фикстуры: разделов ${catalog.categories.length}, блюд ${catalog.count} — проверки каталога, корзины и заказа прошли`,
 );

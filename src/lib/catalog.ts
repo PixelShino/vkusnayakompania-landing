@@ -286,3 +286,29 @@ export const sizeLabel = (product: Pick<Product, 'weight' | 'variants'>) => {
 
 /** «1 позиция», «2 позиции», «5 позиций». */
 export const positions = (n: number) => `${n}${NBSP}${plural(n, 'позиция', 'позиции', 'позиций')}`;
+
+/**
+ * The widths a dish photo is cut into. One list for the card, the section tile
+ * and the landing: the same width of the same file is one encode, not three.
+ * Ширины, в которые режется фото блюда. Один список для карточки, плитки
+ * раздела и лендинга: одна ширина одного файла — одно кодирование, а не три.
+ */
+const PHOTO_WIDTHS = [240, 360, 540, 720];
+export const photoWidths = (width: number) => [
+  ...new Set([...PHOTO_WIDTHS.filter((w) => w < width), Math.min(width, 720)]),
+];
+
+/**
+ * The dish a section is shown by on its tile: a hit with a photo, else the
+ * first dish in stock with one, else any dish with a photo.
+ * Блюдо, которым раздел показан на плитке: хит с фото, иначе первое блюдо в
+ * наличии с фото, иначе любое блюдо с фото.
+ */
+export const coverOf = (category: CatalogCategory): Product | undefined => {
+  const shot = (product: Product) => Boolean(product.photo && !product.photo.placeholder);
+  return (
+    category.products.find((p) => p.available && p.badges.includes('hit') && shot(p)) ??
+    category.products.find((p) => p.available && shot(p)) ??
+    category.products.find(shot)
+  );
+};

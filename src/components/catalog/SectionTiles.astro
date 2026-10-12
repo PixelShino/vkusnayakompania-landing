@@ -1,0 +1,67 @@
+---
+/**
+ * The way into the catalog on a phone and a tablet: every section as a tile
+ * with its characteristic dish, its name and how many dishes it holds — the
+ * first screen of a good delivery service, not a strip of words to swipe through.
+ * A tile is a plain anchor (`#slug`): it works before the script and keeps the
+ * address shareable. From 1200 px the left column does this job, so the tiles
+ * step aside.
+ * Вход в каталог на телефоне и планшете: каждый раздел — плитка с характерным
+ * блюдом, названием и числом блюд, как первый экран хорошего сервиса
+ * доставки, а не строка слов, которую листают вбок. Плитка — обычный якорь
+ * (`#slug`): работает до скрипта и оставляет адрес, которым можно поделиться.
+ * С 1200 px эту работу делает левая колонка, и плитки уступают ей место.
+ */
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import Icon from '../Icon.astro';
+import { coverOf, photoWidths, positions, type Catalog } from '../../lib/catalog.ts';
+
+interface Props {
+  catalog: Catalog;
+}
+
+const { catalog } = Astro.props;
+// two columns on a phone, three on a tablet: the photo is a third of the screen at most
+// две колонки на телефоне, три на планшете: фото — не больше трети экрана
+const SIZES = '(min-width: 768px) 30vw, 46vw';
+const tiles = catalog.categories.map((category) => ({ category, cover: coverOf(category) }));
+---
+
+<nav class="container cat-tiles" aria-labelledby="tiles-title" data-tiles>
+  <h2 class="cat-tiles__title" id="tiles-title">
+    Разделы <span class="cat-tiles__n tnum">{catalog.categories.length}</span>
+  </h2>
+  <ul class="tiles" role="list">
+    {
+      tiles.map(({ category, cover }, i) => (
+        <li>
+          <a class="tile" href={`#${category.slug}`} data-tile={category.slug}>
+            <span class="tile__frame">
+              {cover?.photo ? (
+                <Image
+                  src={cover.photo.src as ImageMetadata}
+                  alt=""
+                  width={Math.min(cover.photo.width, 720)}
+                  height={Math.round((cover.photo.height * Math.min(cover.photo.width, 720)) / cover.photo.width)}
+                  widths={photoWidths(cover.photo.width)}
+                  sizes={SIZES}
+                  format="webp"
+                  quality={76}
+                  loading={i < 4 ? 'eager' : 'lazy'}
+                  decoding="async"
+                />
+              ) : (
+                <span class="tile__stub">
+                  <Icon name="cloche" />
+                </span>
+              )}
+            </span>
+            <span class="tile__name">{category.title}</span>
+            <span class="tile__n tnum">{positions(category.products.length)}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
