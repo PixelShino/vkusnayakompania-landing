@@ -101,6 +101,16 @@ assert.equal(core.verifyChecksum({ ...signed, checksum: signed.checksum.toLowerC
 assert.equal(core.verifyChecksum({ ...signed, status: '0' }, key), false, 'подменённый статус ломает подпись');
 assert.equal(core.verifyChecksum(signed, 'other-key'), false, 'чужой ключ');
 assert.equal(core.verifyChecksum(callback, key), false, 'нет подписи — подделка');
+// пример из документации шлюза (раздел callback, симметричная подпись): ключ,
+// параметры и подпись взяты оттуда как есть
+const documented = {
+  mdOrder: '06cf5599-3f17-7c86-bdbc-bd7d00a8b38b',
+  operation: 'approved',
+  orderNumber: '2003',
+  status: '1',
+  checksum: 'EAF2FB72CAB99FD5067F4BA493DD84F4D79C1589FDE8ED29622F0F07215AA972',
+};
+assert.equal(core.verifyChecksum(documented, 'ooc7slpvc61k7sf7ma7p4hrefr'), true, 'подпись из документации банка сходится');
 
 // ── номер заказа в банке ─────────────────────────────────────────────────────
 assert.equal(site.bankOrderNumber('1910-4821', 57), '1910-4821-57');
