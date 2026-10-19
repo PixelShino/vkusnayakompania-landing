@@ -404,6 +404,64 @@ collections:
       versioning: false
     schema:
       name: menus
+  - collection: notify_log
+    meta:
+      accountability: null
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: notify_log
+      color: '#6F7546'
+      display_template: '{{subject}}'
+      group: notify_settings
+      hidden: false
+      icon: history
+      item_duplication_fields: null
+      note: >-
+        Каждая отправка оповещения: кому, каким каналом, дошло ли. Хранится 180
+        дней
+      preview_url: null
+      singleton: false
+      sort: 1
+      sort_field: null
+      translations:
+        - language: ru-RU
+          plural: Журнал оповещений
+          singular: Запись журнала
+          translation: Журнал оповещений
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: notify_log
+  - collection: notify_settings
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: notify_settings
+      color: '#6F7546'
+      display_template: null
+      group: null
+      hidden: false
+      icon: notifications_active
+      item_duplication_fields: null
+      note: 'Куда присылать новые заказы и заявки: почта и Telegram'
+      preview_url: null
+      singleton: true
+      sort: 13
+      sort_field: null
+      translations:
+        - language: ru-RU
+          plural: Оповещения
+          singular: Оповещения
+          translation: Оповещения
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: notify_settings
   - collection: orders
     meta:
       accountability: all
@@ -434,6 +492,34 @@ collections:
       versioning: false
     schema:
       name: orders
+  - collection: payment_settings
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: payment_settings
+      color: null
+      display_template: null
+      group: catalog
+      hidden: false
+      icon: credit_card
+      item_duplication_fields: null
+      note: 'Онлайн-оплата заказов из корзины: банк, режим, чек и тексты для гостя'
+      preview_url: null
+      singleton: true
+      sort: 3
+      sort_field: null
+      translations:
+        - language: ru-RU
+          plural: Оплата
+          singular: Оплата
+          translation: Оплата
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: payment_settings
   - collection: places
     meta:
       accountability: all
@@ -692,7 +778,7 @@ fields:
       group: null
       hidden: false
       interface: select-dropdown
-      note: null
+      note: 'На сайте только «Опубликовано»: черновик и архив не показываются'
       options:
         choices:
           - text: Черновик
@@ -704,7 +790,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 79
+      sort: 80
       special: null
       translations:
         - language: ru-RU
@@ -746,7 +832,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 80
+      sort: 81
       special: null
       translations:
         - language: ru-RU
@@ -788,7 +874,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 81
+      sort: 82
       special:
         - file
       translations:
@@ -831,7 +917,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 82
+      sort: 83
       special: null
       translations:
         - language: ru-RU
@@ -873,7 +959,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 83
+      sort: 84
       special: null
       translations:
         - language: ru-RU
@@ -916,7 +1002,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 84
+      sort: 85
       special:
         - m2o
       translations:
@@ -959,7 +1045,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 85
+      sort: 86
       special: null
       translations:
         - language: ru-RU
@@ -1002,7 +1088,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 86
+      sort: 87
       special: null
       translations:
         - language: ru-RU
@@ -1044,7 +1130,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 87
+      sort: 88
       special: null
       translations:
         - language: ru-RU
@@ -1086,7 +1172,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 88
+      sort: 89
       special: null
       translations:
         - language: ru-RU
@@ -1128,7 +1214,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 89
+      sort: 90
       special:
         - date-updated
       translations: null
@@ -1152,6 +1238,60 @@ fields:
       has_auto_increment: false
       foreign_key_table: null
       foreign_key_column: null
+  - collection: afisha
+    field: status_notice
+    type: alias
+    meta:
+      collection: afisha
+      conditions:
+        - hidden: false
+          name: Черновик
+          options:
+            color: warning
+            icon: visibility_off
+            text: >-
+              Черновик — событие не попадёт на сайт. Чтобы показать, выберите
+              «Опубликовано» и сохраните; проверьте и даты показа ниже. Сайт
+              обновится сам за минуту.
+          rule:
+            status:
+              _eq: draft
+        - hidden: false
+          name: Архив
+          options:
+            color: normal
+            icon: inventory_2
+            text: >-
+              В архиве — на сайте не показывается. Вернуть на сайт — статус
+              «Опубликовано».
+          rule:
+            status:
+              _eq: archived
+      display: null
+      display_options: null
+      field: status_notice
+      group: null
+      hidden: true
+      interface: presentation-notice
+      note: null
+      options:
+        color: warning
+        icon: visibility_off
+        text: >-
+          Черновик — событие не попадёт на сайт. Чтобы показать, выберите
+          «Опубликовано» и сохраните; проверьте и даты показа ниже. Сайт
+          обновится сам за минуту.
+      readonly: false
+      required: false
+      searchable: true
+      sort: 79
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
   - collection: cakes
     field: id
     type: integer
@@ -1211,7 +1351,7 @@ fields:
       group: null
       hidden: false
       interface: select-dropdown
-      note: null
+      note: 'На сайте только «Опубликовано»: черновик и архив не показываются'
       options:
         choices:
           - text: Черновик
@@ -1223,7 +1363,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 108
+      sort: 109
       special: null
       translations:
         - language: ru-RU
@@ -1265,7 +1405,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 109
+      sort: 110
       special:
         - file
       translations:
@@ -1308,7 +1448,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 110
+      sort: 111
       special: null
       translations:
         - language: ru-RU
@@ -1350,7 +1490,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 111
+      sort: 112
       special: null
       translations:
         - language: ru-RU
@@ -1392,7 +1532,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 112
+      sort: 113
       special: null
       translations: null
       validation: null
@@ -1432,7 +1572,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 113
+      sort: 114
       special:
         - date-updated
       translations: null
@@ -1456,6 +1596,58 @@ fields:
       has_auto_increment: false
       foreign_key_table: null
       foreign_key_column: null
+  - collection: cakes
+    field: status_notice
+    type: alias
+    meta:
+      collection: cakes
+      conditions:
+        - hidden: false
+          name: Черновик
+          options:
+            color: warning
+            icon: visibility_off
+            text: >-
+              Черновик — торт не попадёт на сайт. Чтобы показать, выберите
+              «Опубликовано» и сохраните: сайт обновится сам за минуту.
+          rule:
+            status:
+              _eq: draft
+        - hidden: false
+          name: Архив
+          options:
+            color: normal
+            icon: inventory_2
+            text: >-
+              В архиве — на сайте не показывается. Вернуть на сайт — статус
+              «Опубликовано».
+          rule:
+            status:
+              _eq: archived
+      display: null
+      display_options: null
+      field: status_notice
+      group: null
+      hidden: true
+      interface: presentation-notice
+      note: null
+      options:
+        color: warning
+        icon: visibility_off
+        text: >-
+          Черновик — торт не попадёт на сайт. Чтобы показать, выберите
+          «Опубликовано» и сохраните: сайт обновится сам за минуту.
+      readonly: false
+      required: false
+      searchable: true
+      sort: 108
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
   - collection: catering_faq
     field: id
     type: integer
@@ -1522,7 +1714,7 @@ fields:
       group: null
       hidden: false
       interface: select-dropdown
-      note: null
+      note: 'На сайте только «Опубликовано»: черновик и архив не показываются'
       options:
         choices:
           - text: Опубликовано
@@ -1534,7 +1726,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 2
+      sort: 3
       special: null
       translations:
         - language: ru-RU
@@ -1576,7 +1768,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 3
+      sort: 4
       special: null
       translations: null
       validation: null
@@ -1634,7 +1826,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 4
+      sort: 5
       special: null
       translations:
         - language: ru-RU
@@ -1677,7 +1869,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 5
+      sort: 6
       special:
         - cast-boolean
       translations:
@@ -1720,7 +1912,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 6
+      sort: 7
       special: null
       translations:
         - language: ru-RU
@@ -1762,7 +1954,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 7
+      sort: 8
       special: null
       translations:
         - language: ru-RU
@@ -1806,7 +1998,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 8
+      sort: 9
       special:
         - m2o
       translations:
@@ -1849,7 +2041,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 9
+      sort: 10
       special: null
       translations:
         - language: ru-RU
@@ -1874,6 +2066,58 @@ fields:
       has_auto_increment: false
       foreign_key_table: null
       foreign_key_column: null
+  - collection: catering_faq
+    field: status_notice
+    type: alias
+    meta:
+      collection: catering_faq
+      conditions:
+        - hidden: false
+          name: Черновик
+          options:
+            color: warning
+            icon: visibility_off
+            text: >-
+              Черновик — вопрос не попадёт на сайт. Чтобы показать, выберите
+              «Опубликовано» и сохраните: сайт обновится сам за минуту.
+          rule:
+            status:
+              _eq: draft
+        - hidden: false
+          name: Архив
+          options:
+            color: normal
+            icon: inventory_2
+            text: >-
+              В архиве — на сайте не показывается. Вернуть на сайт — статус
+              «Опубликовано».
+          rule:
+            status:
+              _eq: archived
+      display: null
+      display_options: null
+      field: status_notice
+      group: null
+      hidden: true
+      interface: presentation-notice
+      note: null
+      options:
+        color: warning
+        icon: visibility_off
+        text: >-
+          Черновик — вопрос не попадёт на сайт. Чтобы показать, выберите
+          «Опубликовано» и сохраните: сайт обновится сам за минуту.
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
   - collection: catering_formats
     field: id
     type: integer
@@ -1940,7 +2184,7 @@ fields:
       group: null
       hidden: false
       interface: select-dropdown
-      note: null
+      note: 'На сайте только «Опубликовано»: черновик и архив не показываются'
       options:
         choices:
           - text: Опубликовано
@@ -1952,7 +2196,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 2
+      sort: 3
       special: null
       translations:
         - language: ru-RU
@@ -1994,7 +2238,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 3
+      sort: 4
       special: null
       translations: null
       validation: null
@@ -2034,7 +2278,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 4
+      sort: 5
       special: null
       translations:
         - language: ru-RU
@@ -2080,7 +2324,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 5
+      sort: 6
       special: null
       translations:
         - language: ru-RU
@@ -2122,7 +2366,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 6
+      sort: 7
       special: null
       translations:
         - language: ru-RU
@@ -2164,7 +2408,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 7
+      sort: 8
       special: null
       translations:
         - language: ru-RU
@@ -2218,7 +2462,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 8
+      sort: 9
       special:
         - cast-json
       translations:
@@ -2261,7 +2505,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 9
+      sort: 10
       special: null
       translations:
         - language: ru-RU
@@ -2311,7 +2555,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 10
+      sort: 11
       special: null
       translations:
         - language: ru-RU
@@ -2353,7 +2597,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 11
+      sort: 12
       special: null
       translations:
         - language: ru-RU
@@ -2395,7 +2639,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 12
+      sort: 13
       special: null
       translations:
         - language: ru-RU
@@ -2437,7 +2681,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 13
+      sort: 14
       special: null
       translations:
         - language: ru-RU
@@ -2479,7 +2723,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 14
+      sort: 15
       special: null
       translations:
         - language: ru-RU
@@ -2521,7 +2765,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 15
+      sort: 16
       special:
         - file
       translations:
@@ -2564,7 +2808,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 16
+      sort: 17
       special: null
       translations:
         - language: ru-RU
@@ -2589,6 +2833,58 @@ fields:
       has_auto_increment: false
       foreign_key_table: null
       foreign_key_column: null
+  - collection: catering_formats
+    field: status_notice
+    type: alias
+    meta:
+      collection: catering_formats
+      conditions:
+        - hidden: false
+          name: Черновик
+          options:
+            color: warning
+            icon: visibility_off
+            text: >-
+              Черновик — формат не попадёт на сайт. Чтобы показать, выберите
+              «Опубликовано» и сохраните: сайт обновится сам за минуту.
+          rule:
+            status:
+              _eq: draft
+        - hidden: false
+          name: Архив
+          options:
+            color: normal
+            icon: inventory_2
+            text: >-
+              В архиве — на сайте не показывается. Вернуть на сайт — статус
+              «Опубликовано».
+          rule:
+            status:
+              _eq: archived
+      display: null
+      display_options: null
+      field: status_notice
+      group: null
+      hidden: true
+      interface: presentation-notice
+      note: null
+      options:
+        color: warning
+        icon: visibility_off
+        text: >-
+          Черновик — формат не попадёт на сайт. Чтобы показать, выберите
+          «Опубликовано» и сохраните: сайт обновится сам за минуту.
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
   - collection: catering_page
     field: id
     type: integer
@@ -5105,6 +5401,51 @@ fields:
       has_auto_increment: false
       foreign_key_table: directus_users
       foreign_key_column: id
+  - collection: catering_requests
+    field: notify_result
+    type: text
+    meta:
+      collection: catering_requests
+      conditions: null
+      display: null
+      display_options: null
+      field: notify_result
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Куда ушло оповещение о новой заявке. Подробности — «Оповещения → Журнал
+        оповещений»
+      options:
+        iconLeft: notifications
+      readonly: true
+      required: false
+      searchable: true
+      sort: 40
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Оповещения
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: notify_result
+      table: catering_requests
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: catering_steps
     field: id
     type: integer
@@ -6890,7 +7231,7 @@ fields:
       group: null
       hidden: false
       interface: select-dropdown
-      note: null
+      note: 'На сайте только «Опубликовано»: черновик и архив не показываются'
       options:
         choices:
           - text: Черновик
@@ -6902,7 +7243,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 101
+      sort: 102
       special: null
       translations:
         - language: ru-RU
@@ -6945,7 +7286,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 102
+      sort: 103
       special:
         - m2o
       translations:
@@ -6988,7 +7329,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 103
+      sort: 104
       special: null
       translations:
         - language: ru-RU
@@ -7030,7 +7371,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 104
+      sort: 105
       special:
         - file
       translations:
@@ -7073,7 +7414,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 105
+      sort: 106
       special: null
       translations:
         - language: ru-RU
@@ -7115,7 +7456,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 106
+      sort: 107
       special:
         - date-updated
       translations: null
@@ -7127,6 +7468,1326 @@ fields:
       table: menus
       data_type: timestamp with time zone
       default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: menus
+    field: status_notice
+    type: alias
+    meta:
+      collection: menus
+      conditions:
+        - hidden: false
+          name: Черновик
+          options:
+            color: warning
+            icon: visibility_off
+            text: >-
+              Черновик — меню не попадёт на сайт. Чтобы показать, выберите
+              «Опубликовано» и сохраните: сайт обновится сам за минуту.
+          rule:
+            status:
+              _eq: draft
+        - hidden: false
+          name: Архив
+          options:
+            color: normal
+            icon: inventory_2
+            text: >-
+              В архиве — на сайте не показывается. Вернуть на сайт — статус
+              «Опубликовано».
+          rule:
+            status:
+              _eq: archived
+      display: null
+      display_options: null
+      field: status_notice
+      group: null
+      hidden: true
+      interface: presentation-notice
+      note: null
+      options:
+        color: warning
+        icon: visibility_off
+        text: >-
+          Черновик — меню не попадёт на сайт. Чтобы показать, выберите
+          «Опубликовано» и сохраните: сайт обновится сам за минуту.
+      readonly: false
+      required: false
+      searchable: true
+      sort: 101
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: notify_log
+    field: id
+    type: integer
+    meta:
+      collection: notify_log
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: notify_log
+      data_type: integer
+      default_value: nextval('notify_log_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notify_log
+    field: date_created
+    type: timestamp
+    meta:
+      collection: notify_log
+      conditions: null
+      display: datetime
+      display_options:
+        relative: false
+      field: date_created
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 2
+      special:
+        - date-created
+      translations:
+        - language: ru-RU
+          translation: Когда
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_created
+      table: notify_log
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notify_log
+    field: status
+    type: string
+    meta:
+      collection: notify_log
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - background: '#2ECDA7'
+            foreground: '#FFFFFF'
+            text: Отправлено
+            value: sent
+          - background: '#E35169'
+            foreground: '#FFFFFF'
+            text: Ошибка
+            value: failed
+          - background: '#A2B5CD'
+            foreground: '#FFFFFF'
+            text: Не отправлено
+            value: skipped
+      field: status
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Отправлено
+            value: sent
+          - text: Ошибка
+            value: failed
+          - text: Не отправлено
+            value: skipped
+      readonly: true
+      required: false
+      searchable: true
+      sort: 3
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Итог
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: status
+      table: notify_log
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notify_log
+    field: event
+    type: string
+    meta:
+      collection: notify_log
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Новый заказ
+            value: order_new
+          - text: Новая заявка
+            value: request_new
+          - text: Статус заказа
+            value: order_status
+          - text: Статус заявки
+            value: request_status
+          - text: Проверка
+            value: test
+      field: event
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Новый заказ
+            value: order_new
+          - text: Новая заявка
+            value: request_new
+          - text: Статус заказа
+            value: order_status
+          - text: Статус заявки
+            value: request_status
+          - text: Проверка
+            value: test
+      readonly: true
+      required: false
+      searchable: true
+      sort: 4
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Событие
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: event
+      table: notify_log
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notify_log
+    field: channel
+    type: string
+    meta:
+      collection: notify_log
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Почта
+            value: email
+          - text: Telegram
+            value: telegram
+      field: channel
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Почта
+            value: email
+          - text: Telegram
+            value: telegram
+      readonly: true
+      required: false
+      searchable: true
+      sort: 5
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Канал
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: channel
+      table: notify_log
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notify_log
+    field: recipient
+    type: string
+    meta:
+      collection: notify_log
+      conditions: null
+      display: null
+      display_options: null
+      field: recipient
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 6
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Кому
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: recipient
+      table: notify_log
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notify_log
+    field: attempts
+    type: integer
+    meta:
+      collection: notify_log
+      conditions: null
+      display: null
+      display_options: null
+      field: attempts
+      group: null
+      hidden: false
+      interface: input
+      note: Telegram при сбое связи повторяется ещё дважды
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 7
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Попыток
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: attempts
+      table: notify_log
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notify_log
+    field: error
+    type: text
+    meta:
+      collection: notify_log
+      conditions: null
+      display: null
+      display_options: null
+      field: error
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 8
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Причина
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: error
+      table: notify_log
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notify_log
+    field: subject
+    type: string
+    meta:
+      collection: notify_log
+      conditions: null
+      display: null
+      display_options: null
+      field: subject
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 9
+      special: null
+      translations:
+        - language: ru-RU
+          translation: О чём
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: subject
+      table: notify_log
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notify_log
+    field: order
+    type: integer
+    meta:
+      collection: notify_log
+      conditions: null
+      display: related-values
+      display_options:
+        template: '{{number}}'
+      field: order
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{number}} · {{customer_name}}'
+      readonly: true
+      required: false
+      searchable: true
+      sort: 10
+      special:
+        - m2o
+      translations:
+        - language: ru-RU
+          translation: Заказ
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: order
+      table: notify_log
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: orders
+      foreign_key_column: id
+  - collection: notify_log
+    field: request
+    type: integer
+    meta:
+      collection: notify_log
+      conditions: null
+      display: related-values
+      display_options:
+        template: '{{number}}'
+      field: request
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{number}} · {{name}}'
+      readonly: true
+      required: false
+      searchable: true
+      sort: 11
+      special:
+        - m2o
+      translations:
+        - language: ru-RU
+          translation: Заявка
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: request
+      table: notify_log
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: catering_requests
+      foreign_key_column: id
+  - collection: notify_settings
+    field: id
+    type: integer
+    meta:
+      collection: notify_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: notify_settings
+      data_type: integer
+      default_value: nextval('notify_settings_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notify_settings
+    field: intro
+    type: alias
+    meta:
+      collection: notify_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: intro
+      group: null
+      hidden: false
+      interface: presentation-notice
+      note: null
+      options:
+        color: info
+        icon: notifications_active
+        text: >-
+          О каждом новом заказе и заявке с сайта сюда приходит письмо и
+          сообщение в Telegram. Что ушло и куда — в карточке заказа (поле
+          «Оповещения») и в «Журнале оповещений». Заказы, которые вы заводите
+          сами («Источник: телефон»), не рассылаются.
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: notify_settings
+    field: div_email
+    type: alias
+    meta:
+      collection: notify_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: div_email
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        icon: mail
+        inlineTitle: true
+        title: Почта
+      readonly: false
+      required: false
+      searchable: true
+      sort: 3
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: notify_settings
+    field: email_off
+    type: alias
+    meta:
+      collection: notify_settings
+      conditions:
+        - hidden: false
+          name: Почта не настроена
+          rule:
+            email_ready:
+              _neq: true
+      display: null
+      display_options: null
+      field: email_off
+      group: null
+      hidden: true
+      interface: presentation-notice
+      note: null
+      options:
+        color: warning
+        icon: mail_lock
+        text: >-
+          Письма пока не уходят: на сервере не настроена почта (SMTP). Адреса
+          можно вписать уже сейчас — письма пойдут, как только разработчик
+          подключит SMTP. До этого оповещения идут в Telegram и в колокольчик
+          админки.
+      readonly: false
+      required: false
+      searchable: true
+      sort: 4
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: notify_settings
+    field: email_ready
+    type: boolean
+    meta:
+      collection: notify_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: email_ready
+      group: null
+      hidden: true
+      interface: boolean
+      note: Ставит расширение notify при запуске Directus
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 5
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: email_ready
+      table: notify_settings
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notify_settings
+    field: email_state
+    type: string
+    meta:
+      collection: notify_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: email_state
+      group: null
+      hidden: false
+      interface: input
+      note: Обновляется само при запуске админки
+      options:
+        iconLeft: dns
+      readonly: true
+      required: false
+      searchable: true
+      sort: 7
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Состояние почты
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: email_state
+      table: notify_settings
+      data_type: character varying
+      default_value: null
+      max_length: 500
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notify_settings
+    field: email_enabled
+    type: boolean
+    meta:
+      collection: notify_settings
+      conditions: null
+      display: boolean
+      display_options: null
+      field: email_enabled
+      group: null
+      hidden: false
+      interface: boolean
+      note: Снимите, чтобы временно не слать письма
+      options:
+        label: Отправлять письма
+      readonly: false
+      required: false
+      searchable: true
+      sort: 6
+      special:
+        - cast-boolean
+      translations:
+        - language: ru-RU
+          translation: Письма
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: email_enabled
+      table: notify_settings
+      data_type: boolean
+      default_value: true
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notify_settings
+    field: email_recipients
+    type: json
+    meta:
+      collection: notify_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: email_recipients
+      group: null
+      hidden: false
+      interface: list
+      note: >-
+        Можно несколько адресов: каждому уйдёт своё письмо. Галочки — что
+        присылать на этот адрес.
+      options:
+        addLabel: Добавить адрес
+        fields:
+          - field: email
+            meta:
+              interface: input
+              options:
+                iconLeft: mail
+                placeholder: zakaz@vkus-com.ru
+                trim: true
+              required: true
+              width: full
+            name: Адрес
+            type: string
+          - field: orders
+            meta:
+              interface: boolean
+              options:
+                label: Заказы доставки
+              width: half
+            name: Заказы
+            schema:
+              default_value: true
+            type: boolean
+          - field: requests
+            meta:
+              interface: boolean
+              options:
+                label: Заявки на кейтеринг
+              width: half
+            name: Заявки
+            schema:
+              default_value: true
+            type: boolean
+        template: '{{email}}'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 8
+      special:
+        - cast-json
+      translations:
+        - language: ru-RU
+          translation: Кому писать
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: email_recipients
+      table: notify_settings
+      data_type: json
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notify_settings
+    field: email_subject_order
+    type: string
+    meta:
+      collection: notify_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: email_subject_order
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Подстановки: {number} — номер, {total} — сумма, {name} — имя, {phone} —
+        телефон, {when} — время
+      options:
+        placeholder: ЗАКАЗ №{number} — {total} ₽
+      readonly: false
+      required: false
+      searchable: true
+      sort: 9
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Тема письма о заказе
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: email_subject_order
+      table: notify_settings
+      data_type: character varying
+      default_value: ЗАКАЗ №{number} — {total} ₽
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notify_settings
+    field: email_subject_request
+    type: string
+    meta:
+      collection: notify_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: email_subject_request
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Подстановки: {number}, {format} — формат, {guests} — гости, {date} —
+        дата, {name}, {phone}
+      options:
+        placeholder: ЗАЯВКА №{number} — {format}
+      readonly: false
+      required: false
+      searchable: true
+      sort: 10
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Тема письма о заявке
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: email_subject_request
+      table: notify_settings
+      data_type: character varying
+      default_value: ЗАЯВКА №{number} — {format}
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notify_settings
+    field: div_telegram
+    type: alias
+    meta:
+      collection: notify_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: div_telegram
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        icon: send
+        inlineTitle: true
+        title: Telegram
+      readonly: false
+      required: false
+      searchable: true
+      sort: 11
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: notify_settings
+    field: telegram_enabled
+    type: boolean
+    meta:
+      collection: notify_settings
+      conditions: null
+      display: boolean
+      display_options: null
+      field: telegram_enabled
+      group: null
+      hidden: false
+      interface: boolean
+      note: Снимите, чтобы временно не слать в Telegram
+      options:
+        label: Отправлять в Telegram
+      readonly: false
+      required: false
+      searchable: true
+      sort: 12
+      special:
+        - cast-boolean
+      translations:
+        - language: ru-RU
+          translation: Сообщения
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: telegram_enabled
+      table: notify_settings
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notify_settings
+    field: telegram_token
+    type: string
+    meta:
+      collection: notify_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: telegram_token
+      group: null
+      hidden: false
+      interface: input
+      note: Выдаёт @BotFather. Это ключ от бота — никому не пересылайте
+      options:
+        font: monospace
+        masked: true
+        placeholder: 123456789:AA…
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 13
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Токен бота
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: telegram_token
+      table: notify_settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notify_settings
+    field: telegram_chats
+    type: json
+    meta:
+      collection: notify_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: telegram_chats
+      group: null
+      hidden: false
+      interface: list
+      note: >-
+        Личный чат или рабочая группа. Бот должен быть добавлен в группу, а в
+        личке — запущен кнопкой «Старт».
+      options:
+        addLabel: Добавить чат
+        fields:
+          - field: label
+            meta:
+              interface: input
+              options:
+                placeholder: Группа «Заказы»
+              width: half
+            name: Подпись
+            type: string
+          - field: chat_id
+            meta:
+              interface: input
+              options:
+                font: monospace
+                placeholder: '-1001234567890'
+                trim: true
+              required: true
+              width: half
+            name: chat_id
+            type: string
+          - field: orders
+            meta:
+              interface: boolean
+              options:
+                label: Заказы доставки
+              width: half
+            name: Заказы
+            schema:
+              default_value: true
+            type: boolean
+          - field: requests
+            meta:
+              interface: boolean
+              options:
+                label: Заявки на кейтеринг
+              width: half
+            name: Заявки
+            schema:
+              default_value: true
+            type: boolean
+        template: '{{label}} · {{chat_id}}'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 14
+      special:
+        - cast-json
+      translations:
+        - language: ru-RU
+          translation: Чаты
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: telegram_chats
+      table: notify_settings
+      data_type: json
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: notify_settings
+    field: telegram_help
+    type: alias
+    meta:
+      collection: notify_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: telegram_help
+      group: null
+      hidden: false
+      interface: presentation-notice
+      note: null
+      options:
+        color: normal
+        icon: help
+        text: >-
+          Как подключить бота. 1) В Telegram откройте @BotFather → /newbot,
+          придумайте имя и адрес бота — BotFather пришлёт токен, вставьте его в
+          «Токен бота». 2) Добавьте бота в рабочую группу и напишите там
+          /start@адрес_бота (или нажмите «Старт» в личке с ботом). 3) Откройте в
+          браузере api.telegram.org/bot<токен>/getUpdates — chat_id стоит после
+          "chat":{"id": (у группы число с минусом). 4) Добавьте чат, отметьте
+          «Отправлять в Telegram» и сохраните. Проверочное сообщение отправляет
+          администратор — см. docs/NOTIFY.md.
+      readonly: false
+      required: false
+      searchable: true
+      sort: 15
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: notify_settings
+    field: div_more
+    type: alias
+    meta:
+      collection: notify_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: div_more
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        icon: tune
+        inlineTitle: true
+        title: Ещё
+      readonly: false
+      required: false
+      searchable: true
+      sort: 16
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: notify_settings
+    field: status_changes
+    type: boolean
+    meta:
+      collection: notify_settings
+      conditions: null
+      display: boolean
+      display_options: null
+      field: status_changes
+      group: null
+      hidden: false
+      interface: boolean
+      note: >-
+        «Заказ №1910-4821 — статус «Выполнен»» — на те же адреса и в те же чаты.
+        Обычно не нужно
+      options:
+        label: Сообщать и о смене статуса заказа или заявки
+      readonly: false
+      required: false
+      searchable: true
+      sort: 17
+      special:
+        - cast-boolean
+      translations:
+        - language: ru-RU
+          translation: Смена статуса
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: status_changes
+      table: notify_settings
+      data_type: boolean
+      default_value: false
       max_length: null
       numeric_precision: null
       numeric_scale: null
@@ -7401,10 +9062,13 @@ fields:
       collection: orders
       conditions:
         - hidden: true
-          name: Не новый
+          name: Не новый или оплачен
           rule:
-            status:
-              _neq: new
+            _or:
+              - status:
+                  _neq: new
+              - payment_status:
+                  _eq: paid
       display: null
       display_options: null
       field: confirm_hint
@@ -7416,8 +9080,8 @@ fields:
         color: warning
         icon: call
         text: >-
-          Оплаты на сайте нет: гость ждёт звонка. Позвоните, подтвердите состав,
-          сумму, адрес и время — и переведите заказ в «В работе».
+          Гость ждёт звонка. Позвоните, подтвердите состав, сумму, адрес и время
+          — и переведите заказ в «В работе». Оплачен ли заказ — в поле «Оплата».
       readonly: false
       required: false
       searchable: true
@@ -7915,7 +9579,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 18
+      sort: 25
       special: null
       translations:
         - language: ru-RU
@@ -7957,7 +9621,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 16
+      sort: 23
       special: null
       translations:
         - language: ru-RU
@@ -7999,7 +9663,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 17
+      sort: 24
       special: null
       translations:
         - language: ru-RU
@@ -8041,7 +9705,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 19
+      sort: 26
       special:
         - date-updated
       translations: null
@@ -8054,6 +9718,1628 @@ fields:
       data_type: timestamp with time zone
       default_value: null
       max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: notify_result
+    type: text
+    meta:
+      collection: orders
+      conditions: null
+      display: null
+      display_options: null
+      field: notify_result
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Куда ушло оповещение о новом заказе. Подробности — «Оповещения → Журнал
+        оповещений»
+      options:
+        iconLeft: notifications
+      readonly: true
+      required: false
+      searchable: true
+      sort: 40
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Оповещения
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: notify_result
+      table: orders
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: payment_status
+    type: string
+    meta:
+      collection: orders
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - background: '#F4EFE6'
+            color: '#8A8172'
+            foreground: '#8A8172'
+            text: —
+            value: none
+          - background: '#F6E3D3'
+            color: '#8A4A22'
+            foreground: '#8A4A22'
+            text: Ждём оплату
+            value: pending
+          - background: '#E7E9D6'
+            color: '#474C2B'
+            foreground: '#474C2B'
+            text: Оплачен
+            value: paid
+          - background: '#F1D9CC'
+            color: '#8C4C24'
+            foreground: '#8C4C24'
+            text: Не прошла
+            value: failed
+          - background: '#EEE8DD'
+            color: '#6E655A'
+            foreground: '#6E655A'
+            text: Возврат
+            value: refunded
+        showAsDot: false
+      field: payment_status
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: 'Онлайн-оплата: ставит сервер по ответу банка'
+      options:
+        choices:
+          - text: —
+            value: none
+          - text: Ждём оплату
+            value: pending
+          - text: Оплачен
+            value: paid
+          - text: Не прошла
+            value: failed
+          - text: Возврат
+            value: refunded
+      readonly: true
+      required: false
+      searchable: true
+      sort: 16
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Оплата
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: payment_status
+      table: orders
+      data_type: character varying
+      default_value: none
+      max_length: 16
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: payment_method
+    type: string
+    meta:
+      collection: orders
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - background: '#E7E9D6'
+            color: '#474C2B'
+            foreground: '#474C2B'
+            text: Онлайн картой
+            value: online
+          - background: '#EEE8DD'
+            color: '#6E655A'
+            foreground: '#6E655A'
+            text: При получении
+            value: on_delivery
+        showAsDot: false
+      field: payment_method
+      group: null
+      hidden: false
+      interface: select-radio
+      note: null
+      options:
+        choices:
+          - text: Онлайн картой
+            value: online
+          - text: При получении
+            value: on_delivery
+      readonly: false
+      required: false
+      searchable: true
+      sort: 17
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Способ оплаты
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: payment_method
+      table: orders
+      data_type: character varying
+      default_value: on_delivery
+      max_length: 16
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: paid_at
+    type: timestamp
+    meta:
+      collection: orders
+      conditions: null
+      display: datetime
+      display_options:
+        relative: false
+      field: paid_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 18
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Оплачен
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: paid_at
+      table: orders
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: payment_id
+    type: string
+    meta:
+      collection: orders
+      conditions: null
+      display: null
+      display_options: null
+      field: payment_id
+      group: null
+      hidden: false
+      interface: input
+      note: 'Номер заказа в банке: по нему ищут платёж в кабинете эквайринга'
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 19
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Номер в банке
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: payment_id
+      table: orders
+      data_type: character varying
+      default_value: null
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: payment_url
+    type: string
+    meta:
+      collection: orders
+      conditions: null
+      display: formatted-value
+      display_options: null
+      field: payment_url
+      group: null
+      hidden: false
+      interface: input
+      note: Пока оплата ждёт, эту ссылку можно отправить гостю
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 20
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Ссылка на оплату
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: payment_url
+      table: orders
+      data_type: character varying
+      default_value: null
+      max_length: 512
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: payment_log
+    type: text
+    meta:
+      collection: orders
+      conditions: null
+      display: null
+      display_options: null
+      field: payment_log
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 21
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Журнал оплаты
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: payment_log
+      table: orders
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: payment_meta
+    type: json
+    meta:
+      collection: orders
+      conditions: null
+      display: null
+      display_options: null
+      field: payment_meta
+      group: null
+      hidden: true
+      interface: input-code
+      note: null
+      options:
+        language: JSON
+      readonly: true
+      required: false
+      searchable: true
+      sort: 22
+      special:
+        - cast-json
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: payment_meta
+      table: orders
+      data_type: json
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: paid_hint
+    type: alias
+    meta:
+      collection: orders
+      conditions:
+        - hidden: true
+          name: Не оплачен
+          rule:
+            _and:
+              - payment_status:
+                  _neq: paid
+      display: null
+      display_options: null
+      field: paid_hint
+      group: null
+      hidden: false
+      interface: presentation-notice
+      note: null
+      options:
+        color: success
+        icon: credit_score
+        text: >-
+          Оплачен картой на сайте — сумму с гостем обсуждать не нужно.
+          Позвоните, подтвердите адрес и время — и переведите заказ в «В
+          работе».
+      readonly: false
+      required: false
+      searchable: true
+      sort: 6
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: payment_settings
+    field: id
+    type: integer
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: null
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: payment_settings
+      data_type: integer
+      default_value: nextval('payment_settings_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: intro
+    type: alias
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: intro
+      group: null
+      hidden: false
+      interface: presentation-notice
+      note: null
+      options:
+        color: normal
+        icon: credit_card
+        text: >-
+          Онлайн-оплата заказов из корзины сайта. Выключена — гость оформляет
+          заказ, как раньше, и платит при получении. Секреты (логин, пароль,
+          токен, ключ) надёжнее задать переменными окружения PAY_* на сервере:
+          они важнее полей ниже и не попадают в базу и бэкапы.
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: payment_settings
+    field: online_enabled
+    type: boolean
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: online_enabled
+      group: null
+      hidden: false
+      interface: boolean
+      note: null
+      options:
+        label: Принимать онлайн-оплату
+      readonly: false
+      required: false
+      searchable: true
+      sort: 3
+      special:
+        - cast-boolean
+      translations:
+        - language: ru-RU
+          translation: Онлайн-оплата
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: online_enabled
+      table: payment_settings
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: allow_on_delivery
+    type: boolean
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: allow_on_delivery
+      group: null
+      hidden: false
+      interface: boolean
+      note: Выключить — заказ с сайта только с онлайн-оплатой
+      options:
+        label: Разрешить оплату при получении
+      readonly: false
+      required: false
+      searchable: true
+      sort: 4
+      special:
+        - cast-boolean
+      translations:
+        - language: ru-RU
+          translation: При получении
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: allow_on_delivery
+      table: payment_settings
+      data_type: boolean
+      default_value: true
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: check_link
+    type: alias
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: check_link
+      group: null
+      hidden: false
+      interface: presentation-links
+      note: null
+      options:
+        links:
+          - icon: fact_check
+            label: Проверить настройки и связь с банком
+            type: normal
+            url: /pay/check
+      readonly: false
+      required: false
+      searchable: true
+      sort: 5
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: payment_settings
+    field: bank_divider
+    type: alias
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: bank_divider
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        icon: account_balance
+        inlineTitle: true
+        title: Банк
+      readonly: false
+      required: false
+      searchable: true
+      sort: 6
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: payment_settings
+    field: provider
+    type: string
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: labels
+      display_options: null
+      field: provider
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Альфа-Банк
+            value: alfa
+          - text: Заглушка — только для теста, денег не берёт
+            value: mock
+      readonly: false
+      required: false
+      searchable: true
+      sort: 7
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Банк
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: provider
+      table: payment_settings
+      data_type: character varying
+      default_value: alfa
+      max_length: 32
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: mode
+    type: string
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: mode
+      group: null
+      hidden: false
+      interface: select-radio
+      note: >-
+        В тесте гости кнопку оплаты не видят. Проверка — по ссылке
+        vkus-com.ru/catalog/?paytest=1
+      options:
+        choices:
+          - text: Тест
+            value: test
+          - text: Бой
+            value: prod
+      readonly: false
+      required: false
+      searchable: true
+      sort: 8
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Режим
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: mode
+      table: payment_settings
+      data_type: character varying
+      default_value: test
+      max_length: 16
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: alfa_login
+    type: string
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: alfa_login
+      group: null
+      hidden: false
+      interface: input
+      note: Из письма банка, обычно оканчивается на «-api»
+      options:
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 9
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Логин API
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: alfa_login
+      table: payment_settings
+      data_type: character varying
+      default_value: null
+      max_length: 128
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: alfa_password
+    type: string
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: alfa_password
+      group: null
+      hidden: false
+      interface: input
+      note: Скрыт. Переменная PAY_ALFA_PASSWORD важнее этого поля
+      options:
+        masked: true
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 10
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Пароль API
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: alfa_password
+      table: payment_settings
+      data_type: character varying
+      default_value: null
+      max_length: 512
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: alfa_token
+    type: string
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: alfa_token
+      group: null
+      hidden: false
+      interface: input
+      note: Вместо логина и пароля, если банк выдал токен
+      options:
+        masked: true
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 11
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Токен API
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: alfa_token
+      table: payment_settings
+      data_type: character varying
+      default_value: null
+      max_length: 512
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: alfa_gateway_test
+    type: string
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: alfa_gateway_test
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 12
+      special: null
+      translations:
+        - language: ru-RU
+          translation: 'Шлюз: тест'
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: alfa_gateway_test
+      table: payment_settings
+      data_type: character varying
+      default_value: https://alfa.rbsuat.com/payment/rest/
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: alfa_gateway_prod
+    type: string
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: alfa_gateway_prod
+      group: null
+      hidden: false
+      interface: input
+      note: Логин с префиксом «r-» — https://payment.alfabank.ru/payment/rest/
+      options:
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 13
+      special: null
+      translations:
+        - language: ru-RU
+          translation: 'Шлюз: бой'
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: alfa_gateway_prod
+      table: payment_settings
+      data_type: character varying
+      default_value: https://pay.alfabank.ru/payment/rest/
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: callback_key
+    type: string
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: callback_key
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Ключ контрольной суммы callback-уведомлений (выдаёт банк). Адрес
+        уведомлений для банка: https://admin.vkus-com.ru/pay/callback
+      options:
+        masked: true
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 14
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Ключ уведомлений
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: callback_key
+      table: payment_settings
+      data_type: character varying
+      default_value: null
+      max_length: 512
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: site_url
+    type: string
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: site_url
+      group: null
+      hidden: false
+      interface: input
+      note: Куда банк вернёт гостя после оплаты
+      options:
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 15
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Адрес сайта
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: site_url
+      table: payment_settings
+      data_type: character varying
+      default_value: https://vkus-com.ru
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: session_minutes
+    type: integer
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: session_minutes
+      group: null
+      hidden: false
+      interface: input
+      note: Сколько живёт страница оплаты
+      options:
+        max: 1440
+        min: 5
+      readonly: false
+      required: false
+      searchable: true
+      sort: 16
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Ждём оплату, мин
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: session_minutes
+      table: payment_settings
+      data_type: integer
+      default_value: 20
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: receipt_divider
+    type: alias
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: receipt_divider
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        icon: receipt
+        inlineTitle: true
+        title: Чек (54-ФЗ)
+      readonly: false
+      required: false
+      searchable: true
+      sort: 17
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: payment_settings
+    field: receipt_enabled
+    type: boolean
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: receipt_enabled
+      group: null
+      hidden: false
+      interface: boolean
+      note: 'Нужно, когда у банка подключена онлайн-касса: строки заказа уходят в чек'
+      options:
+        label: Передавать состав заказа для чека
+      readonly: false
+      required: false
+      searchable: true
+      sort: 18
+      special:
+        - cast-boolean
+      translations:
+        - language: ru-RU
+          translation: Чек
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: receipt_enabled
+      table: payment_settings
+      data_type: boolean
+      default_value: true
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: tax_system
+    type: integer
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: tax_system
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: Уточните у бухгалтера
+      options:
+        choices:
+          - text: ОСН
+            value: 0
+          - text: УСН «доходы»
+            value: 1
+          - text: УСН «доходы минус расходы»
+            value: 2
+          - text: ЕСХН
+            value: 4
+          - text: Патент
+            value: 5
+      readonly: false
+      required: false
+      searchable: true
+      sort: 19
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Система налогообложения
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: tax_system
+      table: payment_settings
+      data_type: integer
+      default_value: 1
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: vat
+    type: integer
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: vat
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: Ставка для всех строк заказа
+      options:
+        choices:
+          - text: Без НДС
+            value: 0
+          - text: НДС 0 %
+            value: 1
+          - text: НДС 5 % (УСН)
+            value: 10
+          - text: НДС 7 % (УСН)
+            value: 12
+          - text: НДС 10 %
+            value: 2
+          - text: НДС 22 %
+            value: 14
+      readonly: false
+      required: false
+      searchable: true
+      sort: 20
+      special: null
+      translations:
+        - language: ru-RU
+          translation: НДС
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: vat
+      table: payment_settings
+      data_type: integer
+      default_value: 0
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: receipt_method
+    type: integer
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: receipt_method
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: >-
+        Альфа для доставки с оплатой заранее советует «Предоплата 100 %» и
+        закрывающий чек при передаче — решите с бухгалтером
+      options:
+        choices:
+          - text: Полный расчёт
+            value: 4
+          - text: Предоплата 100 %
+            value: 1
+      readonly: false
+      required: false
+      searchable: true
+      sort: 21
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Способ расчёта
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: receipt_method
+      table: payment_settings
+      data_type: integer
+      default_value: 4
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: texts_divider
+    type: alias
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: texts_divider
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        icon: chat
+        inlineTitle: true
+        title: Тексты для гостя
+      readonly: false
+      required: false
+      searchable: true
+      sort: 23
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: payment_settings
+    field: text_online
+    type: string
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: text_online
+      group: null
+      hidden: false
+      interface: input
+      note: Пусто — текст по умолчанию из подсказки
+      options:
+        placeholder: Картой МИР, Visa или Mastercard на защищённой странице Альфа-Банка
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 24
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Онлайн картой — подпись
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: text_online
+      table: payment_settings
+      data_type: character varying
+      default_value: null
+      max_length: 300
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: text_on_delivery
+    type: string
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: text_on_delivery
+      group: null
+      hidden: false
+      interface: input
+      note: Пусто — текст по умолчанию из подсказки
+      options:
+        placeholder: Наличными или картой курьеру, на кассе при самовывозе
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 25
+      special: null
+      translations:
+        - language: ru-RU
+          translation: При получении — подпись
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: text_on_delivery
+      table: payment_settings
+      data_type: character varying
+      default_value: null
+      max_length: 300
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: text_note
+    type: string
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: text_note
+      group: null
+      hidden: false
+      interface: input
+      note: Пусто — текст по умолчанию из подсказки
+      options:
+        placeholder: >-
+          Онлайн оплачиваются блюда. Платную доставку назовём при звонке и
+          оплатите её курьеру.
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 26
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Пояснение под выбором
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: text_note
+      table: payment_settings
+      data_type: character varying
+      default_value: null
+      max_length: 300
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: text_paid
+    type: string
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: text_paid
+      group: null
+      hidden: false
+      interface: input
+      note: Пусто — текст по умолчанию из подсказки
+      options:
+        placeholder: Спасибо! Перезвоним, чтобы подтвердить адрес и время.
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 27
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Экран «Заказ оплачен»
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: text_paid
+      table: payment_settings
+      data_type: character varying
+      default_value: null
+      max_length: 300
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: text_failed
+    type: string
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: text_failed
+      group: null
+      hidden: false
+      interface: input
+      note: Пусто — текст по умолчанию из подсказки
+      options:
+        placeholder: Деньги не списаны. Заказ сохранён — оформлять его заново не нужно.
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 28
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Экран «Оплата не прошла»
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: text_failed
+      table: payment_settings
+      data_type: character varying
+      default_value: null
+      max_length: 300
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: receipt_ffd
+    type: string
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: receipt_ffd
+      group: null
+      hidden: false
+      interface: select-radio
+      note: 'Версия формата чека у кассы: от неё зависит, как записана единица «шт»'
+      options:
+        choices:
+          - text: ФФД 1.2
+            value: '1.2'
+          - text: ФФД 1.05
+            value: '1.05'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 22
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Формат чека
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: receipt_ffd
+      table: payment_settings
+      data_type: character varying
+      default_value: '1.2'
+      max_length: 8
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
@@ -8858,7 +12144,7 @@ fields:
       group: null
       hidden: false
       interface: select-dropdown
-      note: null
+      note: 'На сайте только «Опубликовано»: черновик и архив не показываются'
       options:
         choices:
           - color: '#6F7546'
@@ -8873,7 +12159,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 2
+      sort: 3
       special: null
       translations:
         - language: ru-RU
@@ -8915,7 +12201,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 3
+      sort: 4
       special: null
       translations: null
       validation: null
@@ -8955,7 +12241,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 4
+      sort: 5
       special: null
       translations:
         - language: ru-RU
@@ -9000,7 +12286,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 5
+      sort: 6
       special: null
       translations:
         - language: ru-RU
@@ -9044,7 +12330,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 6
+      sort: 7
       special: null
       translations:
         - language: ru-RU
@@ -9088,7 +12374,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 7
+      sort: 8
       special: null
       translations:
         - language: ru-RU
@@ -9130,7 +12416,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 8
+      sort: 9
       special:
         - date-updated
       translations: null
@@ -9175,12 +12461,66 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 9
+      sort: 10
       special:
         - o2m
       translations:
         - language: ru-RU
           translation: Блюда раздела
+      validation: null
+      validation_message: null
+      width: full
+  - collection: product_categories
+    field: status_notice
+    type: alias
+    meta:
+      collection: product_categories
+      conditions:
+        - hidden: false
+          name: Черновик
+          options:
+            color: warning
+            icon: visibility_off
+            text: >-
+              Черновик — раздел не попадёт на сайт, и все его блюда тоже. Чтобы
+              показать, выберите «Опубликовано» и сохраните: сайт обновится сам
+              за минуту.
+          rule:
+            status:
+              _eq: draft
+        - hidden: false
+          name: Архив
+          options:
+            color: normal
+            icon: inventory_2
+            text: >-
+              В архиве — на сайте не показывается. Вернуть на сайт — статус
+              «Опубликовано».
+          rule:
+            status:
+              _eq: archived
+      display: null
+      display_options: null
+      field: status_notice
+      group: null
+      hidden: true
+      interface: presentation-notice
+      note: null
+      options:
+        color: warning
+        icon: visibility_off
+        text: >-
+          Черновик — раздел не попадёт на сайт, и все его блюда тоже. Чтобы
+          показать, выберите «Опубликовано» и сохраните: сайт обновится сам за
+          минуту.
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special:
+        - alias
+        - no-data
+      translations: null
       validation: null
       validation_message: null
       width: full
@@ -9247,7 +12587,9 @@ fields:
       group: null
       hidden: false
       interface: select-dropdown
-      note: null
+      note: >-
+        На сайте только «Опубликовано». Новое блюдо сразу опубликовано;
+        закончилось — снимите «Есть в наличии», а не меняйте статус
       options:
         choices:
           - color: '#6F7546'
@@ -9262,7 +12604,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 2
+      sort: 3
       special: null
       translations:
         - language: ru-RU
@@ -9274,7 +12616,7 @@ fields:
       name: status
       table: products
       data_type: character varying
-      default_value: draft
+      default_value: published
       max_length: 255
       numeric_precision: null
       numeric_scale: null
@@ -9307,7 +12649,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 3
+      sort: 4
       special: null
       translations:
         - language: ru-RU
@@ -9349,7 +12691,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 17
+      sort: 18
       special: null
       translations: null
       validation: null
@@ -9389,7 +12731,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 4
+      sort: 5
       special: null
       translations:
         - language: ru-RU
@@ -9435,7 +12777,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 6
+      sort: 7
       special: null
       translations:
         - language: ru-RU
@@ -9481,7 +12823,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 7
+      sort: 8
       special: null
       translations:
         - language: ru-RU
@@ -9528,7 +12870,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 8
+      sort: 9
       special: null
       translations:
         - language: ru-RU
@@ -9571,7 +12913,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 9
+      sort: 10
       special: null
       translations:
         - language: ru-RU
@@ -9625,7 +12967,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 10
+      sort: 11
       special:
         - cast-csv
       translations:
@@ -9671,7 +13013,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 11
+      sort: 12
       special:
         - file
       translations:
@@ -9716,7 +13058,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 12
+      sort: 13
       special: null
       translations:
         - language: ru-RU
@@ -9758,7 +13100,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 13
+      sort: 14
       special: null
       translations:
         - language: ru-RU
@@ -9827,7 +13169,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 14
+      sort: 15
       special:
         - cast-json
       translations:
@@ -9872,7 +13214,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 5
+      sort: 6
       special:
         - m2o
       translations:
@@ -9917,7 +13259,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 16
+      sort: 17
       special: null
       translations:
         - language: ru-RU
@@ -9959,7 +13301,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 18
+      sort: 19
       special:
         - date-updated
       translations: null
@@ -10005,7 +13347,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 15
+      sort: 16
       special:
         - cast-json
       translations:
@@ -10031,6 +13373,60 @@ fields:
       has_auto_increment: false
       foreign_key_table: null
       foreign_key_column: null
+  - collection: products
+    field: status_notice
+    type: alias
+    meta:
+      collection: products
+      conditions:
+        - hidden: false
+          name: Черновик
+          options:
+            color: warning
+            icon: visibility_off
+            text: >-
+              Черновик — блюдо не попадёт на сайт. Чтобы оно появилось в
+              каталоге, выберите «Опубликовано» и сохраните: сайт обновится сам
+              за минуту. Закончилось на время — лучше снимите «Есть в наличии».
+          rule:
+            status:
+              _eq: draft
+        - hidden: false
+          name: Архив
+          options:
+            color: normal
+            icon: inventory_2
+            text: >-
+              В архиве — на сайте не показывается. Вернуть на сайт — статус
+              «Опубликовано».
+          rule:
+            status:
+              _eq: archived
+      display: null
+      display_options: null
+      field: status_notice
+      group: null
+      hidden: true
+      interface: presentation-notice
+      note: null
+      options:
+        color: warning
+        icon: visibility_off
+        text: >-
+          Черновик — блюдо не попадёт на сайт. Чтобы оно появилось в каталоге,
+          выберите «Опубликовано» и сохраните: сайт обновится сам за минуту.
+          Закончилось на время — лучше снимите «Есть в наличии».
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
   - collection: promos
     field: id
     type: integer
@@ -10090,7 +13486,7 @@ fields:
       group: null
       hidden: false
       interface: select-dropdown
-      note: null
+      note: 'На сайте только «Опубликовано»: черновик и архив не показываются'
       options:
         choices:
           - text: Черновик
@@ -10102,7 +13498,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 91
+      sort: 92
       special: null
       translations:
         - language: ru-RU
@@ -10144,7 +13540,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 92
+      sort: 93
       special: null
       translations:
         - language: ru-RU
@@ -10186,7 +13582,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 93
+      sort: 94
       special: null
       translations:
         - language: ru-RU
@@ -10229,7 +13625,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 94
+      sort: 95
       special:
         - m2o
       translations:
@@ -10272,7 +13668,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 96
+      sort: 97
       special: null
       translations:
         - language: ru-RU
@@ -10314,7 +13710,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 97
+      sort: 98
       special: null
       translations:
         - language: ru-RU
@@ -10356,7 +13752,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 98
+      sort: 99
       special: null
       translations: null
       validation: null
@@ -10396,7 +13792,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 99
+      sort: 100
       special:
         - date-updated
       translations: null
@@ -10420,6 +13816,60 @@ fields:
       has_auto_increment: false
       foreign_key_table: null
       foreign_key_column: null
+  - collection: promos
+    field: status_notice
+    type: alias
+    meta:
+      collection: promos
+      conditions:
+        - hidden: false
+          name: Черновик
+          options:
+            color: warning
+            icon: visibility_off
+            text: >-
+              Черновик — акция не попадёт на сайт. Чтобы показать, выберите
+              «Опубликовано» и сохраните; проверьте и даты показа ниже. Сайт
+              обновится сам за минуту.
+          rule:
+            status:
+              _eq: draft
+        - hidden: false
+          name: Архив
+          options:
+            color: normal
+            icon: inventory_2
+            text: >-
+              В архиве — на сайте не показывается. Вернуть на сайт — статус
+              «Опубликовано».
+          rule:
+            status:
+              _eq: archived
+      display: null
+      display_options: null
+      field: status_notice
+      group: null
+      hidden: true
+      interface: presentation-notice
+      note: null
+      options:
+        color: warning
+        icon: visibility_off
+        text: >-
+          Черновик — акция не попадёт на сайт. Чтобы показать, выберите
+          «Опубликовано» и сохраните; проверьте и даты показа ниже. Сайт
+          обновится сам за минуту.
+      readonly: false
+      required: false
+      searchable: true
+      sort: 91
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
   - collection: settings
     field: id
     type: integer
@@ -11748,7 +15198,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 1
+      sort: 11
       special: null
       translations: null
       validation: null
@@ -11782,9 +15232,9 @@ fields:
             color: warning
             icon: hourglass_top
             text: >-
-              Идёт сборка: обычно 10–20 секунд, с новыми фото — до минуты.
-              Перезагрузите страницу чуть позже. Если сохранить ещё раз, пока
-              идёт сборка, после неё сразу пройдёт следующая.
+              Обычно 10–30 секунд, с новыми фото — до минуты. Страница обновится
+              сама, когда сборка закончится. Если сохранить ещё раз, пока идёт
+              сборка, после неё сразу пройдёт следующая.
           rule:
             status:
               _eq: building
@@ -11793,8 +15243,9 @@ fields:
             color: success
             icon: check_circle
             text: >-
-              Опубликовано: последние изменения уже на сайте. После следующего
-              сохранения здесь появится «Идёт сборка» — перезагрузите страницу.
+              Последние изменения уже на сайте. Если правки всё равно не видно —
+              ниже, в «Что на сайте», написано, что осталось черновиком; на
+              телефоне обновите страницу сайта.
           rule:
             status:
               _eq: ok
@@ -11803,9 +15254,8 @@ fields:
             color: danger
             icon: error
             text: >-
-              Сборка не удалась, на сайте осталась прежняя версия. Текст ошибки
-              ниже — перешлите его разработчику. Следующее сохранение запустит
-              сборку заново.
+              На сайте осталась прежняя версия. Текст ошибки ниже — перешлите
+              его разработчику. Следующее сохранение запустит сборку заново.
           rule:
             status:
               _eq: error
@@ -11815,9 +15265,8 @@ fields:
             icon: sync_problem
             text: >-
               На сайте нет части правок: сборка после них не запустилась. Сторож
-              запустит её сам в ближайшие две минуты — перезагрузите страницу
-              чуть позже. Если статус держится дольше пяти минут — напишите
-              разработчику.
+              запустит её сам в ближайшие две минуты — страница обновится сама.
+              Если статус держится дольше пяти минут — напишите разработчику.
           rule:
             status:
               _eq: stale
@@ -11833,12 +15282,11 @@ fields:
         icon: schedule
         text: >-
           Сайт пересобирается сам после каждого сохранения в админке: обычно за
-          10–20 секунд, с новыми фото — до минуты. Статус обновляется при
-          перезагрузке этой страницы.
+          10–30 секунд, с новыми фото — до минуты.
       readonly: false
       required: false
       searchable: true
-      sort: 1
+      sort: 3
       special:
         - alias
         - no-data
@@ -11889,7 +15337,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 8
+      sort: 10
       special: null
       translations:
         - language: ru-RU
@@ -11937,7 +15385,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 5
+      sort: 7
       special: null
       translations:
         - language: ru-RU
@@ -11979,7 +15427,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 3
+      sort: 5
       special: null
       translations:
         - language: ru-RU
@@ -12027,7 +15475,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 4
+      sort: 6
       special: null
       translations:
         - language: ru-RU
@@ -12069,7 +15517,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 6
+      sort: 8
       special: null
       translations:
         - language: ru-RU
@@ -12119,7 +15567,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 7
+      sort: 9
       special: null
       translations:
         - language: ru-RU
@@ -12162,7 +15610,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 2
+      sort: 4
       special: null
       translations:
         - language: ru-RU
@@ -12176,6 +15624,92 @@ fields:
       data_type: text
       default_value: null
       max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: site_build
+    field: progress
+    type: integer
+    meta:
+      collection: site_build
+      conditions: null
+      display: formatted-value
+      display_options:
+        suffix: ' %'
+      field: progress
+      group: null
+      hidden: false
+      interface: build-status
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Ход сборки
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: progress
+      table: site_build
+      data_type: integer
+      default_value: 0
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: site_build
+    field: step
+    type: string
+    meta:
+      collection: site_build
+      conditions: null
+      display: null
+      display_options: null
+      field: step
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options:
+        iconLeft: pending
+      readonly: true
+      required: false
+      searchable: true
+      sort: 2
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Сейчас
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: step
+      table: site_build
+      data_type: character varying
+      default_value: null
+      max_length: 255
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
@@ -12640,6 +16174,48 @@ relations:
       foreign_key_table: directus_files
       foreign_key_column: id
       constraint_name: menus_file_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: notify_log
+    field: order
+    related_collection: orders
+    meta:
+      junction_field: null
+      many_collection: notify_log
+      many_field: order
+      one_allowed_collections: null
+      one_collection: orders
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: notify_log
+      column: order
+      foreign_key_table: orders
+      foreign_key_column: id
+      constraint_name: notify_log_order_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: notify_log
+    field: request
+    related_collection: catering_requests
+    meta:
+      junction_field: null
+      many_collection: notify_log
+      many_field: request
+      one_allowed_collections: null
+      one_collection: catering_requests
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: notify_log
+      column: request
+      foreign_key_table: catering_requests
+      foreign_key_column: id
+      constraint_name: notify_log_request_foreign
       on_update: NO ACTION
       on_delete: SET NULL
   - collection: orders
