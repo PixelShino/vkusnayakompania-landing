@@ -337,5 +337,7 @@ await api('PATCH', '/settings', {
 console.log('= проект: имя и русский язык');
 
 await (await import('./setup/notify.mjs')).setup(api, { editorPolicy: policy.id, builderPolicy: bpolicy.id });
+// 6. online payment — its own module / онлайн-оплата — свой модуль
+await (await import('./setup/payments.mjs')).setup(api, { editorPolicy: policy.id, publicPolicy: publicAccess.policy });
 
 console.log('setup: готово');

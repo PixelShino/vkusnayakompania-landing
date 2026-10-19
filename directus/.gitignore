@@ -10,3 +10,4 @@ extensions/*
 !extensions/request-guard/
 !extensions/notify/
 !extensions/build-status/
+!extensions/pay/

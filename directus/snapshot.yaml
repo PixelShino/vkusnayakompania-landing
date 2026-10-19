@@ -4840,7 +4840,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 8
+      sort: 7
       special: null
       translations:
         - language: ru-RU
@@ -4882,7 +4882,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 9
+      sort: 8
       special: null
       translations:
         - language: ru-RU
@@ -4925,7 +4925,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 10
+      sort: 9
       special: null
       translations:
         - language: ru-RU
@@ -4967,7 +4967,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 11
+      sort: 10
       special: null
       translations:
         - language: ru-RU
@@ -5011,7 +5011,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 12
+      sort: 11
       special:
         - m2o
       translations:
@@ -5069,7 +5069,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 13
+      sort: 12
       special: null
       translations:
         - language: ru-RU
@@ -5118,7 +5118,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 14
+      sort: 13
       special:
         - m2o
       translations:
@@ -5166,7 +5166,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 15
+      sort: 14
       special: null
       translations:
         - language: ru-RU
@@ -5208,7 +5208,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 16
+      sort: 15
       special: null
       translations:
         - language: ru-RU
@@ -5250,7 +5250,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 17
+      sort: 16
       special:
         - cast-boolean
       translations:
@@ -5293,7 +5293,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 18
+      sort: 17
       special: null
       translations:
         - language: ru-RU
@@ -5335,7 +5335,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 19
+      sort: 18
       special:
         - date-updated
       translations: null
@@ -5377,7 +5377,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 20
+      sort: 19
       special:
         - user-updated
       translations: null
@@ -5421,7 +5421,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 7
+      sort: 40
       special: null
       translations:
         - language: ru-RU
@@ -9110,7 +9110,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 8
+      sort: 7
       special: null
       translations:
         - language: ru-RU
@@ -9154,7 +9154,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 9
+      sort: 8
       special: null
       translations:
         - language: ru-RU
@@ -9206,7 +9206,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 10
+      sort: 9
       special: null
       translations:
         - language: ru-RU
@@ -9249,7 +9249,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 11
+      sort: 10
       special: null
       translations:
         - language: ru-RU
@@ -9297,7 +9297,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 12
+      sort: 11
       special: null
       translations:
         - language: ru-RU
@@ -9344,7 +9344,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 13
+      sort: 12
       special: null
       translations:
         - language: ru-RU
@@ -9393,7 +9393,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 14
+      sort: 13
       special:
         - m2o
       translations:
@@ -9491,7 +9491,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 15
+      sort: 14
       special:
         - cast-json
       translations:
@@ -9536,7 +9536,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 16
+      sort: 15
       special: null
       translations:
         - language: ru-RU
@@ -9579,7 +9579,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 26
+      sort: 25
       special: null
       translations:
         - language: ru-RU
@@ -9621,7 +9621,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 24
+      sort: 23
       special: null
       translations:
         - language: ru-RU
@@ -9663,7 +9663,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 25
+      sort: 24
       special: null
       translations:
         - language: ru-RU
@@ -9705,7 +9705,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 27
+      sort: 26
       special:
         - date-updated
       translations: null
@@ -9749,7 +9749,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 7
+      sort: 40
       special: null
       translations:
         - language: ru-RU
@@ -9829,7 +9829,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 17
+      sort: 16
       special: null
       translations:
         - language: ru-RU
@@ -9888,7 +9888,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 18
+      sort: 17
       special: null
       translations:
         - language: ru-RU
@@ -9931,7 +9931,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 19
+      sort: 18
       special: null
       translations:
         - language: ru-RU
@@ -9973,7 +9973,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 20
+      sort: 19
       special: null
       translations:
         - language: ru-RU
@@ -10015,7 +10015,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 21
+      sort: 20
       special: null
       translations:
         - language: ru-RU
@@ -10057,7 +10057,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 22
+      sort: 21
       special: null
       translations:
         - language: ru-RU
@@ -10100,7 +10100,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 23
+      sort: 22
       special:
         - cast-json
       translations: null

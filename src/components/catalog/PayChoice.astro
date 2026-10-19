@@ -1,0 +1,38 @@
+---
+/**
+ * «Оплата» in the checkout form: online by card or on delivery. Hidden in the
+ * markup: the page script (`src/scripts/payment.ts`) asks Directus
+ * (`GET /pay/config`) whether online payment is on and only then shows the
+ * choice with the words from the admin — a switch in the admin works at once,
+ * without a rebuild. In test mode only a device that opened
+ * `/catalog/?paytest=1` sees it.
+ * «Оплата» в форме оформления: онлайн картой или при получении. В разметке
+ * скрыто: скрипт страницы (`src/scripts/payment.ts`) спрашивает у Directus
+ * (`GET /pay/config`), включена ли онлайн-оплата, и только тогда показывает
+ * выбор со словами из админки — переключатель в админке действует сразу, без
+ * пересборки. В тестовом режиме выбор видит только устройство, открывшее
+ * `/catalog/?paytest=1`.
+ */
+import { DEFAULT_TEXTS } from '../../lib/payment.ts';
+import '../../styles/payment.css';
+---
+
+<fieldset class="fs pay-choice" data-pay-choice hidden>
+  <legend class="fs__legend">Оплата</legend>
+  <div class="places pay-choice__opts">
+    <label class="place-opt pay-opt">
+      <input type="radio" name="payment" value="online" checked />
+      <span class="place-opt__name">
+        Онлайн картой
+        <span class="pay-opt__tag" data-pay-test hidden>тест</span>
+      </span>
+      <span class="place-opt__meta" data-pay-text="online">{DEFAULT_TEXTS.online}</span>
+    </label>
+    <label class="place-opt pay-opt" data-pay-on-delivery>
+      <input type="radio" name="payment" value="on_delivery" />
+      <span class="place-opt__name">При получении</span>
+      <span class="place-opt__meta" data-pay-text="onDelivery">{DEFAULT_TEXTS.onDelivery}</span>
+    </label>
+  </div>
+  <p class="field__hint pay-choice__note" data-pay-text="note">{DEFAULT_TEXTS.note}</p>
+</fieldset>

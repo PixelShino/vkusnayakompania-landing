@@ -38,6 +38,7 @@ import {
   type Errors,
 } from '../lib/order';
 import { BADGE_LABEL, positions, rub, type Badge } from '../lib/catalog';
+import { payAfterOrder, withPayment } from './payment';
 import minusIcon from '../assets/icons/minus.svg?raw';
 import plusIcon from '../assets/icons/plus.svg?raw';
 import trashIcon from '../assets/icons/trash.svg?raw';
@@ -628,7 +629,7 @@ if (dataNode && drawer && dishDialog) {
       return;
     }
     const number = orderNumber(new Date(), Math.random());
-    const payload = buildOrder(cart, index, data, number);
+    const payload = withPayment(buildOrder(cart, index, data, number));
 
     // a bot filled the field nobody sees: thank it and send nothing
     // бот заполнил поле, которого никто не видит: поблагодарить и ничего не отправлять
@@ -657,6 +658,7 @@ if (dataNode && drawer && dishDialog) {
       });
       if (response.ok) {
         finish(number, payload);
+        payAfterOrder(number, payload);
         return;
       }
       // the server speaks Russian for what the guest can fix (order-guard)

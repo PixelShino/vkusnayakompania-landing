@@ -1,0 +1,57 @@
+---
+/**
+ * The fourth step of the cart drawer: the payment of an order already placed.
+ * One screen with states the page script switches (`data-state`): going to
+ * the bank, paid, failed (try again or pay on delivery), the bank did not
+ * answer, checking, the order still waits for payment, on delivery after all.
+ * The order is never lost on this screen: it was saved before the bank.
+ * Четвёртый шаг выдвижной корзины: оплата уже оформленного заказа. Один экран
+ * с состояниями, которые переключает скрипт страницы (`data-state`): переход
+ * в банк, оплачен, не прошла (ещё раз или при получении), банк не ответил,
+ * проверяем, заказ ждёт оплаты, всё-таки при получении. Заказ на этом экране
+ * не теряется: он сохранён до банка.
+ */
+import Icon from '../Icon.astro';
+import type { Content } from '../../lib/content.ts';
+import '../../styles/payment.css';
+
+interface Props {
+  settings: Content['settings'];
+}
+
+const { settings } = Astro.props;
+const directus = (import.meta.env.PUBLIC_DIRECTUS_URL as string | undefined)?.replace(/\/+$/, '');
+const api = directus ? `${directus}/pay` : '';
+---
+
+<section class="drawer__step pay-step" data-step="pay" data-pay-step data-pay-api={api} data-state="going" hidden aria-labelledby="pay-title">
+  <div class="drawer__scroll done__in pay-step__in">
+    <span class="mark pay-step__mark" aria-hidden="true"></span>
+    <h3 class="display display-caps done__title" id="pay-title" tabindex="-1" data-pay-title>Переходим к оплате</h3>
+    <p class="done__number">
+      <span class="label">Номер заказа</span>
+      <span class="display tnum" data-pay-number></span>
+    </p>
+    <p class="done__text pay-step__lead" data-pay-lead></p>
+    <span class="pay-step__progress" data-pay-progress aria-hidden="true"></span>
+    <ul class="done__lines" role="list" data-pay-lines></ul>
+    <p class="done__total" data-pay-sum>
+      <span data-pay-sum-label>К оплате</span>
+      <b class="tnum" data-pay-total></b>
+    </p>
+    <p class="done__call">
+      Вопросы по заказу:
+      <a class="tnum" href={settings.phoneHref}>{settings.phone}</a>
+    </p>
+  </div>
+  <footer class="drawer__foot pay-step__foot">
+    <a class="btn btn--primary btn--block" data-pay-go hidden>Открыть страницу банка</a>
+    <button type="button" class="btn btn--primary btn--block" data-pay-retry hidden>
+      <Icon name="card" />
+      <span data-pay-retry-label>Оплатить ещё раз</span>
+    </button>
+    <button type="button" class="btn btn--secondary btn--block" data-pay-offline hidden>Оплачу при получении</button>
+    <button type="button" class="btn btn--secondary btn--block" data-pay-recheck hidden>Проверить ещё раз</button>
+    <button type="button" class="btn btn--primary btn--block" data-close data-pay-close hidden>Вернуться в каталог</button>
+  </footer>
+</section>

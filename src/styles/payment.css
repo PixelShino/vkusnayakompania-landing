@@ -1,0 +1,156 @@
+/* Online payment in the cart drawer: the «Оплата» choice in the form and the
+   payment step. Built from the drawer's own pieces (`.place-opt` tiles, the
+   «done» screen, the sending hairline), so the payment reads as one more step
+   of the same checkout, not as a new widget.
+   Онлайн-оплата в выдвижной корзине: выбор «Оплата» в форме и шаг оплаты.
+   Собрано из деталей самой корзины (плитки `.place-opt`, экран «Заказ
+   принят», волосяная полоса отправки), поэтому оплата читается ещё одним
+   шагом того же оформления, а не новым виджетом. */
+
+/* ── выбор способа ───────────────────────────────────────────────────────── */
+
+.pay-choice[hidden] {
+  display: none;
+}
+
+/* the tile's name and the «test» tag on one baseline / имя плитки и ярлык «тест» на одной линии */
+.pay-opt .place-opt__name {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+}
+
+.pay-opt[hidden] {
+  display: none;
+}
+
+.pay-opt__tag {
+  padding: 1px 6px;
+  border-radius: var(--r-sq);
+  box-shadow: inset 0 0 0 1px var(--line-warm);
+  background: var(--surface-warm);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--terracotta-text);
+}
+
+.pay-opt__tag[hidden] {
+  display: none;
+}
+
+.pay-choice__note {
+  margin-top: 10px;
+}
+
+.pay-choice__note[hidden] {
+  display: none;
+}
+
+/* ── шаг оплаты ──────────────────────────────────────────────────────────── */
+
+/* paid — the olive diamond of «done»; a failure keeps the terracotta signal
+   оплачен — оливковый ромб «готово»; неудача оставляет сигнальную терракоту */
+.pay-step[data-state='paid'] .pay-step__mark,
+.pay-step[data-state='offline'] .pay-step__mark {
+  color: var(--olive);
+}
+
+.pay-step__lead {
+  text-wrap: pretty;
+}
+
+/* two lines of equal weight under the mark («ЗАКАЗ ЖДЁТ / ОПЛАТЫ»)
+   две строки равного веса под маркой («ЗАКАЗ ЖДЁТ / ОПЛАТЫ») */
+.pay-step .done__title {
+  text-wrap: balance;
+}
+
+/* the heading takes the focus for a screen reader, not as a control: after the
+   bank's redirect there was no click, and the browser would ring it
+   заголовок получает фокус для скринридера, а не как элемент управления: после
+   редиректа банка клика не было, и браузер обвёл бы его рамкой */
+.pay-step [data-pay-title]:focus-visible {
+  outline: none;
+}
+
+.pay-step__lead b {
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.pay-step__lead[hidden],
+.pay-step [data-pay-lines][hidden],
+.pay-step [data-pay-sum][hidden],
+.done__number[hidden] {
+  display: none;
+}
+
+/* Waiting for the bank: the hairline of «sending» under the lead, nothing
+   spins. Under reduced motion it stands still at half width.
+   Ожидание банка: волосяная полоса «отправки» под текстом, ничего не
+   крутится. При уменьшенном движении стоит на половине ширины. */
+.pay-step__progress {
+  position: relative;
+  display: block;
+  width: min(220px, 70%);
+  height: 2px;
+  margin-top: 18px;
+  overflow: hidden;
+  background: var(--line-3);
+}
+
+.pay-step__progress::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  background: var(--olive);
+  animation: pay-wait 1.2s var(--ease-in-out) infinite;
+}
+
+.pay-step__progress[hidden] {
+  display: none;
+}
+
+@keyframes pay-wait {
+  from {
+    translate: -100% 0;
+  }
+
+  to {
+    translate: 260% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pay-step__progress::after {
+    width: 50%;
+    animation: none;
+  }
+}
+
+/* two ways out stacked across the whole foot: the main one first
+   два выхода стопкой во всю ширину подвала: главный первым */
+.pay-step__foot {
+  display: grid;
+  gap: 8px;
+}
+
+.pay-step__foot > [hidden] {
+  display: none;
+}
+
+/* the retry carries a card: it says «money» before the label is read
+   у повтора значок карты: он говорит «деньги» раньше, чем прочитана подпись */
+.pay-step__foot [data-pay-retry] .ico {
+  width: 18px;
+  height: 18px;
+}
+
+.pay-step__foot [data-pay-retry][aria-busy='true'] {
+  cursor: progress;
+  opacity: 0.72;
+}
