@@ -9,3 +9,4 @@ extensions/*
 !extensions/order-guard/
 !extensions/request-guard/
 !extensions/notify/
+!extensions/build-status/
