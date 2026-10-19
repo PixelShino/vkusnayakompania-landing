@@ -199,9 +199,13 @@ const published = async (from, since, release, seconds) => {
     ]
       .filter((line) => line !== null)
       .join('\n');
-    // a single draft opens that very record; otherwise the publication page
-    // один черновик — ссылка на саму запись; иначе — страница публикации
-    const [collection, item] = drafts.length === 1 ? [drafts[0].collection, drafts[0].id] : ['site_build', 1];
+    // a single draft opens that very record. The admin cannot link to a
+    // singleton by id (`/content/site_build/1` is «not found»), so otherwise
+    // there is no link: the text names the page
+    // один черновик — ссылка на саму запись. На одиночную коллекцию админка по
+    // id не ссылается (`/content/site_build/1` — «не найдено»), поэтому иначе
+    // ссылки нет: страницу называет текст
+    const [collection, item] = drafts.length === 1 ? [drafts[0].collection, drafts[0].id] : [undefined, undefined];
     try {
       await notify(user, subject, message, collection, item);
       console.log(`уведомление: ${subject}`);
@@ -230,8 +234,6 @@ const failed = async (since) => {
       'Сборка сайта не удалась',
       `На сайте осталась прежняя версия: правки, сохранённые после ${since}, не опубликованы. ` +
         'Последние строки лога — на странице «Публикация сайта». Следующее сохранение запустит сборку заново.',
-      'site_build',
-      1,
     );
   }
   fs.writeFileSync(FAILED_MARK, new Date().toISOString());
