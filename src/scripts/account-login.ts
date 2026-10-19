@@ -27,6 +27,22 @@ type Options = {
 
 const $ = <T extends HTMLElement = HTMLElement>(selector: string, root: ParentNode) => root.querySelector<T>(selector);
 
+// the phone inside a hint never breaks across lines: «+7 (987) 000-» / «11-22» read as two numbers
+// номер в подсказке не переносится: «+7 (987) 000-» / «11-22» читались двумя номерами
+const paintHint = (node: HTMLElement, text: string) => {
+  node.replaceChildren();
+  let rest = text;
+  for (let match = rest.match(/\+7[\d\s()-]{9,}\d/); match; match = rest.match(/\+7[\d\s()-]{9,}\d/)) {
+    const at = match.index ?? 0;
+    const phone = document.createElement('span');
+    phone.className = 'nowrap';
+    phone.textContent = match[0];
+    node.append(rest.slice(0, at), phone);
+    rest = rest.slice(at + match[0].length);
+  }
+  node.append(rest);
+};
+
 export const mountLogin = (form: HTMLFormElement, options: Options) => {
   const { api } = options;
   const steps = { phone: $('[data-login-step="phone"]', form)!, code: $('[data-login-step="code"]', form)! };
@@ -152,7 +168,7 @@ export const mountLogin = (form: HTMLFormElement, options: Options) => {
     setBusy(true, 'Отправляем…');
     try {
       sent = await api.send(phone, channel);
-      hint.textContent = sent.hint;
+      paintHint(hint, sent.hint);
       codeLabel.textContent = sent.channel === 'call' ? 'Последние 4 цифры номера' : 'Код из SMS';
       codeInput.maxLength = sent.length;
       codeInput.value = '';

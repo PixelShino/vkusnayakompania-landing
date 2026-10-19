@@ -31,7 +31,7 @@ import {
   type ProfileInput,
   type RawTx,
 } from '../lib/account';
-import { daysBetween, dayOf, points, type Program } from '../lib/loyalty';
+import { addDays, daysBetween, dayOf, points, type Program } from '../lib/loyalty';
 import { CART_KEY, parseCart } from '../lib/cart';
 import { CHECKOUT_KEY, maskPhone } from '../lib/order';
 import { clearSession, loadSession, onSessionChange, storage, touchSession } from './account-session';
@@ -134,7 +134,9 @@ if (node) {
       : 'Программа на паузе: баллы не начисляются и не списываются, накопленные сохранятся';
     const burn = $('[data-burn]')!;
     burn.hidden = !program.enabled || !sum.burnSoon || !sum.burnDay;
-    if (!burn.hidden) $('[data-burn-text]', burn)!.textContent = `${points(sum.burnSoon)} сгорят ${dateText(sum.burnDay!, me!.today)}`;
+    // a lot «expires» on the first day it no longer works: the guest is told the last day it does
+    // партия «истекает» в первый день, когда уже не действует: гостю называется последний день, когда действует
+    if (!burn.hidden) $('[data-burn-text]', burn)!.textContent = `${points(sum.burnSoon)} сгорят после ${dateText(addDays(sum.burnDay!, -1), me!.today)}`;
 
     $('[data-tier]')!.textContent = level.tier.name;
     $('[data-tier-pct]')!.textContent = `${level.tier.percent} % баллами`;
@@ -398,7 +400,7 @@ if (node) {
     if (nearest) {
       const soon = daysBetween(me.today, nearest.day) <= 30;
       expiring.classList.toggle('acc-expiring--quiet', !soon);
-      expiring.textContent = `${soon ? 'Скоро сгорят' : 'Ближайшее сгорание'}: ${points(nearest.amount)} — ${dateText(nearest.day, me.today)}. Первыми тратятся баллы, которые сгорают раньше.`;
+      expiring.textContent = `${soon ? 'Скоро сгорят' : 'Ближайшее сгорание'}: ${points(nearest.amount)} — после ${dateText(addDays(nearest.day, -1), me.today)}. Первыми тратятся баллы, которые сгорают раньше.`;
     }
 
     if (!profileDirty) paintProfile(sum.program);

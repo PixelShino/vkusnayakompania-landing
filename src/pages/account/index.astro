@@ -26,6 +26,7 @@ import ProgramFacts from '../../components/account/ProgramFacts.astro';
 import { BASE } from '../../lib/base.ts';
 import { BRAND } from '../../data/site.ts';
 import { getContent, typo } from '../../lib/content.ts';
+import { points } from '../../lib/loyalty.ts';
 import '../../styles/catalog.css';
 import '../../styles/account.css';
 
@@ -256,6 +257,7 @@ const data = {
               </div>
 
               <div class="acc-panel" role="tabpanel" id="panel-profile" aria-labelledby="tab-profile" tabindex="0" data-panel="profile" hidden>
+                <div class="acc-profile-wrap">
                 <form class="acc-profile" data-profile novalidate aria-label="Профиль">
                   <fieldset class="fs">
                     <legend class="fs__legend">Как к вам обращаться</legend>
@@ -346,6 +348,32 @@ const data = {
                     </button>
                   </div>
                 </form>
+                {/* why each field is asked: the answer sits next to the question, not in a policy
+                    зачем спрашиваем каждое поле: ответ рядом с вопросом, а не в политике */}
+                <aside class="acc-why" aria-labelledby="why-title">
+                  <p class="acc-why__title" id="why-title">Зачем мы спрашиваем</p>
+                  <dl class="acc-why__list">
+                    <div>
+                      <dt>Имя</dt>
+                      <dd>{typo('Менеджер обратится по имени, когда перезвонит по заказу.')}</dd>
+                    </div>
+                    <div>
+                      <dt>Дата рождения</dt>
+                      <dd>
+                        {typo(
+                          loyalty.birthdayBonus > 0
+                            ? `${points(loyalty.birthdayBonus)} в праздничные дни${loyalty.birthdayDiscount ? ` и скидка ${loyalty.birthdayDiscount} % на заказ` : ''}. Указывается один раз.`
+                            : 'Чтобы поздравить вас. Указывается один раз.',
+                        )}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Почта</dt>
+                      <dd>{typo('Подтвердить, что кабинет ваш, если смените номер телефона.')}</dd>
+                    </div>
+                  </dl>
+                </aside>
+                </div>
               </div>
             </section>
           </div>
