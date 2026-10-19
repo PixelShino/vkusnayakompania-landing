@@ -92,3 +92,19 @@ services:
       # в начало заголовка, не учитывается. По умолчанию Directus (`true`)
       # берёт самый левый, а его подделает кто угодно.
       IP_TRUST_PROXY: ${IP_TRUST_PROXY:-1}
+
+      # Online payment (`extensions/pay`), optional: a non-empty value beats
+      # the field of the «Оплата» singleton in the admin, so the bank's secrets
+      # can stay out of the database and its backups. Empty — the admin rules.
+      # Онлайн-оплата (`extensions/pay`), необязательно: непустое значение
+      # важнее поля синглтона «Оплата» в админке — секреты банка не попадают в
+      # базу и её бэкапы. Пусто — действует админка.
+      PAY_ENABLED: ${PAY_ENABLED:-}
+      PAY_MODE: ${PAY_MODE:-}
+      PAY_PROVIDER: ${PAY_PROVIDER:-}
+      PAY_ALFA_LOGIN: ${PAY_ALFA_LOGIN:-}
+      PAY_ALFA_PASSWORD: ${PAY_ALFA_PASSWORD:-}
+      PAY_ALFA_TOKEN: ${PAY_ALFA_TOKEN:-}
+      PAY_ALFA_GATEWAY: ${PAY_ALFA_GATEWAY:-}
+      PAY_CALLBACK_KEY: ${PAY_CALLBACK_KEY:-}
+      PAY_SITE_URL: ${PAY_SITE_URL:-}

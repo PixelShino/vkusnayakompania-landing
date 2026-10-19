@@ -219,6 +219,13 @@ export default ({ filter, action }, { services, logger }) => {
       total,
       consent: true,
       manager_note: note,
+      // how the guest wants to pay, when the site offered the choice; the rest
+      // of `payment_*` (paid or not) is never taken from here — the `pay`
+      // extension writes it from the bank's answer
+      // как гость хочет платить, если сайт предложил выбор; остальные
+      // `payment_*` (оплачен или нет) отсюда не берутся никогда — их пишет
+      // расширение `pay` по ответу банка
+      ...(payload.payment_method ? { payment_method: payload.payment_method === 'online' ? 'online' : 'on_delivery' } : {}),
     };
   });
 
