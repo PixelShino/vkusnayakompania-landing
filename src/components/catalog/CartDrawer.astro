@@ -14,6 +14,7 @@
  * сайт не примет заказ, который не сможет доставить.
  */
 import Icon from '../Icon.astro';
+import CartAccount from '../account/CartAccount.astro';
 import { hoursRows } from '../../data/site.ts';
 import type { Content } from '../../lib/content.ts';
 
@@ -95,6 +96,7 @@ const endpoint = directus ? `${directus}/items/orders` : '';
     {/* ── шаг 2: оформление ──────────────────────────────────────────── */}
     <form class="drawer__step checkout" data-step="checkout" id="checkout" novalidate hidden aria-label="Оформление заказа">
       <div class="drawer__scroll">
+        <CartAccount content={Astro.props.content} part="checkout" />
         <fieldset class="fs">
           <legend class="fs__legend">Контакты</legend>
           <div class="field">
@@ -244,12 +246,16 @@ const endpoint = directus ? `${directus}/items/orders` : '';
           <span>Сумма <span class="sum__count" data-count></span></span>
           <b class="tnum" data-total></b>
         </p>
+        <CartAccount content={Astro.props.content} part="summary" />
         <p class="sum__note">Без стоимости доставки — назовём её при звонке</p>
         <button type="submit" class="btn btn--primary btn--block" data-submit>
           <span data-submit-label>Отправить заказ</span>
         </button>
       </footer>
     </form>
+
+    {/* ── вход по номеру, не выходя из корзины ─────────────────────── */}
+    <CartAccount content={Astro.props.content} part="login" />
 
     {/* ── шаг 3: заказ принят ────────────────────────────────────────── */}
     <section class="drawer__step done" data-step="done" hidden aria-labelledby="done-title">
@@ -269,6 +275,7 @@ const endpoint = directus ? `${directus}/items/orders` : '';
           <span>Сумма заказа</span>
           <b class="tnum" data-done-total></b>
         </p>
+        <CartAccount content={Astro.props.content} part="done" />
         <p class="done__call">
           Не хотите ждать — позвоните сами:
           <a class="tnum" href={settings.phoneHref}>{settings.phone}</a>

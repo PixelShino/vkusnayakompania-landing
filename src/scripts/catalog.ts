@@ -38,6 +38,7 @@ import {
   type Errors,
 } from '../lib/order';
 import { BADGE_LABEL, positions, rub, type Badge } from '../lib/catalog';
+import { mountCartAccount } from './account-cart';
 import minusIcon from '../assets/icons/minus.svg?raw';
 import plusIcon from '../assets/icons/plus.svg?raw';
 import trashIcon from '../assets/icons/trash.svg?raw';
@@ -96,6 +97,9 @@ if (dataNode && drawer && dishDialog) {
   let undo: Cart | null = null;
   let dropped = restored.dropped;
   if (dropped.length) store.set(CART_KEY, JSON.stringify(cart));
+
+  // «Вкусные баллы» in the drawer (null without the account) / баллы в корзине (null без кабинета)
+  let cartAccount: ReturnType<typeof mountCartAccount> = null;
 
   const announcer = $('[data-announce]');
   const announce = (text: string) => {
@@ -192,6 +196,7 @@ if (dataNode && drawer && dishDialog) {
     for (const node of $$('[data-count]', drawer)) node.textContent = sum.count ? `· ${positions(sum.count)}` : '';
     for (const node of $$('[data-total]', drawer)) node.textContent = rub(sum.total);
     renderLines(sum);
+    cartAccount?.refresh();
   };
 
   const renderLines = (sum = priced(cart, index)) => {
@@ -412,9 +417,9 @@ if (dataNode && drawer && dishDialog) {
   });
 
   // ── drawer: steps ───────────────────────────────────────────────────────
-  type Step = 'cart' | 'checkout' | 'done';
+  type Step = 'cart' | 'checkout' | 'login' | 'done';
   let step: Step = 'cart';
-  const TITLES: Record<Step, string> = { cart: 'Корзина', checkout: 'Оформление', done: 'Готово' };
+  const TITLES: Record<Step, string> = { cart: 'Корзина', checkout: 'Оформление', login: 'Вход', done: 'Готово' };
   const form = $<HTMLFormElement>('form[data-step="checkout"]', drawer)!;
   const endpoint = drawer.dataset.endpoint ?? '';
 
@@ -422,10 +427,14 @@ if (dataNode && drawer && dishDialog) {
     step = next;
     for (const section of $$('[data-step]', drawer)) section.hidden = section.dataset.step !== next;
     const back = $('[data-back]', drawer);
-    if (back) back.hidden = next !== 'checkout';
+    if (back) back.hidden = next !== 'checkout' && next !== 'login';
+    back?.setAttribute('aria-label', next === 'login' ? 'Назад к оформлению' : 'Назад к корзине');
     const title = $('[data-drawer-title]', drawer);
     if (title) title.textContent = TITLES[next];
-    if (next === 'checkout') fillTimes();
+    if (next === 'checkout') {
+      fillTimes();
+      cartAccount?.onCheckout();
+    }
     if (focus) (next === 'done' ? $('#done-title', drawer) : title)?.focus({ preventScroll: true });
   };
 
@@ -514,6 +523,7 @@ if (dataNode && drawer && dishDialog) {
     /* a broken draft is just no draft / битый черновик — просто без черновика */
   }
   togglePart();
+  cartAccount = mountCartAccount({ drawer, form, total: () => priced(cart, index).total, goto, announce });
 
   const ERROR_FIELD: Record<keyof Errors, string> = {
     name: 'name',
@@ -595,6 +605,7 @@ if (dataNode && drawer && dishDialog) {
         return `<li><span>${esc(line.title)}${choice ? `, ${esc(choice)}` : ''}\u00a0×\u00a0${line.qty}</span><b class="tnum">${rub(line.sum)}</b></li>`;
       })
       .join('');
+    cartAccount?.done(Number((sent as { bonus_spent?: number }).bonus_spent ?? 0));
     cart = empty();
     store.set(CART_KEY, JSON.stringify(cart));
     const comment = field<HTMLTextAreaElement>('comment');
@@ -628,7 +639,10 @@ if (dataNode && drawer && dishDialog) {
       return;
     }
     const number = orderNumber(new Date(), Math.random());
-    const payload = buildOrder(cart, index, data, number);
+    // a signed-in guest sends the order with his token and the points to spend
+    // вошедший гость отправляет заказ со своим токеном и баллами к списанию
+    const extra = cartAccount?.extras();
+    const payload = { ...buildOrder(cart, index, data, number), ...(extra?.token && { bonus_spent: extra.bonus_spent }) };
 
     // a bot filled the field nobody sees: thank it and send nothing
     // бот заполнил поле, которого никто не видит: поблагодарить и ничего не отправлять
@@ -651,7 +665,7 @@ if (dataNode && drawer && dishDialog) {
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(extra?.token && { Authorization: `Bearer ${extra.token}` }) },
         body: JSON.stringify(payload),
         signal: AbortSignal.timeout(20_000),
       });
@@ -663,7 +677,10 @@ if (dataNode && drawer && dishDialog) {
       // сервер отвечает по-русски, если гость может это исправить (order-guard)
       const body = await response.json().catch(() => null);
       const reason: string | undefined = body?.errors?.[0]?.extensions?.reason ?? (response.status === 400 ? body?.errors?.[0]?.message : undefined);
-      if (response.status === 403)
+      if (response.status === 401 && extra?.token) {
+        cartAccount?.signedOut();
+        showFailure('Вход в кабинет закончился', 'Нажмите «Отправить заказ» ещё раз — уйдёт без баллов. Или войдите снова, чтобы их списать.');
+      } else if (response.status === 403)
         showFailure('Заказ на сайте сейчас не принимаем', 'Позвоните нам — продиктуйте корзину, и менеджер примет заказ по телефону.');
       else if (reason) showFailure('Проверьте заказ', reason);
       else showFailure('Заказ не отправился', 'Сервер не ответил как надо. Попробуйте ещё раз через минуту или позвоните — примем по телефону.');
@@ -796,7 +813,7 @@ if (dataNode && drawer && dishDialog) {
       return;
     }
     if (hit('[data-back]')) {
-      goto('cart');
+      goto(step === 'login' ? 'checkout' : 'cart');
       return;
     }
     const close = hit('[data-close]');

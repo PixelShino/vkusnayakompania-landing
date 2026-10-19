@@ -1,0 +1,253 @@
+/* «Вкусные баллы» в корзине: блок вверху оформления, строки суммы в подвале,
+   шаг входа и строка на «Заказ принят». Подключается самим компонентом
+   (`CartAccount.astro`), поля и кнопки — из `catalog.css` и `global.css`.
+   «Вкусные баллы» in the cart: the block at the top of the checkout, the sum
+   rows in the footer, the sign-in step and the line on «Заказ принят». The
+   component brings this sheet itself; fields and buttons are the catalog's. */
+
+.ca {
+  margin-bottom: 22px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line-3);
+}
+
+/* signed out: why to sign in, in this order's own numbers
+   не вошёл: зачем входить — числами этого же заказа */
+.ca__pitch {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border-radius: var(--r-sq);
+  background: var(--olive-tint);
+  box-shadow: inset 0 0 0 1px var(--olive-tint-line);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.ca__pitch .ico,
+.ca__note .ico {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--olive);
+}
+
+/* signed in: who, how many points, «Не вы?» on the right
+   вошёл: кто, сколько баллов, «Не вы?» справа */
+/* who and the balance on two lines, «Не вы?» beside them on the right
+   кто и баланс — двумя строками, «Не вы?» справа от них */
+.ca__who {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 2px 12px;
+  font-size: 14px;
+}
+
+.ca__bal {
+  grid-row: 2;
+}
+
+.ca__bal:empty {
+  display: none;
+}
+
+.ca__name {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.ca__bal {
+  color: var(--olive-dark);
+  font-weight: 600;
+}
+
+.ca__not-me {
+  grid-column: 2;
+  grid-row: 1;
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.ca__loading {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--text-4);
+}
+
+.ca__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.ca__note--quiet {
+  display: block;
+  color: var(--text-4);
+}
+
+.ca__spend {
+  margin-top: 14px;
+}
+
+.ca__spend-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ca__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.ca__all {
+  font-size: 13px;
+}
+
+.ca__controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 104px;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+/* the native slider in the site's olive: a control everyone knows, coloured
+   нативный ползунок оливой сайта: привычный всем элемент, только в цвете */
+.ca__range {
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  accent-color: var(--olive);
+  cursor: pointer;
+}
+
+.ca__range:focus-visible {
+  outline: 2px solid var(--terracotta);
+  outline-offset: 2px;
+}
+
+.ca__num {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-4);
+  border-radius: var(--r-sq);
+  background: color-mix(in srgb, var(--surface) 45%, var(--bg));
+  color: var(--text);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.ca__num:focus {
+  outline: none;
+  border-color: var(--olive);
+  background-color: var(--bg);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--olive) 22%, transparent);
+}
+
+.ca__limit {
+  margin-top: 2px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--text-4);
+}
+
+.ca__error {
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--terracotta-text);
+}
+
+/* ── сумма в подвале ─────────────────────────────────────────────────────── */
+
+.ca-sum {
+  display: grid;
+  gap: 2px;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line-4);
+}
+
+.ca-sum__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13.5px;
+  color: var(--text-3);
+}
+
+.ca-sum__row b {
+  font-weight: 600;
+  color: var(--olive-dark);
+}
+
+.ca-sum__row--pay {
+  margin-top: 2px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.ca-sum__row--pay b {
+  font-size: 18px;
+  color: var(--text);
+}
+
+.ca-earn {
+  margin-top: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--olive-dark);
+}
+
+/* ── шаг входа ───────────────────────────────────────────────────────────── */
+
+.ca-login__lead {
+  margin-bottom: 18px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+/* ── заказ принят ────────────────────────────────────────────────────────── */
+
+.done__pts {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: var(--r-sq);
+  background: var(--olive-tint);
+  box-shadow: inset 0 0 0 1px var(--olive-tint-line);
+  font-size: 13.5px;
+  line-height: 1.5;
+  text-align: left;
+  color: var(--text);
+}
+
+.done__pts .ico {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--olive);
+}
+
+.done__pts[hidden] {
+  display: none;
+}

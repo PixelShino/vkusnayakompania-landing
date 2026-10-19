@@ -1,0 +1,152 @@
+---
+/**
+ * «Вкусные баллы» in the cart drawer, in four places of it: at the top of the
+ * checkout (signed in — who and how many points, the slider «Списать баллы»;
+ * signed out — «Войти по номеру, чтобы копить баллы»), in the footer's sum
+ * (points, birthday discount, to pay, what will be earned), as a step of its
+ * own (the sign-in without leaving the cart) and on «Заказ принят». The
+ * drawer places each `part` where it belongs; `src/scripts/account-cart.ts`
+ * drives them. Without the account (no `PUBLIC_DIRECTUS_URL`, the programme
+ * switched off) nothing is drawn and the cart is the plain one.
+ * «Вкусные баллы» в выдвижной корзине, в четырёх её местах: вверху
+ * оформления (вошёл — кто и сколько баллов, ползунок «Списать баллы»; не
+ * вошёл — «Войти по номеру, чтобы копить баллы»), в сумме подвала (баллы,
+ * скидка именинника, к оплате, что начислим), отдельным шагом (вход, не
+ * выходя из корзины) и на «Заказ принят». Корзина ставит каждую `part` на
+ * своё место; ведёт их `src/scripts/account-cart.ts`. Без кабинета (нет
+ * `PUBLIC_DIRECTUS_URL`, программа выключена) ничего не рисуется — корзина
+ * обычная.
+ */
+import Icon from '../Icon.astro';
+import LoginForm from './LoginForm.astro';
+import { points } from '../../lib/loyalty.ts';
+import type { Content } from '../../lib/content.ts';
+import '../../styles/cart-account.css';
+
+interface Props {
+  content: Content;
+  part: 'checkout' | 'summary' | 'login' | 'done';
+}
+
+const { content, part } = Astro.props;
+const { loyalty, settings } = content;
+const api = (import.meta.env.PUBLIC_DIRECTUS_URL as string | undefined)?.replace(/\/+$/, '') ?? '';
+const on = Boolean(api) && loyalty.enabled;
+const low = loyalty.tiers[0]?.percent ?? 0;
+---
+
+{
+  on && part === 'checkout' && (
+    <div class="ca" data-cart-account data-api={api} data-program={JSON.stringify(loyalty)}>
+      <div class="ca__out" data-ca-out>
+        <p class="ca__pitch">
+          <Icon name="gift" />
+          <span data-ca-pitch>
+            {`Войдите по номеру, чтобы копить баллы: ${low} % заказа вернутся на счёт${
+              loyalty.signupBonus ? `, а за первый вход — ${points(loyalty.signupBonus)}` : ''
+            }.`}
+          </span>
+        </p>
+        <button type="button" class="btn btn--secondary btn--md btn--block" data-ca-login>
+          <Icon name="user" />
+          Войти по номеру
+        </button>
+      </div>
+
+      <div class="ca__in" data-ca-in hidden>
+        <p class="ca__who">
+          <span class="ca__name" data-ca-name></span>
+          <span class="ca__bal tnum" data-ca-balance></span>
+          <button type="button" class="tlink ca__not-me" data-ca-logout>Не вы?</button>
+        </p>
+        <p class="ca__loading" data-ca-loading hidden>Загружаем баллы…</p>
+        <p class="ca__note" data-ca-discount hidden>
+          <Icon name="gift" />
+          <span data-ca-discount-text></span>
+        </p>
+
+        <div class="ca__spend" data-ca-spend hidden>
+          <div class="ca__spend-head">
+            <label class="ca__label" for="ca-range">Списать баллы</label>
+            <button type="button" class="tlink ca__all" data-ca-all>Все, что можно</button>
+          </div>
+          <div class="ca__controls">
+            <input
+              class="ca__range"
+              id="ca-range"
+              type="range"
+              min="0"
+              max="0"
+              step="1"
+              value="0"
+              data-ca-range
+              aria-describedby="ca-limit"
+            />
+            <input
+              class="ca__num tnum"
+              id="ca-num"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              max="0"
+              step="1"
+              value="0"
+              data-ca-num
+              aria-label="Сколько баллов списать"
+              aria-describedby="ca-limit"
+            />
+          </div>
+          <p class="ca__limit" id="ca-limit" data-ca-limit></p>
+        </div>
+        <p class="ca__note ca__note--quiet" data-ca-zero hidden></p>
+      </div>
+
+      <p class="ca__error" data-ca-error role="alert" hidden></p>
+    </div>
+  )
+}
+
+{
+  on && part === 'summary' && (
+    <div class="ca-sum" data-ca-summary hidden>
+      <p class="ca-sum__row" data-ca-row="discount" hidden>
+        <span>Скидка именинника</span>
+        <b class="tnum" data-ca-discount-sum></b>
+      </p>
+      <p class="ca-sum__row" data-ca-row="points" hidden>
+        <span>Баллами</span>
+        <b class="tnum" data-ca-points-sum></b>
+      </p>
+      <p class="ca-sum__row ca-sum__row--pay">
+        <span>К оплате</span>
+        <b class="tnum" data-ca-pay></b>
+      </p>
+    </div>
+  )
+}
+
+{
+  on && part === 'summary' && <p class="ca-earn" data-ca-earn hidden />
+}
+
+{
+  on && part === 'login' && (
+    <section class="drawer__step ca-login" data-step="login" hidden aria-label="Вход по номеру телефона">
+      <div class="drawer__scroll">
+        <p class="ca-login__lead">
+          {`Код придёт на телефон — пароль не нужен. После входа вернём вас к заказу: имя и телефон подставим, баллы можно будет списать.`}
+        </p>
+        <LoginForm id="cart-login" settings={settings} submitLabel="Войти и вернуться к заказу" />
+      </div>
+    </section>
+  )
+}
+
+{
+  on && part === 'done' && (
+    <p class="done__pts" data-ca-done hidden>
+      <Icon name="gift" />
+      <span data-ca-done-text></span>
+    </p>
+  )
+}
