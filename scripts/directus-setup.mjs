@@ -336,4 +336,6 @@ await api('PATCH', '/settings', {
 });
 console.log('= проект: имя и русский язык');
 
+await (await import('./setup/notify.mjs')).setup(api, { editorPolicy: policy.id, builderPolicy: bpolicy.id });
+
 console.log('setup: готово');

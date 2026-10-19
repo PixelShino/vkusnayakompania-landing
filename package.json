@@ -10,7 +10,7 @@
     "build": "astro build",
     "preview": "astro preview --host 127.0.0.1",
     "check": "astro check",
-    "test": "node src/data/site.check.ts && node src/lib/select.check.ts && node src/data/content.check.ts",
+    "test": "node src/data/site.check.ts && node src/lib/select.check.ts && node src/data/content.check.ts && node scripts/notify.check.mjs",
     "fixture": "node scripts/export-fixture.mjs",
     "files": "node scripts/fetch-files.mjs",
     "setup": "node scripts/directus-setup.mjs",
