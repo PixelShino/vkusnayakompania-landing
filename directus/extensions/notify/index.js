@@ -57,9 +57,14 @@ const loadModel = async (database, env, collection, key) => {
   return { row, model: requestModel(row, { place, format, adminUrl }) };
 };
 
-const mailer = (services, database, schema) => async (message) => {
-  const mail = new services.MailService({ schema, knex: database });
-  await mail.send(message);
+// one MailService per delivery: its constructor checks the SMTP connection
+// один MailService на рассылку: его конструктор проверяет соединение с SMTP
+const mailer = (services, database, schema) => {
+  let mail = null;
+  return async (message) => {
+    mail ??= new services.MailService({ schema, knex: database });
+    await mail.send(message);
+  };
 };
 
 const secretsOf = (env, settings) => [settings.telegram_token, env.EMAIL_SMTP_PASSWORD, env.EMAIL_MAILGUN_API_KEY].filter(Boolean);
