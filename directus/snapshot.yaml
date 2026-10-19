@@ -2,6 +2,34 @@ version: 1
 directus: 11.17.4
 vendor: postgres
 collections:
+  - collection: account
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: account
+      color: null
+      display_template: null
+      group: null
+      hidden: false
+      icon: loyalty
+      item_duplication_fields: null
+      note: >-
+        Личный кабинет гостей на сайте: вход по телефону, «Вкусные баллы»,
+        уровни, подарок ко дню рождения
+      preview_url: null
+      singleton: false
+      sort: 9
+      sort_field: null
+      translations:
+        - language: ru-RU
+          plural: Личный кабинет
+          singular: Личный кабинет
+          translation: Личный кабинет
+      unarchive_value: null
+      versioning: false
   - collection: afisha
     meta:
       accountability: all
@@ -32,6 +60,66 @@ collections:
       versioning: false
     schema:
       name: afisha
+  - collection: auth_codes
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: auth_codes
+      color: null
+      display_template: null
+      group: account
+      hidden: true
+      icon: password
+      item_duplication_fields: null
+      note: >-
+        Коды входа: хранится только отпечаток кода. Служебная таблица, чистится
+        сама
+      preview_url: null
+      singleton: false
+      sort: 4
+      sort_field: null
+      translations:
+        - language: ru-RU
+          plural: Коды входа
+          singular: Код входа
+          translation: Коды входа
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: auth_codes
+  - collection: bonus_transactions
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: bonus_transactions
+      color: null
+      display_template: '{{amount}} · {{type}}'
+      group: account
+      hidden: false
+      icon: swap_vert
+      item_duplication_fields: null
+      note: >-
+        Все движения «Вкусных баллов». Начислить или списать вручную — новая
+        запись: гость, «Вручную», +/− баллы и комментарий
+      preview_url: null
+      singleton: false
+      sort: 3
+      sort_field: null
+      translations:
+        - language: ru-RU
+          plural: Операции по баллам
+          singular: Операция по баллам
+          translation: Операции по баллам
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: bonus_transactions
   - collection: cakes
     meta:
       accountability: all
@@ -348,6 +436,34 @@ collections:
       versioning: false
     schema:
       name: directions_files
+  - collection: guest_auth_settings
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: guest_auth_settings
+      color: null
+      display_template: null
+      group: account
+      hidden: false
+      icon: phonelink_lock
+      item_duplication_fields: null
+      note: 'Как гость входит на сайт по номеру: звонок или SMS, тексты подсказок'
+      preview_url: null
+      singleton: true
+      sort: 2
+      sort_field: null
+      translations:
+        - language: ru-RU
+          plural: Вход по телефону
+          singular: Вход по телефону
+          translation: Вход по телефону
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: guest_auth_settings
   - collection: home
     meta:
       accountability: all
@@ -376,6 +492,36 @@ collections:
       versioning: false
     schema:
       name: home
+  - collection: loyalty_settings
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: loyalty_settings
+      color: null
+      display_template: null
+      group: account
+      hidden: false
+      icon: card_giftcard
+      item_duplication_fields: null
+      note: >-
+        Сколько баллов дарить и начислять, какую часть заказа можно оплатить
+        баллами, уровни и день рождения
+      preview_url: null
+      singleton: true
+      sort: 1
+      sort_field: null
+      translations:
+        - language: ru-RU
+          plural: Программа лояльности
+          singular: Программа лояльности
+          translation: Программа лояльности
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: loyalty_settings
   - collection: menus
     meta:
       accountability: all
@@ -1152,6 +1298,902 @@ fields:
       has_auto_increment: false
       foreign_key_table: null
       foreign_key_column: null
+  - collection: auth_codes
+    field: id
+    type: uuid
+    meta:
+      collection: auth_codes
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 1
+      special:
+        - uuid
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: id
+      table: auth_codes
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: auth_codes
+    field: date_created
+    type: timestamp
+    meta:
+      collection: auth_codes
+      conditions: null
+      display: null
+      display_options: null
+      field: date_created
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 2
+      special:
+        - date-created
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_created
+      table: auth_codes
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: auth_codes
+    field: phone
+    type: string
+    meta:
+      collection: auth_codes
+      conditions: null
+      display: null
+      display_options: null
+      field: phone
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 3
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Телефон
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: phone
+      table: auth_codes
+      data_type: character varying
+      default_value: null
+      max_length: 16
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: auth_codes
+    field: channel
+    type: string
+    meta:
+      collection: auth_codes
+      conditions: null
+      display: null
+      display_options: null
+      field: channel
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 4
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Канал
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: channel
+      table: auth_codes
+      data_type: character varying
+      default_value: null
+      max_length: 16
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: auth_codes
+    field: code_hash
+    type: string
+    meta:
+      collection: auth_codes
+      conditions: null
+      display: null
+      display_options: null
+      field: code_hash
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 5
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Отпечаток кода
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: code_hash
+      table: auth_codes
+      data_type: character varying
+      default_value: null
+      max_length: 128
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: auth_codes
+    field: provider_id
+    type: string
+    meta:
+      collection: auth_codes
+      conditions: null
+      display: null
+      display_options: null
+      field: provider_id
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 6
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Номер у SMS Aero
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: provider_id
+      table: auth_codes
+      data_type: character varying
+      default_value: null
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: auth_codes
+    field: attempts
+    type: integer
+    meta:
+      collection: auth_codes
+      conditions: null
+      display: null
+      display_options: null
+      field: attempts
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 7
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Попыток
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: attempts
+      table: auth_codes
+      data_type: integer
+      default_value: 0
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: auth_codes
+    field: expires_at
+    type: timestamp
+    meta:
+      collection: auth_codes
+      conditions: null
+      display: null
+      display_options: null
+      field: expires_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 8
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Истекает
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: expires_at
+      table: auth_codes
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: auth_codes
+    field: used_at
+    type: timestamp
+    meta:
+      collection: auth_codes
+      conditions: null
+      display: null
+      display_options: null
+      field: used_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 9
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Использован
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: used_at
+      table: auth_codes
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: auth_codes
+    field: status
+    type: string
+    meta:
+      collection: auth_codes
+      conditions: null
+      display: null
+      display_options: null
+      field: status
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 10
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Статус
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: status
+      table: auth_codes
+      data_type: character varying
+      default_value: sent
+      max_length: 16
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: auth_codes
+    field: ip
+    type: string
+    meta:
+      collection: auth_codes
+      conditions: null
+      display: null
+      display_options: null
+      field: ip
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 11
+      special: null
+      translations:
+        - language: ru-RU
+          translation: IP
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: ip
+      table: auth_codes
+      data_type: character varying
+      default_value: null
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: true
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: bonus_transactions
+    field: id
+    type: integer
+    meta:
+      collection: bonus_transactions
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: bonus_transactions
+      data_type: integer
+      default_value: nextval('bonus_transactions_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: bonus_transactions
+    field: date_created
+    type: timestamp
+    meta:
+      collection: bonus_transactions
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: date_created
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 2
+      special:
+        - date-created
+      translations:
+        - language: ru-RU
+          translation: Когда
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_created
+      table: bonus_transactions
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: bonus_transactions
+    field: user
+    type: uuid
+    meta:
+      collection: bonus_transactions
+      conditions: null
+      display: related-values
+      display_options:
+        template: '{{phone}}'
+      field: user
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        filter:
+          phone:
+            _nnull: true
+        template: '{{phone}}'
+      readonly: false
+      required: true
+      searchable: true
+      sort: 3
+      special:
+        - m2o
+      translations:
+        - language: ru-RU
+          translation: Гость
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: user
+      table: bonus_transactions
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
+  - collection: bonus_transactions
+    field: type
+    type: string
+    meta:
+      collection: bonus_transactions
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - color: '#6F7546'
+            text: Регистрация
+            value: signup
+          - color: '#C67139'
+            text: День рождения
+            value: birthday
+          - color: '#6F7546'
+            text: Начисление за заказ
+            value: accrual
+          - color: '#8C4C24'
+            text: Списание в заказе
+            value: spend
+          - color: '#A79C8A'
+            text: Сгорание
+            value: expire
+          - color: '#736A58'
+            text: Откат по заказу
+            value: refund
+          - color: '#333721'
+            text: Вручную
+            value: manual
+        showAsDot: false
+      field: type
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - color: '#6F7546'
+            text: Регистрация
+            value: signup
+          - color: '#C67139'
+            text: День рождения
+            value: birthday
+          - color: '#6F7546'
+            text: Начисление за заказ
+            value: accrual
+          - color: '#8C4C24'
+            text: Списание в заказе
+            value: spend
+          - color: '#A79C8A'
+            text: Сгорание
+            value: expire
+          - color: '#736A58'
+            text: Откат по заказу
+            value: refund
+          - color: '#333721'
+            text: Вручную
+            value: manual
+      readonly: true
+      required: false
+      searchable: true
+      sort: 4
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Что
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: type
+      table: bonus_transactions
+      data_type: character varying
+      default_value: manual
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: bonus_transactions
+    field: amount
+    type: integer
+    meta:
+      collection: bonus_transactions
+      conditions: null
+      display: null
+      display_options: null
+      field: amount
+      group: null
+      hidden: false
+      interface: input
+      note: Плюс — начислить, минус — списать
+      options: null
+      readonly: false
+      required: true
+      searchable: true
+      sort: 5
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Баллы
+      validation:
+        amount:
+          _neq: 0
+      validation_message: Не ноль
+      width: half
+    schema:
+      name: amount
+      table: bonus_transactions
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: bonus_transactions
+    field: order
+    type: integer
+    meta:
+      collection: bonus_transactions
+      conditions: null
+      display: related-values
+      display_options:
+        template: '{{number}}'
+      field: order
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{number}} · {{total}} ₽'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 6
+      special:
+        - m2o
+      translations:
+        - language: ru-RU
+          translation: Заказ
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: order
+      table: bonus_transactions
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: orders
+      foreign_key_column: id
+  - collection: bonus_transactions
+    field: expires_at
+    type: date
+    meta:
+      collection: bonus_transactions
+      conditions: null
+      display: null
+      display_options: null
+      field: expires_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: Пусто — по сроку из «Программы лояльности» (у начислений)
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 7
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Сгорают
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: expires_at
+      table: bonus_transactions
+      data_type: date
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: bonus_transactions
+    field: comment
+    type: string
+    meta:
+      collection: bonus_transactions
+      conditions: null
+      display: null
+      display_options: null
+      field: comment
+      group: null
+      hidden: false
+      interface: input
+      note: Гость видит его в истории
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 8
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Комментарий
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: comment
+      table: bonus_transactions
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: bonus_transactions
+    field: user_created
+    type: uuid
+    meta:
+      collection: bonus_transactions
+      conditions: null
+      display: user
+      display_options: null
+      field: user_created
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: null
+      options:
+        template: '{{first_name}} {{last_name}}'
+      readonly: true
+      required: false
+      searchable: true
+      sort: 9
+      special:
+        - user-created
+      translations:
+        - language: ru-RU
+          translation: Провёл
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: user_created
+      table: bonus_transactions
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
   - collection: cakes
     field: id
     type: integer
@@ -2883,6 +3925,36 @@ fields:
       foreign_key_table: null
       foreign_key_column: null
   - collection: catering_page
+    field: grp_formats
+    type: alias
+    meta:
+      collection: catering_page
+      conditions: null
+      display: null
+      display_options: null
+      field: grp_formats
+      group: null
+      hidden: false
+      interface: group-detail
+      note: null
+      options:
+        headerIcon: room_service
+        start: open
+      readonly: false
+      required: false
+      searchable: true
+      sort: 4
+      special:
+        - alias
+        - no-data
+        - group
+      translations:
+        - language: ru-RU
+          translation: Форматы
+      validation: null
+      validation_message: null
+      width: full
+  - collection: catering_page
     field: hero_title
     type: string
     meta:
@@ -3584,6 +4656,51 @@ fields:
       foreign_key_table: null
       foreign_key_column: null
   - collection: catering_page
+    field: request_image
+    type: uuid
+    meta:
+      collection: catering_page
+      conditions: null
+      display: image
+      display_options: null
+      field: request_image
+      group: grp_request
+      hidden: false
+      interface: file-image
+      note: >-
+        Блюдо без фона (PNG с прозрачностью) смотрится лучше всего. Пусто — без
+        картинки
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 6
+      special:
+        - file
+      translations:
+        - language: ru-RU
+          translation: Картинка у формы
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: request_image
+      table: catering_page
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_files
+      foreign_key_column: id
+  - collection: catering_page
     field: gallery
     type: alias
     meta:
@@ -3865,36 +4982,6 @@ fields:
       foreign_key_table: null
       foreign_key_column: null
   - collection: catering_page
-    field: grp_formats
-    type: alias
-    meta:
-      collection: catering_page
-      conditions: null
-      display: null
-      display_options: null
-      field: grp_formats
-      group: null
-      hidden: false
-      interface: group-detail
-      note: null
-      options:
-        headerIcon: room_service
-        start: open
-      readonly: false
-      required: false
-      searchable: true
-      sort: 4
-      special:
-        - alias
-        - no-data
-        - group
-      translations:
-        - language: ru-RU
-          translation: Форматы
-      validation: null
-      validation_message: null
-      width: full
-  - collection: catering_page
     field: formats_title
     type: string
     meta:
@@ -3978,51 +5065,6 @@ fields:
       has_auto_increment: false
       foreign_key_table: null
       foreign_key_column: null
-  - collection: catering_page
-    field: request_image
-    type: uuid
-    meta:
-      collection: catering_page
-      conditions: null
-      display: image
-      display_options: null
-      field: request_image
-      group: grp_request
-      hidden: false
-      interface: file-image
-      note: >-
-        Блюдо без фона (PNG с прозрачностью) смотрится лучше всего. Пусто — без
-        картинки
-      options: null
-      readonly: false
-      required: false
-      searchable: true
-      sort: 6
-      special:
-        - file
-      translations:
-        - language: ru-RU
-          translation: Картинка у формы
-      validation: null
-      validation_message: null
-      width: half
-    schema:
-      name: request_image
-      table: catering_page
-      data_type: uuid
-      default_value: null
-      max_length: null
-      numeric_precision: null
-      numeric_scale: null
-      is_nullable: true
-      is_unique: false
-      is_indexed: false
-      is_primary_key: false
-      is_generated: false
-      generation_expression: null
-      has_auto_increment: false
-      foreign_key_table: directus_files
-      foreign_key_column: id
   - collection: catering_page_files
     field: id
     type: integer
@@ -5986,6 +7028,1043 @@ fields:
       has_auto_increment: false
       foreign_key_table: null
       foreign_key_column: null
+  - collection: directus_users
+    field: guest_divider
+    type: alias
+    meta:
+      collection: directus_users
+      conditions: null
+      display: null
+      display_options: null
+      field: guest_divider
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        icon: loyalty
+        inlineTitle: true
+        title: 'Гость сайта: личный кабинет'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 100
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: directus_users
+    field: phone
+    type: string
+    meta:
+      collection: directus_users
+      conditions: null
+      display: null
+      display_options: null
+      field: phone
+      group: null
+      hidden: false
+      interface: input
+      note: Номер, по которому гость входит. Один номер — один гость
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 101
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Телефон (вход на сайт)
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: phone
+      table: directus_users
+      data_type: character varying
+      default_value: null
+      max_length: 16
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: true
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directus_users
+    field: middle_name
+    type: string
+    meta:
+      collection: directus_users
+      conditions: null
+      display: null
+      display_options: null
+      field: middle_name
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 109
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Отчество
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: middle_name
+      table: directus_users
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directus_users
+    field: birthday
+    type: date
+    meta:
+      collection: directus_users
+      conditions: null
+      display: null
+      display_options: null
+      field: birthday
+      group: null
+      hidden: false
+      interface: datetime
+      note: Гость указывает сам и один раз; исправить может редактор
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 107
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Дата рождения
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: birthday
+      table: directus_users
+      data_type: date
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directus_users
+    field: gender
+    type: string
+    meta:
+      collection: directus_users
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Женский
+            value: female
+          - text: Мужской
+            value: male
+        showAsDot: false
+      field: gender
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Женский
+            value: female
+          - text: Мужской
+            value: male
+      readonly: false
+      required: false
+      searchable: true
+      sort: 110
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Пол
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: gender
+      table: directus_users
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directus_users
+    field: recovery_email
+    type: string
+    meta:
+      collection: directus_users
+      conditions: null
+      display: null
+      display_options: null
+      field: recovery_email
+      group: null
+      hidden: false
+      interface: input
+      note: Настоящая почта гостя. «Email» выше — служебный адрес для входа
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 111
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Email для восстановления
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: recovery_email
+      table: directus_users
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directus_users
+    field: bonus_balance
+    type: integer
+    meta:
+      collection: directus_users
+      conditions: null
+      display: null
+      display_options: null
+      field: bonus_balance
+      group: null
+      hidden: false
+      interface: input
+      note: Считается из «Операций по баллам»
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 103
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Вкусные баллы
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: bonus_balance
+      table: directus_users
+      data_type: integer
+      default_value: 0
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directus_users
+    field: tier
+    type: string
+    meta:
+      collection: directus_users
+      conditions: null
+      display: null
+      display_options: null
+      field: tier
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 104
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Уровень
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: tier
+      table: directus_users
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directus_users
+    field: total_spent
+    type: integer
+    meta:
+      collection: directus_users
+      conditions: null
+      display: null
+      display_options: null
+      field: total_spent
+      group: null
+      hidden: false
+      interface: input
+      note: Выполненные заказы с сайта, деньгами
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 105
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Сумма покупок, ₽
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: total_spent
+      table: directus_users
+      data_type: integer
+      default_value: 0
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directus_users
+    field: birthday_bonus_year
+    type: integer
+    meta:
+      collection: directus_users
+      conditions: null
+      display: null
+      display_options: null
+      field: birthday_bonus_year
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 106
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Подарок ко дню рождения — за год
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: birthday_bonus_year
+      table: directus_users
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directus_users
+    field: guest_since
+    type: timestamp
+    meta:
+      collection: directus_users
+      conditions: null
+      display: datetime
+      display_options: null
+      field: guest_since
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 102
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Гость с
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: guest_since
+      table: directus_users
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directus_users
+    field: bonus_history
+    type: alias
+    meta:
+      collection: directus_users
+      conditions: null
+      display: null
+      display_options: null
+      field: bonus_history
+      group: null
+      hidden: false
+      interface: list-o2m
+      note: null
+      options:
+        enableCreate: true
+        enableSelect: false
+        layout: list
+        sort: '-date_created'
+        template: '{{amount}} · {{type}} · {{comment}} · {{date_created}}'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 112
+      special:
+        - o2m
+      translations:
+        - language: ru-RU
+          translation: Операции по баллам
+      validation: null
+      validation_message: null
+      width: full
+  - collection: directus_users
+    field: guest_orders
+    type: alias
+    meta:
+      collection: directus_users
+      conditions: null
+      display: null
+      display_options: null
+      field: guest_orders
+      group: null
+      hidden: false
+      interface: list-o2m
+      note: null
+      options:
+        enableCreate: false
+        enableSelect: false
+        layout: list
+        sort: '-date_created'
+        template: >-
+          {{number}} · {{status}} · {{total}}, баллами {{bonus_spent}},
+          начислено {{bonus_earned}} · {{date_created}}
+      readonly: true
+      required: false
+      searchable: true
+      sort: 113
+      special:
+        - o2m
+      translations:
+        - language: ru-RU
+          translation: Заказы гостя
+      validation: null
+      validation_message: null
+      width: full
+  - collection: directus_users
+    field: birthday_set_at
+    type: timestamp
+    meta:
+      collection: directus_users
+      conditions: null
+      display: datetime
+      display_options: null
+      field: birthday_set_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 108
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Дата рождения указана
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: birthday_set_at
+      table: directus_users
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: guest_auth_settings
+    field: id
+    type: integer
+    meta:
+      collection: guest_auth_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: guest_auth_settings
+      data_type: integer
+      default_value: nextval('guest_auth_settings_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: guest_auth_settings
+    field: auth_hint
+    type: alias
+    meta:
+      collection: guest_auth_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: auth_hint
+      group: null
+      hidden: false
+      interface: presentation-notice
+      note: null
+      options:
+        color: info
+        icon: phonelink_lock
+        text: >-
+          Код приходит через SMS Aero. Ключи лежат на сервере (SMSAERO_EMAIL и
+          SMSAERO_API_KEY), здесь — только способ и тексты. Код живёт 5 минут,
+          на него 5 попыток; повторно запросить можно через минуту, не больше 5
+          раз в час на номер.
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: guest_auth_settings
+    field: enabled
+    type: boolean
+    meta:
+      collection: guest_auth_settings
+      conditions: null
+      display: boolean
+      display_options: null
+      field: enabled
+      group: null
+      hidden: false
+      interface: boolean
+      note: Выключено — сайт не отправляет коды, кабинет просит позвонить
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 3
+      special:
+        - cast-boolean
+      translations:
+        - language: ru-RU
+          translation: Вход на сайте открыт
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: enabled
+      table: guest_auth_settings
+      data_type: boolean
+      default_value: true
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: guest_auth_settings
+    field: channel
+    type: string
+    meta:
+      collection: guest_auth_settings
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: 'Звонок: код — последние 4 цифры номера'
+            value: call
+          - text: SMS с кодом
+            value: sms
+          - text: 'Мобильная авторизация: подтверждение у оператора, иначе SMS'
+            value: mobile_id
+        showAsDot: false
+      field: channel
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: Звонок дешевле SMS. Если звонок недоступен, сайт сам отправит SMS
+      options:
+        choices:
+          - text: 'Звонок: код — последние 4 цифры номера'
+            value: call
+          - text: SMS с кодом
+            value: sms
+          - text: 'Мобильная авторизация: подтверждение у оператора, иначе SMS'
+            value: mobile_id
+      readonly: false
+      required: true
+      searchable: true
+      sort: 4
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Как отправлять код
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: channel
+      table: guest_auth_settings
+      data_type: character varying
+      default_value: call
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: guest_auth_settings
+    field: fallback_sms
+    type: boolean
+    meta:
+      collection: guest_auth_settings
+      conditions: null
+      display: boolean
+      display_options: null
+      field: fallback_sms
+      group: null
+      hidden: false
+      interface: boolean
+      note: Под полем кода появится «Получить код по SMS»
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 5
+      special:
+        - cast-boolean
+      translations:
+        - language: ru-RU
+          translation: Предлагать SMS, если код не пришёл
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: fallback_sms
+      table: guest_auth_settings
+      data_type: boolean
+      default_value: true
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: guest_auth_settings
+    field: sms_sign
+    type: string
+    meta:
+      collection: guest_auth_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: sms_sign
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Своё имя регистрируется в кабинете SMS Aero. «SMS Aero» — бесплатное,
+        тогда в тексте должно быть название сайта
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 6
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Имя отправителя SMS
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: sms_sign
+      table: guest_auth_settings
+      data_type: character varying
+      default_value: SMS Aero
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: guest_auth_settings
+    field: sms_text
+    type: string
+    meta:
+      collection: guest_auth_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: sms_text
+      group: null
+      hidden: false
+      interface: input
+      note: Обязательно {code} — туда встанет код
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 7
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Текст SMS
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: sms_text
+      table: guest_auth_settings
+      data_type: character varying
+      default_value: 'Код для входа на vkus-com.ru: {code}. Никому его не сообщайте'
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: guest_auth_settings
+    field: hint_call
+    type: text
+    meta:
+      collection: guest_auth_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: hint_call
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: '{phone} — номер гостя'
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 8
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Подсказка при звонке
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: hint_call
+      table: guest_auth_settings
+      data_type: text
+      default_value: >-
+        Сейчас позвоним на {phone}. Отвечать не нужно — введите последние 4
+        цифры номера, с которого звонят.
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: guest_auth_settings
+    field: hint_sms
+    type: text
+    meta:
+      collection: guest_auth_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: hint_sms
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 9
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Подсказка при SMS
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: hint_sms
+      table: guest_auth_settings
+      data_type: text
+      default_value: Отправили SMS с кодом на {phone}.
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: guest_auth_settings
+    field: hint_mobile_id
+    type: text
+    meta:
+      collection: guest_auth_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: hint_mobile_id
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 10
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Подсказка при мобильной авторизации
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: hint_mobile_id
+      table: guest_auth_settings
+      data_type: text
+      default_value: >-
+        Подтвердите вход в запросе, который придёт на {phone}. Если вместо
+        запроса пришло SMS с кодом — введите его здесь.
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: guest_auth_settings
+    field: date_updated
+    type: timestamp
+    meta:
+      collection: guest_auth_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: date_updated
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 11
+      special:
+        - date-updated
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_updated
+      table: guest_auth_settings
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: home
     field: id
     type: integer
@@ -6820,6 +8899,574 @@ fields:
       data_type: character varying
       default_value: null
       max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: loyalty_settings
+    field: id
+    type: integer
+    meta:
+      collection: loyalty_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: loyalty_settings
+      data_type: integer
+      default_value: nextval('loyalty_settings_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: loyalty_settings
+    field: loyalty_hint
+    type: alias
+    meta:
+      collection: loyalty_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: loyalty_hint
+      group: null
+      hidden: false
+      interface: presentation-notice
+      note: null
+      options:
+        color: info
+        icon: loyalty
+        text: >-
+          1 балл = 1 ₽. Баллы начисляются, когда заказ с сайта переведён в
+          «Выполнен», — процентом от суммы, оплаченной деньгами, по уровню
+          гостя. Отменённый заказ возвращает списанные баллы и забирает
+          начисленные. Начислить или списать вручную — запись в «Операциях по
+          баллам».
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: loyalty_settings
+    field: enabled
+    type: boolean
+    meta:
+      collection: loyalty_settings
+      conditions: null
+      display: boolean
+      display_options: null
+      field: enabled
+      group: null
+      hidden: false
+      interface: boolean
+      note: >-
+        Выключено — сайт не показывает баллы, новые не начисляются и не
+        списываются, сгорание на паузе
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 3
+      special:
+        - cast-boolean
+      translations:
+        - language: ru-RU
+          translation: Программа включена
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: enabled
+      table: loyalty_settings
+      data_type: boolean
+      default_value: true
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: loyalty_settings
+    field: program_name
+    type: string
+    meta:
+      collection: loyalty_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: program_name
+      group: null
+      hidden: false
+      interface: input
+      note: Так программа называется на сайте
+      options:
+        placeholder: Вкусные баллы
+      readonly: false
+      required: false
+      searchable: true
+      sort: 4
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Название программы
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: program_name
+      table: loyalty_settings
+      data_type: character varying
+      default_value: Вкусные баллы
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: loyalty_settings
+    field: signup_bonus
+    type: integer
+    meta:
+      collection: loyalty_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: signup_bonus
+      group: null
+      hidden: false
+      interface: input
+      note: Один раз, при первом входе по номеру. 0 — не дарить
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 5
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Баллы за регистрацию
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: signup_bonus
+      table: loyalty_settings
+      data_type: integer
+      default_value: 200
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: loyalty_settings
+    field: points_ttl_days
+    type: integer
+    meta:
+      collection: loyalty_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: points_ttl_days
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Сколько дней живут начисленные баллы; сгорают первыми самые старые. 0 —
+        не сгорают
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 6
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Срок жизни баллов, дней
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: points_ttl_days
+      table: loyalty_settings
+      data_type: integer
+      default_value: 365
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: loyalty_settings
+    field: max_share_percent
+    type: integer
+    meta:
+      collection: loyalty_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: max_share_percent
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Например, 30: заказ на 2 000 ₽ можно оплатить баллами не больше чем на
+        600 ₽
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 7
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Оплатить баллами можно до, % заказа
+      validation:
+        _and:
+          - max_share_percent:
+              _gte: 0
+          - max_share_percent:
+              _lte: 100
+      validation_message: От 0 до 100
+      width: half
+    schema:
+      name: max_share_percent
+      table: loyalty_settings
+      data_type: integer
+      default_value: 30
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: loyalty_settings
+    field: tiers
+    type: json
+    meta:
+      collection: loyalty_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: tiers
+      group: null
+      hidden: false
+      interface: list
+      note: >-
+        Уровень гостя — по сумме всех выполненных заказов с сайта. Процент —
+        сколько баллов возвращается с каждого заказа. Первый уровень — от 0 ₽
+      options:
+        addLabel: Добавить уровень
+        fields:
+          - field: name
+            meta:
+              interface: input
+              options:
+                placeholder: Свой
+              width: third
+            name: Название
+            type: string
+          - field: from
+            meta:
+              interface: input
+              width: third
+            name: От суммы покупок, ₽
+            type: integer
+          - field: percent
+            meta:
+              interface: input
+              width: third
+            name: Баллами, %
+            type: integer
+        template: '{{name}}: от {{from}} ₽ — {{percent}} %'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 8
+      special:
+        - cast-json
+      translations:
+        - language: ru-RU
+          translation: Уровни
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: tiers
+      table: loyalty_settings
+      data_type: json
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: loyalty_settings
+    field: birthday_divider
+    type: alias
+    meta:
+      collection: loyalty_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: birthday_divider
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        icon: cake
+        inlineTitle: true
+        title: День рождения
+      readonly: false
+      required: false
+      searchable: true
+      sort: 9
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: loyalty_settings
+    field: birthday_bonus
+    type: integer
+    meta:
+      collection: loyalty_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: birthday_bonus
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Раз в год, в окне вокруг дня рождения. Действуют до конца окна. 0 — не
+        дарить
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 10
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Баллы ко дню рождения
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: birthday_bonus
+      table: loyalty_settings
+      data_type: integer
+      default_value: 500
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: loyalty_settings
+    field: birthday_window_days
+    type: integer
+    meta:
+      collection: loyalty_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: birthday_window_days
+      group: null
+      hidden: false
+      interface: input
+      note: 3 — за три дня до и три дня после
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 11
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Окно дня рождения, ± дней
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: birthday_window_days
+      table: loyalty_settings
+      data_type: integer
+      default_value: 3
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: loyalty_settings
+    field: birthday_discount_percent
+    type: integer
+    meta:
+      collection: loyalty_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: birthday_discount_percent
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Скидка на заказ с сайта в окне дня рождения (только гостям, которые
+        вошли). 0 — без скидки
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 12
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Скидка именинника, %
+      validation:
+        _and:
+          - birthday_discount_percent:
+              _gte: 0
+          - birthday_discount_percent:
+              _lte: 50
+      validation_message: От 0 до 50
+      width: half
+    schema:
+      name: birthday_discount_percent
+      table: loyalty_settings
+      data_type: integer
+      default_value: 0
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: loyalty_settings
+    field: date_updated
+    type: timestamp
+    meta:
+      collection: loyalty_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: date_updated
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 13
+      special:
+        - date-updated
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_updated
+      table: loyalty_settings
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
@@ -8056,6 +10703,224 @@ fields:
       max_length: null
       numeric_precision: null
       numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: customer
+    type: uuid
+    meta:
+      collection: orders
+      conditions: null
+      display: related-values
+      display_options:
+        template: '{{phone}}'
+      field: customer
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: >-
+        Заказ из кабинета: баллы списываются и начисляются этому гостю. Заказу
+        по телефону можно выбрать гостя — баллы начислятся при «Выполнен»
+      options:
+        filter:
+          phone:
+            _nnull: true
+        template: '{{phone}}'
+      readonly: false
+      required: false
+      searchable: true
+      sort: 20
+      special:
+        - m2o
+      translations:
+        - language: ru-RU
+          translation: Гость (личный кабинет)
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: customer
+      table: orders
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
+  - collection: orders
+    field: bonus_spent
+    type: integer
+    meta:
+      collection: orders
+      conditions: null
+      display: null
+      display_options: null
+      field: bonus_spent
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 21
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Оплачено баллами, ₽
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: bonus_spent
+      table: orders
+      data_type: integer
+      default_value: 0
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: discount
+    type: integer
+    meta:
+      collection: orders
+      conditions: null
+      display: null
+      display_options: null
+      field: discount
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 22
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Скидка именинника, ₽
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: discount
+      table: orders
+      data_type: integer
+      default_value: 0
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: to_pay
+    type: integer
+    meta:
+      collection: orders
+      conditions: null
+      display: null
+      display_options: null
+      field: to_pay
+      group: null
+      hidden: false
+      interface: input
+      note: Сумма минус баллы и скидка — столько взять с гостя
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 23
+      special: null
+      translations:
+        - language: ru-RU
+          translation: К оплате, ₽
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: to_pay
+      table: orders
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: bonus_earned
+    type: integer
+    meta:
+      collection: orders
+      conditions: null
+      display: null
+      display_options: null
+      field: bonus_earned
+      group: null
+      hidden: false
+      interface: input
+      note: Появляется, когда заказ выполнен
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 24
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Начислено баллов
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: bonus_earned
+      table: orders
+      data_type: integer
+      default_value: 0
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
       is_nullable: true
       is_unique: false
       is_indexed: false
@@ -10420,6 +13285,61 @@ fields:
       has_auto_increment: false
       foreign_key_table: null
       foreign_key_column: null
+  - collection: promos
+    field: audience
+    type: string
+    meta:
+      collection: promos
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Всем — на сайте
+            value: all
+          - text: Именинникам — в личном кабинете
+            value: birthday
+        showAsDot: false
+      field: audience
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: >-
+        Именинникам — акция видна только в личном кабинете гостю, у которого
+        день рождения в окне из «Программы лояльности»
+      options:
+        choices:
+          - text: Всем — на сайте
+            value: all
+          - text: Именинникам — в личном кабинете
+            value: birthday
+      readonly: false
+      required: false
+      searchable: true
+      sort: 100
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Кому
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: audience
+      table: promos
+      data_type: character varying
+      default_value: all
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: settings
     field: id
     type: integer
@@ -12243,6 +15163,69 @@ relations:
       constraint_name: afisha_place_foreign
       on_update: NO ACTION
       on_delete: SET NULL
+  - collection: bonus_transactions
+    field: user
+    related_collection: directus_users
+    meta:
+      junction_field: null
+      many_collection: bonus_transactions
+      many_field: user
+      one_allowed_collections: null
+      one_collection: directus_users
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: bonus_history
+      sort_field: null
+    schema:
+      table: bonus_transactions
+      column: user
+      foreign_key_table: directus_users
+      foreign_key_column: id
+      constraint_name: bonus_transactions_user_foreign
+      on_update: NO ACTION
+      on_delete: CASCADE
+  - collection: bonus_transactions
+    field: order
+    related_collection: orders
+    meta:
+      junction_field: null
+      many_collection: bonus_transactions
+      many_field: order
+      one_allowed_collections: null
+      one_collection: orders
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: bonus_transactions
+      column: order
+      foreign_key_table: orders
+      foreign_key_column: id
+      constraint_name: bonus_transactions_order_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: bonus_transactions
+    field: user_created
+    related_collection: directus_users
+    meta:
+      junction_field: null
+      many_collection: bonus_transactions
+      many_field: user_created
+      one_allowed_collections: null
+      one_collection: directus_users
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: bonus_transactions
+      column: user_created
+      foreign_key_table: directus_users
+      foreign_key_column: id
+      constraint_name: bonus_transactions_user_created_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
   - collection: cakes
     field: photo
     related_collection: directus_files
@@ -12661,6 +15644,27 @@ relations:
       foreign_key_table: places
       foreign_key_column: id
       constraint_name: orders_place_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
+  - collection: orders
+    field: customer
+    related_collection: directus_users
+    meta:
+      junction_field: null
+      many_collection: orders
+      many_field: customer
+      one_allowed_collections: null
+      one_collection: directus_users
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: guest_orders
+      sort_field: null
+    schema:
+      table: orders
+      column: customer
+      foreign_key_table: directus_users
+      foreign_key_column: id
+      constraint_name: orders_customer_foreign
       on_update: NO ACTION
       on_delete: SET NULL
   - collection: places_files

@@ -92,3 +92,18 @@ services:
       # в начало заголовка, не учитывается. По умолчанию Directus (`true`)
       # берёт самый левый, а его подделает кто угодно.
       IP_TRUST_PROXY: ${IP_TRUST_PROXY:-1}
+
+      # Sign-in to the guest account by phone (`guest-auth`): the SMS Aero
+      # account (email and API key from smsaero.ru → «Настройки» → «API»).
+      # Empty — the account page says to call. `GUEST_AUTH_DEBUG=true` sends
+      # nothing and writes codes to this log (with `GUEST_AUTH_DEBUG_CODE` —
+      # one fixed code): for a local stand only, never in production.
+      # Вход в личный кабинет по телефону (`guest-auth`): аккаунт SMS Aero
+      # (почта и API-ключ из smsaero.ru → «Настройки» → «API»). Пусто — кабинет
+      # просит позвонить. `GUEST_AUTH_DEBUG=true` ничего не отправляет и пишет
+      # коды в этот лог (с `GUEST_AUTH_DEBUG_CODE` — один постоянный код):
+      # только для локального стенда, на боевом — никогда.
+      SMSAERO_EMAIL: ${SMSAERO_EMAIL:-}
+      SMSAERO_API_KEY: ${SMSAERO_API_KEY:-}
+      GUEST_AUTH_DEBUG: ${GUEST_AUTH_DEBUG:-false}
+      GUEST_AUTH_DEBUG_CODE: ${GUEST_AUTH_DEBUG_CODE:-}

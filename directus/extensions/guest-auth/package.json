@@ -1,0 +1,12 @@
+{
+  "name": "directus-extension-guest-auth",
+  "version": "1.0.0",
+  "description": "Guests sign in by phone (SMS Aero: call, SMS, Mobile ID) and get a Directus session / вход гостей по телефону и сессия Directus",
+  "type": "module",
+  "directus:extension": {
+    "type": "endpoint",
+    "path": "index.js",
+    "source": "index.js",
+    "host": "^11.0.0"
+  }
+}

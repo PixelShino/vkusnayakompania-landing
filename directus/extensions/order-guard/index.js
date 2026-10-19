@@ -93,8 +93,15 @@ const freshNumber = () => {
   return `${day}-${String(Math.floor(1000 + Math.random() * 9000))}`;
 };
 
-export default ({ filter, action }, { services, logger }) => {
+// a guest signed in on the site (the `guest-auth` extension) carries this role
+// гость, вошедший на сайте (расширение `guest-auth`), несёт эту роль
+const GUEST_ROLE = 'Гость';
+
+export default ({ filter, action }, { services, logger, emitter }) => {
   const hits = new Map();
+  const isGuest = async (accountability, database) =>
+    Boolean(accountability?.user && accountability.role) &&
+    (await database('directus_roles').where({ id: accountability.role }).first('name'))?.name === GUEST_ROLE;
 
   const tooMany = (ip) => {
     if (!ip) return false;
@@ -109,9 +116,12 @@ export default ({ filter, action }, { services, logger }) => {
   };
 
   filter('orders.items.create', async (payload, _meta, { accountability, database }) => {
-    // editors entering a phone order and internal calls pass as they are
-    // редактор, вбивающий заказ по телефону, и внутренние вызовы проходят как есть
-    if (!accountability || accountability.user) return payload;
+    // editors entering a phone order and internal calls pass as they are; a
+    // guest signed in on the site is checked like the public and owns the order
+    // редактор, вбивающий заказ по телефону, и внутренние вызовы проходят как
+    // есть; вошедший на сайте гость проверяется как публичный и владеет заказом
+    const customer = (await isGuest(accountability, database)) ? accountability.user : null;
+    if (!accountability || (accountability.user && !customer)) return payload;
 
     if (tooMany(accountability.ip))
       throw new OrderError('Слишком много заказов подряд. Позвоните нам — примем по телефону.', 429, 'REQUESTS_EXCEEDED');
@@ -200,6 +210,21 @@ export default ({ filter, action }, { services, logger }) => {
         ? `На сайте гость видел ${rub(seen)}, по текущим ценам ${rub(total)} — уточнить при звонке.`
         : null;
 
+    // «Вкусные баллы» (the `loyalty` extension) decide how much of the order a
+    // signed-in guest pays with points and the birthday discount; without that
+    // extension nothing is taken off the total
+    // «Вкусные баллы» (расширение `loyalty`) решают, сколько заказа вошедший
+    // гость оплачивает баллами, и скидку именинника; без этого расширения из
+    // суммы ничего не вычитается
+    const loyalty = customer
+      ? await emitter.emitFilter(
+          'orders.checkout',
+          { customer, total, requested: payload.bonus_spent, bonus_spent: 0, discount: 0, note: null },
+          { collection: 'orders' },
+          { database, accountability },
+        )
+      : null;
+
     let number = /^\d{4}-\d{4}$/.test(String(payload.number ?? '')) ? payload.number : freshNumber();
     if (await database('orders').where({ number }).first('id')) number = `${number}-${Math.floor(Math.random() * 90 + 10)}`;
 
@@ -218,7 +243,13 @@ export default ({ filter, action }, { services, logger }) => {
       items,
       total,
       consent: true,
-      manager_note: note,
+      manager_note: [note, loyalty?.note].filter(Boolean).join('\n') || null,
+      ...(customer && {
+        customer,
+        bonus_spent: loyalty.bonus_spent,
+        discount: loyalty.discount,
+        to_pay: total - loyalty.discount - loyalty.bonus_spent,
+      }),
     };
   });
 
