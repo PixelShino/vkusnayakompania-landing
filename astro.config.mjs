@@ -17,7 +17,9 @@ export default defineConfig({
   // SITE/BASE_PATH из окружения: превью живёт на другом хосте
   site: process.env.SITE ?? 'https://vkus-com.ru',
   base: process.env.BASE_PATH,
-  integrations: [sitemap(), react()],
+  // the guest account is personal and `noindex`: it stays out of the sitemap
+  // личный кабинет — личное и `noindex`: в карту сайта не попадает
+  integrations: [sitemap({ filter: (page) => !new URL(page).pathname.endsWith('/account/') }), react()],
   build: { inlineStylesheets: 'always' },
   image: {
     remotePatterns: directus

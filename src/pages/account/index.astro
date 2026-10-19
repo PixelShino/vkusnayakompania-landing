@@ -1,0 +1,364 @@
+---
+/**
+ * The guest account, `/account/`: a static page whose data comes from the
+ * browser. Signed out — sign-in by phone beside what the points give; signed
+ * in — the balance, the tier and the spending on an ink band, the guest's
+ * offers, then orders, points and the profile in tabs. The page script
+ * (`src/scripts/account.ts`) asks `GET /guest-auth/me` once and draws
+ * everything; every state has its own view: loading, signed out, the session
+ * that has ended, no connection, an account without orders or points.
+ * Without `PUBLIC_DIRECTUS_URL` the page says the account is not open yet.
+ * Личный кабинет гостя, `/account/`: статическая страница, данные приходят в
+ * браузере. Не вошёл — вход по телефону рядом с тем, что дают баллы; вошёл —
+ * баланс, уровень и траты на чернильной полосе, акции гостя, затем заказы,
+ * баллы и профиль во вкладках. Скрипт страницы (`src/scripts/account.ts`)
+ * один раз спрашивает `GET /guest-auth/me` и рисует всё; у каждого состояния
+ * свой вид: загрузка, не вошёл, сессия закончилась, нет связи, кабинет без
+ * заказов и баллов. Без `PUBLIC_DIRECTUS_URL` страница говорит, что кабинет
+ * ещё не открыт.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Icon from '../../components/Icon.astro';
+import LoginForm from '../../components/account/LoginForm.astro';
+import ProgramFacts from '../../components/account/ProgramFacts.astro';
+import { BASE } from '../../lib/base.ts';
+import { BRAND } from '../../data/site.ts';
+import { getContent, typo } from '../../lib/content.ts';
+import '../../styles/catalog.css';
+import '../../styles/account.css';
+
+const content = await getContent();
+const { settings, places, loyalty, promos, birthdayPromos, catalog } = content;
+const api = (import.meta.env.PUBLIC_DIRECTUS_URL as string | undefined)?.replace(/\/+$/, '') ?? '';
+
+const title = `Личный кабинет — ${loyalty.name} | ${BRAND.name}`;
+const description = `${loyalty.name}: баллы за заказы с сайта, подарок ко дню рождения и история заказов. Вход по номеру телефона, без пароля.`;
+const catalogHref = catalog.count > 0 ? `${BASE}catalog/` : null;
+const top = loyalty.tiers.at(-1)?.percent ?? 0;
+
+// what the script needs and the page already knows: the programme as built,
+// the offers, the venues by id; the guest's own data comes from the API
+// что нужно скрипту и уже знает страница: программа на момент сборки, акции,
+// точки по id; данные самого гостя приходят из API
+const data = {
+  api,
+  program: loyalty,
+  catalog: catalogHref,
+  phone: settings.phone,
+  phoneHref: settings.phoneHref,
+  places: Object.fromEntries(places.map((place) => [place.id, place.name])),
+  promos: promos.map((promo) => ({ title: promo.title, text: promo.text, place: promo.place?.name ?? null, until: promo.until ?? null })),
+  birthdayPromos: birthdayPromos.map((promo) => ({ title: promo.title, text: promo.text, place: promo.place?.name ?? null, until: promo.until ?? null })),
+};
+---
+
+<BaseLayout content={content} title={title} description={description} noindex stickyBar={false} landing={false}>
+  <Header content={content} over={false} />
+
+  <main id="main" class="acc" tabindex="-1">
+    <section class="container acc-head" aria-labelledby="acc-title">
+      <nav class="crumbs" aria-label="Вы здесь">
+        <a href={BASE}>Главная</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">Личный кабинет</span>
+      </nav>
+      <div class="acc-head__row">
+        <span class="mark acc-head__mark" aria-hidden="true"></span>
+        <h1 class="display-caps acc-head__title" id="acc-title" tabindex="-1" data-title>Личный кабинет</h1>
+        <p class="lead acc-head__lead" data-lead>
+          {typo(`«${loyalty.name}» за каждый заказ с сайта: до ${top} % возвращается баллами, 1 балл = 1 ₽.`)}
+        </p>
+        <p class="acc-head__who" data-who hidden>
+          <span class="tnum" data-who-phone></span>
+          <button type="button" class="tlink acc-head__out" data-logout>
+            <Icon name="logout" />
+            Выйти
+          </button>
+        </p>
+      </div>
+    </section>
+
+    {
+      !api ? (
+        <section class="container acc-off" aria-label="Кабинет недоступен">
+          <div class="acc-off__panel">
+            <Icon name="lock" />
+            <p class="display acc-off__title">Кабинет скоро откроется</p>
+            <p>{typo('Баллы и вход по номеру ещё настраиваем. Заказ можно оформить в каталоге или по телефону.')}</p>
+            <div class="acc-off__actions">
+              {catalogHref && <a class="btn btn--primary" href={catalogHref}>Открыть каталог</a>}
+              <a class="btn btn--secondary" href={settings.phoneHref}>Позвонить {settings.phone}</a>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <>
+          <noscript>
+            <section class="container acc-off">
+              <div class="acc-off__panel">
+                <p class="display acc-off__title">Кабинету нужен JavaScript</p>
+                <p>Включите его в браузере или позвоните нам: {settings.phone}.</p>
+              </div>
+            </section>
+          </noscript>
+
+          {/* ── не вошёл ───────────────────────────────────────────────── */}
+          <section class="container acc-login" data-view="login" hidden aria-label="Вход в кабинет">
+            <div class="acc-login__side">
+              <div class="acc-sheet">
+                <h2 class="acc-h2" id="login-title">Вход по номеру</h2>
+                <p class="acc-notice" data-expired hidden>
+                  <Icon name="info" />
+                  <span>Сессия закончилась — войдите снова. Баллы и заказы на месте.</span>
+                </p>
+                <LoginForm id="acc" settings={settings} />
+              </div>
+              {/* what the account holds besides the points: the reason to sign in even without a gift
+                  что в кабинете кроме баллов: причина войти и без подарка */}
+              <div class="acc-perks">
+                <p class="acc-perks__title" id="perks-title">Что будет в кабинете</p>
+                <ul class="acc-perks__list" role="list" aria-labelledby="perks-title">
+                  <li><Icon name="bill" /><span>{typo('Заказы с сайта и их статус — от «Принят» до «Выполнен»')}</span></li>
+                  <li><Icon name="repeat" /><span>{typo('Повтор любимого заказа в одно касание')}</span></li>
+                  <li><Icon name="wallet" /><span>{typo('Баллы: откуда пришли и когда сгорают')}</span></li>
+                  <li>
+                    <Icon name="gift" />
+                    <span>{typo(loyalty.birthdayBonus > 0 ? 'Подарок и акции ко дню рождения' : 'Акции кафе для гостей')}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <ProgramFacts program={loyalty} id="facts" />
+          </section>
+
+          {/* ── загрузка ───────────────────────────────────────────────── */}
+          <div class="acc-loading" data-view="loading" aria-busy="true" aria-label="Загружаем кабинет">
+            <div class="strip-ink acc-band acc-band--ghost">
+              <div class="container acc-band__grid">
+                <span class="acc-ghost" />
+                <span class="acc-ghost" />
+                <span class="acc-ghost" />
+              </div>
+            </div>
+            <div class="container acc-ghost-rows">
+              <span class="acc-ghost acc-ghost--line" />
+              <span class="acc-ghost acc-ghost--row" />
+              <span class="acc-ghost acc-ghost--row" />
+            </div>
+          </div>
+
+          {/* ── нет связи ──────────────────────────────────────────────── */}
+          <section class="container acc-off" data-view="error" hidden aria-labelledby="acc-error-title">
+            <div class="acc-off__panel" role="alert">
+              <Icon name="wifi-off" />
+              <p class="display acc-off__title" id="acc-error-title">Кабинет не загрузился</p>
+              <p data-error-text>Нет связи с сервером. Проверьте интернет и попробуйте ещё раз.</p>
+              <div class="acc-off__actions">
+                <button type="button" class="btn btn--primary" data-retry>Попробовать ещё раз</button>
+                <a class="btn btn--secondary" href={settings.phoneHref}>Позвонить {settings.phone}</a>
+              </div>
+            </div>
+          </section>
+
+          {/* ── кабинет ────────────────────────────────────────────────── */}
+          <div data-view="account" hidden>
+            <div class="container acc-welcome" data-welcome hidden>
+              <p class="acc-notice acc-notice--olive">
+                <Icon name="gift" />
+                <span data-welcome-text></span>
+              </p>
+            </div>
+            <section class="strip-ink acc-band" aria-label="Баллы, уровень и траты">
+              <div class="container acc-band__grid">
+                <div class="acc-cell acc-cell--balance">
+                  <p class="label" data-program-name>{loyalty.name}</p>
+                  <p class="acc-balance">
+                    <span class="display tnum" data-balance>0</span>
+                    <span class="acc-balance__word" data-balance-word>баллов</span>
+                  </p>
+                  <p class="acc-cell__note" data-balance-note>1 балл = 1 ₽ при оплате заказа на сайте</p>
+                  <p class="acc-burn" data-burn hidden>
+                    <Icon name="fire" />
+                    <span data-burn-text></span>
+                  </p>
+                </div>
+                <div class="acc-cell">
+                  <p class="label">Уровень</p>
+                  <p class="acc-tier">
+                    <span class="display" data-tier></span>
+                    <span class="acc-tier__pct tnum" data-tier-pct></span>
+                  </p>
+                  <div class="acc-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Путь до следующего уровня" data-progress>
+                    <span class="acc-progress__fill" data-progress-fill></span>
+                  </div>
+                  <p class="acc-cell__note" data-next></p>
+                </div>
+                <div class="acc-cell">
+                  <p class="label">Траты на сайте</p>
+                  <dl class="acc-spend">
+                    <div>
+                      <dt data-month-label>В этом месяце</dt>
+                      <dd class="display tnum" data-month>0 ₽</dd>
+                    </div>
+                    <div>
+                      <dt>Всего</dt>
+                      <dd class="display tnum" data-spent>0 ₽</dd>
+                    </div>
+                  </dl>
+                  <p class="acc-cell__note" data-pending hidden></p>
+                </div>
+              </div>
+            </section>
+
+            <section class="container acc-offers" aria-labelledby="offers-title" data-offers hidden>
+              <h2 class="acc-h2" id="offers-title">Ваши акции</h2>
+              <div class="acc-offers__grid" data-offers-list></div>
+            </section>
+
+            <section class="container acc-main" aria-label="Заказы, баллы и профиль">
+              <div class="tabs acc-tabs" role="tablist" aria-label="Разделы кабинета">
+                <button type="button" class="tab" role="tab" id="tab-orders" aria-controls="panel-orders" aria-selected="true" data-tab="orders">
+                  Заказы <span class="acc-tabs__n tnum" data-orders-n></span>
+                </button>
+                <button type="button" class="tab" role="tab" id="tab-points" aria-controls="panel-points" aria-selected="false" tabindex="-1" data-tab="points">
+                  Баллы
+                </button>
+                <button type="button" class="tab" role="tab" id="tab-profile" aria-controls="panel-profile" aria-selected="false" tabindex="-1" data-tab="profile">
+                  Профиль <span class="acc-tabs__dot" data-profile-dot hidden aria-label="(не заполнен)"></span>
+                </button>
+              </div>
+
+              <div class="acc-panel" role="tabpanel" id="panel-orders" aria-labelledby="tab-orders" tabindex="0" data-panel="orders">
+                <ul class="acc-orders" role="list" data-orders></ul>
+                <div class="acc-empty" data-orders-empty hidden>
+                  <Icon name="cloche" />
+                  <p class="display acc-empty__title">Заказов пока нет</p>
+                  <p>{typo('Закажите с сайта — баллы начислим, когда заказ будет выполнен. Здесь появятся его статус и состав, а повторить любимое можно в одно касание.')}</p>
+                  {catalogHref && <a class="btn btn--primary" href={catalogHref}>Открыть каталог</a>}
+                </div>
+              </div>
+
+              <div class="acc-panel" role="tabpanel" id="panel-points" aria-labelledby="tab-points" tabindex="0" data-panel="points" hidden>
+                <div class="acc-points">
+                  <div class="acc-points__main">
+                    <p class="acc-notice acc-expiring" data-expiring hidden></p>
+                    <ul class="acc-txs" role="list" data-txs></ul>
+                    <div class="acc-empty" data-txs-empty hidden>
+                      <Icon name="wallet" />
+                      <p class="display acc-empty__title">Баллов пока нет</p>
+                      <p>{typo('Первые придут за выполненный заказ с сайта.')}</p>
+                    </div>
+                  </div>
+                  <ProgramFacts program={loyalty} id="rules" title="Как работают баллы" />
+                </div>
+              </div>
+
+              <div class="acc-panel" role="tabpanel" id="panel-profile" aria-labelledby="tab-profile" tabindex="0" data-panel="profile" hidden>
+                <form class="acc-profile" data-profile novalidate aria-label="Профиль">
+                  <fieldset class="fs">
+                    <legend class="fs__legend">Как к вам обращаться</legend>
+                    <div class="acc-profile__names">
+                      <div class="field">
+                        <label for="pf-first">Имя</label>
+                        <input id="pf-first" name="first_name" autocomplete="given-name" maxlength="60" aria-describedby="pf-first-err" />
+                        <p class="field__err" id="pf-first-err" data-err="first_name" hidden></p>
+                      </div>
+                      <div class="field">
+                        <label for="pf-last">Фамилия <span class="field__opt">необязательно</span></label>
+                        <input id="pf-last" name="last_name" autocomplete="family-name" maxlength="60" aria-describedby="pf-last-err" />
+                        <p class="field__err" id="pf-last-err" data-err="last_name" hidden></p>
+                      </div>
+                      <div class="field">
+                        <label for="pf-middle">Отчество <span class="field__opt">необязательно</span></label>
+                        <input id="pf-middle" name="middle_name" autocomplete="additional-name" maxlength="60" aria-describedby="pf-middle-err" />
+                        <p class="field__err" id="pf-middle-err" data-err="middle_name" hidden></p>
+                      </div>
+                    </div>
+                  </fieldset>
+
+                  <fieldset class="fs">
+                    <legend class="fs__legend">О вас</legend>
+                    <div class="acc-profile__pair">
+                      <div class="field" data-birthday-field>
+                        <label for="pf-birthday">Дата рождения</label>
+                        <input id="pf-birthday" name="birthday" type="date" autocomplete="bday" aria-describedby="pf-birthday-hint pf-birthday-err" />
+                        <div class="acc-locked" data-birthday-locked hidden>
+                          <input
+                            id="pf-birthday-text"
+                            type="text"
+                            readonly
+                            hidden
+                            data-birthday-text
+                            aria-label="Дата рождения"
+                            aria-describedby="pf-birthday-hint"
+                          />
+                          <Icon name="lock" />
+                        </div>
+                        <p class="field__hint" id="pf-birthday-hint" data-birthday-hint></p>
+                        <p class="field__err" id="pf-birthday-err" data-err="birthday" hidden></p>
+                      </div>
+                      <div class="field">
+                        <span class="acc-profile__label" id="pf-gender-label">Пол</span>
+                        <div class="seg seg--3" role="radiogroup" aria-labelledby="pf-gender-label">
+                          <label class="seg__opt"><input type="radio" name="gender" value="female" /><span>Женский</span></label>
+                          <label class="seg__opt"><input type="radio" name="gender" value="male" /><span>Мужской</span></label>
+                          <label class="seg__opt"><input type="radio" name="gender" value="" /><span>Не указывать</span></label>
+                        </div>
+                      </div>
+                    </div>
+                  </fieldset>
+
+                  <fieldset class="fs">
+                    <legend class="fs__legend">Связь</legend>
+                    <div class="acc-profile__pair">
+                      <div class="field">
+                        <label for="pf-phone">Телефон для входа</label>
+                        <div class="acc-locked">
+                          <input id="pf-phone" name="phone" type="tel" readonly aria-describedby="pf-phone-hint" />
+                          <Icon name="lock" />
+                        </div>
+                        <p class="field__hint" id="pf-phone-hint">Сменить номер — позвоните нам: перенесём кабинет и баллы</p>
+                      </div>
+                      <div class="field">
+                        <label for="pf-email">Email для восстановления <span class="field__opt">необязательно</span></label>
+                        <input id="pf-email" name="recovery_email" type="email" autocomplete="email" maxlength="120" inputmode="email" aria-describedby="pf-email-hint pf-email-err" />
+                        <p class="field__hint" id="pf-email-hint">Если смените номер, по этой почте подтвердим, что кабинет ваш</p>
+                        <p class="field__err" id="pf-email-err" data-err="recovery_email" hidden></p>
+                      </div>
+                    </div>
+                  </fieldset>
+
+                  <div class="alert" data-profile-error role="alert" hidden>
+                    <p class="alert__title">Не сохранилось</p>
+                    <p data-profile-error-text></p>
+                  </div>
+
+                  <div class="acc-profile__foot">
+                    <button type="submit" class="btn btn--primary" data-submit>
+                      <span data-submit-label>Сохранить</span>
+                    </button>
+                    <p class="acc-saved" data-saved role="status" aria-live="polite"></p>
+                    <button type="button" class="tlink acc-profile__out" data-logout>
+                      <Icon name="logout" />
+                      Выйти из кабинета
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </section>
+          </div>
+        </>
+      )
+    }
+  </main>
+
+  <Footer content={content} base={BASE} />
+  <p class="sr-only" aria-live="polite" data-announce></p>
+  <script type="application/json" id="account-data" set:html={JSON.stringify(data)} is:inline />
+</BaseLayout>
+
+<script>
+  import '../../scripts/account';
+</script>

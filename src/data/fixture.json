@@ -5442,5 +5442,32 @@
       "featured": false,
       "format": null
     }
-  ]
+  ],
+  "loyalty_settings": {
+    "enabled": true,
+    "program_name": "Вкусные баллы",
+    "signup_bonus": 200,
+    "points_ttl_days": 365,
+    "max_share_percent": 30,
+    "tiers": [
+      {
+        "name": "Знакомый",
+        "from": 0,
+        "percent": 3
+      },
+      {
+        "name": "Свой",
+        "from": 10000,
+        "percent": 5
+      },
+      {
+        "name": "Друг дома",
+        "from": 30000,
+        "percent": 7
+      }
+    ],
+    "birthday_bonus": 500,
+    "birthday_window_days": 3,
+    "birthday_discount_percent": 0
+  }
 }

@@ -1,0 +1,82 @@
+---
+/**
+ * How «Вкусные баллы» work, in the programme's own numbers from the admin:
+ * a numbered ledger of four facts and the ladder of tiers. Beside the sign-in
+ * form it is the reason to sign in; in the «Баллы» tab — the rules. Every
+ * figure comes from «Программа лояльности»: a fact with a zero (no welcome
+ * points, no birthday gift) is not printed at all.
+ * Как работают «Вкусные баллы» — числами самой программы из админки:
+ * нумерованный реестр из четырёх фактов и лестница уровней. Рядом с формой
+ * входа это причина войти, во вкладке «Баллы» — правила. Каждое число — из
+ * «Программы лояльности»: факт с нулём (нет приветственных баллов, нет подарка
+ * ко дню рождения) не печатается вовсе.
+ */
+import { typo } from '../../lib/content.ts';
+import { plural, points, type Program } from '../../lib/loyalty.ts';
+
+interface Props {
+  program: Program;
+  /** заголовок блока; во вкладке «Баллы» — «Как работают баллы» */
+  title?: string;
+  id: string;
+}
+
+const { program, title = 'Как копятся баллы', id } = Astro.props;
+const rub = (n: number) => `${new Intl.NumberFormat('ru-RU').format(n)} ₽`;
+const low = program.tiers[0]?.percent ?? 0;
+const high = program.tiers.at(-1)?.percent ?? low;
+const percents = low === high ? `${low} %` : `${low}–${high} %`;
+const years = program.ttlDays && program.ttlDays % 365 === 0 ? program.ttlDays / 365 : 0;
+const ttl = program.ttlDays ? (years ? (years === 1 ? 'год' : plural(years, 'год', 'года', 'лет')) : plural(program.ttlDays, 'день', 'дня', 'дней')) : null;
+const when = program.birthdayWindow ? `за ${plural(program.birthdayWindow, 'день', 'дня', 'дней')} до праздника` : 'в сам день рождения';
+
+const facts = [
+  program.signupBonus > 0 && {
+    title: `${points(program.signupBonus)} за первый вход`,
+    text: 'Начислим сразу, как только войдёте по номеру.',
+  },
+  {
+    title: `${percents} заказа возвращаются баллами`,
+    text: 'Считаем от суммы, оплаченной деньгами, когда заказ выполнен. Процент растёт с уровнем.',
+  },
+  program.maxSharePercent > 0 && {
+    title: `Баллами — до ${program.maxSharePercent} % заказа`,
+    text: `1 балл = 1 ₽. Списываются в корзине при оформлении.${ttl ? ` Баллы живут ${ttl}.` : ''}`,
+  },
+  program.birthdayBonus > 0 && {
+    title: `${points(program.birthdayBonus)} ко дню рождения`,
+    text: `Укажите дату в профиле заранее — подарок придёт ${when}${
+      program.birthdayDiscount ? `, а один заказ в эти дни — со скидкой ${program.birthdayDiscount} %` : ''
+    }.`,
+  },
+].filter(Boolean) as { title: string; text: string }[];
+---
+
+<section class="facts-l" aria-labelledby={`${id}-title`}>
+  <h2 class="acc-h2" id={`${id}-title`}>{title}</h2>
+  <ol class="facts-l__list" role="list">
+    {
+      facts.map((fact, i) => (
+        <li class="facts-l__item">
+          <span class="facts-l__n display tnum" aria-hidden="true">
+            {String(i + 1).padStart(2, '0')}
+          </span>
+          <p class="facts-l__title">{typo(fact.title)}</p>
+          <p class="facts-l__text">{typo(fact.text)}</p>
+        </li>
+      ))
+    }
+  </ol>
+
+  <div class="ladder" role="group" aria-label="Уровни программы">
+    {
+      program.tiers.map((tier, i) => (
+        <div class="ladder__step" data-tier-step={i}>
+          <p class="ladder__name">{tier.name}</p>
+          <p class="ladder__pct display tnum">{tier.percent}&thinsp;%</p>
+          <p class="ladder__from tnum">{tier.from ? `от ${rub(tier.from)} покупок` : 'с первого заказа'}</p>
+        </div>
+      ))
+    }
+  </div>
+</section>

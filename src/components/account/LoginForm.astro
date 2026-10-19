@@ -1,0 +1,108 @@
+---
+/**
+ * Sign-in by phone, no password: the number, then the code. One markup for the
+ * account page and the cart drawer; `src/scripts/account-login.ts` drives it
+ * (the mask, the timer, the call→SMS switch, the operator's confirmation).
+ * Without the account's address (`PUBLIC_DIRECTUS_URL` is empty) the parent
+ * does not render it at all.
+ * Вход по телефону без пароля: номер, затем код. Одна разметка для кабинета и
+ * корзины; ведёт её `src/scripts/account-login.ts` (маска, таймер, переход со
+ * звонка на SMS, подтверждение у оператора). Без адреса кабинета
+ * (`PUBLIC_DIRECTUS_URL` пуст) родитель её не рисует вовсе.
+ */
+import Icon from '../Icon.astro';
+import type { Content } from '../../lib/content.ts';
+import '../../styles/login.css';
+
+interface Props {
+  /** префикс id полей: на странице корзины и кабинета формы не должны совпасть */
+  id: string;
+  settings: Content['settings'];
+  /** подпись кнопки входа: в корзине — «Войти и вернуться к заказу» */
+  submitLabel?: string;
+}
+
+const { id, settings, submitLabel = 'Войти' } = Astro.props;
+---
+
+<form class="login" data-login novalidate aria-label="Вход по номеру телефона">
+  <div class="login__step" data-login-step="phone">
+    <div class="field">
+      <label for={`${id}-phone`}>Номер телефона</label>
+      <input
+        id={`${id}-phone`}
+        name="phone"
+        type="tel"
+        inputmode="tel"
+        autocomplete="tel"
+        placeholder="+7 (___) ___-__-__"
+        required
+        aria-describedby={`${id}-phone-hint ${id}-phone-err`}
+      />
+      <p class="field__hint" id={`${id}-phone-hint`}>Пароль не нужен: пришлём код</p>
+      <p class="field__err" id={`${id}-phone-err`} data-err="phone" hidden></p>
+    </div>
+    <label class="consent">
+      <input type="checkbox" name="consent" aria-describedby={`${id}-consent-err`} />
+      <span>
+        Согласен на обработку персональных данных для личного кабинета
+        {
+          settings.policy && (
+            <>
+              {' '}по{' '}
+              <a href={settings.policy.href} target="_blank" rel="noopener">
+                политике конфиденциальности
+              </a>
+            </>
+          )
+        }
+      </span>
+    </label>
+    <p class="field__err login__consent-err" id={`${id}-consent-err`} data-err="consent" hidden></p>
+    <button type="submit" class="btn btn--primary btn--block login__submit" data-submit>
+      <span data-submit-label>Получить код</span>
+    </button>
+  </div>
+
+  <div class="login__step" data-login-step="code" hidden>
+    <p class="login__sent">
+      <Icon name="smartphone" />
+      <span data-hint aria-live="polite"></span>
+    </p>
+    <div class="field">
+      <label for={`${id}-code`} data-code-label>Код</label>
+      <input
+        id={`${id}-code`}
+        name="code"
+        class="login__code tnum"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        pattern="[0-9]*"
+        maxlength="4"
+        aria-describedby={`${id}-code-err`}
+      />
+      <p class="field__err" id={`${id}-code-err`} data-err="code" hidden></p>
+    </div>
+    <p class="login__wait" data-wait hidden>
+      <span class="login__pulse" aria-hidden="true"></span>
+      Ждём подтверждения на телефоне…
+    </p>
+    <button type="submit" class="btn btn--primary btn--block login__submit" data-submit>
+      <span data-submit-label>{submitLabel}</span>
+    </button>
+    <div class="login__more">
+      <span class="login__timer tnum" data-timer aria-live="off"></span>
+      <button type="button" class="tlink" data-resend hidden>Прислать код ещё раз</button>
+      <button type="button" class="tlink" data-sms hidden>Получить код по SMS</button>
+      <button type="button" class="tlink" data-change>Другой номер</button>
+    </div>
+  </div>
+
+  <div class="alert" data-login-error role="alert" hidden>
+    <p class="alert__title" data-error-title>Не получилось</p>
+    <p data-error-text></p>
+    <div class="alert__actions">
+      <a class="btn btn--secondary btn--sm" href={settings.phoneHref}>Позвонить {settings.phone}</a>
+    </div>
+  </div>
+</form>

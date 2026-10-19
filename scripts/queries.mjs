@@ -75,6 +75,11 @@ export const QUERIES = {
   )}`,
   catering_steps: `/items/catering_steps?${q('id,sort,title,text,contacts', '&sort=sort,id')}`,
   catering_faq: `/items/catering_faq?${q('id,status,sort,topic,question,answer,featured,format', '&sort=sort,id')}`,
+  // «Вкусные баллы»: the programme the account page and the cart describe;
+  // the guests, their points and the sign-in settings are not here
+  // «Вкусные баллы»: программа, которую описывают кабинет и корзина; гостей,
+  // их баллов и настроек входа здесь нет
+  loyalty_settings: `/items/loyalty_settings?${q('enabled,program_name,signup_bonus,points_ttl_days,max_share_percent,tiers,birthday_bonus,birthday_window_days,birthday_discount_percent')}`,
 };
 
 // Collections the site builds without: a missing one means an empty catalog or
@@ -86,4 +91,5 @@ export const QUERIES = {
 export const OPTIONAL = new Set([
   'product_categories', 'products',
   'catering_page', 'catering_formats', 'catering_steps', 'catering_faq',
+  'loyalty_settings',
 ]);

@@ -1,0 +1,123 @@
+/* Вход по телефону: номер, затем код. Одна форма для кабинета и корзины,
+   поэтому стили отдельно и подключаются самой формой (`LoginForm.astro`);
+   поля, согласие и плашка ошибки — из `catalog.css`.
+   The phone sign-in: the number, then the code. One form for the account and
+   the cart, so its styles stand apart and come with the form itself
+   (`LoginForm.astro`); fields, consent and the alert are from `catalog.css`. */
+
+/* the consent is its own line under the field's hint, not a second hint
+   согласие — отдельная строка под подсказкой поля, а не вторая подсказка */
+.login .consent {
+  margin-top: 14px;
+}
+
+.login__consent-err {
+  margin: 6px 0 0 30px;
+}
+
+.login__submit {
+  margin-top: 20px;
+}
+
+.login__step .field:last-of-type {
+  margin-bottom: 0;
+}
+
+/* where the code went, in the admin's own words — on olive tint, the guest
+   should not miss it
+   куда ушёл код — словами из админки, на оливковом тинте: гость не должен
+   это пропустить */
+.login__sent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: var(--r-sq);
+  background: var(--olive-tint);
+  box-shadow: inset 0 0 0 1px var(--olive-tint-line);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.login__sent .ico {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  color: var(--olive);
+}
+
+/* four digits, spaced like the code itself, large enough to check at a glance
+   четыре цифры вразрядку, как сам код, и крупно — чтобы сверить одним взглядом */
+.field .login__code {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 0.5em;
+  text-indent: 0.25em;
+  text-align: center;
+}
+
+.field .login__code::placeholder {
+  letter-spacing: 0.5em;
+}
+
+.login__wait {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  font-size: 13.5px;
+  color: var(--text-2);
+}
+
+.login__pulse {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: var(--olive);
+  animation: login-pulse 1.4s var(--ease-in-out) infinite;
+}
+
+@keyframes login-pulse {
+  50% {
+    opacity: 0.25;
+    scale: 0.7;
+  }
+}
+
+.login__more {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 22px;
+  margin-top: 14px;
+}
+
+.login__timer {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 13.5px;
+  color: var(--text-4);
+}
+
+.login__timer[hidden] {
+  display: none;
+}
+
+.login__more .tlink {
+  font-size: 13.5px;
+}
+
+.login .alert {
+  margin-top: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login__pulse {
+    animation: none;
+  }
+}

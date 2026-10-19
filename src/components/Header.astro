@@ -39,6 +39,10 @@ const here = Astro.url.pathname;
 // Корзина живёт в каталоге; на других страницах кнопка появляется, только
 // когда гость что-то в неё положил (скрипт читает сохранённую корзину).
 const showCart = content.catalog.count > 0;
+// the guest account exists where orders can be sent: the same Directus address
+// личный кабинет есть там, где можно отправить заказ: тот же адрес Directus
+const showAccount = Boolean(import.meta.env.PUBLIC_DIRECTUS_URL);
+const accountHref = `${BASE}account/`;
 ---
 
 <header class:list={['header', { 'header--over': over, 'is-solid': !over, 'header--cart': cart }]}>
@@ -71,13 +75,13 @@ const showCart = content.catalog.count > 0;
         <a class="header__phone" href={settings.phoneHref}>{settings.phone}</a>
         <button type="button" class="btn btn--secondary btn--sm header__book" data-book="Бронь стола">
           <Icon name="chair" class="ico--pop" />
-          Забронировать стол
+          <span class="header__label">Забронировать стол</span>
         </button>
         {
           cart ? (
             <button type="button" class="btn btn--primary btn--sm header__cart-btn" data-cart-open>
               <Icon name="bag" class="ico--pop" />
-              Корзина
+              <span class="header__label">Корзина</span>
               <span class="header__cart-sum tnum" data-cart-sum></span>
             </button>
           ) : (
@@ -88,7 +92,7 @@ const showCart = content.catalog.count > 0;
               rel={order.external ? 'noopener' : undefined}
             >
               <Icon name="delivery" class="ico--go" />
-              Заказать доставку
+              <span class="header__label">Заказать доставку</span>
             </a>
           )
         }
@@ -109,6 +113,21 @@ const showCart = content.catalog.count > 0;
           <span class="header__cart-count tnum" data-cart-count hidden>
             0
           </span>
+        </a>
+      )
+    }
+
+    {
+      showAccount && (
+        <a
+          class="header__account"
+          href={accountHref}
+          data-account-link
+          aria-label="Личный кабинет"
+          aria-current={currentOf(accountHref, here)}
+        >
+          <Icon name="user" />
+          <span class="header__account-dot" data-account-dot hidden></span>
         </a>
       )
     }
@@ -278,8 +297,54 @@ const showCart = content.catalog.count > 0;
 
   .header__call:active,
   .header__burger:active,
-  .header__cart:active {
+  .header__cart:active,
+  .header__account:active {
     scale: 0.96;
+  }
+
+  /* The account as one more round button: a person in a circle, an olive dot
+     on the shoulder once the guest is signed in.
+     Кабинет — ещё одна круглая кнопка: человек в круге, оливковая точка на
+     плече, когда гость вошёл. */
+  .header__account {
+    position: relative;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border: 1px solid color-mix(in srgb, var(--text) 40%, transparent);
+    border-radius: var(--r-pill);
+    background: var(--surface);
+    color: var(--text);
+    text-decoration: none;
+    transition-property: scale, background-color;
+    transition-duration: 120ms, 0.16s;
+    transition-timing-function: var(--ease-out), ease;
+  }
+
+  .header__account :global(.ico) {
+    width: 21px;
+    height: 21px;
+  }
+
+  .header__account[aria-current='page'] {
+    border-color: var(--terracotta);
+  }
+
+  .header__account-dot {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    width: 11px;
+    height: 11px;
+    border-radius: var(--r-pill);
+    background: var(--olive);
+    box-shadow: 0 0 0 2px var(--bg);
+  }
+
+  .header__account-dot[hidden] {
+    display: none;
   }
 
   /* The cart as the third round button of the bar, with the count on its
@@ -382,7 +447,8 @@ const showCart = content.catalog.count > 0;
 
     .header__call:hover,
     .header__burger:hover,
-    .header__cart:hover {
+    .header__cart:hover,
+    .header__account:hover {
       background: color-mix(in srgb, var(--text) 8%, var(--surface));
     }
   }
@@ -412,7 +478,7 @@ const showCart = content.catalog.count > 0;
        ужимаются, чтобы в строке осталась трубка. */
     .header__nav {
       flex-direction: row;
-      gap: 11px;
+      gap: 9px;
       margin-inline: auto;
     }
 
@@ -420,15 +486,17 @@ const showCart = content.catalog.count > 0;
       padding-block: 4px;
       font-size: 10.5px;
       font-weight: 500;
-      letter-spacing: 0.07em;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
       white-space: nowrap;
       border-bottom: 1px solid transparent;
       transition: border-color 0.16s ease;
     }
 
-    /* до 1024 в строку не входит: «Главная» дублирует логотип и уходит первой
-       under 1024 the row is full: «Главная» duplicates the logo and goes first */
+    /* «Главная» дублирует логотип: в строке десктопа её место занял кружок
+       кабинета, пункт остаётся только в меню телефона
+       «Главная» duplicates the logo: on the desktop row the account circle took
+       its place; the item stays in the phone menu only */
     .header__nav a:first-child {
       display: none;
     }
@@ -483,13 +551,54 @@ const showCart = content.catalog.count > 0;
     }
   }
 
+  /* With a filled cart the round cart button already leads to the catalog, so
+     «Заказать доставку» steps aside: the row keeps room for the account.
+     С полной корзиной в каталог уже ведёт круглая кнопка корзины, и «Заказать
+     доставку» уступает ей место: в строке остаётся место кабинету. */
+  @media (min-width: 768px) {
+    .header:has(.header__cart:not([hidden])) .header__actions .btn--primary:not(.header__cart-btn) {
+      display: none;
+    }
+  }
+
+  /* Up to 1200 «Заказать доставку» is a square with its icon (the label stays
+     for screen readers), and the catalog's cart is the round button with the
+     count, as on the phone: the labelled «Корзина · сумма» needs the width of 1200.
+     До 1200 «Заказать доставку» — квадрат со значком (подпись остаётся для
+     экранных чтецов), а корзина каталога — круглая кнопка с числом, как на
+     телефоне: подписанной «Корзине · сумме» нужна ширина 1200. */
+  @media (min-width: 768px) and (max-width: 1199.98px) {
+    .header__actions .btn {
+      min-width: 36px;
+      padding-inline: 0;
+    }
+
+    .header__label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .header--cart .header__cart {
+      display: grid;
+    }
+
+    .header--cart .header__cart[hidden],
+    .header__actions .header__cart-btn {
+      display: none;
+    }
+  }
+
   @media (min-width: 1024px) {
     .header__logo {
       width: 116px;
     }
 
     .header__nav {
-      gap: 20px;
+      gap: 16px;
     }
 
     .header__nav a {
@@ -504,37 +613,37 @@ const showCart = content.catalog.count > 0;
       width: 132px;
     }
 
-    /* Own left margin, not the row gap: at 1200 the row tightens and the number
-       runs straight into «Контакты», reading as one string.
-       Собственный отступ слева, а не зазор строки: на 1200 строка ужимается и
-       номер упирается в «Контакты», читаясь с ним одной строкой. */
-    .header__phone {
-      display: block;
-      margin-inline: 22px 6px;
-    }
-
-    /* с 1200 номер стоит текстом — трубка становится лишней */
-    .header__call {
-      display: none;
-    }
-
-    .header__book {
-      display: inline-flex;
-    }
-
-    /* с 1200 в строку входит и «Главная» — при чуть меньшем шаге между пунктами
-       from 1200 the row has room for «Главная» too, at a slightly tighter step */
     .header__nav {
       gap: 16px;
       margin-inline: 12px auto;
     }
 
-    .header__nav a:first-child {
-      display: block;
-    }
-
     .header__actions .btn {
       padding-inline: 12px;
+    }
+  }
+
+  /* The number as text from 1280 and «Забронировать стол» from 1440: with the
+     account circle the full row of 1200 ran past the right edge of the window.
+     Own left margin, not the row gap: the number must not read as one string
+     with «Контакты».
+     Номер текстом — с 1280, «Забронировать стол» — с 1440: с кружком кабинета
+     полная строка 1200 уходила за правый край окна. Собственный отступ слева, а
+     не зазор строки: номер не должен читаться одной строкой с «Контакты». */
+  @media (min-width: 1280px) {
+    .header__phone {
+      display: block;
+      margin-inline: 22px 6px;
+    }
+
+    .header__call {
+      display: none;
+    }
+  }
+
+  @media (min-width: 1440px) {
+    .header__book {
+      display: inline-flex;
     }
   }
 
@@ -620,8 +729,26 @@ const showCart = content.catalog.count > 0;
 
 <script>
   import { CART_KEY, parseCart } from '../lib/cart';
+  import { loadSession, onSessionChange } from '../scripts/account-session';
 
   const header = document.querySelector<HTMLElement>('.header');
+
+  // the account button knows whether the guest is signed in (from storage)
+  // кнопка кабинета знает, вошёл ли гость (из хранилища)
+  const accountLink = document.querySelector<HTMLAnchorElement>('[data-account-link]');
+  if (accountLink) {
+    const dot = accountLink.querySelector<HTMLElement>('[data-account-dot]');
+    const paintAccount = () => {
+      const { session } = loadSession();
+      if (dot) dot.hidden = !session;
+      accountLink.setAttribute(
+        'aria-label',
+        session ? `Личный кабинет${session.name ? `: ${session.name}` : ''}, вы вошли` : 'Личный кабинет: войти по номеру',
+      );
+    };
+    paintAccount();
+    onSessionChange(paintAccount);
+  }
 
   // Outside the catalog the cart button only tells there is something in the
   // cart: the count from storage, no prices — those live with the catalog page.

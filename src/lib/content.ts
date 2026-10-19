@@ -19,6 +19,7 @@ import {
   type RawCateringPage,
   type RawCateringStep,
 } from './catering.ts';
+import { toProgram, type Program } from './loyalty.ts';
 import fixture from '../data/fixture.json' with { type: 'json' };
 
 /** Файл-заглушка помечен в админке: с этой пометкой сайт не выдаёт его за готовый. */
@@ -208,6 +209,10 @@ export type Promo = {
   title: string;
   text: string;
   place?: Place;
+  /** кому: всем (на сайте) или именинникам (только в личном кабинете) */
+  audience?: 'all' | 'birthday' | null;
+  /** последний день показа (`show_until`) — кабинет пишет «до 31 октября» */
+  until?: string;
 };
 
 /** `status` остаётся в типе: по нему `menuFor` выбирает свежее меню направления. */
@@ -235,6 +240,10 @@ export type Content = {
   catalog: Catalog;
   /** кейтеринг и банкеты (`/catering/`); пустой, если в админке раздела нет */
   catering: Catering;
+  /** акции «именинникам»: только в личном кабинете, на главной их нет */
+  birthdayPromos: Promo[];
+  /** «Вкусные баллы» («Программа лояльности»); без коллекции — значения по умолчанию */
+  loyalty: Program;
   /** сегодня в часовом поясе точек — от него считаются окна показа */
   today: string;
 };
@@ -301,6 +310,9 @@ export type Raw = {
   catering_formats?: RawCateringFormat[] | null;
   catering_steps?: RawCateringStep[] | null;
   catering_faq?: RawCateringFaq[] | null;
+  // optional: a Directus without the account gives the default programme
+  // необязательна: Directus без кабинета даёт программу по умолчанию
+  loyalty_settings?: Record<string, unknown> | Record<string, unknown>[] | null;
 };
 
 /** Файл Directus → то, что кладётся в `Img.src`. */
@@ -444,6 +456,17 @@ export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraTo
   };
 
   const current = currentAfisha(raw.afisha, today);
+  const live = livePromos(raw.promos, today)
+    .filter((promo) => {
+      if (!mentionsApp(promo.title) && !mentionsApp(promo.text)) return true;
+      log(`контент: акция «${promo.title}» действует в приложении — на сайте не показана`);
+      return false;
+    })
+    .map((promo) => ({
+      ...promo,
+      place: at(promo.place, `акция «${promo.title}»`),
+      until: promo.show_until ?? undefined,
+    }));
   const directions: Direction[] = raw.directions.map((direction) => ({
     ...direction,
     photo: img(direction.photo),
@@ -461,16 +484,10 @@ export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraTo
       poster: img(current.poster),
       place: at(current.place, `афиша «${current.title}»`),
     },
-    promos: livePromos(raw.promos, today)
-      .filter((promo) => {
-        if (!mentionsApp(promo.title) && !mentionsApp(promo.text)) return true;
-        log(`контент: акция «${promo.title}» действует в приложении — на сайте не показана`);
-        return false;
-      })
-      .map((promo) => ({
-        ...promo,
-        place: at(promo.place, `акция «${promo.title}»`),
-      })),
+    // a birthday offer is personal: it lives in the account, not on the home page
+    // акция именинникам личная: она живёт в кабинете, а не на главной
+    promos: live.filter((promo) => promo.audience !== 'birthday'),
+    birthdayPromos: live.filter((promo) => promo.audience === 'birthday'),
     menus: raw.menus.map((menu) => ({
       ...menu,
       updated: menuUpdated(menu),
@@ -499,6 +516,7 @@ export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraTo
       (file) => img(file as unknown as RawFile | null),
       log,
     ),
+    loyalty: toProgram(Array.isArray(raw.loyalty_settings) ? null : raw.loyalty_settings),
     today,
   };
 };
