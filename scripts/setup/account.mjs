@@ -64,7 +64,7 @@ const ensure = async (api, policy, collection, action, rule) => {
   }
 };
 
-export async function setup(api, { findOne, ORDER_FIELDS_PUBLIC }) {
+export async function setup(api, { findOne, ORDER_FIELDS_PUBLIC, publicPolicy = null }) {
   // ── role «Гость» / роль «Гость» ──────────────────────────────────────────
   let policy = await findOne('/policies', { name: { _eq: 'Гость' } });
   if (!policy) {
@@ -91,8 +91,16 @@ export async function setup(api, { findOne, ORDER_FIELDS_PUBLIC }) {
   await ensure(api, policy.id, 'directus_users', 'read', { fields: GUEST_PROFILE_READ, permissions: ME });
   await ensure(api, policy.id, 'directus_users', 'update', { fields: GUEST_PROFILE_WRITE, permissions: ME });
   await ensure(api, policy.id, 'orders', 'read', { fields: GUEST_ORDER_READ, permissions: { customer: { _eq: '$CURRENT_USER' } } });
+  // a guest sends whatever the public may send (other modules add to it, e.g.
+  // `payment_method` of the online payment) plus the points
+  // гость отправляет всё, что может публичная роль (другие модули дописывают
+  // туда своё, например `payment_method` онлайн-оплаты), и баллы
+  const publicCreate = publicPolicy
+    ? await findOne('/permissions', { policy: { _eq: publicPolicy }, collection: { _eq: 'orders' }, action: { _eq: 'create' } })
+    : null;
+  const publicFields = (publicCreate?.fields ?? []).filter((field) => field !== '*');
   await ensure(api, policy.id, 'orders', 'create', {
-    fields: [...new Set([...ORDER_FIELDS_PUBLIC, ...GUEST_ORDER_EXTRA])],
+    fields: [...new Set([...ORDER_FIELDS_PUBLIC, ...publicFields, ...GUEST_ORDER_EXTRA])],
     presets: { status: 'new', source: 'site' },
     // the same as the public order, and the order is the guest's own
     // то же, что у публичного заказа, и заказ — самого гостя

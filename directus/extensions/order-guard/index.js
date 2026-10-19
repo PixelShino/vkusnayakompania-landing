@@ -97,7 +97,7 @@ const freshNumber = () => {
 // гость, вошедший на сайте (расширение `guest-auth`), несёт эту роль
 const GUEST_ROLE = 'Гость';
 
-export default ({ filter, action }, { services, logger, emitter }) => {
+export default ({ filter, action }, { services, logger, emitter = null }) => {
   const hits = new Map();
   const isGuest = async (accountability, database) =>
     Boolean(accountability?.user && accountability.role) &&
@@ -216,7 +216,7 @@ export default ({ filter, action }, { services, logger, emitter }) => {
     // «Вкусные баллы» (расширение `loyalty`) решают, сколько заказа вошедший
     // гость оплачивает баллами, и скидку именинника; без этого расширения из
     // суммы ничего не вычитается
-    const loyalty = customer
+    const loyalty = customer && emitter
       ? await emitter.emitFilter(
           'orders.checkout',
           { customer, total, requested: payload.bonus_spent, bonus_spent: 0, discount: 0, note: null },
@@ -244,11 +244,18 @@ export default ({ filter, action }, { services, logger, emitter }) => {
       total,
       consent: true,
       manager_note: [note, loyalty?.note].filter(Boolean).join('\n') || null,
+      // how the guest wants to pay, when the site offered the choice; the rest
+      // of `payment_*` (paid or not) is never taken from here — the `pay`
+      // extension writes it from the bank's answer
+      // как гость хочет платить, если сайт предложил выбор; остальные
+      // `payment_*` (оплачен или нет) отсюда не берутся никогда — их пишет
+      // расширение `pay` по ответу банка
+      ...(payload.payment_method ? { payment_method: payload.payment_method === 'online' ? 'online' : 'on_delivery' } : {}),
       ...(customer && {
         customer,
-        bonus_spent: loyalty.bonus_spent,
-        discount: loyalty.discount,
-        to_pay: total - loyalty.discount - loyalty.bonus_spent,
+        bonus_spent: loyalty?.bonus_spent ?? 0,
+        discount: loyalty?.discount ?? 0,
+        to_pay: total - (loyalty?.discount ?? 0) - (loyalty?.bonus_spent ?? 0),
       }),
     };
   });

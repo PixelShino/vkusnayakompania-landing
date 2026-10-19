@@ -1,0 +1,15 @@
+{
+  "name": "directus-extension-notify",
+  "version": "1.0.0",
+  "description": "Order and catering-request alerts by mail and Telegram, delivery log, POST /notify/test / оповещения о заказах и заявках почтой и в Telegram, журнал доставки, POST /notify/test",
+  "type": "module",
+  "directus:extension": {
+    "type": "bundle",
+    "path": { "app": "app.js", "api": "index.js" },
+    "entries": [
+      { "type": "hook", "name": "notify-hook", "source": "index.js" },
+      { "type": "endpoint", "name": "notify-endpoint", "source": "index.js" }
+    ],
+    "host": "^11.0.0"
+  }
+}

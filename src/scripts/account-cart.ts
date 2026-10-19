@@ -232,8 +232,13 @@ export const mountCartAccount = ({
     onCheckout: () => void load(),
     /** сумма корзины поменялась: пересчитать предел */
     refresh: () => paint(),
-    /** что добавить к заказу: токен и баллы */
-    extras: () => (token ? { token, bonus_spent: me ? spend : 0 } : { token: null, bonus_spent: 0 }),
+    /** что добавить к заказу: токен, баллы и сколько останется к оплате */
+    extras: () => {
+      if (!token) return { token: null, bonus_spent: 0, pay: total() };
+      const s = state();
+      const bonus = me ? spend : 0;
+      return { token, bonus_spent: bonus, pay: Math.max(0, total() - (s?.discount ?? 0) - bonus) };
+    },
     /** сервер отверг токен: выйти и сказать об этом */
     signedOut: () => {
       clearSession();

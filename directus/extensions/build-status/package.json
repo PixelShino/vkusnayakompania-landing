@@ -1,0 +1,12 @@
+{
+  "name": "directus-extension-build-status",
+  "version": "1.0.0",
+  "description": "Live build progress on «Публикация сайта» / живой ход сборки на странице «Публикация сайта»",
+  "type": "module",
+  "directus:extension": {
+    "type": "interface",
+    "path": "index.js",
+    "source": "index.js",
+    "host": "^11.0.0"
+  }
+}

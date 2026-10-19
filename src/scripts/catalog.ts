@@ -39,6 +39,7 @@ import {
 } from '../lib/order';
 import { BADGE_LABEL, positions, rub, type Badge } from '../lib/catalog';
 import { mountCartAccount } from './account-cart';
+import { payAfterOrder, withPayment } from './payment';
 import minusIcon from '../assets/icons/minus.svg?raw';
 import plusIcon from '../assets/icons/plus.svg?raw';
 import trashIcon from '../assets/icons/trash.svg?raw';
@@ -639,10 +640,12 @@ if (dataNode && drawer && dishDialog) {
       return;
     }
     const number = orderNumber(new Date(), Math.random());
-    // a signed-in guest sends the order with his token and the points to spend
-    // вошедший гость отправляет заказ со своим токеном и баллами к списанию
+    // a signed-in guest sends the order with his token and the points to spend;
+    // the payment method rides along as for anyone
+    // вошедший гость отправляет заказ со своим токеном и баллами к списанию;
+    // способ оплаты едет так же, как у всех
     const extra = cartAccount?.extras();
-    const payload = { ...buildOrder(cart, index, data, number), ...(extra?.token && { bonus_spent: extra.bonus_spent }) };
+    const payload = withPayment({ ...buildOrder(cart, index, data, number), ...(extra?.token && { bonus_spent: extra.bonus_spent }) });
 
     // a bot filled the field nobody sees: thank it and send nothing
     // бот заполнил поле, которого никто не видит: поблагодарить и ничего не отправлять
@@ -671,6 +674,9 @@ if (dataNode && drawer && dishDialog) {
       });
       if (response.ok) {
         finish(number, payload);
+        // online payment asks for what is left after points and the birthday discount
+        // онлайн-оплата просит то, что осталось после баллов и скидки именинника
+        payAfterOrder(number, extra?.token ? { ...payload, total: extra.pay } : payload);
         return;
       }
       // the server speaks Russian for what the guest can fix (order-guard)

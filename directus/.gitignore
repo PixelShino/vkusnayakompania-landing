@@ -8,5 +8,8 @@ extensions/*
 !extensions/optimize-upload/
 !extensions/order-guard/
 !extensions/request-guard/
+!extensions/notify/
+!extensions/build-status/
+!extensions/pay/
 !extensions/guest-auth/
 !extensions/loyalty/

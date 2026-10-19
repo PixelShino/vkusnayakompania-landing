@@ -336,5 +336,10 @@ await api('PATCH', '/settings', {
 });
 console.log('= проект: имя и русский язык');
 
-await (await import('./setup/account.mjs')).setup(api, { findOne, ORDER_FIELDS_PUBLIC }); // личный кабинет и «Вкусные баллы»
+await (await import('./setup/notify.mjs')).setup(api, { editorPolicy: policy.id, builderPolicy: bpolicy.id });
+// 6. online payment — its own module / онлайн-оплата — свой модуль
+await (await import('./setup/payments.mjs')).setup(api, { editorPolicy: policy.id, publicPolicy: publicAccess.policy });
+
+await (await import('./setup/account.mjs')).setup(api, { findOne, ORDER_FIELDS_PUBLIC, publicPolicy: publicAccess.policy }); // личный кабинет и «Вкусные баллы»
+
 console.log('setup: готово');

@@ -15,6 +15,8 @@
  */
 import Icon from '../Icon.astro';
 import CartAccount from '../account/CartAccount.astro';
+import PayChoice from './PayChoice.astro';
+import PayStep from './PayStep.astro';
 import { hoursRows } from '../../data/site.ts';
 import type { Content } from '../../lib/content.ts';
 
@@ -70,7 +72,7 @@ const endpoint = directus ? `${directus}/items/orders` : '';
           <span>Итого <span class="sum__count" data-count></span></span>
           <b class="tnum" data-total></b>
         </p>
-        <p class="sum__note">Стоимость доставки и оплату уточним при звонке</p>
+        <p class="sum__note">Стоимость доставки уточним при звонке</p>
         {/* no order endpoint on this build (PUBLIC_DIRECTUS_URL is empty): the
             cart is still a list to dictate over the phone
             у этой сборки нет адреса для заказов (PUBLIC_DIRECTUS_URL пуст):
@@ -197,6 +199,8 @@ const endpoint = directus ? `${directus}/items/orders` : '';
           <p class="field__hint">Точное время подтвердим при звонке</p>
         </fieldset>
 
+        <PayChoice />
+
         <div class="field">
           <label for="co-comment">Комментарий <span class="field__opt">необязательно</span></label>
           <textarea
@@ -285,5 +289,8 @@ const endpoint = directus ? `${directus}/items/orders` : '';
         <button type="button" class="btn btn--primary btn--block" data-close>Вернуться в каталог</button>
       </footer>
     </section>
+
+    {/* ── шаг 4: оплата ──────────────────────────────────────────────── */}
+    <PayStep settings={settings} />
   </div>
 </dialog>

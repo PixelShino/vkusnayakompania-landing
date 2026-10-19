@@ -1,0 +1,18 @@
+{
+  "name": "directus-extension-pay",
+  "version": "1.0.0",
+  "description": "Online payment of site orders: Alfa-Bank acquiring (and a test stub), return, callback, status sweep / онлайн-оплата заказов с сайта: эквайринг Альфа-Банка (и заглушка для теста), возврат, уведомления, проверка статусов",
+  "type": "module",
+  "directus:extension": {
+    "type": "bundle",
+    "path": {
+      "app": "app.js",
+      "api": "index.js"
+    },
+    "entries": [
+      { "type": "endpoint", "name": "pay", "source": "index.js" },
+      { "type": "hook", "name": "pay-hook", "source": "index.js" }
+    ],
+    "host": "^11.0.0"
+  }
+}

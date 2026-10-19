@@ -137,4 +137,20 @@ for (const input of cases) {
 }
 assert.deepEqual(Object.keys(profileErrors({ birthday: '2027-01-01', recovery_email: 'x' }, '2026-10-19')), ['birthday', 'recovery_email']);
 
+// ── points × online payment and notifications / баллы × онлайн-оплата и оповещения
+// the bank is asked for what is left after points; the managers' message says the same
+// банк просят о том, что осталось после баллов; сообщение менеджерам говорит то же
+{
+  const { payable } = await import('../../directus/extensions/pay/service.js');
+  const { orderModel } = await import('../../directus/extensions/notify/lib.js');
+  assert.equal(payable({ total: 2320, to_pay: 2120 }), 2120);
+  assert.equal(payable({ total: 2320, to_pay: null }), 2320);
+  assert.equal(payable({ total: 2320 }), 2320);
+  assert.equal(payable({ total: '2320.00', to_pay: '0' }), 0);
+  const sold = orderModel({ number: '1910-1546', total: 2320, to_pay: 2120, bonus_spent: 200, discount: 0, items: [] });
+  assert.match(sold.total, /^Итого: 2\s320 ₽ · баллами −200 ₽ · к оплате 2\s120 ₽$/);
+  const plain = orderModel({ number: '1910-1547', total: 2320, items: [] });
+  assert.match(plain.total, /^Итого: 2\s320 ₽$/);
+}
+
 console.log('account.check: ok');
