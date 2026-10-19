@@ -141,21 +141,25 @@ export async function setup(api, { findOne, ORDER_FIELDS_PUBLIC }) {
     },
     { collection: 'bonus_transactions', bookmark: 'Вручную', icon: 'edit_note', color: '#333721', filter: { type: { _eq: 'manual' } } },
     { collection: 'bonus_transactions', bookmark: 'Сгорание', icon: 'local_fire_department', color: '#A79C8A', filter: { type: { _eq: 'expire' } } },
+    // The users module shows no collection bookmarks, so the guests' columns
+    // are the default list: «Пользователи» → «Гость» in its menu filters by
+    // role and shows the phone, the points and the tier. Staff rows keep them
+    // empty.
+    // Модуль пользователей закладок коллекции не показывает, поэтому колонки
+    // гостей — список по умолчанию: «Пользователи» → «Гость» в его меню
+    // фильтрует по роли и показывает телефон, баллы и уровень. У сотрудников
+    // эти колонки пустые.
     {
       collection: 'directus_users',
-      bookmark: 'Гости сайта',
-      icon: 'loyalty',
-      color: '#6F7546',
-      filter: ONLY_GUESTS,
       layout_query: {
         tabular: {
-          fields: ['first_name', 'last_name', 'phone', 'bonus_balance', 'tier', 'total_spent', 'birthday', 'last_access'],
+          fields: ['first_name', 'last_name', 'phone', 'bonus_balance', 'tier', 'total_spent', 'role', 'last_access'],
           sort: ['-last_access'],
           limit: 50,
         },
       },
       layout_options: {
-        tabular: { widths: { first_name: 150, last_name: 160, phone: 170, bonus_balance: 110, tier: 120, total_spent: 140, birthday: 130, last_access: 160 } },
+        tabular: { widths: { first_name: 140, last_name: 150, phone: 170, bonus_balance: 110, tier: 120, total_spent: 140, role: 140, last_access: 170 } },
       },
     },
   ];
