@@ -9,7 +9,8 @@
  *   POST /pay/offline   — `{ number, phone }` → оплата при получении;
  *   POST /pay/status    — `{ number, phone }` → статус оплаты, ждущий уточняется у банка;
  *   GET  /pay/return    — сюда банк возвращает гостя; дальше — на сайт с итогом;
- *   GET|POST /pay/callback — уведомление банка (подпись `checksum`, статус всегда у банка);
+ *   GET|POST /pay/callback — уведомление Альфа-Банка (подпись `checksum`, статус всегда у банка);
+ *   POST /pay/yookassa/webhook — уведомление ЮKassa (статус перепроверяется запросом к ЮKassa);
  *   GET  /pay/check     — только администратор: настройки без секретов и связь с банком;
  *   GET  /pay/mock/…    — страница банка-заглушки, только в тестовом режиме.
  * Hook: `payment_*` of an order are written only by this extension (a person
@@ -23,6 +24,7 @@
  */
 import { createPayService, PayError } from './service.js';
 import { mockOrders } from './providers/mock.js';
+import { isYooKassaIp } from './core.js';
 
 // written by the server only / пишет только сервер
 const SERVER_FIELDS = ['payment_status', 'payment_id', 'payment_url', 'paid_at', 'payment_meta', 'payment_log'];
@@ -119,7 +121,7 @@ const routes = (router, context) => {
   router.get(
     '/return',
     handle(async (req, res) => {
-      const url = await pay.back({ id: Number(req.query.o), bankId: String(req.query.orderId ?? req.query.mdOrder ?? '') });
+      const url = await pay.back({ id: Number(req.query.o), bankId: String(req.query.orderId ?? req.query.mdOrder ?? ''), key: String(req.query.t ?? '') });
       if (url) {
         res.redirect(303, url);
         return;
@@ -153,6 +155,20 @@ const routes = (router, context) => {
   router.get('/callback', callback);
   router.post('/callback', callback);
 
+  // ЮKassa's notification (JSON, parsed by Directus): its own addresses are
+  // never limited, anyone else is — and the payment is asked at ЮKassa anyway
+  // уведомление ЮKassa (JSON, его разбирает Directus): её собственные адреса
+  // не ограничиваются, остальные — да, а платёж всё равно уточняется у ЮKassa
+  router.post(
+    '/yookassa/webhook',
+    handle(async (req, res) => {
+      const ip = ipOf(req);
+      const trusted = isYooKassaIp(ip);
+      if (!trusted && tooMany(ip)) throw new PayError(429, 'rate', 'too many requests');
+      res.json(await pay.yookassaNotification(body(req), { trusted }));
+    }, { limited: false }),
+  );
+
   router.get(
     '/check',
     handle(async (req, res) => {
@@ -165,6 +181,16 @@ const routes = (router, context) => {
       const TAX = { 0: 'ОСН', 1: 'УСН «доходы»', 2: 'УСН «доходы минус расходы»', 3: 'ЕНВД', 4: 'ЕСХН', 5: 'патент' };
       const VAT = { 0: 'без НДС', 1: 'НДС 0 %', 2: 'НДС 10 %', 6: 'НДС 20 %', 10: 'НДС 5 %', 12: 'НДС 7 %', 14: 'НДС 22 %' };
       const METHOD = { 1: 'предоплата 100 %', 4: 'полный расчёт' };
+      const SUBJECT = { 1: 'товар', 3: 'работа', 4: 'услуга' };
+      const yoo = c.providerId === 'yookassa';
+      // what ЮKassa says about its receipts against what the admin asks for
+      // что ЮKassa говорит о своих чеках против того, что просит админка
+      const fiscalNote =
+        yoo && c.bank.fiscal === true && !c.receipt
+          ? ' <span class="bad">— в ЮKassa чеки подключены: без состава заказа платёж не создастся, включите «Чек»</span>'
+          : yoo && c.bank.fiscal === false && c.receipt
+            ? ' <span class="bad">— в ЮKassa чеки не подключены: если платежи не создаются, выключите «Чек» или подключите чеки в кабинете</span>'
+            : '';
       const siteOrigin = (() => {
         try {
           return c.siteUrl ? new URL(c.siteUrl).origin : null;
@@ -176,23 +202,44 @@ const routes = (router, context) => {
       // корзина обращается к /pay с сайта: адрес вне CORS_ORIGIN ответа не получит
       const corsNote = siteOrigin && !c.cors.includes(siteOrigin) ? ` <span class="bad">— адреса сайта ${esc(siteOrigin)} здесь нет: корзина не достучится до оплаты</span>` : '';
       const rows = [
-        ['Онлайн-оплата', c.enabled ? '<span class="ok">включена</span>' : c.stubInProd ? '<span class="bad">выключена: заглушка в боевом режиме</span>' : 'выключена'],
+        [
+          'Онлайн-оплата',
+          c.enabled
+            ? '<span class="ok">включена</span>'
+            : c.stubInProd
+              ? '<span class="bad">выключена: заглушка в боевом режиме</span>'
+              : c.testKeyInProd
+                ? '<span class="bad">выключена: ключ тестового магазина ЮKassa (test_…) в боевом режиме</span>'
+                : 'выключена',
+        ],
         ['Банк', esc(c.provider)],
         ['Режим', c.mode === 'тест' ? 'тест — гости кнопку оплаты не видят, проверка по ссылке …/catalog/?paytest=1' : '<span class="ok">бой</span>'],
-        ['Шлюз', esc(c.gateway ?? '—')],
-        ['Логин API', SRC[c.sources.login]],
-        ['Пароль API', SRC[c.sources.password]],
-        ['Токен API', SRC[c.sources.token]],
-        ['Ключ уведомлений', SRC[c.sources.callbackKey]],
+        [yoo ? 'API' : 'Шлюз', esc(c.gateway ?? '—')],
+        ...(yoo
+          ? [
+              ['shopId', SRC[c.sources.shopId]],
+              ['Секретный ключ', SRC[c.sources.secretKey]],
+            ]
+          : [
+              ['Логин API', SRC[c.sources.login]],
+              ['Пароль API', SRC[c.sources.password]],
+              ['Токен API', SRC[c.sources.token]],
+              ['Ключ уведомлений', SRC[c.sources.callbackKey]],
+            ]),
         ['Адрес возврата', esc(c.returnUrl ?? 'нет PUBLIC_URL')],
-        ['Адрес уведомлений', esc(c.callbackUrl ?? 'нет PUBLIC_URL')],
+        [
+          'Адрес уведомлений',
+          `${esc(c.callbackUrl ?? 'нет PUBLIC_URL')}${yoo ? ' — в кабинете ЮKassa «Интеграция → HTTP-уведомления», события payment.succeeded, payment.canceled, refund.succeeded' : ''}`,
+        ],
         ['Сайт', esc(c.siteUrl ?? '—')],
         ['Сайту разрешено (CORS)', `${esc(c.cors.join(', ') || '—')}${corsNote}`],
         [
           'Чек',
-          c.receipt
-            ? esc(`${TAX[c.receipt.taxSystem] ?? c.receipt.taxSystem}, ${VAT[c.receipt.vat] ?? `НДС код ${c.receipt.vat}`}, ${METHOD[c.receipt.method] ?? `расчёт ${c.receipt.method}`}, ФФД ${c.receipt.ffd}`)
-            : 'без состава заказа',
+          (c.receipt
+            ? esc(
+                `${TAX[c.receipt.taxSystem] ?? c.receipt.taxSystem}, ${VAT[c.receipt.vat] ?? `НДС код ${c.receipt.vat}`}, ${METHOD[c.receipt.method] ?? `расчёт ${c.receipt.method}`}, ${SUBJECT[c.receipt.subject] ?? `предмет ${c.receipt.subject}`}, ФФД ${c.receipt.ffd}`,
+              )
+            : 'без состава заказа') + fiscalNote,
         ],
         ['Связь с банком', `<span class="${c.bank.ok ? 'ok' : 'bad'}">${esc(c.bank.message)}</span>`],
       ];

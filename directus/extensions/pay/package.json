@@ -1,7 +1,7 @@
 {
   "name": "directus-extension-pay",
   "version": "1.0.0",
-  "description": "Online payment of site orders: Alfa-Bank acquiring (and a test stub), return, callback, status sweep / онлайн-оплата заказов с сайта: эквайринг Альфа-Банка (и заглушка для теста), возврат, уведомления, проверка статусов",
+  "description": "Online payment of site orders: ЮKassa (default), Alfa-Bank acquiring and a test stub; return, notifications, status sweep / онлайн-оплата заказов с сайта: ЮKassa (по умолчанию), эквайринг Альфа-Банка и заглушка для теста; возврат, уведомления, проверка статусов",
   "type": "module",
   "directus:extension": {
     "type": "bundle",

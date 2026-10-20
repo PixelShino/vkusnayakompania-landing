@@ -217,8 +217,16 @@ export type PayConfig = {
   texts: { online: string; onDelivery: string; note: string; paid: string; failed: string };
 };
 
+/**
+ * The words while the admin's fields are empty. The server names the provider
+ * in force («…ЮKassa» or «…Альфа-Банка»), so these are only the fallback for a
+ * broken answer and the markup before `/pay/config` comes.
+ * Слова, пока поля в админке пустые. Действующего провайдера называет сервер
+ * («…ЮKassa» или «…Альфа-Банка»), поэтому здесь только запас на битый ответ и
+ * разметка до прихода `/pay/config`.
+ */
 export const DEFAULT_TEXTS: PayConfig['texts'] = {
-  online: 'Картой МИР, Visa или Mastercard на защищённой странице Альфа-Банка',
+  online: 'Картой МИР, Visa или Mastercard на защищённой странице ЮKassa',
   onDelivery: 'Наличными или картой курьеру, на кассе при самовывозе',
   note: 'Онлайн оплачиваются блюда. Платную доставку назовём при звонке и оплатите её курьеру.',
   paid: 'Спасибо! Перезвоним, чтобы подтвердить адрес и время.',

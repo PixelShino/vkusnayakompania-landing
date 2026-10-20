@@ -232,7 +232,7 @@ const leadFor = (state: State, record: PayRecord | null, why: string | null = nu
   const phone = record?.phone ? `<b class="tnum">${esc(record.phone)}</b>` : '';
   switch (state) {
     case 'going':
-      return 'Заказ сохранён. Открываем защищённую страницу банка — там вводят карту.';
+      return 'Заказ сохранён. Открываем защищённую страницу оплаты — там вводят карту.';
     case 'paid':
       return esc(config.texts.paid);
     case 'failed':

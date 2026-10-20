@@ -144,10 +144,163 @@ assert.equal(stub.enabled, false, 'заглушка в боевом режиме
 assert.equal(stub.stubInProd, true);
 assert.equal(core.resolveSettings({ ...row, provider: 'mock' }, {}).enabled, true, 'заглушка в тесте работает');
 assert.equal(core.resolveSettings(null, {}).enabled, false, 'нет записи — оплата выключена');
-assert.equal(core.resolveSettings({ ...row, provider: 'evil' }, {}).provider, 'alfa');
+assert.equal(core.resolveSettings({ ...row, provider: 'evil' }, {}).provider, 'yookassa', 'незнакомый банк — ЮKassa по умолчанию');
 // публичная часть не несёт секретов
 const shown = JSON.stringify(core.publicConfig(fromAdmin));
 for (const secret of ['shop-api', 'admin-pass', 'rbsuat']) assert.ok(!shown.includes(secret), `в /pay/config нет «${secret}»`);
+
+// ── настройки ЮKassa ────────────────────────────────────────────────────────
+{
+  const yooRow = { online_enabled: true, mode: 'test', yookassa_shop_id: '123456', yookassa_secret_key: 'test_admin-key' };
+  const s = core.resolveSettings(yooRow, {});
+  assert.equal(s.provider, 'yookassa', 'без выбора банка — ЮKassa');
+  assert.equal(core.resolveSettings({}, {}).provider, 'yookassa');
+  assert.equal(s.shopId, '123456');
+  assert.equal(s.secretKey, 'test_admin-key');
+  assert.deepEqual([s.sources.shopId, s.sources.secretKey], ['admin', 'admin']);
+  assert.equal(s.yookassaApi, 'https://api.yookassa.ru/v3/');
+  assert.equal(s.enabled, true);
+  assert.equal(s.texts.online, 'Картой МИР, Visa или Mastercard на защищённой странице ЮKassa', 'подпись называет ЮKassa');
+  assert.match(core.resolveSettings({ ...yooRow, provider: 'alfa' }, {}).texts.online, /Альфа-Банка$/, 'у Альфы — Альфа');
+  assert.equal(core.resolveSettings({ ...yooRow, provider: 'mock' }, {}).texts.online, s.texts.online, 'заглушка говорит словами основного банка');
+  assert.equal(core.resolveSettings({ ...yooRow, text_online: 'Своими словами' }, {}).texts.online, 'Своими словами', 'текст из админки важнее');
+  // окружение важнее админки, число из окружения — строка
+  const env = core.resolveSettings(yooRow, { PAY_YOOKASSA_SHOP_ID: 654321, PAY_YOOKASSA_SECRET_KEY: 'live_env-key' });
+  assert.equal(env.shopId, '654321');
+  assert.equal(env.secretKey, 'live_env-key');
+  assert.deepEqual([env.sources.shopId, env.sources.secretKey], ['env', 'env']);
+  // ключ тестового магазина в боевом режиме: гость «оплатил» бы тестовой картой — оплата выключена
+  const testInProd = core.resolveSettings({ ...yooRow, mode: 'prod' }, {});
+  assert.equal(testInProd.testKeyInProd, true);
+  assert.equal(testInProd.enabled, false, 'test_-ключ в бою выключает оплату');
+  assert.equal(core.resolveSettings({ ...yooRow, mode: 'prod', yookassa_secret_key: 'live_x' }, {}).enabled, true, 'live_-ключ в бою работает');
+  // поддельный адрес API — только в тесте
+  assert.equal(core.resolveSettings(yooRow, { PAY_YOOKASSA_API: 'http://127.0.0.1:8099/v3' }).yookassaApi, 'http://127.0.0.1:8099/v3/');
+  assert.equal(core.resolveSettings({ ...yooRow, mode: 'prod' }, { PAY_YOOKASSA_API: 'http://evil/v3' }).yookassaApi, 'https://api.yookassa.ru/v3/', 'бой — всегда api.yookassa.ru');
+  assert.equal(core.resolveSettings({ ...yooRow, receipt_subject: 4 }, {}).receiptSubject, 4);
+  assert.equal(core.resolveSettings({ ...yooRow, receipt_subject: 99 }, {}).receiptSubject, 1, 'незнакомый предмет расчёта — товар');
+  const yooShown = JSON.stringify(core.publicConfig(env));
+  for (const secret of ['654321', 'live_env-key']) assert.ok(!yooShown.includes(secret), `в /pay/config нет «${secret}»`);
+}
+
+// ── ЮKassa: суммы, чек, тело платежа ────────────────────────────────────────
+{
+  assert.equal(core.yooValue(465000), '4650.00');
+  assert.equal(core.yooValue(9990), '99.90');
+  assert.equal(core.yooValue(5), '0.05');
+  assert.throws(() => core.yooValue(10.5), 'дробных копеек не бывает');
+  assert.throws(() => core.yooValue(-1));
+  assert.equal(core.yooKopecks({ value: '4650.00', currency: 'RUB' }), 465000);
+  assert.equal(core.yooKopecks('0.29'), 29);
+  assert.equal(core.yooKopecks(undefined), null);
+  // коды админки → коды ЮKassa: все ставки из выпадающего списка «НДС» знакомы ЮKassa
+  for (const [admin, yoo] of [[0, 1], [1, 2], [10, 7], [12, 8], [2, 3], [14, 11]]) assert.equal(core.YOO_VAT[admin], yoo, `НДС ${admin} → vat_code ${yoo}`);
+  assert.deepEqual([core.yooTaxSystem(0), core.yooTaxSystem(1), core.yooTaxSystem(5), core.yooTaxSystem(9)], [1, 2, 6, null]);
+
+  const order = [
+    { product: 12, title: 'Торт «Лего»', variant: '2 кг', filling: 'Сникерс', qty: 1, price: 4200 },
+    { product: 7, title: 'Морс\nклюквенный  0,5 л', variant: null, filling: null, qty: 3, price: 150 },
+  ];
+  const opts = { vat: 0, method: 4, subject: 1, taxSystem: 1, ffd12: true, phone: '+7 987 955-25-65', title: 'Заказ 1910-4821' };
+  const full = core.buildYooReceipt(order, { ...opts, amount: 465000 });
+  assert.deepEqual(full, {
+    items: [
+      { description: 'Торт «Лего» (2 кг, Сникерс)', quantity: 1, amount: { value: '4200.00', currency: 'RUB' }, vat_code: 1, payment_mode: 'full_payment', payment_subject: 'commodity', measure: 'piece' },
+      { description: 'Морс клюквенный 0,5 л', quantity: 3, amount: { value: '150.00', currency: 'RUB' }, vat_code: 1, payment_mode: 'full_payment', payment_subject: 'commodity', measure: 'piece' },
+    ],
+    customer: { phone: '79879552565' },
+    tax_system_code: 2,
+  }, 'цена — за единицу, телефон цифрами, УСН «доходы» — код 2');
+  assert.equal(core.yooReceiptTotal(full), 465000);
+
+  // баллы: к оплате 1335 ₽ из 1535 ₽ — скидка раскладывается по строкам, чек сходится до копейки
+  const breakfast = [
+    { product: 1, title: 'Завтрак с мясной колбаской', qty: 1, price: 685 },
+    { product: 3, title: 'Драники из кабачка с яйцом пашот и лососем', qty: 1, price: 850 },
+  ];
+  const points = core.buildYooReceipt(breakfast, { ...opts, amount: 133500 });
+  assert.equal(core.yooReceiptTotal(points), 133500, 'чек равен оплате после баллов');
+  assert.deepEqual(points.items.map((it) => it.amount.value), ['595.75', '739.25']);
+  // строка, сумма которой не делится на количество, делится на две
+  const split = core.buildYooReceipt([{ title: 'Морс', qty: 3, price: 1000 }], { ...opts, amount: 100000 });
+  assert.deepEqual(
+    split.items.map((it) => [it.quantity, it.amount.value]),
+    [[2, '333.33'], [1, '333.34']],
+  );
+  assert.equal(core.yooReceiptTotal(split), 100000);
+  for (const amount of [1, 99, 12345, 133499, 465000, 465001]) {
+    const r = core.buildYooReceipt([...order, ...breakfast], { ...opts, amount });
+    assert.equal(core.yooReceiptTotal(r), amount, `чек на ${amount} коп. сходится`);
+  }
+  // без годных строк — одна строка «Заказ …» на всю сумму
+  for (const broken of [[], null, [{ title: 'x', qty: 1.5, price: 10 }], [{ title: 'x', qty: 1, price: -1 }]]) {
+    const r = core.buildYooReceipt(broken, { ...opts, amount: 50000 });
+    assert.deepEqual(r.items.map((it) => [it.description, it.quantity]), [['Заказ 1910-4821', 1]]);
+    assert.equal(core.yooReceiptTotal(r), 50000);
+  }
+  // ФФД 1.05 — без меры; почта — в чек; без телефона и почты — без customer
+  const old = core.buildYooReceipt(order, { ...opts, amount: 465000, ffd12: false, email: 'anna@example.ru', phone: '' });
+  assert.equal(old.items[0].measure, undefined);
+  assert.deepEqual(old.customer, { email: 'anna@example.ru' });
+  assert.equal(core.buildYooReceipt(order, { ...opts, amount: 465000, phone: null }).customer, undefined);
+  assert.equal(core.buildYooReceipt(order, { ...opts, amount: 465000, method: 1, subject: 4 }).items[0].payment_mode, 'full_prepayment');
+  assert.equal(core.buildYooReceipt(order, { ...opts, amount: 465000, subject: 4 }).items[0].payment_subject, 'service');
+  assert.throws(() => core.buildYooReceipt(order, { ...opts, amount: 465000, vat: 99 }), /НДС/);
+  assert.equal(core.yooItemName({ title: 'Т'.repeat(200) }).length, 128, 'наименование не длиннее 128 знаков');
+
+  const body = core.buildYooPayment({
+    amount: 133500,
+    description: 'Заказ 1910-5341, Вкусная компания',
+    returnUrl: 'https://admin.vkus-com.ru/pay/return?o=76&t=abc',
+    metadata: { order_id: 76, order_number: '1910-5341', empty: '', none: null },
+    receipt: points,
+  });
+  assert.deepEqual(body.amount, { value: '1335.00', currency: 'RUB' }, 'сумма строкой с копейками');
+  assert.equal(body.capture, true, 'одностадийный платёж');
+  assert.deepEqual(body.confirmation, { type: 'redirect', return_url: 'https://admin.vkus-com.ru/pay/return?o=76&t=abc', locale: 'ru_RU' });
+  assert.deepEqual(body.metadata, { order_id: '76', order_number: '1910-5341' }, 'metadata — строки, пустое не уходит');
+  assert.equal(body.receipt, points);
+  assert.equal(core.buildYooPayment({ amount: 100, description: 'Д'.repeat(300), returnUrl: 'r' }).description.length, 128);
+  assert.equal(core.buildYooPayment({ amount: 100, description: 'd', returnUrl: 'r' }).receipt, undefined, 'без чека — без receipt');
+}
+
+// ── ЮKassa: статусы, уведомления, адреса ────────────────────────────────────
+{
+  const pay = (status: string, extra: Record<string, unknown> = {}) => ({ id: 'p1', status, amount: { value: '1335.00', currency: 'RUB' }, ...extra });
+  const cases: [Record<string, unknown>, string, Record<string, unknown>][] = [
+    [pay('pending'), 'pending', { left: true, why: null }],
+    [pay('waiting_for_capture'), 'pending', { left: false, held: true }],
+    [pay('succeeded'), 'paid', { amount: 133500, refunded: 0 }],
+    [pay('succeeded', { refunded_amount: { value: '200.00', currency: 'RUB' } }), 'paid', { refunded: 20000 }],
+    [pay('succeeded', { refunded_amount: { value: '1335.00', currency: 'RUB' } }), 'refunded', {}],
+    [pay('canceled', { cancellation_details: { party: 'yoo_money', reason: 'expired_on_confirmation' } }), 'failed', { why: 'expired', note: 'время на оплату истекло' }],
+    [pay('canceled', { cancellation_details: { party: 'payment_network', reason: 'insufficient_funds' } }), 'failed', { why: 'declined', note: 'на карте не хватает денег' }],
+    [pay('canceled', { cancellation_details: { party: 'payment_network', reason: 'new_reason' } }), 'failed', { note: 'new_reason' }],
+    [{}, 'pending', { left: false }],
+  ];
+  for (const [payment, state, fields] of cases) {
+    const result = core.yooState(payment);
+    assert.equal(result.state, state, `yooState(${JSON.stringify(payment)})`);
+    for (const [key, value] of Object.entries(fields)) assert.equal(result[key], value, `yooState(${payment.status}).${key}`);
+  }
+  assert.equal(core.yooState(pay('succeeded', { test: true })).test, true);
+
+  const succeeded = { type: 'notification', event: 'payment.succeeded', object: { id: '22e12f66-000f-5000-8000-18db351245c7', status: 'succeeded' } };
+  assert.deepEqual(core.parseYooNotification(succeeded), { event: 'payment.succeeded', paymentId: '22e12f66-000f-5000-8000-18db351245c7' });
+  assert.deepEqual(
+    core.parseYooNotification({ type: 'notification', event: 'refund.succeeded', object: { id: '216749f7-0016-50be-b000-078d43a63ae4', payment_id: '216749da-000f-50be-b000-096747fad91e' } }),
+    { event: 'refund.succeeded', paymentId: '216749da-000f-50be-b000-096747fad91e' },
+    'возврат называет свой платёж',
+  );
+  assert.deepEqual(core.parseYooNotification({ type: 'notification', event: 'payout.succeeded', object: { id: 'po-1' } }), { event: 'payout.succeeded', paymentId: null }, 'чужое событие — пропустить');
+  for (const bad of [null, 'x', {}, { type: 'error' }, { ...succeeded, object: null }, { ...succeeded, object: { id: '../../etc' } }, { ...succeeded, object: { id: 'x' } }])
+    assert.equal(core.parseYooNotification(bad), null, `битое уведомление ${JSON.stringify(bad)}`);
+
+  for (const ip of ['185.71.76.0', '185.71.76.31', '185.71.77.5', '77.75.153.127', '77.75.156.11', '77.75.156.35', '77.75.154.200', '::ffff:185.71.76.10', '2a02:5180::1', '2A02:5180:0:1::5'])
+    assert.equal(core.isYooKassaIp(ip), true, `${ip} — ЮKassa`);
+  for (const ip of ['185.71.76.32', '185.71.78.1', '77.75.153.128', '77.75.156.12', '77.75.154.127', '10.0.0.1', '2a02:5181::1', '', null, 'abc', '300.1.1.1'])
+    assert.equal(core.isYooKassaIp(ip), false, `${ip} — не ЮKassa`);
+}
 
 // ── возврат на сайт: только разрешённые адреса, без открытого редиректа ─────
 const allowed = ['https://vkus-com.ru', 'https://www.vkus-com.ru'];
@@ -261,6 +414,250 @@ assert.deepEqual(site.DEFAULT_TEXTS, core.DEFAULT_TEXTS, 'тексты по ум
     await assert.rejects(alfa({ gateway, login: '', password: '' }).status('id'), (error: unknown) => error instanceof BankError && error.kind === 'config');
     // шлюз молчит — ошибка сети
     await assert.rejects(alfa({ gateway: 'http://127.0.0.1:9/payment/rest/', login: 'a', password: 'b' }).status('id'), (error: unknown) => error instanceof BankError && error.kind === 'network');
+  } finally {
+    server.close();
+  }
+}
+
+// ── провайдер ЮKassa: что уходит в API и как читается ответ ─────────────────
+// поддельная ЮKassa на локальном порту отвечает так, как описано в
+// документации (POST /payments → id и confirmation.confirmation_url,
+// GET /payments/{id} → status, GET /me → магазин, ошибка → type: error, code)
+{
+  const { createServer } = await import('node:http');
+  const { yookassa } = await import('../../directus/extensions/pay/providers/yookassa.js');
+  const { BankError } = await import('../../directus/extensions/pay/providers/alfa.js');
+  type Seen = { method: string; path: string; auth: string; key: string; type: string; body: Record<string, any> | null };
+  const seen: Seen[] = [];
+  const payments = new Map<string, Record<string, unknown>>();
+  let failNext = 0;
+  const server = createServer((req, res) => {
+    let raw = '';
+    req.on('data', (chunk) => (raw += chunk));
+    req.on('end', () => {
+      const body = raw ? JSON.parse(raw) : null;
+      seen.push({
+        method: req.method ?? '',
+        path: req.url ?? '',
+        auth: req.headers.authorization ?? '',
+        key: String(req.headers['idempotence-key'] ?? ''),
+        type: String(req.headers['content-type'] ?? ''),
+        body,
+      });
+      const send = (status: number, data: unknown) => {
+        res.statusCode = status;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(data));
+      };
+      if (failNext > 0) {
+        failNext -= 1;
+        return send(500, { type: 'error', id: 'e1', code: 'internal_server_error', description: 'Internal server error' });
+      }
+      const [user] = Buffer.from((req.headers.authorization ?? '').replace(/^Basic /, ''), 'base64').toString().split(':');
+      if (user !== '123456') return send(401, { type: 'error', id: 'e2', code: 'invalid_credentials', description: 'Login or password is incorrect' });
+      if (req.method === 'POST' && req.url === '/v3/payments') {
+        if (body.amount.value === '0.50') return send(400, { type: 'error', id: 'e3', code: 'invalid_request', description: 'Amount is too small', parameter: 'amount.value' });
+        const id = `2e8f${String(payments.size + 1).padStart(4, '0')}-000f-5000-8000-18db351245c7`;
+        const payment = { id, status: 'pending', paid: false, amount: body.amount, metadata: body.metadata, test: true, confirmation: { type: 'redirect', confirmation_url: `https://yoomoney.ru/checkout/payments/v2/contract?orderId=${id}` } };
+        payments.set(id, payment);
+        return send(200, payment);
+      }
+      const capture = /^\/v3\/payments\/([^/]+)\/capture$/.exec(req.url ?? '');
+      if (req.method === 'POST' && capture) {
+        const payment = { ...payments.get(capture[1]), status: 'succeeded', paid: true };
+        payments.set(capture[1], payment);
+        return send(200, payment);
+      }
+      const get = /^\/v3\/payments\/([^/]+)$/.exec(req.url ?? '');
+      if (req.method === 'GET' && get) return payments.has(get[1]) ? send(200, payments.get(get[1])) : send(404, { type: 'error', id: 'e4', code: 'not_found', description: 'Payment not found' });
+      if (req.method === 'GET' && req.url === '/v3/me') return send(200, { account_id: '123456', test: true, fiscalization: { enabled: true, provider: 'avanpost' }, status: 'enabled' });
+      return send(404, { type: 'error', id: 'e5', code: 'not_found' });
+    });
+  });
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const { port } = server.address() as { port: number };
+  const settings = { shopId: '123456', secretKey: 'test_secret', yookassaApi: `http://127.0.0.1:${port}/v3/`, mode: 'test' };
+  try {
+    const bank = yookassa(settings);
+    assert.equal(bank.keepsPage, true, 'ждущую страницу ЮKassa выдают снова, а не создают вторую');
+    const receipt = { lines: [{ product: 1, title: 'Завтрак', qty: 1, price: 685 }, { product: 3, title: 'Драники', qty: 1, price: 850 }], vat: 0, method: 4, subject: 1, taxSystem: 1, ffd12: true, phone: '+7 987 955-25-65', title: 'Заказ 1910-5341' };
+    const page = await bank.register({
+      orderNumber: '1910-5341-76',
+      amount: 133500,
+      description: 'Заказ 1910-5341, Вкусная компания',
+      returnUrl: 'https://admin.vkus-com.ru/pay/return?o=76&t=k1',
+      receipt,
+      metadata: { order_id: 76, order_number: '1910-5341' },
+    });
+    assert.match(page.id, /^2e8f0001-/);
+    assert.match(page.url, /^https:\/\/yoomoney\.ru\/checkout\//);
+    assert.equal(page.test, true);
+    const sent = seen[0];
+    assert.equal(sent.method, 'POST');
+    assert.equal(sent.path, '/v3/payments');
+    assert.equal(sent.auth, `Basic ${Buffer.from('123456:test_secret').toString('base64')}`, 'Basic shopId:ключ');
+    assert.match(sent.key, /^[0-9a-f-]{36}$/, 'у каждого POST свой Idempotence-Key');
+    assert.equal(sent.type, 'application/json');
+    assert.deepEqual(sent.body?.amount, { value: '1335.00', currency: 'RUB' });
+    assert.equal(sent.body?.capture, true);
+    assert.equal(sent.body?.confirmation.return_url, 'https://admin.vkus-com.ru/pay/return?o=76&t=k1');
+    assert.deepEqual(sent.body?.metadata, { order_id: '76', order_number: '1910-5341', bank_order: '1910-5341-76' });
+    assert.equal(core.yooReceiptTotal(sent.body?.receipt), 133500, 'чек в запросе сходится с суммой после баллов');
+    assert.equal(sent.body?.receipt.tax_system_code, 2);
+
+    let status = await bank.status(page.id);
+    assert.equal(status.state, 'pending');
+    assert.equal(status.left, true);
+    assert.deepEqual(status.metadata, { order_id: '76', order_number: '1910-5341', bank_order: '1910-5341-76' });
+    payments.set(page.id, { ...payments.get(page.id), status: 'succeeded', paid: true });
+    status = await bank.status(page.id);
+    assert.equal(status.state, 'paid');
+    assert.equal(status.amount, 133500);
+    assert.equal(status.orderNumber, '1910-5341-76');
+    // платёж тестового магазина в боевом режиме — не деньги
+    assert.equal((await yookassa({ ...settings, mode: 'prod' }).status(page.id)).state, 'failed');
+    // заморожен (двухстадийный) — провайдер списывает сам, с постоянным ключом
+    payments.set(page.id, { ...payments.get(page.id), status: 'waiting_for_capture' });
+    const before = seen.length;
+    assert.equal((await bank.status(page.id)).state, 'paid');
+    const captured = seen.slice(before).find((s) => s.path.endsWith('/capture'));
+    assert.equal(captured?.key, `capture-${page.id}`);
+    // без чека — без receipt
+    await bank.register({ orderNumber: 'n', amount: 100, description: 'd', returnUrl: 'r', receipt: null });
+    assert.equal(seen.at(-1)?.body?.receipt, undefined);
+    // 500 — повтор с тем же ключом идемпотентности, платёж один
+    failNext = 1;
+    const retried = await bank.register({ orderNumber: 'n2', amount: 100, description: 'd', returnUrl: 'r' });
+    const [first, second] = seen.slice(-2);
+    assert.equal(first.key, second.key, 'повтор после 500 — тот же Idempotence-Key');
+    assert.ok(retried.id);
+    // ошибка запроса — с параметром; неверный ключ; не настроено; сеть
+    await assert.rejects(bank.register({ orderNumber: 'n3', amount: 50, description: 'd', returnUrl: 'r' }), (error: any) => error instanceof BankError && error.code === 'invalid_request' && /amount\.value/.test(error.message));
+    await assert.rejects(bank.status('2e8f9999-000f-5000-8000-18db351245c7'), (error: any) => error.status === 404 && error.code === 'not_found');
+    await assert.rejects(yookassa({ ...settings, shopId: '1' }).status(page.id), (error: any) => error.code === 'invalid_credentials' && error.kind === 'bank');
+    await assert.rejects(yookassa({ ...settings, shopId: '' }).status(page.id), (error: any) => error.kind === 'config');
+    await assert.rejects(yookassa({ ...settings, yookassaApi: 'http://127.0.0.1:9/v3/' }).status(page.id), (error: any) => error.kind === 'network');
+    // чек с незнакомой ставкой — ошибка настройки, а не банка
+    await assert.rejects(bank.register({ orderNumber: 'n4', amount: 153500, description: 'd', returnUrl: 'r', receipt: { ...receipt, vat: 99 } }), (error: any) => error.kind === 'config');
+    // проверка доступа
+    const ok = await bank.check();
+    assert.equal(ok.ok, true);
+    assert.match(ok.message, /Ключ принят, магазин 123456 — тестовый; чеки ЮKassa подключены/);
+    assert.equal(ok.fiscal, true);
+    const denied = await yookassa({ ...settings, shopId: '1' }).check();
+    assert.equal(denied.ok, false);
+    assert.match(denied.message, /не подошли/);
+  } finally {
+    server.close();
+  }
+}
+
+// ── сервис: уведомления ЮKassa и что они пишут в заказ ──────────────────────
+// настоящий `createPayService` на базе в миниатюре и поддельной ЮKassa: тело
+// уведомления ничего не решает, решает ответ ЮKassa на GET /payments/{id}
+{
+  const { createServer } = await import('node:http');
+  const { createPayService, PayError } = await import('../../directus/extensions/pay/service.js');
+  const api: Record<string, Record<string, unknown>> = {
+    P1: { id: 'P1-000f-5000-9000-000000000001', status: 'succeeded', amount: { value: '1535.00', currency: 'RUB' }, metadata: { order_id: '57' } },
+    P2: { id: 'P2-000f-5000-9000-000000000002', status: 'succeeded', amount: { value: '1535.00', currency: 'RUB' }, metadata: { order_id: '57' } },
+    P4: { id: 'P4-000f-5000-9000-000000000004', status: 'succeeded', amount: { value: '10.00', currency: 'RUB' }, metadata: { order_id: '999' } },
+    P5: { id: 'P5-000f-5000-9000-000000000005', status: 'succeeded', amount: { value: '700.00', currency: 'RUB' }, metadata: { order_id: '58' } },
+  };
+  const byId = (id: string) => Object.values(api).find((p) => p.id === id);
+  const server = createServer((req, res) => {
+    const id = decodeURIComponent((req.url ?? '').split('/').pop() ?? '');
+    const payment = byId(id);
+    res.setHeader('Content-Type', 'application/json');
+    if (!payment) {
+      res.statusCode = 404;
+      res.end(JSON.stringify({ type: 'error', code: 'not_found' }));
+    } else res.end(JSON.stringify(payment));
+  });
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const { port } = server.address() as { port: number };
+  type Row = Record<string, any>;
+  const tables: Record<string, Row[]> = {
+    payment_settings: [{ id: 1, online_enabled: true, provider: 'yookassa', mode: 'test', yookassa_shop_id: '100500', yookassa_secret_key: 'test_k' }],
+    orders: [
+      { id: 57, number: '1910-4821', customer_name: 'Анна', phone: '+7 987 955-25-65', total: 1535, to_pay: null, payment_status: 'pending', payment_method: 'online', payment_id: api.P2.id, payment_log: '', payment_meta: { provider: 'yookassa', ids: [api.P1.id, api.P2.id] } },
+      { id: 58, number: '1910-4822', customer_name: 'Борис', phone: '+7 987 955-25-66', total: 700, to_pay: null, payment_status: 'pending', payment_method: 'online', payment_id: 'P6-other', payment_log: '', payment_meta: { provider: 'yookassa', ids: [api.P5.id, 'P6-other'] } },
+    ],
+    directus_roles: [{ id: 'r1', name: 'Administrator' }],
+    directus_users: [{ id: 'u1', role: 'r1', status: 'active' }],
+  };
+  const database = (name: string) => {
+    let rows = [...(tables[name] ?? [])];
+    const query = {
+      where(match: Row) {
+        rows = rows.filter((row) => Object.entries(match).every(([key, value]) => row[key] === value));
+        return query;
+      },
+      whereIn(column: string, values: unknown[]) {
+        rows = rows.filter((row) => values.includes(row[column]));
+        return query;
+      },
+      first: async () => rows[0],
+      pluck: async (column: string) => rows.map((row) => row[column]),
+    };
+    return query;
+  };
+  const sentNotes: Row[] = [];
+  const services = {
+    ItemsService: class {
+      async updateOne(id: number, patch: Row) {
+        Object.assign(tables.orders.find((row) => row.id === id)!, patch);
+      }
+    },
+    NotificationsService: class {
+      async createOne(note: Row) {
+        sentNotes.push(note);
+      }
+    },
+  };
+  const warnings: string[] = [];
+  const service = createPayService({
+    services,
+    database,
+    getSchema: async () => ({}),
+    env: { PUBLIC_URL: 'https://admin.vkus-com.ru', PAY_YOOKASSA_API: `http://127.0.0.1:${port}/v3/` },
+    logger: { warn: (text: string) => warnings.push(text), error: () => {} },
+  });
+  const notify = (event: string, object: Row) => service.yookassaNotification({ type: 'notification', event, object }, { trusted: true });
+  const order = (id: number) => tables.orders.find((row) => row.id === id)!;
+  try {
+    // тело врёт про сумму и статус — значение имеет только ответ ЮKassa
+    assert.deepEqual(await notify('payment.succeeded', { id: api.P2.id, status: 'succeeded', amount: { value: '1.00' } }), { ok: true });
+    assert.equal(order(57).payment_status, 'paid');
+    assert.equal(order(57).payment_id, api.P2.id);
+    assert.match(order(57).payment_log, /оплачено 1\s535 ₽; уведомление ЮKassa \(payment\.succeeded\)$/);
+    assert.equal(sentNotes.length, 1, 'администратор получил уведомление об оплате');
+    // вторая попытка тоже оплачена — громкая строка в журнале, один раз
+    await notify('payment.succeeded', { id: api.P1.id });
+    await notify('payment.succeeded', { id: api.P1.id });
+    assert.equal(order(57).payment_log.match(/ВНИМАНИЕ: оплачена ещё одна попытка/g)?.length, 1, 'двойная оплата названа один раз');
+    assert.equal(order(57).payment_id, api.P2.id, 'номер платежа заказа не меняется');
+    assert.equal(sentNotes.length, 1, 'вторая оплата не шлёт второе «оплачен»');
+    // частичный возврат: заказ оплачен, сумма возврата — в журнале; повтор не дублирует строку
+    api.P2.refunded_amount = { value: '535.00', currency: 'RUB' };
+    await notify('refund.succeeded', { id: 'R1-000f-5000-9000-000000000001', payment_id: api.P2.id });
+    await notify('refund.succeeded', { id: 'R1-000f-5000-9000-000000000001', payment_id: api.P2.id });
+    assert.equal(order(57).payment_status, 'paid');
+    assert.equal(order(57).payment_log.match(/частичный возврат: всего вернули 535 ₽/g)?.length, 1);
+    api.P2.refunded_amount = { value: '1535.00', currency: 'RUB' };
+    await notify('refund.succeeded', { id: 'R2-000f-5000-9000-000000000002', payment_id: api.P2.id });
+    assert.equal(order(57).payment_status, 'refunded', 'полный возврат — «Возврат»');
+    // заказ находится по metadata, которую вернула ЮKassa, если платёж — не последняя попытка
+    await notify('payment.succeeded', { id: api.P5.id });
+    assert.equal(order(58).payment_status, 'paid');
+    assert.equal(order(58).payment_id, api.P5.id);
+    // платёж не наш, платежа нет, тело битое
+    assert.deepEqual(await notify('payment.succeeded', { id: api.P4.id }), { ok: true, ignored: 'unknown order' });
+    assert.deepEqual(await notify('payment.succeeded', { id: 'P9-000f-5000-9000-000000000009' }), { ok: true, ignored: 'unknown payment' });
+    await assert.rejects(service.yookassaNotification({ event: 'payment.succeeded' }), (error: unknown) => error instanceof PayError && error.status === 400);
+    // ЮKassa недоступна — 503, ЮKassa повторит
+    tables.payment_settings[0].yookassa_shop_id = '';
+    await assert.rejects(notify('payment.succeeded', { id: api.P1.id }), (error: unknown) => error instanceof PayError && error.status === 503);
   } finally {
     server.close();
   }
