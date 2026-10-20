@@ -11,6 +11,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import Icon from '../../components/Icon.astro';
+import DocText from '../../components/docs/DocText.astro';
 import { BASE } from '../../lib/base.ts';
 import { BRAND } from '../../data/site.ts';
 import { getContent, typo } from '../../lib/content.ts';
@@ -84,7 +85,11 @@ const jsonLd = {
                   </span>
                   <span class="doc-index__body">
                     <span class="display doc-index__name">{page.title}</span>
-                    {page.description && <span class="doc-index__desc">{typo(page.description)}</span>}
+                    {page.description && (
+                      <span class="doc-index__desc">
+                        <DocText text={page.description} />
+                      </span>
+                    )}
                     {page.revised && <span class="tag">Редакция от {longDate(page.revised)}</span>}
                   </span>
                   <Icon name="arrow-right" />

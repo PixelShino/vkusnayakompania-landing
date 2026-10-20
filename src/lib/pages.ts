@@ -152,7 +152,14 @@ export const prepareBody = (body: string, ctx: Context, where: string, log: (mes
     .replace(/\[\[телефон\]\]/gi, `<a class="tnum" href="${ctx.phoneHref}">${ctx.phone}</a>`)
     // «vkus-com.ru/catalog/» broke after the hyphen: a domain in the text stays whole
     // «vkus-com.ru/catalog/» рвался после дефиса: домен в тексте держится целым
-    .replace(/>([^<]+)</g, (_all, text: string) => `>${glue(text).replace(/(?<![\w./-])([a-z0-9-]+\.(?:ru|рф|com)(?:\/[\w./-]*)?)/gi, '<span class="nw">$1</span>')}<`);
+    // «5–30 рабочих дней» tore at the dash: a range of numbers stays whole too
+    // «5–30 рабочих дней» рвалось на тире: диапазон чисел тоже держится целым
+    .replace(/>([^<]+)</g, (_all, text: string) => {
+      const set = glue(text)
+        .replace(/(?<![\w./-])([a-z0-9-]+\.(?:ru|рф|com)(?:\/[\w./-]*)?)/gi, '<span class="nw">$1</span>')
+        .replace(/(?<![\d:])(\d+(?:[.,]\d+)?\u2013\d+(?:[.,]\d+)?)(?![\d:])/g, '<span class="nw">$1</span>');
+      return `>${set}<`;
+    });
   html = dashes(html);
 
   // a block insert stands alone in its paragraph; it splits the text there
@@ -229,6 +236,20 @@ export const normalizePages = (
       ];
     });
 };
+
+/**
+ * A plain line (the description of a document) set like the body: short words
+ * glued, the dash holding on, the site address in a piece of its own, so the
+ * page can keep it from breaking after the hyphen.
+ * Простая строка (описание документа) с тем же набором, что и текст: короткие
+ * слова приклеены, тире держится, адрес сайта — отдельным куском, чтобы
+ * страница не дала ему разорваться на дефисе.
+ */
+export const textParts = (text: string) =>
+  dashes(glue(text))
+    .split(/((?<![\w./-])[a-z0-9-]+\.(?:ru|рф|com)(?:\/[\w./-]*)?)/i)
+    .filter(Boolean)
+    .map((part) => ({ text: part, domain: /^[a-z0-9-]+\.(?:ru|рф|com)(?:\/[\w./-]*)?$/i.test(part) }));
 
 /** Адрес опубликованного документа или ничего: ссылка на архивный документ не рисуется. */
 export const docHref = (pages: DocPage[], slug: string) => pages.find((page) => page.slug === slug)?.href;

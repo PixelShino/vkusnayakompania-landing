@@ -163,6 +163,14 @@
   padding-bottom: 10px;
 }
 
+/* touch: a section in the folded contents is a 44 px target
+   тач: раздел в свёрнутом оглавлении — цель 44 px */
+@media (pointer: coarse) {
+  .doc-toc--fold .doc-toc__list a {
+    padding-block: 12px;
+  }
+}
+
 .doc-toc__list a {
   display: grid;
   grid-template-columns: 26px minmax(0, 1fr);
@@ -742,6 +750,41 @@
 
   .doc-index__n {
     font-size: 24px;
+  }
+}
+
+/* desktop: the register runs across — title on the left, what it covers on
+   the right, the arrow at the edge — instead of a text block and a long gap
+   десктоп: реестр идёт в строку — название слева, о чём документ справа,
+   стрелка у края — вместо блока текста и длинной пустоты */
+@media (min-width: 1024px) {
+  .doc-index__link {
+    grid-template-columns: 64px minmax(0, 5fr) minmax(0, 6fr) 28px;
+    gap: 8px 32px;
+    align-items: baseline;
+  }
+
+  .doc-index__body {
+    display: contents;
+  }
+
+  .doc-index__n {
+    grid-row: 1 / span 2;
+  }
+
+  .doc-index__name {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .doc-index__desc,
+  .doc-index__body .tag {
+    grid-column: 3;
+  }
+
+  .doc-index__link .ico {
+    grid-column: 4;
+    grid-row: 1 / span 2;
   }
 }
 

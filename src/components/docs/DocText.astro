@@ -1,0 +1,17 @@
+---
+/**
+ * A plain line of a document (its description) with the body's typography:
+ * short words glued to the next one, the site address unbroken.
+ * Простая строка документа (его описание) с набором текста: короткие слова
+ * держатся за следующее, адрес сайта не рвётся.
+ */
+import { textParts } from '../../lib/pages.ts';
+
+interface Props {
+  text: string;
+}
+
+const parts = textParts(Astro.props.text);
+---
+
+{parts.map((part) => (part.domain ? <span class="nw">{part.text}</span> : part.text))}

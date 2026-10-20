@@ -6,7 +6,7 @@
  * оглавление и четыре документа, на которые ссылается сайт. Запуск: `pnpm test`.
  */
 import assert from 'node:assert/strict';
-import { DOC, anchorOf, cleanHtml, docHref, longDate, normalizePages, prepareBody, type RawPage } from './pages.ts';
+import { DOC, anchorOf, cleanHtml, docHref, longDate, normalizePages, prepareBody, textParts, type RawPage } from './pages.ts';
 import { normalize, type Raw } from './content.ts';
 import { plural } from '../data/site.ts';
 import fixture from '../data/fixture.json' with { type: 'json' };
@@ -33,7 +33,7 @@ const body = [
   '<h1>Общие положения</h1>',
   '<p>1.1. Пункт с <a href="/docs/privacy/">ссылкой</a> — и тире.</p>',
   '<h2>2. Оплата</h2>',
-  '<p>Звоните [[телефон]] или пишите на vkus-com.ru/catalog/ в любое время.</p>',
+  '<p>Звоните [[телефон]] или пишите на vkus-com.ru/catalog/ в любое время, ответим за 5–30 минут.</p>',
   '<p>[[реквизиты]]</p>',
   '<h2>2. Оплата</h2>',
   '<table><tr><td>a</td></tr></table>',
@@ -65,6 +65,7 @@ assert.ok(html.includes(`<a class="tnum" href="${ctx.phoneHref}">${ctx.phone}</a
 assert.ok(html.includes('<div class="doc-table" role="region" aria-label="Таблица" tabindex="0"><table>'), 'таблица без коробки прокрутки');
 assert.ok(!html.includes('[['), 'на странице осталась вставка в скобках');
 assert.ok(html.includes('<span class="nw">vkus-com.ru/catalog/</span>'), 'адрес сайта может разорваться на дефисе');
+assert.ok(html.includes('<span class="nw">5–30</span>'), 'диапазон чисел может разорваться на тире');
 assert.ok(html.includes('пишите на\u00a0<span') && html.includes('в\u00a0любое'), 'короткие слова висят в конце строки');
 assert.ok(
   notes.some((n) => n.includes('[[связь]]')) && notes.some((n) => n.includes('[[неизвестно]]')),
@@ -91,6 +92,15 @@ assert.deepEqual(normalizePages(null, ctx, log), [], 'без коллекции 
 assert.equal(docHref(list, 'b'), '/docs/b/');
 assert.equal(docHref(list, 'draft'), undefined, 'на черновик ссылок нет');
 assert.equal(longDate('2026-10-20'), '20 октября 2026');
+assert.deepEqual(
+  textParts('Что получает сайт vkus-com.ru, и как.'),
+  [
+    { text: 'Что получает сайт ', domain: false },
+    { text: 'vkus-com.ru', domain: true },
+    { text: ', и\u00a0как.', domain: false },
+  ],
+  'описание: адрес сайта отдельным куском, короткие слова приклеены',
+);
 
 // ── the four documents of the fixture / четыре документа фикстуры ───────────
 const content = normalize(fixture as unknown as Raw, () => '/x.jpg', '2026-10-20', () => {});

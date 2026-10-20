@@ -15,9 +15,10 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import Icon from '../../components/Icon.astro';
 import DocBlock from '../../components/docs/DocBlock.astro';
+import DocText from '../../components/docs/DocText.astro';
 import { BASE } from '../../lib/base.ts';
 import { BRAND, plural } from '../../data/site.ts';
-import { getContent, typo } from '../../lib/content.ts';
+import { getContent } from '../../lib/content.ts';
 import { TOC_FROM, longDate, type DocPage } from '../../lib/pages.ts';
 import '../../styles/docs.css';
 
@@ -89,7 +90,13 @@ const jsonLd = {
       </nav>
       <span class="mark doc-head__mark" aria-hidden="true"></span>
       <h1 class="display-caps doc-head__title" id="doc-h1" style={`--word: ${longestWord}`}>{page.title}</h1>
-      {page.description && <p class="lead doc-head__lead">{typo(page.description)}</p>}
+      {
+        page.description && (
+          <p class="lead doc-head__lead">
+            <DocText text={page.description} />
+          </p>
+        )
+      }
       <div class="doc-head__meta">
         {revised && <p class="tag">Редакция от {revised}</p>}
         <p class="print-only doc-head__url">{url}</p>
@@ -183,7 +190,11 @@ const jsonLd = {
                 <li>
                   <a class="doc-more__link" href={other.href}>
                     <span class="display doc-more__name">{other.title}</span>
-                    {other.description && <span class="doc-more__desc">{typo(other.description)}</span>}
+                    {other.description && (
+                      <span class="doc-more__desc">
+                        <DocText text={other.description} />
+                      </span>
+                    )}
                     <Icon name="arrow-right" />
                   </a>
                 </li>
