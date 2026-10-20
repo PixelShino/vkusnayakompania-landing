@@ -25,7 +25,7 @@ import {
 
 // a shape no scanner takes for a real bot token: GitHub flagged the previous one
 // форма, которую сканер не примет за настоящий токен бота: прошлую GitHub пометил
-const TOKEN = 'fake:TEST-TOKEN-FOR-CHECKS-ONLY';
+const TOKEN = '1234:FAKEtokenFORchecksONLYnotREAL';
 const NOON = new Date('2026-10-19T08:05:00Z'); // 12:05 в Самаре
 const noSleep = async () => {};
 // Intl groups thousands with a no-break space; the checks read it as a plain one
