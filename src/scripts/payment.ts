@@ -236,7 +236,13 @@ const leadFor = (state: State, record: PayRecord | null, why: string | null = nu
     case 'paid':
       return esc(config.texts.paid);
     case 'failed':
-      return `${esc(failReason(why))} ${esc(config.texts.failed)}`;
+      // the bank took part of the money: the admin's «money not taken» line
+      // would be a lie here, only the reason and that the order is kept
+      // банк взял часть денег: строка админки «деньги не списаны» здесь солгала
+      // бы — только причина и что заказ сохранён
+      return why === 'short'
+        ? `${esc(failReason(why))} Заказ сохранён — оформлять его заново не нужно.`
+        : `${esc(failReason(why))} ${esc(config.texts.failed)}`;
     case 'unavailable':
       return esc(message || 'Банк сейчас не отвечает. Заказ принят — попробуйте оплатить через минуту или оплатите при получении.');
     case 'wait':
