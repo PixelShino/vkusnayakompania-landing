@@ -354,6 +354,40 @@ html:not(.js) .acc-loading {
   color: var(--on-ink-2);
 }
 
+/* Narrower than 420 px three steps side by side are 100-px cells where every
+   line wraps; the ladder lies down into rows: name and percent on one line,
+   the threshold under them, the top step still ink.
+   Уже 420 px три ступени рядом — ячейки по 100 px, где рвётся каждая строка;
+   лестница ложится строками: уровень и процент в одну строку, порог под
+   ними, верхняя ступень по-прежнему чернильная. */
+@media (max-width: 419px) {
+  .ladder {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .ladder__step {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    column-gap: 12px;
+    min-height: 0;
+    padding: 12px 14px;
+  }
+
+  .ladder__pct {
+    grid-column: 2;
+    grid-row: 1;
+    margin-top: 0;
+    font-size: 26px;
+  }
+
+  .ladder__from {
+    grid-column: 1 / -1;
+    margin-top: 2px;
+  }
+}
+
 .ladder__step[data-current] {
   box-shadow: inset 0 0 0 2px var(--olive);
 }

@@ -229,6 +229,24 @@ const accountHref = `${BASE}account/`;
     display: block;
   }
 
+  /* Under the open panel the page is dimmed, not left showing through: the
+     hero buttons peeking out beneath the menu read as a layout glitch. The
+     scrim is the header's own pseudo-element, so a tap on it hits the
+     header and closes the menu (see the script); the desktop unfolds the
+     panel into the bar and needs none.
+     Под раскрытой панелью страница притемнена, а не просвечивает: кнопки
+     первого экрана, торчащие из-под меню, читались сбоем вёрстки. Скрим —
+     псевдоэлемент самой шапки, поэтому касание по нему попадает в шапку и
+     закрывает меню (см. скрипт); на десктопе панель разворачивается в
+     строку, и скрим не нужен. */
+  .header.is-open::before {
+    content: '';
+    position: fixed;
+    inset: var(--header-h) 0 0;
+    z-index: -1;
+    background: rgb(44 41 39 / 0.42);
+  }
+
   .header__nav {
     display: flex;
     flex-direction: column;
@@ -464,6 +482,10 @@ const accountHref = `${BASE}account/`;
     .header .header__panel,
     .header.is-open .header__panel {
       display: contents;
+    }
+
+    .header.is-open::before {
+      content: none;
     }
 
     /* Centred between the logo and the actions, caps with tracking: that is
@@ -817,6 +839,12 @@ const accountHref = `${BASE}account/`;
     });
 
     burger.addEventListener('click', () => setOpen(!header.classList.contains('is-open')));
+
+    // a tap on the scrim lands on the header itself: close, like Escape
+    // касание по скриму попадает в саму шапку: закрыть, как по Escape
+    header.addEventListener('click', (event) => {
+      if (event.target === header && header.classList.contains('is-open')) setOpen(false);
+    });
 
     panel.addEventListener('click', (event) => {
       const target = event.target;
