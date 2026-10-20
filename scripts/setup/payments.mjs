@@ -17,7 +17,7 @@ const ORDERS = 'orders';
 
 // secrets stay with the administrator: editors never read them
 // секреты — только администратору: редактор их не читает
-const SECRET_FIELDS = ['alfa_login', 'alfa_password', 'alfa_token', 'callback_key'];
+const SECRET_FIELDS = ['alfa_login', 'alfa_password', 'alfa_token', 'callback_key', 'yookassa_shop_id', 'yookassa_secret_key'];
 // what an editor may switch: the payments on/off and the words for the guest
 // что может переключить редактор: оплату вкл/выкл и слова для гостя
 const EDITOR_UPDATE = ['online_enabled', 'allow_on_delivery', 'text_online', 'text_on_delivery', 'text_note', 'text_paid', 'text_failed'];
@@ -30,11 +30,16 @@ const divider = (field, title, icon, sort) => ({
   type: 'alias',
   meta: { special: ['alias', 'no-data'], interface: 'presentation-divider', options: { title, icon, inlineTitle: true }, width: 'full', sort },
 });
-const masked = (field, name, note, sort, width = 'half') => ({
+// a bank's own fields show only while that bank is chosen
+// поля банка видны, только пока выбран этот банк
+const onlyFor = (provider, name) => [{ name, rule: { _and: [{ provider: { _neq: provider } }] }, hidden: true }];
+const ALFA_ONLY = onlyFor('alfa', 'Не Альфа-Банк');
+const YOOKASSA_ONLY = onlyFor('yookassa', 'Не ЮKassa');
+const masked = (field, name, note, sort, width = 'half', conditions = undefined) => ({
   field,
   type: 'string',
   schema: { max_length: 512 },
-  meta: { interface: 'input', options: { masked: true, trim: true }, note, width, sort, translations: tr(name) },
+  meta: { interface: 'input', options: { masked: true, trim: true }, note, width, sort, translations: tr(name), ...(conditions ? { conditions } : {}) },
 });
 
 /** Поля синглтона «Оплата»: включение, банк, чек, тексты. */
@@ -53,7 +58,8 @@ const SETTINGS_FIELDS = [
         icon: 'credit_card',
         text:
           'Онлайн-оплата заказов из корзины сайта. Выключена — гость оформляет заказ, как раньше, и платит при получении. ' +
-          'Секреты (логин, пароль, токен, ключ) надёжнее задать переменными окружения PAY_* на сервере: они важнее полей ниже и не попадают в базу и бэкапы.',
+          'Банк по умолчанию — ЮKassa, Альфа-Банк — запасной. ' +
+          'Секреты (секретный ключ ЮKassa, логин и пароль Альфы, ключи) надёжнее задать переменными окружения PAY_* на сервере: они важнее полей ниже и не попадают в базу и бэкапы.',
       },
     },
   },
@@ -92,10 +98,12 @@ const SETTINGS_FIELDS = [
   {
     field: 'provider',
     type: 'string',
-    schema: { default_value: 'alfa', max_length: 32 },
+    schema: { default_value: 'yookassa', max_length: 32 },
     meta: {
       interface: 'select-dropdown',
-      options: { choices: [choice('Альфа-Банк', 'alfa'), choice('Заглушка — только для теста, денег не берёт', 'mock')] },
+      options: {
+        choices: [choice('ЮKassa', 'yookassa'), choice('Альфа-Банк', 'alfa'), choice('Заглушка — только для теста, денег не берёт', 'mock')],
+      },
       display: 'labels',
       width: 'half',
       sort: 7,
@@ -116,18 +124,66 @@ const SETTINGS_FIELDS = [
     },
   },
   {
+    field: 'yookassa_shop_id',
+    type: 'string',
+    schema: { max_length: 32 },
+    meta: {
+      interface: 'input',
+      options: { trim: true },
+      note: 'Кабинет ЮKassa → «Интеграция» → «Ключи API». У тестового магазина свой shopId',
+      width: 'half',
+      sort: 9,
+      translations: tr('shopId'),
+      conditions: YOOKASSA_ONLY,
+    },
+  },
+  masked(
+    'yookassa_secret_key',
+    'Секретный ключ',
+    'Скрыт. live_… — боевой магазин, test_… — тестовый (в режиме «Бой» тестовый ключ выключает оплату). Переменная PAY_YOOKASSA_SECRET_KEY важнее поля',
+    10,
+    'half',
+    YOOKASSA_ONLY,
+  ),
+  {
+    field: 'yookassa_hint',
+    type: 'alias',
+    meta: {
+      special: ['alias', 'no-data'],
+      interface: 'presentation-notice',
+      width: 'full',
+      sort: 11,
+      options: {
+        color: 'normal',
+        icon: 'notifications_active',
+        text:
+          'В кабинете ЮKassa «Интеграция → HTTP-уведомления»: адрес https://admin.vkus-com.ru/pay/yookassa/webhook, события payment.succeeded, payment.canceled, refund.succeeded. ' +
+          'Возврат денег — в кабинете ЮKassa: заказ сам станет «Возврат».',
+      },
+      conditions: YOOKASSA_ONLY,
+    },
+  },
+  {
     field: 'alfa_login',
     type: 'string',
     schema: { max_length: 128 },
-    meta: { interface: 'input', options: { trim: true }, note: 'Из письма банка, обычно оканчивается на «-api»', width: 'half', sort: 9, translations: tr('Логин API') },
+    meta: {
+      interface: 'input',
+      options: { trim: true },
+      note: 'Из письма банка, обычно оканчивается на «-api»',
+      width: 'half',
+      sort: 12,
+      translations: tr('Логин API'),
+      conditions: ALFA_ONLY,
+    },
   },
-  masked('alfa_password', 'Пароль API', 'Скрыт. Переменная PAY_ALFA_PASSWORD важнее этого поля', 10),
-  masked('alfa_token', 'Токен API', 'Вместо логина и пароля, если банк выдал токен', 11, 'full'),
+  masked('alfa_password', 'Пароль API', 'Скрыт. Переменная PAY_ALFA_PASSWORD важнее этого поля', 13, 'half', ALFA_ONLY),
+  masked('alfa_token', 'Токен API', 'Вместо логина и пароля, если банк выдал токен', 14, 'full', ALFA_ONLY),
   {
     field: 'alfa_gateway_test',
     type: 'string',
     schema: { default_value: 'https://alfa.rbsuat.com/payment/rest/', max_length: 255 },
-    meta: { interface: 'input', options: { trim: true }, width: 'half', sort: 12, translations: tr('Шлюз: тест') },
+    meta: { interface: 'input', options: { trim: true }, width: 'half', sort: 15, translations: tr('Шлюз: тест'), conditions: ALFA_ONLY },
   },
   {
     field: 'alfa_gateway_prod',
@@ -138,30 +194,39 @@ const SETTINGS_FIELDS = [
       options: { trim: true },
       note: 'Логин с префиксом «r-» — https://payment.alfabank.ru/payment/rest/',
       width: 'half',
-      sort: 13,
+      sort: 16,
       translations: tr('Шлюз: бой'),
+      conditions: ALFA_ONLY,
     },
   },
   masked(
     'callback_key',
     'Ключ уведомлений',
     'Ключ контрольной суммы callback-уведомлений (выдаёт банк). Адрес уведомлений для банка: https://admin.vkus-com.ru/pay/callback',
-    14,
+    17,
     'full',
+    ALFA_ONLY,
   ),
   {
     field: 'site_url',
     type: 'string',
     schema: { default_value: 'https://vkus-com.ru', max_length: 255 },
-    meta: { interface: 'input', options: { trim: true }, note: 'Куда банк вернёт гостя после оплаты', width: 'half', sort: 15, translations: tr('Адрес сайта') },
+    meta: { interface: 'input', options: { trim: true }, note: 'Куда банк вернёт гостя после оплаты', width: 'half', sort: 18, translations: tr('Адрес сайта') },
   },
   {
     field: 'session_minutes',
     type: 'integer',
     schema: { default_value: 20 },
-    meta: { interface: 'input', options: { min: 5, max: 1440 }, note: 'Сколько живёт страница оплаты', width: 'half', sort: 16, translations: tr('Ждём оплату, мин') },
+    meta: {
+      interface: 'input',
+      options: { min: 5, max: 1440 },
+      note: 'Сколько живёт страница оплаты. ЮKassa держит страницу сама: по этому сроку заказ только отмечается «Не прошла»',
+      width: 'half',
+      sort: 19,
+      translations: tr('Ждём оплату, мин'),
+    },
   },
-  divider('receipt_divider', 'Чек (54-ФЗ)', 'receipt', 17),
+  divider('receipt_divider', 'Чек (54-ФЗ)', 'receipt', 20),
   {
     field: 'receipt_enabled',
     type: 'boolean',
@@ -170,9 +235,11 @@ const SETTINGS_FIELDS = [
       interface: 'boolean',
       options: { label: 'Передавать состав заказа для чека' },
       special: ['cast-boolean'],
-      note: 'Нужно, когда у банка подключена онлайн-касса: строки заказа уходят в чек',
+      note:
+        'ЮKassa: включите, если в её кабинете подключены «Чеки от ЮKassa» или онлайн-касса, — тогда без состава платёж не создастся. ' +
+        'Альфа: нужно, когда у банка подключена онлайн-касса',
       width: 'full',
-      sort: 18,
+      sort: 21,
       translations: tr('Чек'),
     },
   },
@@ -193,7 +260,7 @@ const SETTINGS_FIELDS = [
       },
       note: 'Уточните у бухгалтера',
       width: 'half',
-      sort: 19,
+      sort: 22,
       translations: tr('Система налогообложения'),
     },
   },
@@ -215,7 +282,7 @@ const SETTINGS_FIELDS = [
       },
       note: 'Ставка для всех строк заказа',
       width: 'half',
-      sort: 20,
+      sort: 23,
       translations: tr('НДС'),
     },
   },
@@ -226,10 +293,23 @@ const SETTINGS_FIELDS = [
     meta: {
       interface: 'select-dropdown',
       options: { choices: [choice('Полный расчёт', 4), choice('Предоплата 100 %', 1)] },
-      note: 'Альфа для доставки с оплатой заранее советует «Предоплата 100 %» и закрывающий чек при передаче — решите с бухгалтером',
+      note: 'Для доставки с оплатой заранее банки советуют «Предоплата 100 %» и закрывающий чек при передаче — решите с бухгалтером',
       width: 'half',
-      sort: 21,
+      sort: 24,
       translations: tr('Способ расчёта'),
+    },
+  },
+  {
+    field: 'receipt_subject',
+    type: 'integer',
+    schema: { default_value: 1 },
+    meta: {
+      interface: 'select-dropdown',
+      options: { choices: [choice('Товар', 1), choice('Услуга', 4)] },
+      note: 'Признак предмета расчёта для всех строк: блюда обычно «Товар» — решите с бухгалтером',
+      width: 'half',
+      sort: 25,
+      translations: tr('Предмет расчёта'),
     },
   },
   {
@@ -239,26 +319,40 @@ const SETTINGS_FIELDS = [
     meta: {
       interface: 'select-radio',
       options: { choices: [choice('ФФД 1.2', '1.2'), choice('ФФД 1.05', '1.05')] },
-      note: 'Версия формата чека у кассы: от неё зависит, как записана единица «шт»',
+      note: 'Версия формата чека у кассы: от неё зависит, как записана единица «шт». «Чеки от ЮKassa» — ФФД 1.2',
       width: 'half',
-      sort: 22,
+      sort: 26,
       translations: tr('Формат чека'),
     },
   },
-  divider('texts_divider', 'Тексты для гостя', 'chat', 23),
+  divider('texts_divider', 'Тексты для гостя', 'chat', 27),
   ...[
-    ['text_online', 'Онлайн картой — подпись', 'Картой МИР, Visa или Mastercard на защищённой странице Альфа-Банка'],
+    ['text_online', 'Онлайн картой — подпись', 'Картой МИР, Visa или Mastercard на защищённой странице ЮKassa', 'Пусто — текст по умолчанию для выбранного банка (у Альфы — «…странице Альфа-Банка»)'],
     ['text_on_delivery', 'При получении — подпись', 'Наличными или картой курьеру, на кассе при самовывозе'],
     ['text_note', 'Пояснение под выбором', 'Онлайн оплачиваются блюда. Платную доставку назовём при звонке и оплатите её курьеру.'],
     ['text_paid', 'Экран «Заказ оплачен»', 'Спасибо! Перезвоним, чтобы подтвердить адрес и время.'],
     ['text_failed', 'Экран «Оплата не прошла»', 'Деньги не списаны. Заказ сохранён — оформлять его заново не нужно.'],
-  ].map(([field, name, placeholder], i) => ({
+  ].map(([field, name, placeholder, note], i) => ({
     field,
     type: 'string',
     schema: { max_length: 300 },
-    meta: { interface: 'input', options: { placeholder, trim: true }, note: 'Пусто — текст по умолчанию из подсказки', width: 'full', sort: 24 + i, translations: tr(name) },
+    meta: {
+      interface: 'input',
+      options: { placeholder, trim: true },
+      note: note ?? 'Пусто — текст по умолчанию из подсказки',
+      width: 'full',
+      sort: 28 + i,
+      translations: tr(name),
+    },
   })),
 ];
+// the layout of the fields that exist already follows this list: the order,
+// the words, the choices and when a field shows (the snapshot carries the
+// same; this keeps an install without it in step)
+// раскладка уже существующих полей следует этому списку: порядок, слова,
+// варианты и когда поле видно (снапшот несёт то же; это держит в ногу
+// установку без него)
+const SYNCED_META = ['sort', 'note', 'options', 'conditions', 'width'];
 
 /** Поля оплаты у заказа: после суммы, только для чтения — их пишет сервер. */
 const ORDER_FIELDS = [
@@ -386,11 +480,35 @@ export async function setup(api, { editorPolicy, publicPolicy }) {
     });
     console.log(`+ collection ${SETTINGS}`);
   }
-  const settingsFields = (await api('GET', `/fields/${SETTINGS}`)).map((f) => f.field);
+  const existing = await api('GET', `/fields/${SETTINGS}`);
+  const settingsFields = existing.map((f) => f.field);
   for (const field of SETTINGS_FIELDS) {
     if (settingsFields.includes(field.field)) continue;
     await api('POST', `/fields/${SETTINGS}`, field);
     console.log(`+ field ${SETTINGS}.${field.field}`);
+  }
+  // ЮKassa joined later: the old fields take the new order, words, choices and
+  // conditions; the bank by default becomes ЮKassa (the saved choice stays)
+  // ЮKassa пришла позже: старые поля получают новый порядок, слова, варианты и
+  // условия; банк по умолчанию — ЮKassa (сохранённый выбор не меняется)
+  const stable = (value) =>
+    JSON.stringify(value ?? null, (_key, v) => (v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b))) : v));
+  const patches = [];
+  for (const field of SETTINGS_FIELDS) {
+    const have = existing.find((f) => f.field === field.field);
+    if (!have || field.field === 'id') continue;
+    const meta = {};
+    for (const key of SYNCED_META) if (key in field.meta && stable(have.meta?.[key]) !== stable(field.meta[key])) meta[key] = field.meta[key];
+    if (Object.keys(meta).length) patches.push({ field: field.field, meta });
+  }
+  if (patches.length) {
+    await api('PATCH', `/fields/${SETTINGS}`, patches);
+    console.log(`= fields ${SETTINGS}: ${patches.map((p) => `${p.field} (${Object.keys(p.meta).join(', ')})`).join('; ')}`);
+  }
+  const provider = existing.find((f) => f.field === 'provider');
+  if (provider && provider.schema?.default_value !== 'yookassa') {
+    await api('PATCH', `/fields/${SETTINGS}/provider`, { schema: { default_value: 'yookassa' } });
+    console.log(`= field ${SETTINGS}.provider: по умолчанию ЮKassa`);
   }
 
   // 2. payment fields of an order / поля оплаты у заказа
