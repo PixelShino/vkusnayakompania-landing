@@ -102,6 +102,15 @@ services:
       PAY_ENABLED: ${PAY_ENABLED:-}
       PAY_MODE: ${PAY_MODE:-}
       PAY_PROVIDER: ${PAY_PROVIDER:-}
+      # ЮKassa (the default bank): shopId and the secret key from the ЮKassa
+      # cabinet («Интеграция» → «Ключи API»); PAY_YOOKASSA_API — only for a
+      # check against a fake ЮKassa, works in test mode only, empty on a server
+      # ЮKassa (банк по умолчанию): shopId и секретный ключ из кабинета ЮKassa
+      # («Интеграция» → «Ключи API»); PAY_YOOKASSA_API — только для проверки на
+      # поддельной ЮKassa, действует лишь в тесте, на сервере пусто
+      PAY_YOOKASSA_SHOP_ID: ${PAY_YOOKASSA_SHOP_ID:-}
+      PAY_YOOKASSA_SECRET_KEY: ${PAY_YOOKASSA_SECRET_KEY:-}
+      PAY_YOOKASSA_API: ${PAY_YOOKASSA_API:-}
       PAY_ALFA_LOGIN: ${PAY_ALFA_LOGIN:-}
       PAY_ALFA_PASSWORD: ${PAY_ALFA_PASSWORD:-}
       PAY_ALFA_TOKEN: ${PAY_ALFA_TOKEN:-}
