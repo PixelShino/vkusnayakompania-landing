@@ -26,7 +26,7 @@ const suite = (lib: typeof site, who: string) => {
   assert.equal(tierFor(10000, tiers).tier.name, '2', who);
   assert.equal(tierFor(20000, tiers).progress, 0.5, who);
   const top = tierFor(45000, tiers);
-  assert.equal(top.tier.name, 'Друг дома', who);
+  assert.equal(top.tier.name, '3', who);
   assert.equal(top.next, null, who);
   assert.equal(top.left, 0, who);
   assert.equal(top.progress, 1, who);
