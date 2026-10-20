@@ -138,7 +138,7 @@ export const createPayService = ({ services, database, getSchema, env, logger })
 
   const orderById = async (id) => (Number.isInteger(id) ? ((await database('orders').where({ id }).first()) ?? null) : null);
 
-  const notifyPaid = async (order, amount) => {
+  const notifyPaid = async (order, amount, { test = false, short = false } = {}) => {
     try {
       const roles = await database('directus_roles').whereIn('name', NOTIFY_ROLES).pluck('id');
       const users = roles.length ? await database('directus_users').whereIn('role', roles).where({ status: 'active' }).pluck('id') : [];
@@ -146,8 +146,12 @@ export const createPayService = ({ services, database, getSchema, env, logger })
       for (const recipient of users) {
         await notifications.createOne({
           recipient,
-          subject: `Заказ ${order.number} оплачен онлайн · ${rub(amount)}`,
-          message: `**${order.customer_name}**, ${order.phone}\n\nОплачено картой на сайте: **${rub(amount)}**. Подтвердите адрес и время — сумму с гостем обсуждать не нужно.`,
+          subject: short
+            ? `Заказ ${order.number}: банк подтвердил меньше, чем к оплате — сверьте`
+            : `${test ? 'ТЕСТ · ' : ''}Заказ ${order.number} оплачен онлайн · ${rub(amount)}`,
+          message: short
+            ? `**${order.customer_name}**, ${order.phone}\n\nБанк подтвердил **${rub(amount)}**, а к оплате в заказе **${rub(payable(order))}**. Заказ не отмечен оплаченным: сверьте платёж в кабинете банка и договоритесь с гостем о разнице.`
+            : `${test ? '**Тестовый режим оплаты — денег не списано.**\n\n' : ''}**${order.customer_name}**, ${order.phone}\n\nОплачено картой на сайте: **${rub(amount)}**. Подтвердите адрес и время — сумму с гостем обсуждать не нужно.`,
           collection: 'orders',
           item: String(order.id),
         });
@@ -165,18 +169,41 @@ export const createPayService = ({ services, database, getSchema, env, logger })
    * оплатить старую вкладку); неудача — только текущей, чтобы мёртвая старая
    * ссылка не испортила живую.
    */
-  const apply = async (order, bankId, result, via) => {
+  const apply = async (order, bankId, result, via, s = null) => {
     const was = order.payment_status;
     const total = toKopecks(payable(order)) ?? 0;
-    if (result.state === 'paid' && was !== 'paid' && was !== 'refunded') {
+    // the stub and a test shop take no money: the journal and the manager's
+    // notification say so, a test «paid» is never mistaken for a real one
+    // заглушка и тестовый магазин денег не берут: журнал и уведомление
+    // менеджеру говорят об этом, тестовое «оплачено» не спутать с настоящим
+    const test = s?.mode === 'test';
+    const tag = test ? 'ТЕСТ, денег не списано: ' : '';
+    if (result.state === 'paid' && result.amount && result.amount < total && was !== 'paid' && was !== 'refunded') {
+      // the bank confirmed less than the order asks (the bill grew after the
+      // link was issued, or the amount was tampered with): not «paid» — the
+      // manager squares it with the guest, said once per attempt
+      // банк подтвердил меньше, чем просит заказ (счёт вырос после выдачи
+      // ссылки или сумму подменили): не «оплачен» — менеджер сверяет с гостем,
+      // сказано один раз на попытку
+      const meta = json(order.payment_meta, {});
+      if (!(meta.short ?? []).includes(bankId)) {
+        const paid = result.amount / 100;
+        await write(
+          order,
+          { payment_status: 'failed', payment_meta: { ...meta, short: [...(meta.short ?? []), bankId] } },
+          `${tag}ВНИМАНИЕ: банк подтвердил ${rub(paid)}, а к оплате ${rub(payable(order))} — заказ не отмечен оплаченным, сверьте платёж ${bankId} в кабинете банка; ${via}`,
+        );
+        await notifyPaid(order, paid, { test, short: true });
+      }
+    } else if (result.state === 'paid' && was !== 'paid' && was !== 'refunded') {
       const paid = result.amount ? result.amount / 100 : payable(order);
       const differs = result.amount && result.amount !== total ? ` (в заказе к оплате ${rub(payable(order))} — сверить)` : '';
       await write(
         order,
         { payment_status: 'paid', payment_method: 'online', paid_at: new Date().toISOString(), payment_id: bankId },
-        `оплачено ${rub(paid)}${differs}; ${via}`,
+        `${tag}оплачено ${rub(paid)}${differs}; ${via}`,
       );
-      await notifyPaid(order, paid);
+      await notifyPaid(order, paid, { test });
     } else if (result.state === 'paid' && was === 'paid' && bankId !== order.payment_id) {
       // a second attempt paid as well (two tabs): money twice for one order —
       // said once, loudly, for the manager to refund
@@ -257,15 +284,20 @@ export const createPayService = ({ services, database, getSchema, env, logger })
         if (samePage && (live || kept)) {
           const result = await ask(s, order.payment_id);
           if (result.state === 'paid') {
-            await apply(order, order.payment_id, result, 'проверка при повторном переходе');
-            return { paid: true, number: order.number, total: payable(order) };
+            await apply(order, order.payment_id, result, 'проверка при повторном переходе', s);
+            if (order.payment_status === 'paid') return { paid: true, number: order.number, total: payable(order) };
+            // the bank took less than the order asks: no second payment on top
+            // of it — the manager settles the difference by phone
+            // банк взял меньше, чем просит заказ: второй платёж сверху не
+            // открываем — разницу менеджер решает по телефону
+            throw new PayError(409, 'short', 'Банк подтвердил меньшую сумму, чем в заказе. Позвоните нам — разберёмся.');
           }
           if (result.state === 'pending' && (live || !result.unreachable)) {
             if (order.payment_status !== 'pending')
               await write(order, { payment_status: 'pending', payment_method: 'online' }, `та же страница оплаты выдана снова: ${provider.label} её ещё держит`);
             return { url: order.payment_url, number: order.number, total: payable(order), again: true };
           }
-          await apply(order, order.payment_id, result, 'проверка при повторном переходе');
+          await apply(order, order.payment_id, result, 'проверка при повторном переходе', s);
         }
 
         const target = returnTarget({ origin, path, allowed: corsOrigins(env.CORS_ORIGIN), siteUrl: s.siteUrl });
@@ -383,7 +415,16 @@ export const createPayService = ({ services, database, getSchema, env, logger })
       const order = await orderById(found.id);
       if (order.payment_status === 'pending' && order.payment_id) {
         const result = await ask(s, order.payment_id);
-        await locked(order.id, () => apply(order, order.payment_id, result, 'проверка со страницы сайта'));
+        // the order is read again under the lock: the snapshot taken before the
+        // bank answered may already be a step behind another handler
+        // заказ перечитывается под блокировкой: снимок, снятый до ответа банка,
+        // мог отстать от другого обработчика на шаг
+        await locked(order.id, async () => {
+          const fresh = await orderById(order.id);
+          if (!fresh) return;
+          await apply(fresh, order.payment_id, result, 'проверка со страницы сайта', s);
+          Object.assign(order, fresh);
+        });
       }
       return { number: order.number, status: order.payment_status, method: order.payment_method, total: payable(order) };
     },
@@ -421,9 +462,15 @@ export const createPayService = ({ services, database, getSchema, env, logger })
         await new Promise((resolve) => setTimeout(resolve, LEFT_RECHECK_MS));
         result = await ask(s, asked);
       }
-      await locked(order.id, () => apply(order, asked, result, 'возврат гостя со страницы банка'));
+      await locked(order.id, async () => {
+        const fresh = await orderById(order.id);
+        if (!fresh) return;
+        await apply(fresh, asked, result, 'возврат гостя со страницы банка', s);
+        Object.assign(order, fresh);
+      });
       if (!target) return null;
-      if (order.payment_status === 'paid' || result.state === 'paid') return resultUrl(target, 'ok', order.number);
+      if (order.payment_status === 'paid') return resultUrl(target, 'ok', order.number);
+      if (result.state === 'paid') return resultUrl(target, 'fail', order.number, 'short');
       if (result.state === 'failed' || result.state === 'refunded') return resultUrl(target, 'fail', order.number, whyFailed(result));
       // the bank never gives up an unfinished page on the way back: Alfa's
       // status 0 or ЮKassa's `pending` means the guest left it («back to the
@@ -450,7 +497,10 @@ export const createPayService = ({ services, database, getSchema, env, logger })
       }
       if (!order) throw new PayError(404, 'not_found', 'unknown order');
       const result = await ask(s, bankId);
-      await locked(order.id, () => apply(order, bankId, result, `уведомление банка (${params.operation ?? 'без операции'})`));
+      await locked(order.id, async () => {
+        const fresh = await orderById(order.id);
+        if (fresh) await apply(fresh, bankId, result, `уведомление банка (${params.operation ?? 'без операции'})`, s);
+      });
       return { ok: true };
     },
 
@@ -498,7 +548,7 @@ export const createPayService = ({ services, database, getSchema, env, logger })
       }
       await locked(order.id, async () => {
         const fresh = await orderById(order.id);
-        await apply(fresh, note.paymentId, result, `уведомление ЮKassa (${note.event})`);
+        await apply(fresh, note.paymentId, result, `уведомление ЮKassa (${note.event})`, s);
       });
       return { ok: true };
     },
@@ -515,7 +565,7 @@ export const createPayService = ({ services, database, getSchema, env, logger })
           const meta = json(order.payment_meta, {});
           if (meta.provider && meta.provider !== s.provider) return;
           const result = await ask(s, order.payment_id);
-          await apply(order, order.payment_id, result, 'проверка по расписанию');
+          await apply(order, order.payment_id, result, 'проверка по расписанию', s);
           if (order.payment_status === 'pending' && !result.unreachable && meta.until && Date.now() > meta.until + EXPIRE_GRACE_MS)
             await write(order, { payment_status: 'failed' }, 'время на оплату истекло, гость не оплатил');
         });
