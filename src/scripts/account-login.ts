@@ -149,7 +149,7 @@ export const mountLogin = (form: HTMLFormElement, options: Options) => {
       }
       if (busy) return;
       try {
-        const result = await api.verify(phone);
+        const result = await api.verify(phone, undefined, sent?.request || undefined);
         if (result) signedIn(result.token, result.expires, result.created);
       } catch (error) {
         if (error instanceof ApiError && error.status && error.status !== 429) {
@@ -215,7 +215,7 @@ export const mountLogin = (form: HTMLFormElement, options: Options) => {
     fieldError('code', null);
     setBusy(true, 'Проверяем…');
     try {
-      const result = await api.verify(phone, code);
+      const result = await api.verify(phone, code, sent?.request || undefined);
       if (result) signedIn(result.token, result.expires, result.created);
     } catch (error) {
       const e = error as ApiError;

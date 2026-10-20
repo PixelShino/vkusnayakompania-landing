@@ -176,8 +176,11 @@ export type Verified = { token: string; expires: string; created: boolean };
 export const accountApi = (base: string) => ({
   send: (phone: string, channel?: 'sms') => request<Sent>(base, '/guest-auth/send', { method: 'POST', body: { phone, ...(channel && { channel }) } }).then((r) => r.data),
   /** `null` — ждём подтверждения у оператора (мобильная авторизация) */
-  verify: async (phone: string, code?: string) => {
-    const result = await request<Verified | { pending: true; otp: boolean }>(base, '/guest-auth/verify', { method: 'POST', body: { phone, code } });
+  verify: async (phone: string, code?: string, requestId?: string) => {
+    const result = await request<Verified | { pending: true; otp: boolean }>(base, '/guest-auth/verify', {
+      method: 'POST',
+      body: { phone, code, ...(requestId && { request: requestId }) },
+    });
     return result.status === 202 ? null : (result.data as Verified);
   },
   me: (token: string) => request<Me>(base, '/guest-auth/me', { token }).then((r) => r.data),

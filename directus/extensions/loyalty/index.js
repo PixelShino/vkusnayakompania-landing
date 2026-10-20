@@ -130,40 +130,86 @@ export default ({ filter, action, schedule, init }, { database, logger, emitter 
       .update({ bonus_balance: available, total_spent: spent, tier: tierFor(spent, p.tiers).tier.name });
   };
 
+  /**
+   * A guest's ledger is written one job at a time: two orders from two tabs
+   * and two settles of one order queue behind a Postgres advisory lock that
+   * lives as long as the transaction, so the same points are not spent twice
+   * and an order is not accrued twice.
+   * Книга гостя пишется по одной работе за раз: два заказа из двух вкладок и
+   * два пересчёта одного заказа встают в очередь за advisory-блокировкой
+   * Postgres, живущей вместе с транзакцией, — одни баллы не тратятся дважды,
+   * заказ не начисляется дважды.
+   */
+  const withGuest = (db, user, run) =>
+    db.transaction(async (trx) => {
+      await trx.raw('select pg_advisory_xact_lock(hashtext(?))', [`loyalty:${user}`]);
+      return run(trx);
+    });
+
   /** Заказ ↔ баланс: провести недостающие операции и записать начисленное в заказ. */
   const settle = async (db, orderId) => {
-    const order = await db('orders').where({ id: orderId }).first('id', 'number', 'status', 'customer', 'bonus_spent', 'to_pay', 'total');
-    if (!order?.customer) return;
-    const p = await program(db);
-    const applied = (await db('bonus_transactions').where({ order: orderId, user: order.customer }).select('type', 'amount')).map((tx) => ({
-      type: tx.type,
-      amount: Number(tx.amount),
-    }));
-    // the percent of the tier the guest had before this order
-    // процент уровня, который был у гостя до этого заказа
-    const percent = tierFor(await spentBy(db, order.customer, orderId), p.tiers).tier.percent;
-    let ops = reconcileOrder(
-      { status: order.status, bonus_spent: Number(order.bonus_spent ?? 0), to_pay: order.to_pay ?? null, total: Number(order.total ?? 0) },
-      applied,
-      percent,
-    );
-    // a switched-off programme accrues nothing new, but still returns points taken by a cancelled order
-    // выключенная программа ничего нового не начисляет, но баллы отменённого заказа возвращает
-    if (!p.enabled) ops = ops.filter((op) => op.type === 'refund');
-    if (ops.length) {
-      await post(
-        db,
-        order.customer,
-        ops.map((op) => ({ ...op, comment: `${op.comment} · заказ ${order.number}` })),
-        { order: orderId, ttlDays: p.ttlDays },
+    const head = await db('orders').where({ id: orderId }).first('customer');
+    if (!head?.customer) return;
+    await withGuest(db, head.customer, async (trx) => {
+      const order = await trx('orders')
+        .where({ id: orderId })
+        .first('id', 'number', 'status', 'customer', 'bonus_spent', 'to_pay', 'total', 'discount', 'manager_note');
+      if (!order?.customer) return;
+      const p = await program(trx);
+      const applied = (await trx('bonus_transactions').where({ order: orderId, user: order.customer }).select('type', 'amount')).map((tx) => ({
+        type: tx.type,
+        amount: Number(tx.amount),
+      }));
+      // the percent of the tier the guest had before this order
+      // процент уровня, который был у гостя до этого заказа
+      const percent = tierFor(await spentBy(trx, order.customer, orderId), p.tiers).tier.percent;
+      let ops = reconcileOrder(
+        { status: order.status, bonus_spent: Number(order.bonus_spent ?? 0), to_pay: order.to_pay ?? null, total: Number(order.total ?? 0) },
+        applied,
+        percent,
       );
-      logger.info(`loyalty: заказ ${order.number} — ${ops.map((op) => `${op.type} ${op.amount}`).join(', ')}`);
-    }
-    const earned = [...applied, ...ops]
-      .filter((tx) => tx.type === 'accrual' || (tx.type === 'refund' && tx.amount < 0))
-      .reduce((sum, tx) => sum + tx.amount, 0);
-    await db('orders').where({ id: orderId }).update({ bonus_earned: Math.max(0, earned) });
-    await recount(db, order.customer);
+      // a switched-off programme accrues nothing new, but still returns points taken by a cancelled order
+      // выключенная программа ничего нового не начисляет, но баллы отменённого заказа возвращает
+      if (!p.enabled) ops = ops.filter((op) => op.type === 'refund');
+      // The checkout saw the balance before the order existed; under the lock
+      // it is read once more. A second order that raced for the same points
+      // takes what is left, the rest goes back to the bill, the manager sees why.
+      // Оформление видело баланс до того, как заказ появился; под блокировкой он
+      // читается ещё раз. Второй заказ, бежавший за теми же баллами, берёт
+      // остаток, остальное возвращается в счёт, менеджер видит почему.
+      const spend = ops.find((op) => op.type === 'spend');
+      if (spend) {
+        const { available } = ledger(await txsOf(trx, order.customer), today());
+        const want = -spend.amount;
+        if (want > available) {
+          const got = Math.max(0, Math.floor(available));
+          const total = Number(order.total ?? 0);
+          const discount = Number(order.discount ?? 0);
+          const toPay = Math.max(0, total - discount - got);
+          const line = `Баллы: на счёте было ${got} из ${want} запрошенных — списано ${got}, к оплате ${rub(toPay)}.`;
+          await trx('orders')
+            .where({ id: orderId })
+            .update({ bonus_spent: got, to_pay: toPay, manager_note: [order.manager_note, line].filter(Boolean).join('\n') });
+          logger.warn(`loyalty: заказ ${order.number} — ${line}`);
+          if (got > 0) spend.amount = -got;
+          else ops = ops.filter((op) => op !== spend);
+        }
+      }
+      if (ops.length) {
+        await post(
+          trx,
+          order.customer,
+          ops.map((op) => ({ ...op, comment: `${op.comment} · заказ ${order.number}` })),
+          { order: orderId, ttlDays: p.ttlDays },
+        );
+        logger.info(`loyalty: заказ ${order.number} — ${ops.map((op) => `${op.type} ${op.amount}`).join(', ')}`);
+      }
+      const earned = [...applied, ...ops]
+        .filter((tx) => tx.type === 'accrual' || (tx.type === 'refund' && tx.amount < 0))
+        .reduce((sum, tx) => sum + tx.amount, 0);
+      await trx('orders').where({ id: orderId }).update({ bonus_earned: Math.max(0, earned) });
+      await recount(trx, order.customer);
+    });
   };
 
   const guard = (what, run) =>
@@ -234,12 +280,14 @@ export default ({ filter, action, schedule, init }, { database, logger, emitter 
   action('users.create', ({ key, payload }) =>
     guard(`гость ${key}`, async () => {
       if (!payload?.role || payload.role !== (await guestRole())) return;
-      const p = await program();
-      const had = await database('bonus_transactions').where({ user: key, type: 'signup' }).first('id');
-      if (p.enabled && p.signupBonus > 0 && !had) {
-        await post(database, key, [{ type: 'signup', amount: p.signupBonus, comment: `Добро пожаловать в «${p.name}»` }], { ttlDays: p.ttlDays });
-      }
-      await recount(database, key);
+      await withGuest(database, key, async (trx) => {
+        const p = await program(trx);
+        const had = await trx('bonus_transactions').where({ user: key, type: 'signup' }).first('id');
+        if (p.enabled && p.signupBonus > 0 && !had) {
+          await post(trx, key, [{ type: 'signup', amount: p.signupBonus, comment: `Добро пожаловать в «${p.name}»` }], { ttlDays: p.ttlDays });
+        }
+        await recount(trx, key);
+      });
     }),
   );
 

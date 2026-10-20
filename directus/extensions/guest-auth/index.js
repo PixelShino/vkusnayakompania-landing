@@ -300,19 +300,29 @@ export default {
         if (tooManyTries(ip)) return fail(res, 429, 'TOO_MANY', 'Слишком много попыток. Подождите десять минут или позвоните нам.');
         const phone = normalizePhone(req.body?.phone);
         if (!phone) return fail(res, 400, 'INVALID_PHONE', 'Проверьте номер: нужен российский, 10 цифр после +7.');
+        // the browser that asked for the code names its request (`/send` gave the id):
+        // a stranger who only knows the phone cannot pick up this confirmation
+        // браузер, который просил код, называет свой запрос (id выдал `/send`):
+        // посторонний, знающий только телефон, это подтверждение не заберёт
+        const request = typeof req.body?.request === 'string' && /^[0-9a-f-]{36}$/i.test(req.body.request) ? req.body.request : null;
         const row = await database('auth_codes')
           .where({ phone, status: 'sent' })
           .where('expires_at', '>', new Date())
           .orderBy('date_created', 'desc')
           .first();
-        if (!row) return fail(res, 400, 'CODE_EXPIRED', 'Код устарел. Запросите новый.');
+        if (!row || (request && row.id !== request)) return fail(res, 400, 'CODE_EXPIRED', 'Код устарел. Запросите новый.');
         const code = String(req.body?.code ?? '').replace(/\D/g, '');
         const s = await settings();
 
         const wrong = async () => {
-          const attempts = Number(row.attempts) + 1;
+          // counted in the database, not from this request's snapshot: ten wrong
+          // codes at once are ten tries, not one
+          // считается в базе, а не по снимку этого запроса: десять неверных кодов
+          // разом — десять попыток, а не одна
+          await database('auth_codes').where({ id: row.id, status: 'sent' }).update({ attempts: database.raw('attempts + 1') });
+          const attempts = Number((await database('auth_codes').where({ id: row.id }).first('attempts'))?.attempts ?? Number(row.attempts) + 1);
           const burnt = attempts >= CODE.tries;
-          await database('auth_codes').where({ id: row.id }).update({ attempts, ...(burnt && { status: 'burnt' }) });
+          if (burnt) await database('auth_codes').where({ id: row.id, status: 'sent' }).update({ status: 'burnt' });
           return burnt
             ? fail(res, 400, 'CODE_BURNT', `Код введён неверно ${CODE.tries} раз. Запросите новый.`)
             : fail(res, 400, 'CODE_WRONG', `Неверный код. Осталось попыток: ${CODE.tries - attempts}.`, { attempts_left: CODE.tries - attempts });
@@ -327,6 +337,11 @@ export default {
           // верим, отправить в него может кто угодно
           if (!provider) return fail(res, 503, 'NO_PROVIDER', 'Вход по коду ещё не настроен. Позвоните нам.');
           if (!code) {
+            // a confirmation on the phone opens a session only for the browser
+            // that started this sign-in — anyone else needs the code
+            // подтверждение на телефоне открывает сессию только браузеру, который
+            // начал этот вход, — остальным нужен код
+            if (!request) return fail(res, 400, 'CODE_REQUIRED', 'Введите код из сообщения или продолжите вход там, где его начали.');
             const data = await provider.mobileIdStatus(row.provider_id).catch(() => null);
             if (data?.status === 1) {
               /* confirmed on the phone / подтверждено на телефоне */
@@ -361,7 +376,12 @@ export default {
           if (code.length !== CODE.length) return fail(res, 400, 'CODE_REQUIRED', `Введите ${CODE.length} цифры кода.`);
           if (!sameHash(hashCode(secret, phone, code), row.code_hash)) return wrong();
         }
-        await database('auth_codes').where({ id: row.id }).update({ status: 'used', used_at: new Date() });
+        // the code is spent by one request only: two checks of the right code at
+        // once give one session, not two
+        // код тратится одним запросом: две одновременные проверки верного кода
+        // дают одну сессию, а не две
+        const taken = await database('auth_codes').where({ id: row.id, status: 'sent' }).update({ status: 'used', used_at: new Date() });
+        if (!taken) return fail(res, 400, 'CODE_EXPIRED', 'Код уже использован. Запросите новый.');
 
         // the guest: found by the phone or created; a staff member's phone never opens a guest session
         // гость: найден по телефону или заведён; телефон сотрудника гостевую сессию не открывает
