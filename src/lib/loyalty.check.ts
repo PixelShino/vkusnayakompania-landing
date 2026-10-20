@@ -16,14 +16,14 @@ const suite = (lib: typeof site, who: string) => {
 
   // ── уровень по сумме покупок ──────────────────────────────────────────────
   const zero = tierFor(0, tiers);
-  assert.equal(zero.tier.name, 'Знакомый', who);
+  assert.equal(zero.tier.name, '1', who);
   assert.equal(zero.tier.percent, 3, who);
-  assert.equal(zero.next?.name, 'Свой', who);
+  assert.equal(zero.next?.name, '2', who);
   assert.equal(zero.left, 10000, who);
-  assert.equal(tierFor(9999, tiers).tier.name, 'Знакомый', who);
+  assert.equal(tierFor(9999, tiers).tier.name, '1', who);
   assert.equal(tierFor(9999, tiers).left, 1, who);
-  // порог включительно: ровно 10 000 ₽ — уже «Свой»
-  assert.equal(tierFor(10000, tiers).tier.name, 'Свой', who);
+  // порог включительно: ровно 10 000 ₽ — уже уровень 2
+  assert.equal(tierFor(10000, tiers).tier.name, '2', who);
   assert.equal(tierFor(20000, tiers).progress, 0.5, who);
   const top = tierFor(45000, tiers);
   assert.equal(top.tier.name, 'Друг дома', who);

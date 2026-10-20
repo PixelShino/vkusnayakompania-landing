@@ -12,9 +12,9 @@
  */
 
 export const DEFAULT_TIERS = [
-  { name: 'Знакомый', from: 0, percent: 3 },
-  { name: 'Свой', from: 10000, percent: 5 },
-  { name: 'Друг дома', from: 30000, percent: 7 },
+  { name: '1', from: 0, percent: 3 },
+  { name: '2', from: 10000, percent: 5 },
+  { name: '3', from: 30000, percent: 7 },
 ];
 
 export const DEFAULT_PROGRAM = {

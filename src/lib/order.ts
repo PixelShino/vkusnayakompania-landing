@@ -76,6 +76,39 @@ export const normalizePhone = (value: string) => {
  * Маска при вводе: «+7 (987) 955-25-65». Первая 8 или 7 — код страны, любая
  * другая цифра начинает сам номер; вставленный «+7 987…» ложится верно.
  */
+/**
+ * Backspace over a mask character («)», «-», space) used to put it straight
+ * back: the digit before it stayed, and the number could not be cleared past
+ * the brackets. On a deletion that removed only formatting, the digit before
+ * the caret goes too.
+ * Backspace по символу маски («)», «-», пробел) возвращал его на место: цифра
+ * перед ним оставалась, и номер нельзя было стереть дальше скобок. При удалении,
+ * которое убрало только оформление, уходит и цифра перед ним.
+ */
+export const phoneAfterEdit = (prev: string, next: string, deleting: boolean) => {
+  const digits = (value: string) => value.replace(/\D/g, '');
+  let raw = next;
+  if (deleting && digits(prev).length > 0 && digits(next).length === digits(prev).length)
+    raw = next.replace(/\D+$/, '').slice(0, -1);
+  return maskPhone(raw);
+};
+
+/** Вешает маску на поле: ввод форматируется, удаление проходит сквозь скобки и дефисы. */
+export const bindPhoneMask = (input: HTMLInputElement, after?: () => void) => {
+  let prev = input.value;
+  input.addEventListener('input', (event) => {
+    const deleting = Boolean((event as InputEvent).inputType?.startsWith('delete'));
+    const masked = phoneAfterEdit(prev, input.value, deleting);
+    if (masked !== input.value) input.value = masked;
+    prev = masked;
+    after?.();
+  });
+  input.addEventListener('focus', () => {
+    if (!input.value) input.value = '+7 ';
+    prev = input.value;
+  });
+};
+
 export const maskPhone = (value: string) => {
   let digits = value.replace(/\D/g, '');
   if (!digits) return '';

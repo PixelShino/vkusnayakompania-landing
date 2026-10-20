@@ -61,7 +61,7 @@ const me: Me = {
   program: null,
   profile: {
     id: 'u1', first_name: 'Анна', middle_name: null, last_name: 'Смирнова', phone: '+7 987 000-11-22', birthday: '1990-10-21',
-    gender: 'female', recovery_email: null, bonus_balance: 999, total_spent: 0, tier: 'Знакомый', guest_since: null, birthday_set_at: null,
+    gender: 'female', recovery_email: null, bonus_balance: 999, total_spent: 0, tier: '1', guest_since: null, birthday_set_at: null,
   },
   orders: [
     order(1, 'done', '2026-09-30T20:30:00Z', 8000, { to_pay: 7700, bonus_spent: 300 }), // 1 октября по Самаре
@@ -82,7 +82,7 @@ assert.equal(sum.burnSoon, 300);
 assert.equal(sum.burnDay, '2026-11-10');
 // траты — только выполненные заказы и только деньгами: 7 700 + 3 000
 assert.equal(sum.spent, 10700);
-assert.equal(sum.level.tier.name, 'Свой');
+assert.equal(sum.level.tier.name, '2');
 assert.equal(sum.level.left, 30000 - 10700);
 // заказ 30 сентября в 20:30 UTC — уже 1 октября в Самаре, он в тратах октября
 assert.equal(sum.monthSpent, 7700);

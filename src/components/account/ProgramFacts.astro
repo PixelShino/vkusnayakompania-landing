@@ -72,7 +72,7 @@ const facts = [
     {
       program.tiers.map((tier, i) => (
         <div class="ladder__step" data-tier-step={i}>
-          <p class="ladder__name">{tier.name}</p>
+          <p class="ladder__name">Уровень {tier.name}</p>
           <p class="ladder__pct display tnum">{tier.percent}&thinsp;%</p>
           <p class="ladder__from tnum">{tier.from ? `от ${rub(tier.from)} покупок` : 'с первого заказа'}</p>
         </div>

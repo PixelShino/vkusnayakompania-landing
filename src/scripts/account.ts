@@ -143,10 +143,10 @@ if (node) {
     const progress = $('[data-progress]')!;
     const pct = Math.round(level.progress * 100);
     progress.setAttribute('aria-valuenow', String(pct));
-    progress.setAttribute('aria-valuetext', level.next ? `${pct} % пути до уровня «${level.next.name}»` : 'Высший уровень');
+    progress.setAttribute('aria-valuetext', level.next ? `${pct} % пути до уровня ${level.next.name}` : 'Высший уровень');
     $('[data-progress-fill]')!.style.setProperty('--p', String(level.progress));
     $('[data-next]')!.textContent = level.next
-      ? `До уровня «${level.next.name}» (${level.next.percent} %) — ещё ${rub(level.left)} покупок`
+      ? `До уровня ${level.next.name} (${level.next.percent} %) — ещё ${rub(level.left)} покупок`
       : 'Высший уровень программы — спасибо, что вы с нами';
 
     $('[data-month-label]')!.textContent = `В ${monthIn(me!.today)}`;

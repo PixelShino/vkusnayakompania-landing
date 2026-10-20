@@ -313,7 +313,7 @@ if (rawCats.length && rawDishes.length) {
 // ── корзина и заказ ──────────────────────────────────────────────────────────
 {
   const { add, setQty, priced, reconcile, parseCart, empty, MAX_QTY } = await import('../lib/cart.ts');
-  const { buildOrder, normalizePhone, maskPhone, validate, slotsFor, daysFrom, desiredTime, orderNumber } = await import(
+  const { buildOrder, normalizePhone, maskPhone, phoneAfterEdit, validate, slotsFor, daysFrom, desiredTime, orderNumber } = await import(
     '../lib/order.ts'
   );
   const all = catalog.categories.flatMap((category) => category.products);
@@ -396,6 +396,17 @@ if (rawCats.length && rawDishes.length) {
   // вставка полного номера в поле, где уже стоит «+7 »
   assert.equal(maskPhone('+7 +7 987 955-25-65'), '+7 (987) 955-25-65');
   assert.equal(maskPhone('+7 8 987 955-25-65'), '+7 (987) 955-25-65');
+  // стирание сквозь скобки и дефисы: удалённый символ маски уносит цифру перед ним
+  assert.equal(phoneAfterEdit('+7 (987) 955-25-65', '+7 (987) 955-25-6', true), '+7 (987) 955-25-6');
+  assert.equal(phoneAfterEdit('+7 (987) 955-25', '+7 (987) 955-2', true), '+7 (987) 955-2');
+  assert.equal(phoneAfterEdit('+7 (987) 955', '+7 (987) 95', true), '+7 (987) 95');
+  assert.equal(phoneAfterEdit('+7 (987)', '+7 (987', true), '+7 (98');
+  // выделение «955» и Backspace убирают сами цифры — маска просто форматирует остаток
+  assert.equal(phoneAfterEdit('+7 (987) 955', '+7 (987)', true), '+7 (987)');
+  assert.equal(phoneAfterEdit('+7 (9', '+7 (', true), '+7');
+  assert.equal(phoneAfterEdit('+7', '+', true), '');
+  // набор, не удаление: обычная маска
+  assert.equal(phoneAfterEdit('+7 (98', '+7 (987', false), '+7 (987)');
   assert.equal(maskPhone('9'), '+7 (9');
   assert.equal(normalizePhone('+7 (987) 955-25-65'), '+7 987 955-25-65');
   assert.equal(normalizePhone('12345'), null);

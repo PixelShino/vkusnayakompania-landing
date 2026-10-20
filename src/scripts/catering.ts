@@ -8,7 +8,7 @@
  * раскрыт, а форма ничего не отправляет, но телефон и мессенджеры рядом с ней
  * работают.
  */
-import { maskPhone, orderNumber } from '../lib/order';
+import { bindPhoneMask, orderNumber } from '../lib/order';
 import {
   REQUEST_DRAFT_KEY,
   buildRequest,
@@ -336,13 +336,7 @@ function mountRequest(form: HTMLFormElement) {
 
   // ── телефон: маска и «+7» при фокусе ──
   const phone = field('phone');
-  phone?.addEventListener('input', () => {
-    const masked = maskPhone(phone.value);
-    if (masked !== phone.value) phone.value = masked;
-  });
-  phone?.addEventListener('focus', () => {
-    if (!phone.value) phone.value = '+7 ';
-  });
+  if (phone) bindPhoneMask(phone);
   phone?.addEventListener('blur', () => {
     if (phone.value.replace(/\D/g, '') === '7') phone.value = '';
   });

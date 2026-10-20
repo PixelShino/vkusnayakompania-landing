@@ -30,7 +30,7 @@ import {
   CHECKOUT_KEY,
   buildOrder,
   daysFrom,
-  maskPhone,
+  bindPhoneMask,
   orderNumber,
   slotsFor,
   validate,
@@ -550,15 +550,9 @@ if (dataNode && drawer && dishDialog) {
   };
 
   const phone = field('phone');
-  phone?.addEventListener('input', () => {
-    const masked = maskPhone(phone.value);
-    if (masked !== phone.value) phone.value = masked;
-  });
-  // «+7» appears on focus, so the guest starts typing the number itself
-  // «+7» появляется при фокусе — гость сразу набирает сам номер
-  phone?.addEventListener('focus', () => {
-    if (!phone.value) phone.value = '+7 ';
-  });
+  // mask and «+7» on focus: the guest starts typing the number itself
+  // маска и «+7» при фокусе — гость сразу набирает сам номер
+  if (phone) bindPhoneMask(phone);
   phone?.addEventListener('blur', () => {
     if (phone.value.replace(/\D/g, '') === '7') phone.value = '';
   });

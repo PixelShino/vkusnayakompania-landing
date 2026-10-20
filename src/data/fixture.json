@@ -5451,17 +5451,17 @@
     "max_share_percent": 30,
     "tiers": [
       {
-        "name": "Знакомый",
+        "name": "1",
         "from": 0,
         "percent": 3
       },
       {
-        "name": "Свой",
+        "name": "2",
         "from": 10000,
         "percent": 5
       },
       {
-        "name": "Друг дома",
+        "name": "3",
         "from": 30000,
         "percent": 7
       }

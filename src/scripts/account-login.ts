@@ -13,7 +13,7 @@
  * по-русски, рядом с полем, к которому относится.
  */
 import { ApiError, accountApi, type Sent } from '../lib/account';
-import { maskPhone, normalizePhone } from '../lib/order';
+import { bindPhoneMask, maskPhone, normalizePhone } from '../lib/order';
 import { saveSession } from './account-session';
 
 type Options = {
@@ -233,16 +233,9 @@ export const mountLogin = (form: HTMLFormElement, options: Options) => {
 
   // the site's mask: «+7» on focus, the guest types the number itself
   // маска сайта: «+7» при фокусе, гость набирает сам номер
-  phoneInput.addEventListener('focus', () => {
-    if (!phoneInput.value) phoneInput.value = '+7 ';
-  });
+  bindPhoneMask(phoneInput, () => fieldError('phone', null));
   phoneInput.addEventListener('blur', () => {
     if (phoneInput.value.replace(/\D/g, '') === '7') phoneInput.value = '';
-  });
-  phoneInput.addEventListener('input', () => {
-    const masked = maskPhone(phoneInput.value);
-    if (masked !== phoneInput.value) phoneInput.value = masked;
-    fieldError('phone', null);
   });
   consent.addEventListener('change', () => consent.checked && fieldError('consent', null));
   codeInput.addEventListener('input', () => {

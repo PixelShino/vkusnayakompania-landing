@@ -134,7 +134,7 @@ export const mountCartAccount = ({
     if (earn) {
       const coming = s.program.enabled ? accrualFor(pay, s.sum.level.tier.percent) : 0;
       earn.hidden = coming <= 0;
-      earn.textContent = `Начислим ≈\u00a0${points(coming)} после выполнения заказа (${s.sum.level.tier.percent}\u00a0%, уровень «${s.sum.level.tier.name}»)`;
+      earn.textContent = `Начислим ≈\u00a0${points(coming)} после выполнения заказа (${s.sum.level.tier.percent}\u00a0%, уровень ${s.sum.level.tier.name})`;
     }
   };
 
