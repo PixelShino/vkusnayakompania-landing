@@ -28,11 +28,15 @@ import { BASE } from '../../lib/base.ts';
 import { BRAND } from '../../data/site.ts';
 import { getContent, typo } from '../../lib/content.ts';
 import { positions } from '../../lib/catalog.ts';
+import { DOC, docHref } from '../../lib/pages.ts';
 import '../../styles/catalog.css';
 
 const content = await getContent();
 const { catalog, settings, places } = content;
 const empty = catalog.count === 0;
+// the conditions in full: zones, the minimum order, payment, returns
+// условия целиком: зоны, минимальный заказ, оплата, возврат
+const deliveryHref = docHref(content.pages, DOC.delivery);
 
 const title = `Доставка еды в Самаре — каталог и цены | ${BRAND.name}`;
 const description =
@@ -182,7 +186,15 @@ let rendered = 0;
         </li>
         <li>
           <Icon name="delivery" />
-          <span><b>Доставка по Самаре.</b> Стоимость доставки назовём при звонке</span>
+          <span>
+            <b>Доставка по Самаре.</b> Стоимость доставки назовём при звонке{
+              deliveryHref && (
+                <>
+                  {' '}— <a href={deliveryHref}>условия доставки и оплаты</a>
+                </>
+              )
+            }
+          </span>
         </li>
         <li>
           <Icon name="pin" />
