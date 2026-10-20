@@ -52,6 +52,7 @@ const NOTIFY_ROLES = ['Administrator', 'Редактор'];
 // a stuck «pending» is retired this long after its page died
 // зависшее «ждём оплату» снимается через столько после смерти страницы
 const EXPIRE_GRACE_MS = 30 * 60 * 1000;
+const LEFT_RECHECK_MS = 1500;
 
 const rub = (n) => `${new Intl.NumberFormat('ru-RU').format(n)} ₽`;
 
@@ -411,7 +412,15 @@ export const createPayService = ({ services, database, getSchema, env, logger })
       const asked = bankId || byKey;
       const known = asked && (asked === order.payment_id || (meta.ids ?? []).includes(asked));
       if (!known) return target ? new URL(target.path, target.site).toString() : null;
-      const result = await ask(s, asked);
+      let result = await ask(s, asked);
+      // ЮKassa's «pending» on the way back is a guest who left — unless the
+      // payment is finishing this very second: one more look before saying so
+      // `pending` ЮKassa при возвращении — гость ушёл, если только платёж не
+      // завершается в эту секунду: ещё один взгляд, прежде чем так сказать
+      if (result.left === true && !result.unreachable) {
+        await new Promise((resolve) => setTimeout(resolve, LEFT_RECHECK_MS));
+        result = await ask(s, asked);
+      }
       await locked(order.id, () => apply(order, asked, result, 'возврат гостя со страницы банка'));
       if (!target) return null;
       if (order.payment_status === 'paid' || result.state === 'paid') return resultUrl(target, 'ok', order.number);
