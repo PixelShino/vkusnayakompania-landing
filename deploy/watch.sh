@@ -30,7 +30,7 @@ pending=$(node -e '
     if (!r.ok) throw new Error(`${path} → ${r.status}`);
     return (await r.json()).data;
   };
-  const collections = "afisha,promos,menus,cakes,places_files,directions_files,product_categories,products,settings,home,places,directions,directus_files,texts,catering_page,catering_page_files,catering_formats,catering_steps,catering_faq,loyalty_settings";
+  const collections = "afisha,promos,menus,cakes,places_files,directions_files,product_categories,products,settings,home,places,directions,directus_files,texts,catering_page,catering_page_files,catering_formats,catering_steps,catering_faq,loyalty_settings,pages";
   const [build, [last]] = await Promise.all([
     get("/items/site_build"),
     get(`/activity?filter[collection][_in]=${collections}&filter[action][_in]=create,update,delete&sort=-timestamp&limit=1&fields=timestamp`),

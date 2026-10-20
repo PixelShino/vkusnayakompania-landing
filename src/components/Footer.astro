@@ -1,11 +1,14 @@
 ---
 /**
  * Footer: both venues with their own phone and hours, section links (the
- * catalog and catering among them), legal line. Legal data and documents come
- * from the admin panel, so an unfilled field simply does not render.
+ * catalog and catering among them), the documents, legal line. Legal data and
+ * documents come from the admin panel, so an unfilled field simply does not
+ * render. The documents are the `/docs/` pages; before they exist, the policy
+ * and the offer uploaded as files in «Настройки».
  * Подвал: обе точки со своими телефонами и часами, разделы (среди них каталог и
- * кейтеринг), юрстрока. Реквизиты и документы приходят из админки — незаполненное
- * поле просто не рисуется, заглушек «ИНН —» не бывает.
+ * кейтеринг), документы, юрстрока. Реквизиты и документы приходят из админки —
+ * незаполненное поле просто не рисуется, заглушек «ИНН —» не бывает. Документы —
+ * страницы `/docs/`; пока их нет — политика и оферта файлами из «Настроек».
  */
 import { BRAND, hoursRows } from '../data/site';
 import { footerGroupsFor, navFor } from '../lib/nav.ts';
@@ -18,7 +21,7 @@ interface Props {
 }
 
 const { content, base = '' } = Astro.props;
-const { settings, places, home } = content;
+const { settings, places, home, pages } = content;
 
 // «Главная» внизу страницы не нужна — подвал и так конец
 const sections = navFor(content, base).filter((link) => !link.href.endsWith('#top'));
@@ -36,10 +39,16 @@ const legal = [
   .filter(Boolean)
   .join(' · ');
 
-const docs = [
-  { label: 'Политика конфиденциальности', href: settings.policy?.href },
-  { label: 'Оферта', href: settings.offer?.href },
-].filter((doc) => Boolean(doc.href)) as { label: string; href: string }[];
+// a page opens in place; an uploaded file — in a new tab, like every PDF of the site
+// страница открывается на месте, загруженный файл — в новой вкладке, как все PDF сайта
+const docs = (
+  pages.length
+    ? pages.map((page) => ({ label: page.title, href: page.href, file: false }))
+    : [
+        { label: 'Политика конфиденциальности', href: settings.policy?.href, file: true },
+        { label: 'Оферта', href: settings.offer?.href, file: true },
+      ]
+).filter((doc) => Boolean(doc.href)) as { label: string; href: string; file: boolean }[];
 ---
 
 <footer class="footer">
@@ -82,9 +91,28 @@ const docs = [
       }
 
       <div class="footer__col footer__col--links">
-        <nav class="footer__list" aria-label="Разделы">
+        <nav class="footer__list" aria-labelledby="footer-sections">
+          <p class="footer__head" id="footer-sections">Разделы</p>
           {sections.map((link) => <a href={link.href}>{link.label}</a>)}
         </nav>
+        {
+          docs.length > 0 && (
+            <nav class="footer__list" aria-labelledby="footer-docs">
+              <p class="footer__head" id="footer-docs">
+                Документы
+              </p>
+              {docs.map((doc) =>
+                doc.file ? (
+                  <a href={doc.href} target="_blank" rel="noopener">
+                    {doc.label}
+                  </a>
+                ) : (
+                  <a href={doc.href}>{doc.label}</a>
+                ),
+              )}
+            </nav>
+          )
+        }
       </div>
     </div>
 
@@ -92,17 +120,6 @@ const docs = [
       <p class="footer__legal">
         © {year} · {BRAND.city}{legal && ` · ${legal}`}
       </p>
-      {
-        docs.length > 0 && (
-          <nav class="footer__links footer__links--docs" aria-label="Документы">
-            {docs.map((doc) => (
-              <a href={doc.href} target="_blank" rel="noopener">
-                {doc.label}
-              </a>
-            ))}
-          </nav>
-        )
-      }
     </div>
   </div>
 </footer>
@@ -201,7 +218,7 @@ const docs = [
   .footer__col--links {
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 8px 32px;
+    gap: 22px 32px;
   }
 
   .footer__list {
@@ -277,12 +294,15 @@ const docs = [
     text-wrap: pretty;
   }
 
-  .footer__links--docs {
-    margin-top: 0;
-  }
-
-  .footer__links--docs a {
-    font-size: 12px;
+  /* the group's name: a label, not a link — the links are under it
+     имя группы — подпись, а не ссылка: ссылки под ним */
+  .footer__head {
+    margin-bottom: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgb(255 250 237 / 0.82);
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -313,7 +333,7 @@ const docs = [
 
     .footer__col--links {
       grid-area: links;
-      gap: 8px 48px;
+      gap: 22px 48px;
     }
 
     .footer__place:nth-child(2) {
@@ -325,10 +345,12 @@ const docs = [
     }
   }
 
-  /* десктоп: бренд · точка · точка · ссылки, юрстрока и документы в одну строку */
+  /* десктоп: бренд · точка · точка · разделы и документы, юрстрока под линией */
   @media (min-width: 1200px) {
     .footer__grid {
-      grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+      /* the links column holds two lists side by side: sections and documents
+         в колонке ссылок два списка рядом: разделы и документы */
+      grid-template-columns: 1.25fr 1fr 1fr 1.55fr;
       grid-template-areas: 'brand first second links';
       gap: 24px;
     }

@@ -1,0 +1,214 @@
+---
+/**
+ * One document of the site — the offer, the privacy policy, delivery and
+ * payment, the requisites — as an open HTML page: readable column, the date
+ * of the edition, a table of contents for a long text, «Распечатать». The text
+ * comes from «Документы» in the admin; a slug that is not published is not
+ * built, and nginx answers it with the site's 404.
+ * Один документ сайта — оферта, политика, доставка и оплата, реквизиты — как
+ * открытая HTML-страница: читаемая колонка, дата редакции, оглавление у
+ * длинного текста, «Распечатать». Текст — из «Документов» в админке;
+ * неопубликованный адрес не собирается, nginx отвечает на него 404 сайта.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Icon from '../../components/Icon.astro';
+import DocBlock from '../../components/docs/DocBlock.astro';
+import DocText from '../../components/docs/DocText.astro';
+import { BASE } from '../../lib/base.ts';
+import { BRAND, plural } from '../../data/site.ts';
+import { getContent } from '../../lib/content.ts';
+import { TOC_FROM, longDate, type DocPage } from '../../lib/pages.ts';
+import '../../styles/docs.css';
+
+export async function getStaticPaths() {
+  const { pages } = await getContent();
+  return pages.map((page) => ({ params: { slug: page.slug }, props: { page } }));
+}
+
+interface Props {
+  page: DocPage;
+}
+
+const { page } = Astro.props;
+const content = await getContent();
+const others = content.pages.filter((other) => other.slug !== page.slug);
+
+const site = Astro.site ?? new URL('https://vkus-com.ru');
+const url = new URL(page.href, site).href;
+const docsUrl = new URL(`${BASE}docs/`, site).href;
+const title = `${page.title} — ${BRAND.name}`;
+const description = page.description ?? `${page.title}: ${BRAND.name}, ${BRAND.city}.`;
+const toc = page.toc.length >= TOC_FROM ? page.toc : [];
+const revised = page.revised ? longDate(page.revised) : undefined;
+const sections = `${toc.length} ${plural(toc.length, 'раздел', 'раздела', 'разделов')}`;
+// «КОНФИДЕНЦИАЛЬНОСТИ» in caps antiqua is wider than a phone: the title is set
+// so that its longest word fits the column, never broken in the middle
+// «КОНФИДЕНЦИАЛЬНОСТИ» прописной антиквой шире телефона: заголовок набирается
+// так, чтобы самое длинное слово влезло в колонку, а не ломалось посередине
+const longestWord = Math.max(...page.title.split(/[\s-]+/).map((word) => word.length));
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Главная', item: new URL(BASE, site).href },
+        { '@type': 'ListItem', position: 2, name: 'Документы', item: docsUrl },
+        { '@type': 'ListItem', position: 3, name: page.title, item: url },
+      ],
+    },
+    {
+      '@type': 'WebPage',
+      '@id': url,
+      url,
+      name: page.title,
+      description,
+      inLanguage: 'ru-RU',
+      ...(page.revised && { dateModified: page.revised }),
+      isPartOf: { '@type': 'WebSite', name: BRAND.name, url: new URL(BASE, site).href },
+      publisher: { '@type': 'Organization', name: content.settings.legal_name ?? BRAND.name },
+    },
+  ],
+};
+---
+
+<BaseLayout content={content} title={title} description={description} landing={false}>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} is:inline />
+  <Header content={content} over={false} />
+
+  <main id="main" class="doc" tabindex="-1">
+    <header class="container doc-head">
+      <nav class="crumbs" aria-label="Вы здесь">
+        <a href={BASE}>Главная</a>
+        <span aria-hidden="true">/</span>
+        <a href={`${BASE}docs/`}>Документы</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{page.title}</span>
+      </nav>
+      <span class="mark doc-head__mark" aria-hidden="true"></span>
+      <h1 class="display-caps doc-head__title" id="doc-h1" style={`--word: ${longestWord}`}>{page.title}</h1>
+      {
+        page.description && (
+          <p class="lead doc-head__lead">
+            <DocText text={page.description} />
+          </p>
+        )
+      }
+      <div class="doc-head__meta">
+        {revised && <p class="tag">Редакция от {revised}</p>}
+        <p class="print-only doc-head__url">{url}</p>
+        <button type="button" class="tlink doc-head__print" data-print hidden>
+          <Icon name="printer" />
+          Распечатать
+        </button>
+      </div>
+    </header>
+
+    <div class="container doc-layout">
+      {
+        toc.length > 0 ? (
+          <aside class="doc-aside">
+            <details class="doc-toc doc-toc--fold">
+              <summary>
+                <span>Содержание</span>
+                <span class="doc-toc__count">{sections}</span>
+                <Icon name="chevron-down" />
+              </summary>
+              <ol class="doc-toc__list" role="list">
+                {toc.map((item, i) => (
+                  <li>
+                    <a href={`#${item.id}`}>
+                      <span class="doc-toc__n display tnum">{item.n ?? String(i + 1)}</span>
+                      <span>{item.title}</span>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </details>
+            <nav class="doc-toc doc-toc--side" aria-label="Содержание документа" data-toc>
+              <p class="label doc-toc__title">Содержание</p>
+              <ol class="doc-toc__list" role="list">
+                {toc.map((item, i) => (
+                  <li>
+                    <a href={`#${item.id}`} data-toc-link={item.id}>
+                      <span class="doc-toc__n display tnum">{item.n ?? String(i + 1)}</span>
+                      <span>{item.title}</span>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          </aside>
+        ) : (
+          // A short document has no contents; on a wide screen its side holds
+          // the other documents instead of an empty column
+          // У короткого документа оглавления нет; на широком экране его поле
+          // занимают остальные документы, а не пустая колонка
+          <aside class="doc-aside doc-aside--side">
+            <nav class="doc-toc doc-toc--side" aria-label="Документы">
+              <p class="label doc-toc__title">Документы</p>
+              <ul class="doc-toc__list doc-toc__list--docs" role="list">
+                {content.pages.map((other) => (
+                  <li>
+                    <a href={other.href} aria-current={other.slug === page.slug ? 'page' : undefined}>
+                      <Icon name="document" />
+                      <span>{other.title}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </aside>
+        )
+      }
+
+      <article class="doc-body" aria-labelledby="doc-h1">
+        {
+          page.segments.map((segment) =>
+            segment.kind === 'html' ? (
+              <div class="prose" set:html={segment.html} />
+            ) : (
+              <DocBlock block={segment.block} content={content} />
+            ),
+          )
+        }
+      </article>
+    </div>
+
+    {
+      others.length > 0 && (
+        <section class="strip-paper doc-more" aria-labelledby="doc-more-title">
+          <div class="container">
+            <h2 class="label doc-more__title" id="doc-more-title">
+              Другие документы
+            </h2>
+            <ul class="doc-more__list" role="list">
+              {others.map((other) => (
+                <li>
+                  <a class="doc-more__link" href={other.href}>
+                    <span class="display doc-more__name">{other.title}</span>
+                    {other.description && (
+                      <span class="doc-more__desc">
+                        <DocText text={other.description} />
+                      </span>
+                    )}
+                    <Icon name="arrow-right" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )
+    }
+  </main>
+
+  <Footer content={content} base={BASE} />
+</BaseLayout>
+
+<script>
+  import '../../scripts/docs';
+</script>

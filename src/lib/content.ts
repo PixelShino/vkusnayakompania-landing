@@ -20,6 +20,7 @@ import {
   type RawCateringStep,
 } from './catering.ts';
 import { toProgram, type Program } from './loyalty.ts';
+import { DOC, normalizePages, type DocPage, type RawPage } from './pages.ts';
 import fixture from '../data/fixture.json' with { type: 'json' };
 
 /** Файл-заглушка помечен в админке: с этой пометкой сайт не выдаёт его за готовый. */
@@ -88,12 +89,16 @@ export type Img = {
   placeholder: boolean;
 };
 /**
- * A document in `public/media/`: a menu, the policy, the offer. `kind` is what
- * the link may promise — the owner uploads a picture of the menu as readily as a PDF.
- * Документ в `public/media/`: меню, политика, оферта. `kind` — что вправе
- * обещать ссылка: владелица кладёт картинку меню так же охотно, как PDF.
+ * A document link: a menu, the policy, the offer. `kind` is what the link may
+ * promise — the owner uploads a picture of the menu as readily as a PDF; the
+ * policy and the offer are pages of the site (`page`) once they are in
+ * «Документы», a file in `public/media/` only before that.
+ * Ссылка на документ: меню, политика, оферта. `kind` — что вправе обещать
+ * ссылка: владелица кладёт картинку меню так же охотно, как PDF; политика и
+ * оферта — страницы сайта (`page`), когда они есть в «Документах», и файл в
+ * `public/media/` — только до этого.
  */
-export type Doc = { href: string; title: string; placeholder: boolean; kind: 'pdf' | 'image' | 'file' };
+export type Doc = { href: string; title: string; placeholder: boolean; kind: 'pdf' | 'image' | 'file' | 'page' };
 
 export type Settings = {
   phone: string;
@@ -120,6 +125,8 @@ export type Settings = {
   inn?: string;
   ogrn?: string;
   legal_address?: string;
+  /** почта для обращений гостей: реквизиты и политика; пусто — только телефон */
+  email?: string | null;
   policy?: Doc;
   offer?: Doc;
   yandex_score?: string;
@@ -244,6 +251,8 @@ export type Content = {
   birthdayPromos: Promo[];
   /** «Вкусные баллы» («Программа лояльности»); без коллекции — значения по умолчанию */
   loyalty: Program;
+  /** документы `/docs/<slug>/` в порядке админки; пусто, если коллекции ещё нет */
+  pages: DocPage[];
   /** сегодня в часовом поясе точек — от него считаются окна показа */
   today: string;
 };
@@ -313,6 +322,9 @@ export type Raw = {
   // optional: a Directus without the account gives the default programme
   // необязательна: Directus без кабинета даёт программу по умолчанию
   loyalty_settings?: Record<string, unknown> | Record<string, unknown>[] | null;
+  // optional: a Directus or a fixture without the documents gives the old file links
+  // необязательна: Directus или фикстура без документов дают прежние ссылки на файлы
+  pages?: RawPage[] | null;
 };
 
 /** Файл Directus → то, что кладётся в `Img.src`. */
@@ -440,11 +452,21 @@ export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraTo
   const at = (id: number | undefined, where: string) =>
     id ? need(byId.get(id), `${where}: адреса ${id} нет в places`) : undefined;
 
+  // the documents come first: once the policy and the offer are pages, every
+  // consent checkbox and the footer lead there, not to an uploaded file
+  // сначала документы: когда политика и оферта стали страницами, туда ведут
+  // все галочки согласия и подвал, а не загруженный файл
+  const pages = normalizePages(raw.pages, { phone: mainPhone, phoneHref: telHref(mainPhone) }, log);
+  const pageDoc = (slug: string): Doc | undefined => {
+    const page = pages.find((p) => p.slug === slug);
+    return page && { href: page.href, title: page.title, placeholder: false, kind: 'page' };
+  };
   const settings: Settings = {
     ...raw.settings,
+    email: raw.settings.email?.trim() || null,
     phoneHref: telHref(mainPhone),
-    policy: toDoc(raw.settings.policy_file),
-    offer: toDoc(raw.settings.offer_file),
+    policy: pageDoc(DOC.privacy) ?? toDoc(raw.settings.policy_file),
+    offer: pageDoc(DOC.offer) ?? toDoc(raw.settings.offer_file),
     yandex_highlights: raw.settings.yandex_highlights ?? [],
   };
 
@@ -517,6 +539,7 @@ export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraTo
       log,
     ),
     loyalty: toProgram(Array.isArray(raw.loyalty_settings) ? null : raw.loyalty_settings),
+    pages,
     today,
   };
 };

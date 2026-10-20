@@ -19,12 +19,17 @@ import PayChoice from './PayChoice.astro';
 import PayStep from './PayStep.astro';
 import { hoursRows } from '../../data/site.ts';
 import type { Content } from '../../lib/content.ts';
+import { DOC, docHref } from '../../lib/pages.ts';
 
 interface Props {
   content: Content;
 }
 
-const { settings, places } = Astro.props.content;
+const { settings, places, pages } = Astro.props.content;
+// what the guest agrees to by sending: the offer, and where delivery and payment are explained
+// с чем гость соглашается, отправляя заказ: оферта и где описаны доставка и оплата
+const offerHref = settings.offer?.href;
+const deliveryHref = docHref(pages, DOC.delivery);
 const directus = (import.meta.env.PUBLIC_DIRECTUS_URL as string | undefined)?.replace(/\/+$/, '');
 const endpoint = directus ? `${directus}/items/orders` : '';
 ---
@@ -255,6 +260,24 @@ const endpoint = directus ? `${directus}/items/orders` : '';
         <button type="submit" class="btn btn--primary btn--block" data-submit>
           <span data-submit-label>Отправить заказ</span>
         </button>
+        {
+          offerHref && (
+            <p class="sum__legal">
+              Отправляя заказ, вы принимаете{' '}
+              <a href={offerHref} target="_blank" rel="noopener">
+                оферту
+              </a>
+              {deliveryHref && (
+                <>
+                  {' '}и{' '}
+                  <a href={deliveryHref} target="_blank" rel="noopener">
+                    условия доставки и оплаты
+                  </a>
+                </>
+              )}
+            </p>
+          )
+        }
       </footer>
     </form>
 

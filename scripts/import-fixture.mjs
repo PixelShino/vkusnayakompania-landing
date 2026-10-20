@@ -144,4 +144,21 @@ if (cp && !Array.isArray(cp) && cateringReady) {
   }
   console.log(`= кейтеринг: форматов ${formatIds.size}, вопросов ${(fixture.catering_faq ?? []).length}`);
 }
+// The documents (offer, policy, delivery, requisites), when the schema has
+// them: the missing ones by slug, an existing one is not touched. The same
+// rule as `scripts/import-pages.mjs`, which also knows `--force`.
+// Документы (оферта, политика, доставка, реквизиты), если они есть в схеме:
+// недостающие по адресу, существующий не трогается. То же правило, что у
+// `scripts/import-pages.mjs`, который умеет ещё и `--force`.
+const pagesReady = await api('GET', '/items/pages?limit=1').then(() => true, () => false);
+if (pagesReady && Array.isArray(fixture.pages)) {
+  let added = 0;
+  for (const page of fixture.pages) {
+    if (await exists('pages', 'slug', page.slug)) continue;
+    const { slug, title, description, body, revised, sort, status } = page;
+    await api('POST', '/items/pages', { slug, title, description, body, revised, sort, status });
+    added += 1;
+  }
+  console.log(`= документы: заведено ${added} из ${fixture.pages.length}`);
+}
 console.log('import: готово');

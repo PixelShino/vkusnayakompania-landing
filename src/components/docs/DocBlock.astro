@@ -1,0 +1,111 @@
+---
+/**
+ * A live insert inside a document: what `[[реквизиты]]`, `[[связь]]` and
+ * `[[точки]]` stand for. The data is the admin's own — «Настройки» and
+ * «Точки» — so the offer, the policy and the requisites page never keep an
+ * old phone or old hours. An empty field is not drawn.
+ * Живая вставка в документе: то, что стоит за `[[реквизиты]]`, `[[связь]]` и
+ * `[[точки]]`. Данные — из самой админки («Настройки» и «Точки»), поэтому в
+ * оферте, политике и реквизитах не залёживаются старый телефон или старые
+ * часы. Незаполненное поле не рисуется.
+ */
+import Icon from '../Icon.astro';
+import { BRAND, hoursRows } from '../../data/site.ts';
+import type { Content } from '../../lib/content.ts';
+import type { DocBlock } from '../../lib/pages.ts';
+
+interface Props {
+  block: DocBlock;
+  content: Content;
+}
+
+const { block, content } = Astro.props;
+const { settings, places } = content;
+const site = (Astro.site ?? new URL('https://vkus-com.ru')).hostname;
+
+// 15 digits is an individual entrepreneur's number / 15 цифр — номер ИП
+const ogrnLabel = settings.ogrn?.replace(/\D/g, '').length === 15 ? 'ОГРНИП' : 'ОГРН';
+const requisites = [
+  { label: 'Наименование', value: settings.legal_name },
+  { label: 'ИНН', value: settings.inn, num: true },
+  { label: ogrnLabel, value: settings.ogrn, num: true },
+  { label: 'Адрес', value: settings.legal_address },
+  { label: 'Сайт', value: site },
+].filter((row) => Boolean(row.value)) as { label: string; value: string; num?: boolean }[];
+// what «Скопировать» puts on the clipboard: one line per row, ready for a form
+// что кладёт в буфер «Скопировать»: строка на реквизит, готово для анкеты
+const copyText = requisites.map((row) => `${row.label}: ${row.value}`).join('\n');
+
+const contacts = [
+  { label: 'Телефон', value: settings.phone, href: settings.phoneHref, num: true },
+  settings.email && { label: 'Почта', value: settings.email, href: `mailto:${settings.email}` },
+  settings.telegram && { label: 'Telegram', value: 'Написать в Telegram', href: settings.telegram, out: true },
+  settings.max && { label: 'Max', value: 'Написать в Max', href: settings.max, out: true },
+  settings.vk && { label: 'ВКонтакте', value: 'Сообщество ВКонтакте', href: settings.vk, out: true },
+].filter(Boolean) as { label: string; value: string; href: string; num?: boolean; out?: boolean }[];
+---
+
+{
+  block === 'requisites' && (
+    <div class="doc-req">
+      <dl class="doc-req__list">
+        {requisites.map((row) => (
+          <div class="doc-req__row">
+            <dt class="label">{row.label}</dt>
+            <dd class:list={{ tnum: row.num }}>{row.value}</dd>
+          </div>
+        ))}
+      </dl>
+      <button type="button" class="tlink doc-req__copy" data-copy={copyText} hidden>
+        <Icon name="copy" />
+        <span data-copy-label>Скопировать реквизиты</span>
+      </button>
+    </div>
+  )
+}
+
+{
+  block === 'contacts' && (
+    <dl class="doc-contacts">
+      {contacts.map((row) => (
+        <div class="doc-contacts__row">
+          <dt class="label">{row.label}</dt>
+          <dd>
+            <a
+              class:list={{ tnum: row.num }}
+              href={row.href}
+              {...(row.out ? { target: '_blank', rel: 'noopener' } : {})}
+            >
+              {row.value}
+            </a>
+          </dd>
+        </div>
+      ))}
+    </dl>
+  )
+}
+
+{
+  block === 'places' && (
+    <ul class="doc-places" role="list">
+      {places.map((place) => (
+        <li class="doc-place">
+          <p class="label">{BRAND.city}</p>
+          <p class="display doc-place__name">{place.name}</p>
+          <p class="doc-place__kind">{place.kind}</p>
+          <a class="doc-place__tel tnum" href={place.phoneHref}>
+            {place.phone}
+          </a>
+          <dl class="doc-place__hours">
+            {hoursRows(place.schedule).map((row) => (
+              <div>
+                <dt>{row.days}</dt>
+                <dd class="tnum">{row.hours}</dd>
+              </div>
+            ))}
+          </dl>
+        </li>
+      ))}
+    </ul>
+  )
+}
