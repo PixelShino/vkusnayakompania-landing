@@ -80,6 +80,11 @@ export const QUERIES = {
   // «Вкусные баллы»: программа, которую описывают кабинет и корзина; гостей,
   // их баллов и настроек входа здесь нет
   loyalty_settings: `/items/loyalty_settings?${q('enabled,program_name,signup_bonus,points_ttl_days,max_share_percent,tiers,birthday_bonus,birthday_window_days,birthday_discount_percent')}`,
+  // the documents (offer, privacy, delivery, requisites): every status, so the
+  // site report can name a draft; the site shows only the published ones
+  // документы (оферта, политика, доставка, реквизиты): все статусы, чтобы отчёт
+  // сборки назвал черновик; сайт показывает только опубликованные
+  pages: `/items/pages?${q('id,status,sort,slug,title,description,body,revised,date_updated', '&sort=sort,id')}`,
 };
 
 // Collections the site builds without: a missing one means an empty catalog or
@@ -91,5 +96,5 @@ export const QUERIES = {
 export const OPTIONAL = new Set([
   'product_categories', 'products',
   'catering_page', 'catering_formats', 'catering_steps', 'catering_faq',
-  'loyalty_settings',
+  'loyalty_settings', 'pages',
 ]);

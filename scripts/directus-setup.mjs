@@ -288,7 +288,7 @@ for (const preset of PRESETS) {
 const FLOW_SCOPE = ['items.create', 'items.update', 'items.delete', 'items.sort'];
 // orders and catering requests are not here: a new one changes nothing on the site
 // заказов и заявок здесь нет: новый заказ или заявка ничего на сайте не меняют
-const FLOW_COLLECTIONS = [...CONTENT, ...SINGLE, 'directus_files', 'loyalty_settings'];
+const FLOW_COLLECTIONS = [...CONTENT, ...SINGLE, 'directus_files', 'loyalty_settings', 'pages'];
 let flow = await findOne('/flows', { name: { _eq: 'Пересборка сайта' } });
 if (flow && FLOW_SCOPE.some((event) => !flow.options?.scope?.includes(event))) {
   flow.options = { ...flow.options, scope: FLOW_SCOPE };
@@ -341,5 +341,6 @@ await (await import('./setup/notify.mjs')).setup(api, { editorPolicy: policy.id,
 await (await import('./setup/payments.mjs')).setup(api, { editorPolicy: policy.id, publicPolicy: publicAccess.policy });
 
 await (await import('./setup/account.mjs')).setup(api, { findOne, ORDER_FIELDS_PUBLIC, publicPolicy: publicAccess.policy }); // личный кабинет и «Вкусные баллы»
+await (await import('./setup/pages.mjs')).setup(api, { editorPolicy: policy.id, builderPolicy: bpolicy.id }); // документы: оферта, политика, доставка, реквизиты
 
 console.log('setup: готово');

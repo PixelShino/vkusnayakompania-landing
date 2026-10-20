@@ -43,10 +43,11 @@ const [cateringPage, cateringFormats] = await Promise.all([
 
 // read only for the count of drafts below; missing ones count as empty
 // нужны только для счёта черновиков ниже; недоступные считаются пустыми
-const [promos, categories, faq] = await Promise.all([
+const [promos, categories, faq, pages] = await Promise.all([
   get(QUERIES.promos).catch(() => []),
   get(QUERIES.product_categories).catch(() => []),
   get(QUERIES.catering_faq).catch(() => []),
+  get(QUERIES.pages).catch(() => []),
 ]);
 
 const published = (items) => items.filter((item) => !item.status || item.status === 'published');
@@ -104,6 +105,7 @@ const drafts = [
   [menus, ['меню', 'меню', 'меню']],
   [cateringFormats, ['формат кейтеринга', 'формата кейтеринга', 'форматов кейтеринга']],
   [faq, ['вопрос кейтеринга', 'вопроса кейтеринга', 'вопросов кейтеринга']],
+  [pages, ['документ', 'документа', 'документов']],
 ]
   .map(([items, words]) => [items.filter((item) => item.status === 'draft'), words])
   .filter(([items]) => items.length)

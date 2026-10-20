@@ -28,7 +28,7 @@ const TOKEN = process.env.DIRECTUS_TOKEN;
 export const SITE_COLLECTIONS = [
   'afisha', 'promos', 'menus', 'cakes', 'places_files', 'directions_files', 'product_categories', 'products',
   'settings', 'home', 'places', 'directions', 'directus_files', 'texts',
-  'catering_page', 'catering_page_files', 'catering_formats', 'catering_steps', 'catering_faq',
+  'catering_page', 'catering_page_files', 'catering_formats', 'catering_steps', 'catering_faq', 'pages',
 ];
 
 // how a change is named: plural forms, the field with its name, whether it has drafts
@@ -45,6 +45,7 @@ const KINDS = {
   catering_formats: { label: 'Форматы кейтеринга', words: ['формат кейтеринга', 'формата кейтеринга', 'форматов кейтеринга'], title: 'title', status: true },
   catering_steps: { label: 'Шаги кейтеринга', words: ['шаг кейтеринга', 'шага кейтеринга', 'шагов кейтеринга'], title: 'title' },
   catering_faq: { label: 'Вопросы кейтеринга', words: ['вопрос кейтеринга', 'вопроса кейтеринга', 'вопросов кейтеринга'], title: 'question', status: true },
+  pages: { label: 'Документы', words: ['документ', 'документа', 'документов'], title: 'title', status: true },
   settings: { single: 'настройки сайта' },
   home: { single: 'главная страница' },
   catering_page: { single: 'страница кейтеринга' },

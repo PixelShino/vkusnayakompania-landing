@@ -1,0 +1,855 @@
+/* Documents (`/docs/`): the offer, the policy, delivery and payment, the
+   requisites. The site's language on a page made for reading: paper, the mark
+   and caps antiqua over the title, hairlines instead of boxes; the text itself
+   is a calm column of 68–72 characters, the sections numbered in terracotta,
+   clause numbers hanging in the margin like in a printed contract.
+   Документы (`/docs/`): оферта, политика, доставка и оплата, реквизиты. Язык
+   сайта на странице для чтения: бумага, марка и прописная антиква над
+   заголовком, волосяные линии вместо коробок; сам текст — спокойная колонка в
+   68–72 знака, номера разделов терракотой, номера пунктов на поле, как в
+   печатном договоре. */
+
+.doc {
+  display: block;
+}
+
+/* ── шапка документа ──────────────────────────────────────────────────────── */
+
+.doc-head {
+  padding-block: 18px 26px;
+}
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+
+/* цель нажатия 44 px при строке 15: паддинг растит зону, не сдвигая строку */
+.crumbs a {
+  margin-block: -14px;
+  padding-block: 14px;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--line-4);
+  text-underline-offset: 3px;
+  transition: color 0.16s ease;
+}
+
+.crumbs [aria-current] {
+  color: var(--text-2);
+}
+
+/* the page works left-aligned, the mark goes to the edge with the title
+   страница рабочая, выровнена влево — марка у края вместе с заголовком */
+.doc-head__mark {
+  margin: 22px 0 0;
+}
+
+.doc-head__title {
+  margin-top: 14px;
+  /* the longest word (`--word`, in letters) must fit the column: a caps letter
+     of Prata with its tracking is about 0.93 em wide
+     самое длинное слово (`--word`, в буквах) обязано влезть в колонку: буква
+     Prata прописью с разрядкой — около 0,93 em */
+  font-size: min(clamp(27px, 7.6vw, 40px), calc((100vw - 2 * var(--pad)) / (var(--word, 10) * 0.93)));
+  text-wrap: balance;
+  hyphens: manual;
+}
+
+.doc-head__lead {
+  margin-top: 12px;
+  max-width: 60ch;
+}
+
+.doc-head__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 28px;
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.doc-head__meta .tag {
+  color: var(--text-4);
+}
+
+.doc-head__print {
+  gap: 8px;
+  font-size: 12.5px;
+}
+
+.doc-head__print .ico,
+.doc-req__copy .ico {
+  width: 18px;
+  height: 18px;
+}
+
+.print-only {
+  display: none;
+}
+
+/* ── раскладка: оглавление и текст ────────────────────────────────────────── */
+
+.doc-layout {
+  padding-bottom: calc(var(--sec-pad) * 1.2);
+}
+
+.doc-aside {
+  margin-bottom: 26px;
+}
+
+.doc-toc--side,
+.doc-aside--side {
+  display: none;
+}
+
+/* phone and tablet: the contents fold into one line above the text
+   телефон и планшет: оглавление свёрнуто в строку над текстом */
+.doc-toc--fold {
+  border-block: 1px solid var(--line);
+}
+
+.doc-toc--fold summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  list-style: none;
+  cursor: pointer;
+}
+
+.doc-toc--fold summary::-webkit-details-marker {
+  display: none;
+}
+
+.doc-toc__count {
+  margin-left: auto;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--text-4);
+}
+
+.doc-toc--fold summary .ico {
+  width: 18px;
+  height: 18px;
+  transition: rotate 0.2s var(--ease-out);
+}
+
+.doc-toc--fold[open] summary .ico {
+  rotate: 180deg;
+}
+
+.doc-toc__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.doc-toc--fold .doc-toc__list {
+  padding-bottom: 10px;
+}
+
+.doc-toc__list a {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+  padding-block: 8px;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--text-2);
+  text-decoration: none;
+  transition: color 0.16s ease;
+}
+
+.doc-toc__n {
+  font-size: 15px;
+  line-height: 1;
+  color: var(--terracotta-text);
+}
+
+.doc-toc__list a[aria-current] {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.doc-toc__list--docs a {
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: center;
+}
+
+.doc-toc__list--docs .ico {
+  width: 18px;
+  height: 18px;
+  color: var(--terracotta-text);
+}
+
+.doc-toc__title {
+  margin-bottom: 8px;
+}
+
+/* the reading column: 68–72 characters, wherever the contents stand
+   колонка чтения: 68–72 знака, где бы ни стояло оглавление */
+.doc-body {
+  max-width: 760px;
+}
+
+@media (min-width: 1200px) {
+  .doc-layout {
+    display: grid;
+    grid-template-columns: 252px minmax(0, 760px);
+    gap: 80px;
+    align-items: start;
+  }
+
+  .doc-aside {
+    position: sticky;
+    top: calc(var(--header-h) + 28px);
+    max-height: calc(100svh - var(--header-h) - 56px);
+    margin: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  .doc-toc--fold {
+    display: none;
+  }
+
+  .doc-toc--side,
+  .doc-aside--side {
+    display: block;
+  }
+
+  .doc-toc--side .doc-toc__list a {
+    padding-block: 7px;
+    font-size: 13.5px;
+  }
+}
+
+/* ── текст документа ──────────────────────────────────────────────────────── */
+
+.prose {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text);
+  text-wrap: pretty;
+}
+
+.doc-body > .prose:first-child > :first-child {
+  margin-top: 0;
+}
+
+/* after a block from the admin the text steps back a little more; a section
+   right after the requisites or the contacts needs no rule of its own — the
+   block already ends with one
+   после вставки из админки текст отступает чуть больше; разделу сразу после
+   реквизитов или связи своя линия не нужна — блок уже кончается линией */
+:is(.doc-req, .doc-contacts, .doc-places) + .prose > p:first-child {
+  margin-top: 1.6em;
+}
+
+:is(.doc-req, .doc-contacts) + .prose > h2:first-child {
+  margin-top: 1.5em;
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* a phone number and the site address never break across lines
+   номер телефона и адрес сайта не рвутся между строками */
+.nw,
+.prose a[href^='tel:'] {
+  white-space: nowrap;
+}
+
+.prose p,
+.prose ul,
+.prose ol,
+.prose blockquote,
+.prose .doc-table {
+  margin-top: 0.85em;
+}
+
+.prose h2 {
+  margin-top: 2em;
+  padding-top: 1.1em;
+  border-top: 1px solid var(--line);
+  font-size: clamp(22px, 6vw, 26px);
+  line-height: 1.18;
+  text-wrap: balance;
+  scroll-margin-top: calc(var(--header-h) + 18px);
+}
+
+/* the document opens with a section: the rule above the title is already there
+   документ начинается с раздела: линия над ним уже есть у шапки */
+.doc-body > .prose:first-child > h2:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.prose h2 + * {
+  margin-top: 0.7em;
+}
+
+.doc-n {
+  margin-right: 0.12em;
+  color: var(--terracotta-text);
+}
+
+.prose h3 {
+  margin-top: 1.6em;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
+  scroll-margin-top: calc(var(--header-h) + 18px);
+}
+
+.prose strong,
+.prose b {
+  font-weight: 700;
+}
+
+.prose a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--line-4);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition:
+    color 0.16s ease,
+    text-decoration-color 0.16s ease;
+}
+
+.prose ul,
+.prose ol {
+  display: grid;
+  gap: 0.5em;
+  padding: 0;
+  list-style: none;
+}
+
+.prose li {
+  position: relative;
+}
+
+/* the bullet is the site's mark in small: a terracotta diamond
+   маркер — марка сайта в малом: терракотовый ромб */
+.prose ul > li {
+  padding-left: 22px;
+}
+
+.prose ul > li::before {
+  content: '';
+  position: absolute;
+  top: 0.66em;
+  left: 4px;
+  width: 6px;
+  height: 6px;
+  rotate: 45deg;
+  background: var(--terracotta);
+}
+
+.prose ol {
+  counter-reset: step;
+}
+
+.prose ol > li {
+  padding-left: 34px;
+  counter-increment: step;
+}
+
+.prose ol > li::before {
+  content: counter(step);
+  position: absolute;
+  top: -0.08em;
+  left: 0;
+  font-family: var(--font-display);
+  font-size: 1.25em;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  color: var(--terracotta-text);
+}
+
+.doc-cl__n {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-3);
+}
+
+.prose blockquote {
+  padding: 14px 18px;
+  background: var(--surface);
+}
+
+.prose hr {
+  margin-block: 2em;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+.doc-table {
+  overflow-x: auto;
+}
+
+.doc-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.doc-table th,
+.doc-table td {
+  padding: 10px 14px 10px 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.doc-table th {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+
+@media (min-width: 768px) {
+  .doc-head {
+    padding-block: 26px 34px;
+  }
+
+  .doc-head__title {
+    font-size: min(clamp(40px, 4.6vw, 54px), calc((100vw - 2 * var(--pad)) / (var(--word, 10) * 0.93)));
+  }
+
+  .prose {
+    font-size: 16.5px;
+  }
+
+  .prose h2 {
+    font-size: 28px;
+  }
+
+  /* clause numbers hang in the margin: the text of every clause starts on one line
+     номера пунктов висят на поле: текст всех пунктов начинается с одной линии */
+  .doc-cl {
+    position: relative;
+    padding-left: 3.3em;
+  }
+
+  .doc-cl__n {
+    position: absolute;
+    left: 0;
+    font-size: 0.94em;
+  }
+
+  .doc-cl + ul,
+  .doc-cl + ol {
+    padding-left: 3.3em;
+  }
+}
+
+/* ── вставки: реквизиты, связь, точки ─────────────────────────────────────── */
+
+/* the requisites are a slip between two double rules, like the coupons
+   реквизиты — бланк между двумя двойными линиями, как купоны сайта */
+.doc-req {
+  margin-top: 1.1em;
+  padding-bottom: 10px;
+  border-block: 3px double var(--line-4);
+}
+
+.doc-req__list,
+.doc-contacts {
+  margin: 0;
+}
+
+.doc-req__row,
+.doc-contacts__row {
+  display: grid;
+  gap: 2px;
+  padding-block: 11px;
+  border-bottom: 1px solid var(--line-3);
+}
+
+.doc-req__row:last-child {
+  border-bottom: 0;
+}
+
+.doc-req__row dd,
+.doc-contacts__row dd {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.doc-req__copy {
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.doc-contacts {
+  display: grid;
+  margin-top: 1.1em;
+  border-top: 1px solid var(--line);
+}
+
+/* right under the requisites the contacts continue the same slip
+   сразу под реквизитами связь продолжает тот же бланк */
+.doc-req + .doc-contacts {
+  margin-top: 0;
+  border-top: 0;
+}
+
+.doc-contacts__row a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--line-4);
+  text-underline-offset: 4px;
+  transition: color 0.16s ease;
+}
+
+/* touch: a one-line link grows to 44 px in place
+   тач: ссылка в строку растёт до 44 px на месте */
+@media (pointer: coarse) {
+  .doc-contacts__row a,
+  .doc-place__tel {
+    display: inline-block;
+    margin-block: -10px;
+    padding-block: 10px;
+  }
+}
+
+@media (min-width: 600px) {
+  .doc-req__row,
+  .doc-contacts__row {
+    grid-template-columns: 140px minmax(0, 1fr);
+    gap: 16px;
+    align-items: baseline;
+  }
+}
+
+.doc-places {
+  display: grid;
+  gap: 26px;
+  margin: 1.2em 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.doc-place {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.doc-place__name {
+  font-size: 24px;
+}
+
+.doc-place__kind {
+  font-size: 13.5px;
+  color: var(--text-3);
+}
+
+.doc-place__tel {
+  margin-top: 6px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.doc-place__hours {
+  display: grid;
+  gap: 2px;
+  margin: 6px 0 0;
+  font-size: 14px;
+}
+
+.doc-place__hours div {
+  display: flex;
+  gap: 12px;
+}
+
+.doc-place__hours dt {
+  min-width: 84px;
+  color: var(--text-3);
+}
+
+.doc-place__hours dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+@media (min-width: 768px) {
+  .doc-places {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 40px;
+  }
+}
+
+/* ── другие документы ─────────────────────────────────────────────────────── */
+
+/* paper before the ink footer, not ink on ink
+   бумага перед чернильным подвалом, а не чернила к чернилам */
+.doc-more {
+  padding-block: calc(var(--sec-pad) * 0.9);
+}
+
+.doc-more__title {
+  margin-bottom: 14px;
+  font-family: var(--font);
+}
+
+.doc-more__list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.doc-more__link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22px;
+  gap: 4px 16px;
+  padding-block: 16px 18px;
+  border-top: 1px solid var(--line-4);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.doc-more__name {
+  font-size: 21px;
+  transition: color 0.16s ease;
+}
+
+.doc-more__desc {
+  grid-column: 1;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.doc-more__link .ico {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  width: 20px;
+  height: 20px;
+  color: var(--terracotta-text);
+  transition: translate 0.24s var(--ease-out);
+}
+
+@media (min-width: 900px) {
+  .doc-more__list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0 40px;
+  }
+}
+
+/* ── все документы (`/docs/`) ─────────────────────────────────────────────── */
+
+.doc-index {
+  padding-bottom: calc(var(--sec-pad) * 1.2);
+}
+
+.doc-index__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.doc-index__link {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 22px;
+  gap: 14px;
+  align-items: start;
+  padding-block: 20px 22px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.doc-index__n {
+  padding-top: 4px;
+  font-size: 18px;
+  color: var(--terracotta-text);
+}
+
+.doc-index__body {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+
+.doc-index__name {
+  font-size: clamp(22px, 6vw, 30px);
+  line-height: 1.15;
+  transition: color 0.16s ease;
+}
+
+.doc-index__desc {
+  max-width: 64ch;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.doc-index__body .tag {
+  margin-top: 2px;
+  color: var(--text-4);
+}
+
+.doc-index__link .ico {
+  align-self: center;
+  width: 22px;
+  height: 22px;
+  color: var(--terracotta-text);
+  transition: translate 0.24s var(--ease-out);
+}
+
+.doc-index__empty {
+  padding-top: 8px;
+}
+
+@media (min-width: 768px) {
+  .doc-index__link {
+    grid-template-columns: 64px minmax(0, 1fr) 28px;
+    gap: 20px;
+    padding-block: 26px 28px;
+  }
+
+  .doc-index__n {
+    font-size: 24px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .crumbs a:hover,
+  .prose a:hover,
+  .doc-contacts__row a:hover {
+    color: var(--terracotta-text);
+    text-decoration-color: currentColor;
+  }
+
+  .doc-toc__list a:hover {
+    color: var(--terracotta-text);
+  }
+
+  .doc-more__link:hover .doc-more__name,
+  .doc-index__link:hover .doc-index__name {
+    color: var(--terracotta-text);
+  }
+
+  .doc-more__link:hover .ico,
+  .doc-index__link:hover .ico {
+    translate: 4px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .doc-toc--fold summary .ico,
+  .doc-more__link .ico,
+  .doc-index__link .ico {
+    transition: none;
+  }
+}
+
+/* ── печать ───────────────────────────────────────────────────────────────── */
+
+/* Printed, the document is the document: no header, footer, contents or
+   buttons; the address of the page under the title says where it came from.
+   На печати документ — это документ: без шапки, подвала, оглавления и кнопок;
+   адрес страницы под заголовком говорит, откуда лист. */
+@media print {
+  @page {
+    margin: 16mm 18mm;
+  }
+
+  .header,
+  .footer,
+  .bar,
+  .skip-link,
+  .crumbs,
+  .doc-aside,
+  .doc-more,
+  .doc-head__mark,
+  [data-print],
+  [data-copy],
+  dialog {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block;
+  }
+
+  .doc-head {
+    padding: 0 0 10px;
+  }
+
+  .doc-head__title {
+    font-size: 22pt;
+  }
+
+  .doc-head__lead {
+    font-size: 11pt;
+  }
+
+  .doc-head__url {
+    font-size: 9pt;
+    color: var(--text-3);
+  }
+
+  .doc-layout {
+    display: block;
+    padding: 0;
+  }
+
+  .doc-body {
+    max-width: none;
+  }
+
+  .prose {
+    font-size: 10.5pt;
+    line-height: 1.5;
+  }
+
+  .prose h2 {
+    margin-top: 1.4em;
+    padding-top: 0;
+    border-top: 0;
+    font-size: 14pt;
+    break-after: avoid;
+  }
+
+  .prose a {
+    text-decoration: none;
+  }
+
+  .doc-req,
+  .doc-place {
+    break-inside: avoid;
+  }
+}

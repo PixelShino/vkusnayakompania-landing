@@ -1,0 +1,107 @@
+---
+/**
+ * All documents of the site on one page: the middle crumb of every document
+ * and the address to give a bank or a payment provider when they ask «where
+ * are your terms». Each line: the title, what it covers, the edition date.
+ * Все документы сайта на одной странице: средняя крошка каждого документа и
+ * адрес, который можно дать банку или платёжному сервису на вопрос «где ваши
+ * условия». В строке — название, о чём документ, дата редакции.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Icon from '../../components/Icon.astro';
+import { BASE } from '../../lib/base.ts';
+import { BRAND } from '../../data/site.ts';
+import { getContent, typo } from '../../lib/content.ts';
+import { longDate } from '../../lib/pages.ts';
+import '../../styles/docs.css';
+
+const content = await getContent();
+const { pages, settings } = content;
+
+const site = Astro.site ?? new URL('https://vkus-com.ru');
+const url = new URL(`${BASE}docs/`, site).href;
+const title = `Документы: оферта, доставка, реквизиты — ${BRAND.name}`;
+const description =
+  'Публичная оферта, условия доставки и оплаты, политика конфиденциальности, реквизиты и контакты «Вкусной компании» в Самаре.';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Главная', item: new URL(BASE, site).href },
+        { '@type': 'ListItem', position: 2, name: 'Документы', item: url },
+      ],
+    },
+    {
+      '@type': 'CollectionPage',
+      '@id': url,
+      url,
+      name: 'Документы',
+      inLanguage: 'ru-RU',
+      hasPart: pages.map((page) => ({ '@type': 'WebPage', name: page.title, url: new URL(page.href, site).href })),
+    },
+  ],
+};
+---
+
+<BaseLayout content={content} title={title} description={description} noindex={pages.length === 0} landing={false}>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} is:inline />
+  <Header content={content} over={false} />
+
+  <main id="main" class="doc" tabindex="-1">
+    <header class="container doc-head">
+      <nav class="crumbs" aria-label="Вы здесь">
+        <a href={BASE}>Главная</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">Документы</span>
+      </nav>
+      <span class="mark doc-head__mark" aria-hidden="true"></span>
+      <h1 class="display-caps doc-head__title" style="--word: 9">Документы</h1>
+      <p class="lead doc-head__lead">
+        {
+          typo(
+            pages.length
+              ? 'Условия заказа, доставки и оплаты, политика конфиденциальности и реквизиты. Всё открыто, без входа.'
+              : 'Документы переносим на сайт. Пока ответим на вопросы по телефону.',
+          )
+        }
+      </p>
+    </header>
+
+    <div class="container doc-index">
+      {
+        pages.length > 0 ? (
+          <ol class="doc-index__list" role="list">
+            {pages.map((page, i) => (
+              <li>
+                <a class="doc-index__link" href={page.href}>
+                  <span class="doc-index__n display tnum" aria-hidden="true">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span class="doc-index__body">
+                    <span class="display doc-index__name">{page.title}</span>
+                    {page.description && <span class="doc-index__desc">{typo(page.description)}</span>}
+                    {page.revised && <span class="tag">Редакция от {longDate(page.revised)}</span>}
+                  </span>
+                  <Icon name="arrow-right" />
+                </a>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p class="doc-index__empty">
+            <a class="btn btn--primary" href={settings.phoneHref}>
+              Позвонить {settings.phone}
+            </a>
+          </p>
+        )
+      }
+    </div>
+  </main>
+
+  <Footer content={content} base={BASE} />
+</BaseLayout>
