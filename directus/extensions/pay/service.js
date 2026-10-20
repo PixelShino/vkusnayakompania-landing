@@ -3,13 +3,16 @@
  * for, open a payment page at the bank, learn the outcome (the guest's return,
  * the bank's callback, the five-minute check) and write it into the order.
  * Only this file writes `payment_*`; it goes through `ItemsService`, so other
- * hooks see `orders.items.update` with the new `payment_status`.
+ * hooks see `orders.items.update` with the new `payment_status`. The bank is
+ * a provider (`providers/*.js`): ЮKassa by default, Alfa-Bank, the test stub.
  * Оплата заказа на стороне сервера: найти заказ, который оплачивает гость,
  * открыть страницу оплаты в банке, узнать итог (возврат гостя, уведомление
  * банка, проверка раз в пять минут) и записать его в заказ. Поля `payment_*`
  * пишет только этот файл; через `ItemsService`, поэтому другие хуки видят
- * `orders.items.update` с новым `payment_status`.
+ * `orders.items.update` с новым `payment_status`. Банк — это провайдер
+ * (`providers/*.js`): по умолчанию ЮKassa, ещё Альфа-Банк и тестовая заглушка.
  */
+import { randomBytes } from 'node:crypto';
 import {
   bankOrderNumber,
   buildBundle,
@@ -17,6 +20,7 @@ import {
   isOrderNumber,
   normalizePhone,
   parseBankOrderNumber,
+  parseYooNotification,
   publicConfig,
   receiptPhone,
   resolveSettings,
@@ -27,6 +31,7 @@ import {
 } from './core.js';
 import { alfa, BankError } from './providers/alfa.js';
 import { mock } from './providers/mock.js';
+import { yookassa } from './providers/yookassa.js';
 
 /** an error the guest's page can show as is / ошибка, которую страница гостя покажет как есть */
 export class PayError extends Error {
@@ -47,6 +52,7 @@ const NOTIFY_ROLES = ['Administrator', 'Редактор'];
 // a stuck «pending» is retired this long after its page died
 // зависшее «ждём оплату» снимается через столько после смерти страницы
 const EXPIRE_GRACE_MS = 30 * 60 * 1000;
+const LEFT_RECHECK_MS = 1500;
 
 const rub = (n) => `${new Intl.NumberFormat('ru-RU').format(n)} ₽`;
 
@@ -96,7 +102,7 @@ export const createPayService = ({ services, database, getSchema, env, logger })
     return resolveSettings(row, env);
   };
 
-  const providerFor = (s) => (s.provider === 'mock' ? mock(s, { publicUrl }) : alfa(s));
+  const providerFor = (s, id = s.provider) => (id === 'mock' ? mock(s, { publicUrl }) : id === 'yookassa' ? yookassa(s) : alfa(s));
 
   /** одна оплата заказа за раз: два «Оплатить» подряд не откроют в банке два заказа */
   const locked = async (id, fn) => {
@@ -171,10 +177,29 @@ export const createPayService = ({ services, database, getSchema, env, logger })
         `оплачено ${rub(paid)}${differs}; ${via}`,
       );
       await notifyPaid(order, paid);
+    } else if (result.state === 'paid' && was === 'paid' && bankId !== order.payment_id) {
+      // a second attempt paid as well (two tabs): money twice for one order —
+      // said once, loudly, for the manager to refund
+      // оплачена и вторая попытка (две вкладки): деньги дважды за один заказ —
+      // сказать один раз и громко, чтобы менеджер вернул
+      const meta = json(order.payment_meta, {});
+      if (!(meta.extra ?? []).includes(bankId))
+        await write(
+          order,
+          { payment_meta: { ...meta, extra: [...(meta.extra ?? []), bankId] } },
+          `ВНИМАНИЕ: оплачена ещё одна попытка (${bankId}) на ${rub(result.amount ? result.amount / 100 : payable(order))} — заказ оплачен дважды, лишнее верните в кабинете банка; ${via}`,
+        );
     } else if (result.state === 'refunded' && was !== 'refunded') {
       await write(order, { payment_status: 'refunded' }, `возврат в банке; ${via}`);
     } else if (result.state === 'failed' && was === 'pending' && bankId === order.payment_id) {
       await write(order, { payment_status: 'failed' }, `оплата не прошла${result.note ? `: ${result.note}` : ''}; ${via}`);
+    }
+    // a partial refund leaves the order paid; the manager still sees how much went back
+    // частичный возврат оставляет заказ оплаченным; менеджер всё равно видит, сколько вернули
+    if (result.state === 'paid' && result.refunded > 0 && bankId === order.payment_id) {
+      const meta = json(order.payment_meta, {});
+      if (meta.refunded !== result.refunded)
+        await write(order, { payment_meta: { ...meta, refunded: result.refunded } }, `частичный возврат: всего вернули ${rub(result.refunded / 100)}; ${via}`);
     }
     return order;
   };
@@ -190,6 +215,7 @@ export const createPayService = ({ services, database, getSchema, env, logger })
 
   /** Почему не прошло — ключ для экрана сайта (`failReason`). */
   const whyFailed = (result) => {
+    if (result.why) return result.why;
     // -2007: the gateway's «payment page timed out» / -2007 — «истёк срок страницы оплаты»
     if (String(result.action) === '-2007' || /истек|истёк|expired/i.test(String(result.note ?? ''))) return 'expired';
     return 'declined';
@@ -218,16 +244,27 @@ export const createPayService = ({ services, database, getSchema, env, logger })
         const meta = json(order.payment_meta, {});
         const provider = providerFor(s);
         // a live page of the bank is handed out again: the same order, the same
-        // link — a second tap, a reload or «back» never opens a second payment
+        // link — a second tap, a reload or «back» never opens a second payment.
+        // ЮKassa keeps a page open past our clock and a merchant cannot close
+        // it, so its page is asked about even after «failed»
         // живая страница банка выдаётся снова: тот же заказ — та же ссылка;
-        // второе нажатие, перезагрузка или «назад» не открывают вторую оплату
-        if (order.payment_status === 'pending' && order.payment_url && meta.provider === s.provider && meta.until > Date.now() + 60_000) {
+        // второе нажатие, перезагрузка или «назад» не открывают вторую оплату.
+        // ЮKassa держит страницу открытой дольше наших часов, а магазин закрыть
+        // её не может, поэтому о ней спрашиваем и после «не прошла»
+        const samePage = order.payment_url && order.payment_id && meta.provider === s.provider;
+        const live = order.payment_status === 'pending' && meta.until > Date.now() + 60_000;
+        const kept = provider.keepsPage && ['pending', 'failed'].includes(order.payment_status);
+        if (samePage && (live || kept)) {
           const result = await ask(s, order.payment_id);
           if (result.state === 'paid') {
             await apply(order, order.payment_id, result, 'проверка при повторном переходе');
             return { paid: true, number: order.number, total: payable(order) };
           }
-          if (result.state === 'pending') return { url: order.payment_url, number: order.number, total: payable(order), again: true };
+          if (result.state === 'pending' && (live || !result.unreachable)) {
+            if (order.payment_status !== 'pending')
+              await write(order, { payment_status: 'pending', payment_method: 'online' }, `та же страница оплаты выдана снова: ${provider.label} её ещё держит`);
+            return { url: order.payment_url, number: order.number, total: payable(order), again: true };
+          }
           await apply(order, order.payment_id, result, 'проверка при повторном переходе');
         }
 
@@ -236,10 +273,18 @@ export const createPayService = ({ services, database, getSchema, env, logger })
         const attempt = (Number(meta.attempt) || 0) + 1;
         if (attempt > MAX_ATTEMPTS) throw new PayError(429, 'attempts', 'Слишком много попыток оплаты. Позвоните нам — поможем.');
 
+        // Alfa (and the stub's page) take the basket as is and drop it when it
+        // does not add up; ЮKassa builds its own receipt from the lines and
+        // spreads points over them, since with its receipts on a payment
+        // without one is refused
+        // Альфа (и страница заглушки) берут корзину как есть и обходятся без
+        // неё, если она не сходится; ЮKassa собирает свой чек из строк и
+        // раскладывает баллы по ним: с её чеками платёж без чека не примут
+        const lines = json(order.items, []);
         let bundle = null;
-        if (s.receipt) {
+        if (s.receipt && s.provider !== 'yookassa') {
           try {
-            bundle = buildBundle(json(order.items, []), { vat: s.vat, method: s.receiptMethod, object: 1, measure: s.measure, phone: order.phone });
+            bundle = buildBundle(lines, { vat: s.vat, method: s.receiptMethod, object: s.receiptSubject, measure: s.measure, phone: order.phone });
             if (bundleTotal(bundle) !== amount) {
               logger.warn(`pay: корзина заказа ${order.number} не сходится с суммой — чек без позиций`);
               bundle = null;
@@ -249,10 +294,38 @@ export const createPayService = ({ services, database, getSchema, env, logger })
             bundle = null;
           }
         }
+        const receipt =
+          s.receipt && s.provider === 'yookassa'
+            ? {
+                lines,
+                vat: s.vat,
+                method: s.receiptMethod,
+                subject: s.receiptSubject,
+                taxSystem: s.taxSystem,
+                ffd12: s.measure === 0,
+                phone: order.phone,
+                email: order.email ?? null,
+                title: `Заказ ${order.number}`,
+              }
+            : null;
 
-        const back = `${publicUrl}/pay/return?o=${order.id}`;
+        // ЮKassa adds nothing to the return address, so the address carries
+        // its own unguessable key of the attempt; Alfa and the stub add their
+        // order id on top of it
+        // ЮKassa ничего не дописывает к адресу возврата, поэтому в адресе свой
+        // неугадываемый ключ попытки; Альфа и заглушка дописывают ещё и свой номер
+        const key = randomBytes(9).toString('base64url');
+        const back = `${publicUrl}/pay/return?o=${order.id}&t=${key}`;
         const sessionSeconds = s.sessionMinutes * 60;
-        const nextMeta = { ...meta, attempt, provider: s.provider, mode: s.mode, target, ids: [...(meta.ids ?? [])].slice(-19) };
+        const nextMeta = {
+          ...meta,
+          attempt,
+          provider: s.provider,
+          mode: s.mode,
+          target,
+          ids: [...(meta.ids ?? [])].slice(-19),
+          back: Object.fromEntries(Object.entries(meta.back ?? {}).slice(-19)),
+        };
         let page;
         try {
           page = await provider.register({
@@ -262,9 +335,11 @@ export const createPayService = ({ services, database, getSchema, env, logger })
             returnUrl: back,
             failUrl: back,
             bundle,
+            receipt,
             taxSystem: s.taxSystem,
             sessionSeconds,
             phone: receiptPhone(order.phone),
+            metadata: { order_id: order.id, order_number: order.number },
           });
         } catch (error) {
           const why = error instanceof BankError ? error.message : String(error?.message ?? error);
@@ -273,12 +348,13 @@ export const createPayService = ({ services, database, getSchema, env, logger })
           throw new PayError(502, 'bank', 'Банк сейчас не отвечает. Заказ принят — попробуйте оплатить через минуту или оплатите при получении.');
         }
         nextMeta.ids.push(page.id);
+        nextMeta.back[key] = page.id;
         nextMeta.until = Date.now() + sessionSeconds * 1000;
         nextMeta.amount = amount;
         await write(
           order,
           { payment_method: 'online', payment_status: 'pending', payment_id: page.id, payment_url: page.url, payment_meta: nextMeta },
-          `ссылка на оплату ${rub(payable(order))} (${provider.label}, ${MODE[s.mode]}${attempt > 1 ? `, попытка ${attempt}` : ''})`,
+          `ссылка на оплату ${rub(payable(order))} (${provider.label}, ${MODE[s.mode]}${page.test ? ', тестовый магазин' : ''}${attempt > 1 ? `, попытка ${attempt}` : ''})`,
         );
         return { url: page.url, number: order.number, total: payable(order) };
       });
@@ -313,36 +389,49 @@ export const createPayService = ({ services, database, getSchema, env, logger })
     },
 
     /**
-     * GET /pay/return?o=<id>&orderId=<bank id>: the bank sends the guest back
-     * here; the status is asked again (the address alone proves nothing) and
-     * the guest goes on to the site with the outcome.
+     * GET /pay/return?o=<id>&t=<key>[&orderId=<bank id>]: the bank sends the
+     * guest back here; the status is asked again (the address alone proves
+     * nothing) and the guest goes on to the site with the outcome.
      * Сюда банк возвращает гостя; статус спрашиваем заново (сам адрес ничего
      * не доказывает) и отправляем гостя на сайт с итогом.
      */
-    async back({ id, bankId }) {
+    async back({ id, bankId, key }) {
       const s = await settings();
       const order = await orderById(id);
       const fallback = returnTarget({ origin: null, path: '/catalog/', allowed: corsOrigins(env.CORS_ORIGIN), siteUrl: s.siteUrl });
       if (!order) return fallback ? new URL('/catalog/', fallback.site).toString() : null;
       const meta = json(order.payment_meta, {});
       const target = meta.target ?? fallback;
-      // the bank always adds its own order id; without a known one the address
+      // the attempt is named by our key in the address (ЮKassa) or by the
+      // bank's own order id (Alfa, the stub); without a known one the address
       // was typed by hand, and a stranger learns nothing about order 57
-      // банк всегда добавляет свой номер заказа; без знакомого номера адрес
-      // набран руками, и посторонний ничего не узнает о заказе 57
-      const known = bankId && (bankId === order.payment_id || (meta.ids ?? []).includes(bankId));
+      // попытку называет наш ключ в адресе (ЮKassa) или номер заказа самого
+      // банка (Альфа, заглушка); без знакомого адрес набран руками, и
+      // посторонний ничего не узнает о заказе 57
+      const byKey = key && meta.back && Object.hasOwn(meta.back, key) && typeof meta.back[key] === 'string' ? meta.back[key] : '';
+      const asked = bankId || byKey;
+      const known = asked && (asked === order.payment_id || (meta.ids ?? []).includes(asked));
       if (!known) return target ? new URL(target.path, target.site).toString() : null;
-      const asked = bankId;
-      const result = await ask(s, asked);
+      let result = await ask(s, asked);
+      // ЮKassa's «pending» on the way back is a guest who left — unless the
+      // payment is finishing this very second: one more look before saying so
+      // `pending` ЮKassa при возвращении — гость ушёл, если только платёж не
+      // завершается в эту секунду: ещё один взгляд, прежде чем так сказать
+      if (result.left === true && !result.unreachable) {
+        await new Promise((resolve) => setTimeout(resolve, LEFT_RECHECK_MS));
+        result = await ask(s, asked);
+      }
       await locked(order.id, () => apply(order, asked, result, 'возврат гостя со страницы банка'));
       if (!target) return null;
       if (order.payment_status === 'paid' || result.state === 'paid') return resultUrl(target, 'ok', order.number);
       if (result.state === 'failed' || result.state === 'refunded') return resultUrl(target, 'fail', order.number, whyFailed(result));
-      // the bank never gives up an unfinished page on the way back: status 0
-      // means the guest left it (the «back to the shop» link); 5 is 3-D Secure
-      // банк не отпускает гостя с незавершённой страницы: статус 0 значит, что
-      // гость ушёл сам (ссылка «вернуться в магазин»); 5 — идёт 3-D Secure
-      if (!result.unreachable && String(result.code) === '0')
+      // the bank never gives up an unfinished page on the way back: Alfa's
+      // status 0 or ЮKassa's `pending` means the guest left it («back to the
+      // shop»); Alfa's 5 is 3-D Secure still going
+      // банк не отпускает гостя с незавершённой страницы: статус 0 у Альфы или
+      // `pending` у ЮKassa значит, что гость ушёл сам («вернуться в магазин»);
+      // 5 у Альфы — ещё идёт 3-D Secure
+      if (!result.unreachable && (result.left ?? String(result.code) === '0'))
         return resultUrl(target, 'fail', order.number, 'cancelled');
       return resultUrl(target, 'wait', order.number);
     },
@@ -362,6 +451,55 @@ export const createPayService = ({ services, database, getSchema, env, logger })
       if (!order) throw new PayError(404, 'not_found', 'unknown order');
       const result = await ask(s, bankId);
       await locked(order.id, () => apply(order, bankId, result, `уведомление банка (${params.operation ?? 'без операции'})`));
+      return { ok: true };
+    },
+
+    /**
+     * POST /pay/yookassa/webhook: ЮKassa's notification. The body only names
+     * the payment; what happened to it is asked at ЮKassa (`GET /payments/{id}`),
+     * and the order is found by our payment id or by the `metadata` ЮKassa
+     * itself returns — a forged body changes nothing. Repeats are harmless:
+     * `apply` writes only a change. A payment ЮKassa does not know, or one
+     * that is not ours, is answered 200 and left alone; ЮKassa out of reach —
+     * 503, and ЮKassa repeats the notification for 24 hours.
+     * Уведомление ЮKassa. Тело только называет платёж; что с ним, спрашиваем у
+     * ЮKassa (`GET /payments/{id}`), а заказ ищем по нашему номеру платежа или
+     * по `metadata`, которую вернула сама ЮKassa, — поддельное тело ничего не
+     * изменит. Повторы безвредны: `apply` пишет только перемену. Платёж,
+     * которого ЮKassa не знает или который не наш, — ответ 200 и больше
+     * ничего; ЮKassa недоступна — 503, и ЮKassa повторит уведомление в
+     * течение суток.
+     */
+    async yookassaNotification(body, { trusted = false } = {}) {
+      const note = parseYooNotification(body);
+      if (!note) throw new PayError(400, 'bad_request', 'not a ЮKassa notification');
+      if (!note.paymentId) return { ok: true, ignored: note.event };
+      const s = await settings();
+      let result;
+      try {
+        result = await providerFor(s, 'yookassa').status(note.paymentId);
+      } catch (error) {
+        if (error?.status === 404 || error?.code === 'not_found') {
+          logger.warn(`pay: уведомление ЮKassa (${note.event}) о платеже ${note.paymentId}, которого ЮKassa не знает${trusted ? '' : ' — адрес отправителя не из списка ЮKassa'}`);
+          return { ok: true, ignored: 'unknown payment' };
+        }
+        logger.warn(`pay: уведомление ЮKassa (${note.event}) о платеже ${note.paymentId} не проверено — ${error?.message ?? error}`);
+        throw new PayError(503, 'unavailable', 'payment not verified yet, repeat later');
+      }
+      let order = (await database('orders').where({ payment_id: note.paymentId }).first()) ?? null;
+      if (!order) {
+        const id = Number(result.metadata?.order_id);
+        const candidate = Number.isInteger(id) ? await orderById(id) : null;
+        if (candidate && (json(candidate.payment_meta, {}).ids ?? []).includes(note.paymentId)) order = candidate;
+      }
+      if (!order) {
+        logger.warn(`pay: уведомление ЮKassa (${note.event}) о платеже ${note.paymentId} — такого платежа нет в заказах`);
+        return { ok: true, ignored: 'unknown order' };
+      }
+      await locked(order.id, async () => {
+        const fresh = await orderById(order.id);
+        await apply(fresh, note.paymentId, result, `уведомление ЮKassa (${note.event})`);
+      });
       return { ok: true };
     },
 
@@ -398,16 +536,20 @@ export const createPayService = ({ services, database, getSchema, env, logger })
       return {
         enabled: s.enabled,
         stubInProd: s.stubInProd,
+        testKeyInProd: s.testKeyInProd,
+        providerId: s.provider,
         provider: provider.label,
         mode: MODE[s.mode],
-        gateway: s.provider === 'alfa' ? s.gateway : null,
+        gateway: s.provider === 'alfa' ? s.gateway : s.provider === 'yookassa' ? s.yookassaApi : null,
         sources: s.sources,
         publicUrl,
         returnUrl: publicUrl ? `${publicUrl}/pay/return` : null,
-        callbackUrl: publicUrl ? `${publicUrl}/pay/callback` : null,
+        callbackUrl: publicUrl ? (s.provider === 'yookassa' ? `${publicUrl}/pay/yookassa/webhook` : `${publicUrl}/pay/callback`) : null,
         siteUrl: s.siteUrl || null,
         cors: corsOrigins(env.CORS_ORIGIN),
-        receipt: s.receipt ? { taxSystem: s.taxSystem, vat: s.vat, method: s.receiptMethod, ffd: s.measure === 0 ? '1.2' : '1.05' } : null,
+        receipt: s.receipt
+          ? { taxSystem: s.taxSystem, vat: s.vat, method: s.receiptMethod, subject: s.receiptSubject, ffd: s.measure === 0 ? '1.2' : '1.05' }
+          : null,
         bank,
       };
     },

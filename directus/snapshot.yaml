@@ -13629,8 +13629,9 @@ fields:
         icon: credit_card
         text: >-
           Онлайн-оплата заказов из корзины сайта. Выключена — гость оформляет
-          заказ, как раньше, и платит при получении. Секреты (логин, пароль,
-          токен, ключ) надёжнее задать переменными окружения PAY_* на сервере:
+          заказ, как раньше, и платит при получении. Банк по умолчанию — ЮKassa,
+          Альфа-Банк — запасной. Секреты (секретный ключ ЮKassa, логин и пароль
+          Альфы, ключи) надёжнее задать переменными окружения PAY_* на сервере:
           они важнее полей ниже и не попадают в базу и бэкапы.
       readonly: false
       required: false
@@ -13804,6 +13805,8 @@ fields:
       note: null
       options:
         choices:
+          - text: ЮKassa
+            value: yookassa
           - text: Альфа-Банк
             value: alfa
           - text: Заглушка — только для теста, денег не берёт
@@ -13823,7 +13826,7 @@ fields:
       name: provider
       table: payment_settings
       data_type: character varying
-      default_value: alfa
+      default_value: yookassa
       max_length: 32
       numeric_precision: null
       numeric_scale: null
@@ -13890,7 +13893,13 @@ fields:
     type: string
     meta:
       collection: payment_settings
-      conditions: null
+      conditions:
+        - hidden: true
+          name: Не Альфа-Банк
+          rule:
+            _and:
+              - provider:
+                  _neq: alfa
       display: null
       display_options: null
       field: alfa_login
@@ -13903,7 +13912,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 9
+      sort: 12
       special: null
       translations:
         - language: ru-RU
@@ -13933,7 +13942,13 @@ fields:
     type: string
     meta:
       collection: payment_settings
-      conditions: null
+      conditions:
+        - hidden: true
+          name: Не Альфа-Банк
+          rule:
+            _and:
+              - provider:
+                  _neq: alfa
       display: null
       display_options: null
       field: alfa_password
@@ -13947,7 +13962,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 10
+      sort: 13
       special: null
       translations:
         - language: ru-RU
@@ -13977,7 +13992,13 @@ fields:
     type: string
     meta:
       collection: payment_settings
-      conditions: null
+      conditions:
+        - hidden: true
+          name: Не Альфа-Банк
+          rule:
+            _and:
+              - provider:
+                  _neq: alfa
       display: null
       display_options: null
       field: alfa_token
@@ -13991,7 +14012,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 11
+      sort: 14
       special: null
       translations:
         - language: ru-RU
@@ -14021,7 +14042,13 @@ fields:
     type: string
     meta:
       collection: payment_settings
-      conditions: null
+      conditions:
+        - hidden: true
+          name: Не Альфа-Банк
+          rule:
+            _and:
+              - provider:
+                  _neq: alfa
       display: null
       display_options: null
       field: alfa_gateway_test
@@ -14034,7 +14061,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 12
+      sort: 15
       special: null
       translations:
         - language: ru-RU
@@ -14064,7 +14091,13 @@ fields:
     type: string
     meta:
       collection: payment_settings
-      conditions: null
+      conditions:
+        - hidden: true
+          name: Не Альфа-Банк
+          rule:
+            _and:
+              - provider:
+                  _neq: alfa
       display: null
       display_options: null
       field: alfa_gateway_prod
@@ -14077,7 +14110,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 13
+      sort: 16
       special: null
       translations:
         - language: ru-RU
@@ -14107,7 +14140,13 @@ fields:
     type: string
     meta:
       collection: payment_settings
-      conditions: null
+      conditions:
+        - hidden: true
+          name: Не Альфа-Банк
+          rule:
+            _and:
+              - provider:
+                  _neq: alfa
       display: null
       display_options: null
       field: callback_key
@@ -14123,7 +14162,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 14
+      sort: 17
       special: null
       translations:
         - language: ru-RU
@@ -14166,7 +14205,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 15
+      sort: 18
       special: null
       translations:
         - language: ru-RU
@@ -14203,14 +14242,16 @@ fields:
       group: null
       hidden: false
       interface: input
-      note: Сколько живёт страница оплаты
+      note: >-
+        Сколько живёт страница оплаты. ЮKassa держит страницу сама: по этому
+        сроку заказ только отмечается «Не прошла»
       options:
         max: 1440
         min: 5
       readonly: false
       required: false
       searchable: true
-      sort: 16
+      sort: 19
       special: null
       translations:
         - language: ru-RU
@@ -14255,7 +14296,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 17
+      sort: 20
       special:
         - alias
         - no-data
@@ -14275,13 +14316,16 @@ fields:
       group: null
       hidden: false
       interface: boolean
-      note: 'Нужно, когда у банка подключена онлайн-касса: строки заказа уходят в чек'
+      note: >-
+        ЮKassa: включите, если в её кабинете подключены «Чеки от ЮKassa» или
+        онлайн-касса, — тогда без состава платёж не создастся. Альфа: нужно,
+        когда у банка подключена онлайн-касса
       options:
         label: Передавать состав заказа для чека
       readonly: false
       required: false
       searchable: true
-      sort: 18
+      sort: 21
       special:
         - cast-boolean
       translations:
@@ -14335,7 +14379,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 19
+      sort: 22
       special: null
       translations:
         - language: ru-RU
@@ -14390,7 +14434,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 20
+      sort: 23
       special: null
       translations:
         - language: ru-RU
@@ -14428,7 +14472,7 @@ fields:
       hidden: false
       interface: select-dropdown
       note: >-
-        Альфа для доставки с оплатой заранее советует «Предоплата 100 %» и
+        Для доставки с оплатой заранее банки советуют «Предоплата 100 %» и
         закрывающий чек при передаче — решите с бухгалтером
       options:
         choices:
@@ -14439,7 +14483,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 21
+      sort: 24
       special: null
       translations:
         - language: ru-RU
@@ -14484,7 +14528,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 23
+      sort: 27
       special:
         - alias
         - no-data
@@ -14504,14 +14548,16 @@ fields:
       group: null
       hidden: false
       interface: input
-      note: Пусто — текст по умолчанию из подсказки
+      note: >-
+        Пусто — текст по умолчанию для выбранного банка (у Альфы — «…странице
+        Альфа-Банка»)
       options:
-        placeholder: Картой МИР, Visa или Mastercard на защищённой странице Альфа-Банка
+        placeholder: Картой МИР, Visa или Mastercard на защищённой странице ЮKassa
         trim: true
       readonly: false
       required: false
       searchable: true
-      sort: 24
+      sort: 28
       special: null
       translations:
         - language: ru-RU
@@ -14555,7 +14601,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 25
+      sort: 29
       special: null
       translations:
         - language: ru-RU
@@ -14601,7 +14647,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 26
+      sort: 30
       special: null
       translations:
         - language: ru-RU
@@ -14645,7 +14691,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 27
+      sort: 31
       special: null
       translations:
         - language: ru-RU
@@ -14689,7 +14735,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 28
+      sort: 32
       special: null
       translations:
         - language: ru-RU
@@ -14726,7 +14772,9 @@ fields:
       group: null
       hidden: false
       interface: select-radio
-      note: 'Версия формата чека у кассы: от неё зависит, как записана единица «шт»'
+      note: >-
+        Версия формата чека у кассы: от неё зависит, как записана единица «шт».
+        «Чеки от ЮKassa» — ФФД 1.2
       options:
         choices:
           - text: ФФД 1.2
@@ -14736,7 +14784,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 22
+      sort: 26
       special: null
       translations:
         - language: ru-RU
@@ -14752,6 +14800,197 @@ fields:
       max_length: 8
       numeric_precision: null
       numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: yookassa_shop_id
+    type: string
+    meta:
+      collection: payment_settings
+      conditions:
+        - hidden: true
+          name: Не ЮKassa
+          rule:
+            _and:
+              - provider:
+                  _neq: yookassa
+      display: null
+      display_options: null
+      field: yookassa_shop_id
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Кабинет ЮKassa → «Интеграция» → «Ключи API». У тестового магазина свой
+        shopId
+      options:
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 9
+      special: null
+      translations:
+        - language: ru-RU
+          translation: shopId
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: yookassa_shop_id
+      table: payment_settings
+      data_type: character varying
+      default_value: null
+      max_length: 32
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: yookassa_secret_key
+    type: string
+    meta:
+      collection: payment_settings
+      conditions:
+        - hidden: true
+          name: Не ЮKassa
+          rule:
+            _and:
+              - provider:
+                  _neq: yookassa
+      display: null
+      display_options: null
+      field: yookassa_secret_key
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Скрыт. live_… — боевой магазин, test_… — тестовый (в режиме «Бой»
+        тестовый ключ выключает оплату). Переменная PAY_YOOKASSA_SECRET_KEY
+        важнее поля
+      options:
+        masked: true
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 10
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Секретный ключ
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: yookassa_secret_key
+      table: payment_settings
+      data_type: character varying
+      default_value: null
+      max_length: 512
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: payment_settings
+    field: yookassa_hint
+    type: alias
+    meta:
+      collection: payment_settings
+      conditions:
+        - hidden: true
+          name: Не ЮKassa
+          rule:
+            _and:
+              - provider:
+                  _neq: yookassa
+      display: null
+      display_options: null
+      field: yookassa_hint
+      group: null
+      hidden: false
+      interface: presentation-notice
+      note: null
+      options:
+        color: normal
+        icon: notifications_active
+        text: >-
+          В кабинете ЮKassa «Интеграция → HTTP-уведомления»: адрес
+          https://admin.vkus-com.ru/pay/yookassa/webhook, события
+          payment.succeeded, payment.canceled, refund.succeeded. Возврат денег —
+          в кабинете ЮKassa: заказ сам станет «Возврат».
+      readonly: false
+      required: false
+      searchable: true
+      sort: 11
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: payment_settings
+    field: receipt_subject
+    type: integer
+    meta:
+      collection: payment_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: receipt_subject
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: >-
+        Признак предмета расчёта для всех строк: блюда обычно «Товар» — решите с
+        бухгалтером
+      options:
+        choices:
+          - text: Товар
+            value: 1
+          - text: Услуга
+            value: 4
+      readonly: false
+      required: false
+      searchable: true
+      sort: 25
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Предмет расчёта
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: receipt_subject
+      table: payment_settings
+      data_type: integer
+      default_value: 1
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
       is_nullable: true
       is_unique: false
       is_indexed: false
