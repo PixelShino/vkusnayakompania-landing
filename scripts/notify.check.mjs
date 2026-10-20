@@ -23,7 +23,9 @@ import {
   telegramText,
 } from '../directus/extensions/notify/lib.js';
 
-const TOKEN = '123456789:AAHfakeFAKEfakeFAKEfakeFAKEfake_tok';
+// a shape no scanner takes for a real bot token: GitHub flagged the previous one
+// форма, которую сканер не примет за настоящий токен бота: прошлую GitHub пометил
+const TOKEN = 'fake:TEST-TOKEN-FOR-CHECKS-ONLY';
 const NOON = new Date('2026-10-19T08:05:00Z'); // 12:05 в Самаре
 const noSleep = async () => {};
 // Intl groups thousands with a no-break space; the checks read it as a plain one
