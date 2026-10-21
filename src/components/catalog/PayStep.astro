@@ -50,7 +50,9 @@ const api = directus ? `${directus}/pay` : '';
       <Icon name="card" />
       <span data-pay-retry-label>Оплатить ещё раз</span>
     </button>
+    <!-- «Оплачу при получении» выключено по решению владельца 21.10.2026 (не просили); вернуть — раскомментировать
     <button type="button" class="btn btn--secondary btn--block" data-pay-offline hidden>Оплачу при получении</button>
+    -->
     <button type="button" class="btn btn--secondary btn--block" data-pay-recheck hidden>Проверить ещё раз</button>
     <button type="button" class="btn btn--primary btn--block" data-close data-pay-close hidden>Вернуться в каталог</button>
   </footer>

@@ -80,7 +80,11 @@ const tester = () => store.get(TEST_KEY) === '1';
 
 // ── the choice in the form / выбор в форме ───────────────────────────────────
 
-const chosen = () => choice?.querySelector<HTMLInputElement>('input[name="payment"]:checked')?.value ?? 'on_delivery';
+// the «on delivery» radio is commented out in the markup (21.10.2026), so the
+// default is online; the branch stays for the day it comes back
+// радио «при получении» в разметке закомментировано (21.10.2026), поэтому по
+// умолчанию — онлайн; ветка остаётся на случай возврата
+const chosen = () => choice?.querySelector<HTMLInputElement>('input[name="payment"]:checked')?.value ?? 'online';
 const online = () => offered && chosen() === 'online';
 
 const submitLabel = drawer?.querySelector<HTMLElement>('[data-submit-label]') ?? null;
@@ -211,14 +215,16 @@ const show = (state: State, record: PayRecord | null, number: string, lead: stri
   $('[data-pay-retry-label]')!.textContent = state === 'pending' ? 'Перейти к оплате' : 'Оплатить ещё раз';
   retry.removeAttribute('aria-busy');
   retry.disabled = false;
-  const offline = $('[data-pay-offline]')!;
-  offline.hidden = !(['failed', 'unavailable', 'pending'].includes(state) && canOffline);
+  // the button is commented out in the markup (21.10.2026) — may be absent
+  // кнопка в разметке закомментирована (21.10.2026) — её может не быть
+  const offline = $('[data-pay-offline]');
+  if (offline) offline.hidden = !(['failed', 'unavailable', 'pending'].includes(state) && canOffline);
   $('[data-pay-recheck]')!.hidden = state !== 'waitlong' || !record?.phone;
   // one main action: with «pay again» on screen the way back is the cross in
   // the corner; it becomes a button only when there is nothing else to do
   // одно главное действие: при «оплатить ещё раз» путь назад — крестик в углу;
   // кнопкой он становится, только когда больше делать нечего
-  $('[data-pay-close]')!.hidden = ['going', 'wait'].includes(state) || !retry.hidden || !offline.hidden;
+  $('[data-pay-close]')!.hidden = ['going', 'wait'].includes(state) || !retry.hidden || Boolean(offline && !offline.hidden);
   $('[data-pay-go]')!.hidden = true;
   const foot = $('.pay-step__foot')!;
   foot.hidden = ![...foot.children].some((node) => !(node as HTMLElement).hidden);
