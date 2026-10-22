@@ -206,16 +206,39 @@ export const spreadAmount = (totals, amount) => {
 };
 
 /**
+ * The delivery inside «К оплате», in roubles: what the bill adds on top of the
+ * dishes after the discount and the points. Counted from the order's parts,
+ * not read from `delivery_cost`: a cost a manager typed after the call is not
+ * in the bill and must not take a line of the receipt.
+ * Доставка внутри «К оплате», в рублях: что счёт добавляет к блюдам после
+ * скидки и баллов. Считается из частей заказа, а не берётся из
+ * `delivery_cost`: стоимость, которую менеджер вписал после звонка, в счёт не
+ * входит и строку в чеке занимать не должна.
+ * @param {Record<string, any>} order
+ */
+export const deliveryInPayment = (order) => {
+  if (order?.to_pay === null || order?.to_pay === undefined || !Number.isFinite(Number(order.to_pay))) return 0;
+  const dishes = Number(order.total ?? 0) - Number(order.discount ?? 0) - Number(order.bonus_spent ?? 0);
+  return Math.max(0, Number(order.to_pay) - Math.max(0, dishes));
+};
+
+/**
  * The ЮKassa receipt (54-FZ) for the sum paid: a line per dish at the price
  * after points; a line whose total does not divide by its quantity splits in
- * two («2 × 333.33» and «1 × 333.34»). Without usable lines — one line «Заказ …».
+ * two («2 × 333.33» and «1 × 333.34»); the delivery, when the payment carries
+ * it, is its own line «Доставка» (a service), the dishes share the rest.
+ * Without usable lines, or when the delivery leaves nothing for the dishes —
+ * one line «Заказ …».
  * Чек ЮKassa (54-ФЗ) на оплаченную сумму: строка на блюдо по цене после
  * баллов; строка, сумма которой не делится на количество, делится на две
- * («2 × 333,33» и «1 × 333,34»). Без годных строк — одна строка «Заказ …».
+ * («2 × 333,33» и «1 × 333,34»); доставка, если она в платеже, — своя строка
+ * «Доставка» (услуга), блюда делят остаток. Без годных строк или когда после
+ * доставки на блюда ничего не остаётся — одна строка «Заказ …».
  *
  * @param {Array<Record<string, any>> | null | undefined} lines `orders.items`
  * @param {{ amount: number, vat: number, method: number, subject?: number, taxSystem?: number,
- *   ffd12?: boolean, phone?: string | null, email?: string | null, title: string }} options
+ *   ffd12?: boolean, phone?: string | null, email?: string | null, title: string,
+ *   delivery?: number | null }} options `delivery` — рубли доставки внутри `amount`
  */
 export const buildYooReceipt = (lines, options) => {
   const vat = YOO_VAT[options.vat];
@@ -227,6 +250,9 @@ export const buildYooReceipt = (lines, options) => {
     ...(options.ffd12 === false ? {} : { measure: 'piece' }),
   };
   const item = (description, quantity, unit) => ({ description, quantity, amount: { value: yooValue(unit), currency: 'RUB' }, ...base });
+  // the delivery is a service whatever the dishes are / доставка — услуга, что бы ни были блюда
+  const delivery = Math.min(toKopecks(options.delivery) ?? 0, options.amount);
+  const dishes = options.amount - delivery;
 
   let parsed = Array.isArray(lines) && lines.length ? [] : null;
   for (const line of Array.isArray(lines) ? lines : []) {
@@ -238,7 +264,7 @@ export const buildYooReceipt = (lines, options) => {
     }
     parsed.push({ name: yooItemName(line), qty, total: price * qty });
   }
-  const totals = parsed ? spreadAmount(parsed.map((p) => p.total), options.amount) : null;
+  const totals = parsed && dishes > 0 ? spreadAmount(parsed.map((p) => p.total), dishes) : null;
   let items = totals
     ? parsed
         .flatMap((p, i) => {
@@ -251,6 +277,7 @@ export const buildYooReceipt = (lines, options) => {
         // блюдо, целиком съеденное баллами, в чек не идёт: нулевая строка ничего не добавляет
         .filter((it) => it.amount.value !== '0.00')
     : [];
+  if (items.length && delivery > 0) items.push({ ...item('Доставка', 1, delivery), payment_subject: 'service' });
   if (!items.length || items.length > YOO_ITEMS_MAX) items = [item(cleanText(options.title, YOO_NAME_MAX, 'Заказ'), 1, options.amount)];
 
   /** @type {{ items: Array<Record<string, any>>, customer?: { email?: string, phone?: string }, tax_system_code?: number }} */
@@ -435,7 +462,7 @@ export const GATEWAYS = {
 export const DEFAULT_TEXTS = {
   online: 'Картой МИР, Visa или Mastercard на защищённой странице ЮKassa',
   onDelivery: 'Наличными или картой курьеру, на кассе при самовывозе',
-  note: 'Онлайн оплачиваются блюда. Платную доставку назовём при звонке и оплатите её курьеру.',
+  note: 'Онлайн оплачиваются блюда и доставка. Если адрес не найден на карте, стоимость доставки назовём при звонке.',
   paid: 'Спасибо! Перезвоним, чтобы подтвердить адрес и время.',
   failed: 'Деньги не списаны. Заказ сохранён — оформлять его заново не нужно.',
 };

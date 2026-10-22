@@ -288,7 +288,8 @@ for (const preset of PRESETS) {
 const FLOW_SCOPE = ['items.create', 'items.update', 'items.delete', 'items.sort'];
 // orders and catering requests are not here: a new one changes nothing on the site
 // заказов и заявок здесь нет: новый заказ или заявка ничего на сайте не меняют
-const FLOW_COLLECTIONS = [...CONTENT, ...SINGLE, 'directus_files', 'loyalty_settings', 'pages'];
+// `delivery_zones`: the site may print the zones' prices / сайт может печатать цены зон
+const FLOW_COLLECTIONS = [...CONTENT, ...SINGLE, 'directus_files', 'loyalty_settings', 'pages', 'delivery_zones'];
 let flow = await findOne('/flows', { name: { _eq: 'Пересборка сайта' } });
 if (flow && FLOW_SCOPE.some((event) => !flow.options?.scope?.includes(event))) {
   flow.options = { ...flow.options, scope: FLOW_SCOPE };
@@ -339,6 +340,9 @@ console.log('= проект: имя и русский язык');
 await (await import('./setup/notify.mjs')).setup(api, { editorPolicy: policy.id, builderPolicy: bpolicy.id });
 // 6. online payment — its own module / онлайн-оплата — свой модуль
 await (await import('./setup/payments.mjs')).setup(api, { editorPolicy: policy.id, publicPolicy: publicAccess.policy });
+// 7. delivery by zone: before the account, whose guest order copies the public fields
+//    доставка по зонам: до кабинета — заказ гостя повторяет публичные поля
+await (await import('./setup/delivery.mjs')).setup(api, { editorPolicy: policy.id, builderPolicy: bpolicy.id, publicPolicy: publicAccess.policy });
 
 await (await import('./setup/account.mjs')).setup(api, { findOne, ORDER_FIELDS_PUBLIC, publicPolicy: publicAccess.policy }); // личный кабинет и «Вкусные баллы»
 await (await import('./setup/pages.mjs')).setup(api, { editorPolicy: policy.id, builderPolicy: bpolicy.id }); // документы: оферта, политика, доставка, реквизиты

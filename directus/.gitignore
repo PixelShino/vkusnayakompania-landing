@@ -13,3 +13,4 @@ extensions/*
 !extensions/pay/
 !extensions/guest-auth/
 !extensions/loyalty/
+!extensions/delivery/

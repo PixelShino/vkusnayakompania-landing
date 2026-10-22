@@ -202,6 +202,7 @@ for (const secret of ['shop-api', 'admin-pass', 'rbsuat']) assert.ok(!shown.incl
     { product: 7, title: 'Морс\nклюквенный  0,5 л', variant: null, filling: null, qty: 3, price: 150 },
   ];
   const opts = { vat: 0, method: 4, subject: 1, taxSystem: 1, ffd12: true, phone: '+7 987 955-25-65', title: 'Заказ 1910-4821' };
+  const yooRub = (kopecks: number) => `${Math.floor(kopecks / 100)}.${String(kopecks % 100).padStart(2, '0')}`;
   const full = core.buildYooReceipt(order, { ...opts, amount: 465000 });
   assert.deepEqual(full, {
     items: [
@@ -232,6 +233,41 @@ for (const secret of ['shop-api', 'admin-pass', 'rbsuat']) assert.ok(!shown.incl
     const r = core.buildYooReceipt([...order, ...breakfast], { ...opts, amount });
     assert.equal(core.yooReceiptTotal(r), amount, `чек на ${amount} коп. сходится`);
   }
+  // доставка — своя строка «Доставка» (услуга), блюда делят остаток; чек сходится до копейки
+  const delivered = core.buildYooReceipt(order, { ...opts, amount: 505000, delivery: 400 });
+  assert.deepEqual(
+    delivered.items.map((it) => [it.description, it.quantity, it.amount.value, it.payment_subject]),
+    [
+      ['Торт «Лего» (2 кг, Сникерс)', 1, '4200.00', 'commodity'],
+      ['Морс клюквенный 0,5 л', 3, '150.00', 'commodity'],
+      ['Доставка', 1, '400.00', 'service'],
+    ],
+    'блюда — по своим ценам, доставка — отдельной строкой с признаком «услуга»',
+  );
+  assert.deepEqual(delivered.items.at(-1), { description: 'Доставка', quantity: 1, amount: { value: '400.00', currency: 'RUB' }, vat_code: 1, payment_mode: 'full_payment', payment_subject: 'service', measure: 'piece' });
+  assert.equal(core.yooReceiptTotal(delivered), 505000);
+  // доставка 0 или пусто (назовут при звонке) — чек как раньше
+  for (const delivery of [0, null, undefined]) assert.deepEqual(core.buildYooReceipt(order, { ...opts, amount: 465000, delivery }), full, `доставка ${delivery} — без строки`);
+  // баллы и доставка: баллы раскладываются только по блюдам, доставка остаётся целой
+  const both = core.buildYooReceipt(breakfast, { ...opts, amount: 173500, delivery: 400 });
+  assert.deepEqual(both.items.map((it) => it.amount.value), ['595.75', '739.25', '400.00']);
+  assert.equal(core.yooReceiptTotal(both), 173500, 'чек = блюда после баллов + доставка');
+  for (const amount of [40001, 40099, 52345, 173499, 505000, 505001]) {
+    const r = core.buildYooReceipt([...order, ...breakfast], { ...opts, amount, delivery: 400 });
+    assert.equal(core.yooReceiptTotal(r), amount, `чек с доставкой на ${amount} коп. сходится`);
+    assert.equal(r.items.at(-1)?.description, 'Доставка');
+  }
+  // баллы съели блюда целиком (или доставка больше суммы) — одна строка «Заказ …»
+  for (const amount of [40000, 30000]) {
+    const r = core.buildYooReceipt(order, { ...opts, amount, delivery: 400 });
+    assert.deepEqual(r.items.map((it) => [it.description, it.quantity, it.amount.value]), [['Заказ 1910-4821', 1, yooRub(amount)]]);
+  }
+  assert.deepEqual(core.buildYooReceipt(null, { ...opts, amount: 50000, delivery: 400 }).items.map((it) => it.description), ['Заказ 1910-4821'], 'без годных строк — одна строка и с доставкой');
+  // сколько доставки внутри «К оплате»: из частей заказа, а не из поля, вписанного после звонка
+  assert.equal(core.deliveryInPayment({ total: 1535, discount: 0, bonus_spent: 200, to_pay: 1735, delivery_cost: 400 }), 400);
+  assert.equal(core.deliveryInPayment({ total: 1535, discount: 0, bonus_spent: 0, to_pay: 1535, delivery_cost: 600 }), 0, 'менеджер вписал доставку после звонка — в оплате её нет');
+  assert.equal(core.deliveryInPayment({ total: 1535, to_pay: null, delivery_cost: 400 }), 0, 'старый заказ без «К оплате»');
+  assert.equal(core.deliveryInPayment({ total: 8000, discount: 800, bonus_spent: 0, to_pay: 7200, delivery_cost: 0 }), 0);
   // без годных строк — одна строка «Заказ …» на всю сумму
   for (const broken of [[], null, [{ title: 'x', qty: 1.5, price: 10 }], [{ title: 'x', qty: 1, price: -1 }]]) {
     const r = core.buildYooReceipt(broken, { ...opts, amount: 50000 });

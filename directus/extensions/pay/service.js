@@ -17,6 +17,7 @@ import {
   bankOrderNumber,
   buildBundle,
   bundleTotal,
+  deliveryInPayment,
   isOrderNumber,
   normalizePhone,
   parseBankOrderNumber,
@@ -57,12 +58,13 @@ const LEFT_RECHECK_MS = 1500;
 const rub = (n) => `${new Intl.NumberFormat('ru-RU').format(n)} ₽`;
 
 /**
- * What the guest pays: an order from the guest account carries `to_pay` — the
- * total less the points and the birthday discount (`order-guard` +
- * `loyalty`); any other order pays its total.
- * Сколько платит гость: у заказа из личного кабинета есть `to_pay` — сумма
- * минус баллы и скидка именинника (`order-guard` + `loyalty`); любой другой
- * заказ платит свою сумму.
+ * What the guest pays: `to_pay` — the dishes less the points and the birthday
+ * discount plus the delivery (`order-guard` + `loyalty`; every site order has
+ * it since 22.10.2026); an order without it (an older one, a phone order) pays
+ * its total.
+ * Сколько платит гость: `to_pay` — блюда минус баллы и скидка именинника плюс
+ * доставка (`order-guard` + `loyalty`; с 22.10.2026 он есть у каждого заказа с
+ * сайта); заказ без него (старый, по телефону) платит свою сумму.
  */
 export const payable = (order) =>
   order.to_pay !== null && order.to_pay !== undefined && Number.isFinite(Number(order.to_pay)) ? Number(order.to_pay) : Number(order.total);
@@ -263,7 +265,7 @@ export const createPayService = ({ services, database, getSchema, env, logger })
         if (['cancelled', 'done'].includes(order.status)) throw new PayError(409, 'closed', 'Заказ уже закрыт. Позвоните нам, если хотите его оплатить.');
         if (Date.now() - new Date(order.date_created).getTime() > START_WINDOW_MS)
           throw new PayError(409, 'old', 'Заказ оформлен больше двух суток назад. Позвоните нам — оплатите его при получении.');
-        if (order.payment_status === 'paid') return { paid: true, number: order.number, total: payable(order) };
+        if (order.payment_status === 'paid') return { paid: true, number: order.number, total: payable(order), delivery_cost: order.delivery_cost ?? null };
         if (order.payment_status === 'refunded') throw new PayError(409, 'refunded', 'По заказу уже сделан возврат. Позвоните нам.');
         const amount = toKopecks(payable(order));
         if (!amount) throw new PayError(409, 'empty', 'В заказе нет суммы для оплаты. Позвоните нам.');
@@ -285,7 +287,7 @@ export const createPayService = ({ services, database, getSchema, env, logger })
           const result = await ask(s, order.payment_id);
           if (result.state === 'paid') {
             await apply(order, order.payment_id, result, 'проверка при повторном переходе', s);
-            if (order.payment_status === 'paid') return { paid: true, number: order.number, total: payable(order) };
+            if (order.payment_status === 'paid') return { paid: true, number: order.number, total: payable(order), delivery_cost: order.delivery_cost ?? null };
             // the bank took less than the order asks: no second payment on top
             // of it — the manager settles the difference by phone
             // банк взял меньше, чем просит заказ: второй платёж сверху не
@@ -295,7 +297,7 @@ export const createPayService = ({ services, database, getSchema, env, logger })
           if (result.state === 'pending' && (live || !result.unreachable)) {
             if (order.payment_status !== 'pending')
               await write(order, { payment_status: 'pending', payment_method: 'online' }, `та же страница оплаты выдана снова: ${provider.label} её ещё держит`);
-            return { url: order.payment_url, number: order.number, total: payable(order), again: true };
+            return { url: order.payment_url, number: order.number, total: payable(order), delivery_cost: order.delivery_cost ?? null, again: true };
           }
           await apply(order, order.payment_id, result, 'проверка при повторном переходе', s);
         }
@@ -306,12 +308,13 @@ export const createPayService = ({ services, database, getSchema, env, logger })
         if (attempt > MAX_ATTEMPTS) throw new PayError(429, 'attempts', 'Слишком много попыток оплаты. Позвоните нам — поможем.');
 
         // Alfa (and the stub's page) take the basket as is and drop it when it
-        // does not add up; ЮKassa builds its own receipt from the lines and
-        // spreads points over them, since with its receipts on a payment
-        // without one is refused
+        // does not add up; ЮKassa builds its own receipt from the lines,
+        // spreads points over them and puts the delivery on a line of its own,
+        // since with its receipts on a payment without one is refused
         // Альфа (и страница заглушки) берут корзину как есть и обходятся без
-        // неё, если она не сходится; ЮKassa собирает свой чек из строк и
-        // раскладывает баллы по ним: с её чеками платёж без чека не примут
+        // неё, если она не сходится; ЮKassa собирает свой чек из строк,
+        // раскладывает баллы по ним и ставит доставку отдельной строкой: с её
+        // чеками платёж без чека не примут
         const lines = json(order.items, []);
         let bundle = null;
         if (s.receipt && s.provider !== 'yookassa') {
@@ -338,6 +341,8 @@ export const createPayService = ({ services, database, getSchema, env, logger })
                 phone: order.phone,
                 email: order.email ?? null,
                 title: `Заказ ${order.number}`,
+                // the delivery inside «К оплате» (not the field as typed later) / доставка внутри «К оплате»
+                delivery: deliveryInPayment(order),
               }
             : null;
 
@@ -388,7 +393,7 @@ export const createPayService = ({ services, database, getSchema, env, logger })
           { payment_method: 'online', payment_status: 'pending', payment_id: page.id, payment_url: page.url, payment_meta: nextMeta },
           `ссылка на оплату ${rub(payable(order))} (${provider.label}, ${MODE[s.mode]}${page.test ? ', тестовый магазин' : ''}${attempt > 1 ? `, попытка ${attempt}` : ''})`,
         );
-        return { url: page.url, number: order.number, total: payable(order) };
+        return { url: page.url, number: order.number, total: payable(order), delivery_cost: order.delivery_cost ?? null };
       });
     },
 
@@ -399,7 +404,7 @@ export const createPayService = ({ services, database, getSchema, env, logger })
       if (!found) throw new PayError(404, 'not_found', 'Не нашли заказ с этим номером и телефоном. Позвоните нам — разберёмся.');
       return locked(found.id, async () => {
         const order = await orderById(found.id);
-        if (order.payment_status === 'paid') return { paid: true, number: order.number, total: payable(order) };
+        if (order.payment_status === 'paid') return { paid: true, number: order.number, total: payable(order), delivery_cost: order.delivery_cost ?? null };
         if (s.enabled && !s.onDelivery) throw new PayError(409, 'online_only', 'Заказы с сайта сейчас принимаем только с онлайн-оплатой. Позвоните нам — поможем.');
         if (order.payment_method !== 'on_delivery' || order.payment_status !== 'none')
           await write(order, { payment_method: 'on_delivery', payment_status: 'none' }, 'гость выбрал оплату при получении');
@@ -426,7 +431,7 @@ export const createPayService = ({ services, database, getSchema, env, logger })
           Object.assign(order, fresh);
         });
       }
-      return { number: order.number, status: order.payment_status, method: order.payment_method, total: payable(order) };
+      return { number: order.number, status: order.payment_status, method: order.payment_method, total: payable(order), delivery_cost: order.delivery_cost ?? null };
     },
 
     /**

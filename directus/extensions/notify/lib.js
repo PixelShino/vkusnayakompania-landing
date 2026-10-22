@@ -126,7 +126,7 @@ export const orderModel = (order, { place = null, adminUrl = null } = {}) => {
   const how =
     order.fulfillment === 'pickup'
       ? `Самовывоз${place ? `: ${place}` : ''}`
-      : `Доставка: ${[order.address, order.address_details].filter(Boolean).join(', ') || 'адрес не указан'}`;
+      : `Доставка: ${[order.address, order.address_details].filter(Boolean).join(', ') || 'адрес не указан'}${order.delivery_zone ? ` · зона «${order.delivery_zone}»` : ''}`;
   return {
     kind: 'order',
     collection: 'orders',
@@ -147,7 +147,7 @@ export const orderModel = (order, { place = null, adminUrl = null } = {}) => {
     // заказ из личного кабинета: что сняли баллы и скидка именинника и сколько осталось
     total:
       order.to_pay !== null && order.to_pay !== undefined && Number(order.to_pay) !== Number(order.total)
-        ? `Итого: ${rub(order.total)}${Number(order.discount) > 0 ? ` · скидка именинника −${rub(order.discount)}` : ''}${Number(order.bonus_spent) > 0 ? ` · баллами −${rub(order.bonus_spent)}` : ''} · к оплате ${rub(order.to_pay)}`
+        ? `Итого: ${rub(order.total)}${Number(order.discount) > 0 ? ` · скидка именинника −${rub(order.discount)}` : ''}${Number(order.bonus_spent) > 0 ? ` · баллами −${rub(order.bonus_spent)}` : ''}${order.delivery_cost === null || order.delivery_cost === undefined ? (order.fulfillment === 'delivery' ? ' · доставка: назвать при звонке' : '') : Number(order.delivery_cost) > 0 ? ` · доставка ${rub(order.delivery_cost)}` : order.fulfillment === 'delivery' ? ' · доставка бесплатно' : ''} · к оплате ${rub(order.to_pay)}`
         : `Итого: ${rub(order.total)}`,
     notes: [
       order.comment ? `Комментарий: ${order.comment}` : null,

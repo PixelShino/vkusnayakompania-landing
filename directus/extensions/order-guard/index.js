@@ -20,8 +20,21 @@
  * Правила повторяют `src/lib/order.ts` сайта: форма отказывает в том же до
  * отправки, а этот хук — та часть, которую скрипт обойти не может.
  *
+ * Delivery (since 22.10.2026): the zone is found by the address on the server
+ * (`../delivery/geo.js` and the geocoder of `../delivery/photon.js` — the same
+ * rules and the same cache as the cart's `/delivery/quote`), the delivery is
+ * priced by the zone, an order below the zone's minimum is refused, and every
+ * order gets «К оплате» = dishes − discount − points + delivery.
+ * Доставка (с 22.10.2026): зона ищется по адресу на сервере (`../delivery/geo.js`
+ * и геокодер `../delivery/photon.js` — те же правила и тот же кэш, что у
+ * `/delivery/quote` корзины), стоимость — по зоне, заказ меньше минимума зоны
+ * не принимается, а «К оплате» = блюда − скидка − баллы + доставка получает
+ * каждый заказ.
+ *
  * No build step: this file is the extension. / Без сборки: этот файл и есть расширение.
  */
+import { deliveryCost, minOrderError, normalizeAddress, quote, toZones } from '../delivery/geo.js';
+import { geocoder } from '../delivery/photon.js';
 
 const LIMITS = {
   lines: 40,
@@ -97,7 +110,24 @@ const freshNumber = () => {
 // гость, вошедший на сайте (расширение `guest-auth`), несёт эту роль
 const GUEST_ROLE = 'Гость';
 
-export default ({ filter, action }, { services, logger, emitter = null }) => {
+// what the manager reads when the address gave no zone / что читает менеджер, когда зоны по адресу нет
+export const NOTE_NOT_FOUND = 'Адрес не найден на карте — стоимость доставки назвать при звонке.';
+export const NOTE_OUTSIDE = 'Адрес вне зон доставки — предложить самовывоз или назвать стоимость при звонке.';
+
+/**
+ * The delivery line of the manager's notification: «зона «…» · 400 ₽»,
+ * «… · бесплатно (от 7 000 ₽)» or «стоимость назвать при звонке».
+ * Строка доставки в уведомлении менеджеру.
+ * @param {{ zone?: string | null, cost?: number | null, freeFrom?: number | null }} delivery
+ */
+export const deliveryText = ({ zone, cost, freeFrom = null }) => {
+  if (cost === null || cost === undefined) return 'стоимость назвать при звонке';
+  const where = zone ? `зона «${zone}» · ` : '';
+  if (Number(cost) > 0) return `${where}${rub(Number(cost))}`;
+  return `${where}бесплатно${freeFrom ? ` (от ${rub(freeFrom)})` : ''}`;
+};
+
+export default ({ filter, action }, { services, logger, emitter = null, database: root = null }) => {
   const hits = new Map();
   const isGuest = async (accountability, database) =>
     Boolean(accountability?.user && accountability.role) &&
@@ -115,7 +145,22 @@ export default ({ filter, action }, { services, logger, emitter = null }) => {
     return recent.length > RATE.max;
   };
 
-  filter('orders.items.create', async (payload, _meta, { accountability, database }) => {
+  /**
+   * Zones in force. Read outside the order's transaction when the hook has
+   * its own connection: a missing table must not break the order's write.
+   * Действующие зоны. Читаются вне транзакции заказа, если у хука есть своё
+   * соединение: отсутствующая таблица не должна ломать запись заказа.
+   */
+  const zonesNow = async (database, schema) => {
+    if (schema?.collections && !schema.collections.delivery_zones) return [];
+    try {
+      return toZones(await (root ?? database)('delivery_zones').select('id', 'name', 'price', 'free_from', 'min_order', 'polygon', 'sort', 'status'));
+    } catch {
+      return [];
+    }
+  };
+
+  filter('orders.items.create', async (payload, _meta, { accountability, database, schema }) => {
     // editors entering a phone order and internal calls pass as they are; a
     // guest signed in on the site is checked like the public and owns the order
     // редактор, вбивающий заказ по телефону, и внутренние вызовы проходят как
@@ -210,6 +255,34 @@ export default ({ filter, action }, { services, logger, emitter = null }) => {
         ? `На сайте гость видел ${rub(seen)}, по текущим ценам ${rub(total)} — уточнить при звонке.`
         : null;
 
+    // Delivery by zone: the zone is found here again, whatever the cart showed.
+    // Free from the zone's threshold, counted on the dishes before the discount
+    // and the points; below the zone's minimum the order is refused. No zone
+    // (the address is not on the map, or outside every zone) — the order goes
+    // through, the delivery is priced on the call. Pickup costs nothing.
+    // Доставка по зонам: зона ищется здесь заново, что бы ни показала корзина.
+    // Бесплатно от порога зоны, считая блюда до скидки и баллов; меньше минимума
+    // зоны — отказ. Нет зоны (адреса нет на карте или он вне всех зон) — заказ
+    // проходит, стоимость доставки называют при звонке. Самовывоз — 0 ₽.
+    const delivery = { zone: null, cost: fulfillment === 'pickup' ? 0 : null, note: null };
+    if (fulfillment === 'delivery') {
+      const zones = await zonesNow(database, schema);
+      if (zones.length) {
+        const found = await quote(address, {
+          zones,
+          geocode: geocoder.locate,
+          geocodeRaw: geocoder.locateRaw,
+          log: (error) => logger.warn(`order-guard: адрес «${normalizeAddress(address)}» не проверен — ${error.message}`),
+        });
+        if (found.found) {
+          const refused = minOrderError(found.zone, total);
+          if (refused) throw new OrderError(refused);
+          delivery.zone = found.zone.name;
+          delivery.cost = deliveryCost(found.zone, total);
+        } else delivery.note = found.outside ? NOTE_OUTSIDE : NOTE_NOT_FOUND;
+      }
+    }
+
     // «Вкусные баллы» (the `loyalty` extension) decide how much of the order a
     // signed-in guest pays with points and the birthday discount; without that
     // extension nothing is taken off the total
@@ -219,7 +292,7 @@ export default ({ filter, action }, { services, logger, emitter = null }) => {
     const loyalty = customer && emitter
       ? await emitter.emitFilter(
           'orders.checkout',
-          { customer, total, requested: payload.bonus_spent, bonus_spent: 0, discount: 0, note: null },
+          { customer, total, delivery: delivery.cost ?? 0, requested: payload.bonus_spent, bonus_spent: 0, discount: 0, note: null },
           { collection: 'orders' },
           { database, accountability },
         )
@@ -243,7 +316,7 @@ export default ({ filter, action }, { services, logger, emitter = null }) => {
       items,
       total,
       consent: true,
-      manager_note: [note, loyalty?.note].filter(Boolean).join('\n') || null,
+      manager_note: [note, delivery.note, loyalty?.note].filter(Boolean).join('\n') || null,
       // how the guest wants to pay, when the site offered the choice; the rest
       // of `payment_*` (paid or not) is never taken from here — the `pay`
       // extension writes it from the bank's answer
@@ -251,11 +324,17 @@ export default ({ filter, action }, { services, logger, emitter = null }) => {
       // `payment_*` (оплачен или нет) отсюда не берутся никогда — их пишет
       // расширение `pay` по ответу банка
       ...(payload.payment_method ? { payment_method: payload.payment_method === 'online' ? 'online' : 'on_delivery' } : {}),
+      delivery_zone: delivery.zone,
+      delivery_cost: delivery.cost,
+      // «К оплате» for every order: what the online payment asks and the
+      // manager takes; `delivery_cost` null (priced on the call) adds nothing
+      // «К оплате» у каждого заказа: столько просит онлайн-оплата и берёт
+      // менеджер; `delivery_cost` null (назовут при звонке) ничего не добавляет
+      to_pay: total - (loyalty?.discount ?? 0) - (loyalty?.bonus_spent ?? 0) + (delivery.cost ?? 0),
       ...(customer && {
         customer,
         bonus_spent: loyalty?.bonus_spent ?? 0,
         discount: loyalty?.discount ?? 0,
-        to_pay: total - (loyalty?.discount ?? 0) - (loyalty?.bonus_spent ?? 0),
       }),
     };
   });
@@ -268,17 +347,30 @@ export default ({ filter, action }, { services, logger, emitter = null }) => {
         : [];
       if (!users.length) return;
       const lines = (payload.items ?? []).map((line) => `- ${line.title} × ${line.qty} — ${rub(line.sum ?? 0)}`);
+      // «бесплатно (от 7 000 ₽)» needs the zone's threshold; the order keeps only the zone's name
+      // «бесплатно (от 7 000 ₽)» нужен порог зоны; в заказе лежит только её имя
+      const freeFrom =
+        payload.delivery_zone && Number(payload.delivery_cost) === 0
+          ? ((await database('delivery_zones').where({ name: payload.delivery_zone }).first('free_from').catch(() => null))?.free_from ?? null)
+          : null;
+      // an order entered by an editor carries no delivery fields: its line stays as it was
+      // у заказа, который вбил редактор, полей доставки нет: его строка остаётся как была
+      const priced = 'delivery_cost' in payload || payload.source === 'site';
       const how =
         payload.fulfillment === 'pickup'
           ? 'Самовывоз'
-          : `Доставка: ${payload.address ?? ''}${payload.address_details ? `, ${payload.address_details}` : ''}`;
+          : `Доставка: ${payload.address ?? ''}${payload.address_details ? `, ${payload.address_details}` : ''}${
+              priced ? ` · ${deliveryText({ zone: payload.delivery_zone, cost: payload.delivery_cost, freeFrom })}` : ''
+            }`;
+      const toPay = payload.to_pay ?? payload.total ?? 0;
       const message = [
         `**${payload.customer_name}**, ${payload.phone}`,
         `${how}. Когда: ${payload.desired_time ?? 'как можно скорее'}.`,
         '',
         ...lines,
         '',
-        `Итого: **${rub(payload.total ?? 0)}**`,
+        `Итого (блюда): ${rub(payload.total ?? 0)}`,
+        `К оплате: **${rub(toPay)}**`,
         payload.comment ? `\nКомментарий: ${payload.comment}` : '',
         payload.manager_note ? `\n${payload.manager_note}` : '',
       ].join('\n');
@@ -286,7 +378,7 @@ export default ({ filter, action }, { services, logger, emitter = null }) => {
       for (const recipient of users) {
         await notifications.createOne({
           recipient,
-          subject: `Новый заказ ${payload.number ?? key} · ${rub(payload.total ?? 0)}`,
+          subject: `Новый заказ ${payload.number ?? key} · ${rub(toPay)}`,
           message,
           collection: 'orders',
           item: String(key),

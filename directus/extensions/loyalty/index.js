@@ -112,12 +112,32 @@ export default ({ filter, action, schedule, init }, { database, logger, emitter 
     }
   };
 
+  // Purchases are the dishes paid with money: «К оплате» carries the delivery
+  // since 22.10.2026, so it is counted from the order's own parts (for every
+  // older order the same number as `to_pay`); an order without `to_pay` (taken
+  // by phone) counts its total.
+  // Покупки — это блюда, оплаченные деньгами: «К оплате» с 22.10.2026 несёт
+  // доставку, поэтому сумма считается из частей заказа (у всех прежних заказов
+  // это то же число, что `to_pay`); заказ без `to_pay` (принят по телефону)
+  // считается по сумме.
   const spentBy = async (db, user, exceptOrder = null) => {
     let query = db('orders').where({ customer: user, status: 'done' });
     if (exceptOrder) query = query.whereNot({ id: exceptOrder });
-    const row = await query.select(db.raw('coalesce(sum(coalesce(to_pay, total)), 0) as spent')).first();
+    const row = await query
+      .select(
+        db.raw(
+          'coalesce(sum(case when to_pay is null then total else greatest(0, total - coalesce(discount, 0) - coalesce(bonus_spent, 0)) end), 0) as spent',
+        ),
+      )
+      .first();
     return Number(row?.spent ?? 0);
   };
+
+  /** Сколько за блюда заплачено деньгами — от этого начисляются баллы (доставка — не покупка). */
+  const paidForDishes = (order) =>
+    order.to_pay === null || order.to_pay === undefined
+      ? null
+      : Math.max(0, Number(order.total ?? 0) - Number(order.discount ?? 0) - Number(order.bonus_spent ?? 0));
 
   /** Баланс, сумма покупок и уровень гостя — заново из операций и заказов. */
   const recount = async (db, user) => {
@@ -153,7 +173,7 @@ export default ({ filter, action, schedule, init }, { database, logger, emitter 
     await withGuest(db, head.customer, async (trx) => {
       const order = await trx('orders')
         .where({ id: orderId })
-        .first('id', 'number', 'status', 'customer', 'bonus_spent', 'to_pay', 'total', 'discount', 'manager_note');
+        .first('id', 'number', 'status', 'customer', 'bonus_spent', 'to_pay', 'total', 'discount', 'delivery_cost', 'manager_note');
       if (!order?.customer) return;
       const p = await program(trx);
       const applied = (await trx('bonus_transactions').where({ order: orderId, user: order.customer }).select('type', 'amount')).map((tx) => ({
@@ -164,7 +184,7 @@ export default ({ filter, action, schedule, init }, { database, logger, emitter 
       // процент уровня, который был у гостя до этого заказа
       const percent = tierFor(await spentBy(trx, order.customer, orderId), p.tiers).tier.percent;
       let ops = reconcileOrder(
-        { status: order.status, bonus_spent: Number(order.bonus_spent ?? 0), to_pay: order.to_pay ?? null, total: Number(order.total ?? 0) },
+        { status: order.status, bonus_spent: Number(order.bonus_spent ?? 0), to_pay: paidForDishes(order), total: Number(order.total ?? 0) },
         applied,
         percent,
       );
@@ -185,7 +205,9 @@ export default ({ filter, action, schedule, init }, { database, logger, emitter 
           const got = Math.max(0, Math.floor(available));
           const total = Number(order.total ?? 0);
           const discount = Number(order.discount ?? 0);
-          const toPay = Math.max(0, total - discount - got);
+          // the delivery stays in the bill: only the points part changes
+          // доставка остаётся в счёте: меняется только часть баллов
+          const toPay = Math.max(0, total - discount - got) + Number(order.delivery_cost ?? 0);
           const line = `Баллы: на счёте было ${got} из ${want} запрошенных — списано ${got}, к оплате ${rub(toPay)}.`;
           await trx('orders')
             .where({ id: orderId })
@@ -246,6 +268,9 @@ export default ({ filter, action, schedule, init }, { database, logger, emitter 
     }
 
     const requested = Math.max(0, Math.floor(Number(draft.requested) || 0));
+    // the delivery is paid with money only: it is in «К оплате», never in the points' share
+    // доставка оплачивается только деньгами: она в «К оплате», но не в доле баллов
+    const delivery = Math.max(0, Math.floor(Number(draft.delivery) || 0));
     let bonus = 0;
     if (requested > 0) {
       const { available } = ledger(await txsOf(db, draft.customer), t);
@@ -265,7 +290,7 @@ export default ({ filter, action, schedule, init }, { database, logger, emitter 
       ...draft,
       bonus_spent: bonus,
       discount,
-      note: parts.length ? `Личный кабинет — ${parts.join(', ')}. К оплате ${rub(total - discount - bonus)}.` : null,
+      note: parts.length ? `Личный кабинет — ${parts.join(', ')}. К оплате ${rub(total - discount - bonus + delivery)}${delivery ? ` (с доставкой ${rub(delivery)})` : ''}.` : null,
     };
   });
 

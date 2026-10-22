@@ -1,0 +1,12 @@
+{
+  "name": "directus-extension-delivery",
+  "version": "1.0.0",
+  "description": "Delivery by zone: address suggestions, the zone and the price of an address, the zones for the site / доставка по зонам: подсказки адресов, зона и стоимость по адресу, зоны для сайта",
+  "type": "module",
+  "directus:extension": {
+    "type": "endpoint",
+    "path": "index.js",
+    "source": "index.js",
+    "host": "^11.0.0"
+  }
+}

@@ -378,6 +378,36 @@ collections:
       versioning: false
     schema:
       name: catering_steps
+  - collection: delivery_zones
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: delivery_zones
+      color: null
+      display_template: '{{name}} · {{price}} ₽'
+      group: catalog
+      hidden: false
+      icon: local_shipping
+      item_duplication_fields: null
+      note: >-
+        Стоимость доставки по адресу: цена, бесплатно от, минимальный заказ.
+        Корзина и сервер считают по этим цифрам
+      preview_url: null
+      singleton: false
+      sort: 4
+      sort_field: sort
+      translations:
+        - language: ru-RU
+          plural: Зоны доставки
+          singular: Зона доставки
+          translation: Зоны доставки
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: delivery_zones
   - collection: directions
     meta:
       accountability: all
@@ -6768,6 +6798,377 @@ fields:
       has_auto_increment: false
       foreign_key_table: null
       foreign_key_column: null
+  - collection: delivery_zones
+    field: id
+    type: integer
+    meta:
+      collection: delivery_zones
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: null
+      note: null
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 1
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: delivery_zones
+      data_type: integer
+      default_value: nextval('delivery_zones_id_seq'::regclass)
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_indexed: false
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: delivery_zones
+    field: status
+    type: string
+    meta:
+      collection: delivery_zones
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - background: '#E7E9D6'
+            color: '#474C2B'
+            foreground: '#474C2B'
+            text: Действует
+            value: published
+          - background: '#EEE8DD'
+            color: '#6E655A'
+            foreground: '#6E655A'
+            text: Выключена
+            value: draft
+        showAsDot: false
+      field: status
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: >-
+        Выключенная зона не считается: адрес в ней — «вне зон», стоимость
+        назовёт менеджер
+      options:
+        choices:
+          - text: Действует
+            value: published
+          - text: Выключена
+            value: draft
+      readonly: false
+      required: false
+      searchable: true
+      sort: 2
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Статус
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: status
+      table: delivery_zones
+      data_type: character varying
+      default_value: published
+      max_length: 16
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: delivery_zones
+    field: sort
+    type: integer
+    meta:
+      collection: delivery_zones
+      conditions: null
+      display: null
+      display_options: null
+      field: sort
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 3
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: sort
+      table: delivery_zones
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: delivery_zones
+    field: name
+    type: string
+    meta:
+      collection: delivery_zones
+      conditions: null
+      display: null
+      display_options: null
+      field: name
+      group: null
+      hidden: false
+      interface: input
+      note: Так зону видят гость в корзине и менеджер в заказе
+      options:
+        trim: true
+      readonly: false
+      required: true
+      searchable: true
+      sort: 4
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Название
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: name
+      table: delivery_zones
+      data_type: character varying
+      default_value: null
+      max_length: 120
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: delivery_zones
+    field: price
+    type: integer
+    meta:
+      collection: delivery_zones
+      conditions: null
+      display: formatted-value
+      display_options:
+        format: true
+        suffix: ' ₽'
+      field: price
+      group: null
+      hidden: false
+      interface: input
+      note: 0 — бесплатно всегда
+      options:
+        min: 0
+        step: 50
+      readonly: false
+      required: false
+      searchable: true
+      sort: 5
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Доставка, ₽
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: price
+      table: delivery_zones
+      data_type: integer
+      default_value: 0
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: delivery_zones
+    field: free_from
+    type: integer
+    meta:
+      collection: delivery_zones
+      conditions: null
+      display: formatted-value
+      display_options:
+        format: true
+        suffix: ' ₽'
+      field: free_from
+      group: null
+      hidden: false
+      interface: input
+      note: Сумма блюд до скидки и баллов. Пусто — бесплатной доставки нет
+      options:
+        min: 0
+        step: 50
+      readonly: false
+      required: false
+      searchable: true
+      sort: 6
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Бесплатно от, ₽
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: free_from
+      table: delivery_zones
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: delivery_zones
+    field: min_order
+    type: integer
+    meta:
+      collection: delivery_zones
+      conditions: null
+      display: formatted-value
+      display_options:
+        format: true
+        suffix: ' ₽'
+      field: min_order
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Меньше — заказ с доставкой сюда не примем, предложим добрать или
+        самовывоз. 0 — без минимума
+      options:
+        min: 0
+        step: 50
+      readonly: false
+      required: false
+      searchable: true
+      sort: 7
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Минимальный заказ, ₽
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: min_order
+      table: delivery_zones
+      data_type: integer
+      default_value: 0
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: delivery_zones
+    field: polygon
+    type: json
+    meta:
+      collection: delivery_zones
+      conditions: null
+      display: null
+      display_options: null
+      field: polygon
+      group: null
+      hidden: false
+      interface: input-code
+      note: >-
+        Граница зоны: точки [долгота, широта] из магазина FoodPicasso. Менять не
+        нужно
+      options:
+        language: JSON
+        lineNumber: false
+      readonly: false
+      required: false
+      searchable: true
+      sort: 8
+      special:
+        - cast-json
+      translations:
+        - language: ru-RU
+          translation: Граница на карте
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: polygon
+      table: delivery_zones
+      data_type: json
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: directions
     field: id
     type: integer
@@ -12070,7 +12471,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 13
+      sort: 15
       special:
         - m2o
       translations:
@@ -12168,7 +12569,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 14
+      sort: 16
       special:
         - cast-json
       translations:
@@ -12208,12 +12609,12 @@ fields:
       group: null
       hidden: false
       interface: input
-      note: 'Без доставки: её стоимость называете при звонке'
+      note: Блюда по ценам каталога — без доставки, скидки и баллов
       options: null
       readonly: false
       required: false
       searchable: true
-      sort: 15
+      sort: 17
       special: null
       translations:
         - language: ru-RU
@@ -12256,7 +12657,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 25
+      sort: 27
       special: null
       translations:
         - language: ru-RU
@@ -12298,7 +12699,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 23
+      sort: 25
       special: null
       translations:
         - language: ru-RU
@@ -12340,7 +12741,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 24
+      sort: 26
       special: null
       translations:
         - language: ru-RU
@@ -12382,7 +12783,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 26
+      sort: 28
       special:
         - date-updated
       translations: null
@@ -12430,7 +12831,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 20
+      sort: 22
       special:
         - m2o
       translations:
@@ -12473,7 +12874,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 21
+      sort: 23
       special: null
       translations:
         - language: ru-RU
@@ -12515,7 +12916,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 22
+      sort: 24
       special: null
       translations:
         - language: ru-RU
@@ -12552,12 +12953,14 @@ fields:
       group: null
       hidden: false
       interface: input
-      note: Сумма минус баллы и скидка — столько взять с гостя
+      note: >-
+        Блюда − скидка − баллы + доставка: столько оплачено онлайн или взять с
+        гостя
       options: null
       readonly: true
       required: false
       searchable: true
-      sort: 23
+      sort: 25
       special: null
       translations:
         - language: ru-RU
@@ -12599,7 +13002,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 24
+      sort: 26
       special: null
       translations:
         - language: ru-RU
@@ -12644,7 +13047,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 40
+      sort: 42
       special: null
       translations:
         - language: ru-RU
@@ -12724,7 +13127,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 16
+      sort: 18
       special: null
       translations:
         - language: ru-RU
@@ -12783,7 +13186,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 17
+      sort: 19
       special: null
       translations:
         - language: ru-RU
@@ -12826,7 +13229,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 18
+      sort: 20
       special: null
       translations:
         - language: ru-RU
@@ -12868,7 +13271,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 19
+      sort: 21
       special: null
       translations:
         - language: ru-RU
@@ -12910,7 +13313,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 20
+      sort: 22
       special: null
       translations:
         - language: ru-RU
@@ -12952,7 +13355,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 21
+      sort: 23
       special: null
       translations:
         - language: ru-RU
@@ -12995,7 +13398,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 22
+      sort: 24
       special:
         - cast-json
       translations: null
@@ -13056,6 +13459,96 @@ fields:
       validation: null
       validation_message: null
       width: full
+  - collection: orders
+    field: delivery_zone
+    type: string
+    meta:
+      collection: orders
+      conditions: null
+      display: null
+      display_options: null
+      field: delivery_zone
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Сервер находит зону по адресу. Пусто — адрес не нашли на карте или он
+        вне зон: стоимость назвать при звонке
+      options:
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 13
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Зона доставки
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: delivery_zone
+      table: orders
+      data_type: character varying
+      default_value: null
+      max_length: 120
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: delivery_cost
+    type: integer
+    meta:
+      collection: orders
+      conditions: null
+      display: formatted-value
+      display_options:
+        format: true
+        suffix: ' ₽'
+      field: delivery_cost
+      group: null
+      hidden: false
+      interface: input
+      note: 0 — бесплатно, пусто — назвать при звонке (в «К оплате» не вошла)
+      options:
+        min: 0
+      readonly: false
+      required: false
+      searchable: true
+      sort: 14
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Доставка, ₽
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: delivery_cost
+      table: orders
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: pages
     field: id
     type: integer
@@ -14635,8 +15128,8 @@ fields:
       note: Пусто — текст по умолчанию из подсказки
       options:
         placeholder: >-
-          Онлайн оплачиваются блюда. Платную доставку назовём при звонке и
-          оплатите её курьеру.
+          Онлайн оплачиваются блюда и доставка. Если адрес не найден на карте,
+          стоимость доставки назовём при звонке.
         trim: true
       readonly: false
       required: false

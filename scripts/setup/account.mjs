@@ -26,7 +26,7 @@ export const GUEST_PROFILE_READ = [
 export const GUEST_PROFILE_WRITE = ['first_name', 'middle_name', 'last_name', 'birthday', 'gender', 'recovery_email'];
 const GUEST_ORDER_READ = [
   'id', 'number', 'status', 'date_created', 'fulfillment', 'place', 'address', 'desired_time',
-  'items', 'total', 'bonus_spent', 'discount', 'to_pay', 'bonus_earned',
+  'items', 'total', 'bonus_spent', 'discount', 'to_pay', 'bonus_earned', 'delivery_zone', 'delivery_cost',
 ];
 // what `order-guard` adds to a guest's order on top of the public fields
 // что `order-guard` добавляет к заказу гостя поверх публичных полей
