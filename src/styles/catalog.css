@@ -1592,7 +1592,8 @@ html:has(.dlg[open]) {
    above says why
    «Оформить заказ», пока в корзине закончившееся блюдо: видно, что выключена,
    а почему — говорит плашка сверху */
-.drawer .btn:disabled {
+.drawer .btn:disabled,
+.drawer .btn[aria-disabled='true'] {
   opacity: 0.42;
   cursor: not-allowed;
   scale: 1;
@@ -1710,6 +1711,78 @@ html:has(.dlg[open]) {
   margin: 2px 0 12px;
   font-size: 12.5px;
   color: var(--text-4);
+}
+
+/* The bill of the checkout: dishes, delivery, what points and the birthday
+   take off — quiet rows; «К оплате» under a hairline, in the weight the
+   cart's «Итого» has, because that is the sum the bank will ask for.
+   Счёт оформления: блюда, доставка, что сняли баллы и скидка именинника —
+   тихие строки; «К оплате» под волосяной линией, весом «Итого» корзины:
+   именно эту сумму попросит банк. */
+.bill {
+  display: grid;
+  gap: 3px;
+}
+
+.bill__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--text-3);
+}
+
+.bill__row[hidden] {
+  display: none;
+}
+
+.bill__row b {
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* not known yet or named on the call: a word, not a price
+   ещё не знаем или назовём при звонке: слово, а не цена */
+.bill__row b[data-tone='quiet'] {
+  font-weight: 500;
+  color: var(--text-4);
+}
+
+.bill__row b[data-tone='free'],
+.bill__row--off b {
+  color: var(--olive-dark);
+}
+
+.bill__row--pay {
+  margin-top: 5px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line-3);
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.bill__row--pay b {
+  font-size: 22px;
+  line-height: 1.1;
+}
+
+.bill__note {
+  margin: 6px 0 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--terracotta-text);
+}
+
+.bill__note[hidden] {
+  display: none;
+}
+
+.bill ~ [data-submit] {
+  margin-top: 12px;
 }
 
 /* what sending the order means, right under the button that sends it
@@ -2097,6 +2170,220 @@ html:has(.dlg[open]) {
   display: none;
 }
 
+.field__hint[hidden] {
+  display: none;
+}
+
+/* ── адрес: подсказки домов и расчёт доставки ── */
+
+/* The houses drop over the fields below like any address picker: the only
+   floating layer of the form, so the only shadow — the one of the «наверх»
+   button, the site's other floating thing.
+   Дома ложатся поверх полей ниже, как в любом выборе адреса: единственный
+   плавающий слой формы, поэтому и единственная тень — та же, что у кнопки
+   «наверх», другого плавающего элемента сайта. */
+.combo {
+  position: relative;
+}
+
+.combo__list {
+  position: absolute;
+  inset: calc(100% + 4px) 0 auto;
+  z-index: 3;
+  max-height: min(304px, 46dvh);
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  border-radius: var(--r-sq);
+  background: var(--bg);
+  box-shadow:
+    0 0 0 1px var(--line-4),
+    0 8px 22px rgb(44 41 39 / 0.14);
+}
+
+.combo__list[hidden] {
+  display: none;
+}
+
+.combo__opt {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 8px 14px;
+  font-size: 15px;
+  line-height: 1.3;
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color 0.16s ease;
+}
+
+.combo__opt + .combo__opt {
+  border-top: 1px solid var(--line-3);
+}
+
+.combo__opt .ico {
+  width: 18px;
+  height: 18px;
+  color: var(--text-5);
+  transition: color 0.16s ease;
+}
+
+.combo__label {
+  min-width: 0;
+  text-wrap: pretty;
+}
+
+.combo__city {
+  font-size: 12.5px;
+  color: var(--text-4);
+  white-space: nowrap;
+}
+
+/* the house under the keys or the finger: the olive tint of a chosen tile
+   дом под клавишами или пальцем: оливковый тинт выбранной плитки */
+.combo__opt[aria-selected='true'] {
+  background: var(--olive-tint);
+}
+
+.combo__opt[aria-selected='true'] .ico {
+  color: var(--olive);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .combo__opt:hover {
+    background: color-mix(in srgb, var(--olive-tint) 60%, var(--bg));
+  }
+
+  .combo__opt:hover .ico {
+    color: var(--olive);
+  }
+}
+
+.combo__opt:active {
+  background: var(--olive-tint);
+}
+
+/* What the address means for the order, right under it: the price in weight,
+   the near «free» and the house as the map read it in quiet lines; a zone
+   the order is too small for, or no zone at all, is a warm plate with the
+   ways out.
+   Что адрес значит для заказа — прямо под ним: цена весом, близкое
+   «бесплатно» и дом, как его понял поиск по карте, тихими строками; зона,
+   до минимума которой заказ не дотянул, или адрес вне зон — тёплая плашка с
+   выходами. */
+.dlv {
+  display: grid;
+  gap: 4px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+.dlv[hidden],
+.dlv [hidden] {
+  display: none;
+}
+
+.dlv__line {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.dlv__line b {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.dlv__ico {
+  display: none;
+  flex: none;
+}
+
+.dlv__ico .ico {
+  width: 18px;
+  height: 18px;
+  margin-top: 0.5px;
+}
+
+.dlv[data-tone='zone'] .dlv__ico--zone,
+.dlv[data-tone='free'] .dlv__ico--zone {
+  display: block;
+  color: var(--olive);
+}
+
+/* counting: the same delivery mark, waiting in grey — not an «i» that reads as a warning
+   считаем: тот же знак доставки, ждущий серым, — а не «i», которое читается предупреждением */
+.dlv[data-tone='pending'] .dlv__ico--zone {
+  display: block;
+  color: var(--text-5);
+}
+
+.dlv[data-tone='quiet'] .dlv__ico--quiet {
+  display: block;
+  color: var(--text-5);
+}
+
+.dlv[data-tone='free'] .dlv__line b {
+  color: var(--olive-dark);
+}
+
+.dlv[data-tone='quiet'],
+.dlv[data-tone='pending'] {
+  color: var(--text-3);
+}
+
+.dlv__meta {
+  display: grid;
+  gap: 1px;
+  padding-left: 26px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--text-4);
+}
+
+.dlv__warn {
+  margin-top: 4px;
+  padding: 10px 12px 4px;
+  border-radius: var(--r-sq);
+  background: var(--surface-warm);
+  box-shadow: inset 0 0 0 1px var(--line-warm);
+  color: var(--terracotta-text);
+}
+
+.dlv__warn-text {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-weight: 500;
+  text-wrap: pretty;
+}
+
+.dlv__warn-text .ico {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 0.5px;
+}
+
+/* the ways out under the warning, in one row while they fit
+   выходы под предупреждением — в строку, пока помещаются */
+.dlv__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 18px;
+  padding-left: 26px;
+}
+
+.dlv__actions .tlink {
+  font-size: 13px;
+  color: var(--terracotta-text);
+}
+
 .seg {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2360,6 +2647,17 @@ html:has(.dlg[open]) {
   font-weight: 600;
   white-space: nowrap;
   color: var(--text);
+}
+
+/* the rows under the dishes: delivery, points, discount — quieter than a dish
+   строки под блюдами: доставка, баллы, скидка — тише, чем блюдо */
+.done__lines .done__extra {
+  color: var(--text-3);
+}
+
+.done__lines .is-quiet {
+  font-weight: 500;
+  color: var(--text-4);
 }
 
 .done__total {

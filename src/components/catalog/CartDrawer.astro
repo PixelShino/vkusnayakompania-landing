@@ -20,6 +20,7 @@ import PayStep from './PayStep.astro';
 import { hoursRows } from '../../data/site.ts';
 import type { Content } from '../../lib/content.ts';
 import { DOC, docHref } from '../../lib/pages.ts';
+import { CART_NOTE } from '../../lib/delivery.ts';
 
 interface Props {
   content: Content;
@@ -32,9 +33,12 @@ const offerHref = settings.offer?.href;
 const deliveryHref = docHref(pages, DOC.delivery);
 const directus = (import.meta.env.PUBLIC_DIRECTUS_URL as string | undefined)?.replace(/\/+$/, '');
 const endpoint = directus ? `${directus}/items/orders` : '';
+// address suggestions and the zone quote (`directus/extensions/delivery`); without it the price is named on the call
+// подсказки адресов и расчёт зоны (`directus/extensions/delivery`); без него стоимость называют при звонке
+const deliveryApi = directus ? `${directus}/delivery` : '';
 ---
 
-<dialog id="cart" class="dlg drawer" aria-labelledby="cart-title" data-endpoint={endpoint}>
+<dialog id="cart" class="dlg drawer" aria-labelledby="cart-title" data-endpoint={endpoint} data-delivery-api={deliveryApi}>
   <div class="drawer__in">
     <header class="drawer__head">
       <button type="button" class="round-btn drawer__back" data-back hidden aria-label="Назад к корзине">
@@ -77,7 +81,7 @@ const endpoint = directus ? `${directus}/items/orders` : '';
           <span>Итого <span class="sum__count" data-count></span></span>
           <b class="tnum" data-total></b>
         </p>
-        <p class="sum__note">Стоимость доставки уточним при звонке</p>
+        <p class="sum__note">{CART_NOTE}</p>
         {/* no order endpoint on this build (PUBLIC_DIRECTUS_URL is empty): the
             cart is still a list to dictate over the phone
             у этой сборки нет адреса для заказов (PUBLIC_DIRECTUS_URL пуст):
@@ -142,17 +146,46 @@ const endpoint = directus ? `${directus}/items/orders` : '';
           </div>
 
           <div class="fs__part" data-for="delivery">
-            <div class="field">
+            {/* The address is a combobox once the script finds the API: houses
+                from `GET /delivery/suggest` under the field, the zone quote under
+                them. Without the script it is the plain field it always was.
+                Адрес становится комбобоксом, когда скрипт находит API: дома из
+                `GET /delivery/suggest` под полем, расчёт зоны под ними. Без
+                скрипта — обычное поле, как было. */}
+            <div class="field field--address">
               <label for="co-address">Адрес</label>
-              <input
-                id="co-address"
-                name="address"
-                autocomplete="street-address"
-                placeholder="Улица и дом"
-                maxlength="200"
-                aria-describedby="co-address-err"
-              />
+              <div class="combo" data-combo>
+                <input
+                  id="co-address"
+                  name="address"
+                  autocomplete="street-address"
+                  placeholder="Улица и дом"
+                  maxlength="200"
+                  aria-describedby="co-address-hint co-address-dlv co-address-err"
+                />
+                <ul class="combo__list" id="co-address-list" role="listbox" aria-label="Подсказки адреса" data-combo-list hidden></ul>
+              </div>
+              <p class="field__hint" id="co-address-hint" data-address-hint>Подскажем дом и посчитаем доставку</p>
               <p class="field__err" id="co-address-err" data-err="address" hidden></p>
+              <div class="dlv" id="co-address-dlv" data-dlv hidden>
+                <p class="dlv__line" data-dlv-line>
+                  <span class="dlv__ico dlv__ico--zone"><Icon name="delivery" /></span>
+                  <span class="dlv__ico dlv__ico--quiet"><Icon name="info" /></span>
+                  <span data-dlv-text></span>
+                </p>
+                <p class="dlv__meta" data-dlv-meta hidden></p>
+                <div class="dlv__warn" data-dlv-warn hidden>
+                  <p class="dlv__warn-text">
+                    <Icon name="danger" />
+                    <span data-dlv-warn-text></span>
+                  </p>
+                  <p class="dlv__actions">
+                    <button type="button" class="tlink" data-dlv-act="catalog">Добавить блюда</button>
+                    <button type="button" class="tlink" data-dlv-act="pickup">Выбрать самовывоз</button>
+                    <a class="tlink" href={settings.phoneHref} data-dlv-act="call" aria-label={`Позвонить ${settings.phone}`}>Позвонить</a>
+                  </p>
+                </div>
+              </div>
             </div>
             <div class="field">
               <label for="co-details">Квартира, подъезд, этаж <span class="field__opt">необязательно</span></label>
@@ -251,12 +284,25 @@ const endpoint = directus ? `${directus}/items/orders` : '';
       </div>
 
       <footer class="drawer__foot">
-        <p class="sum">
-          <span>Сумма <span class="sum__count" data-count></span></span>
-          <b class="tnum" data-total></b>
-        </p>
-        <CartAccount content={Astro.props.content} part="summary" />
-        <p class="sum__note">Без стоимости доставки — назовём её при звонке</p>
+        {/* the bill: dishes, delivery, what points and the birthday take off, to pay
+            счёт: блюда, доставка, что снимают баллы и скидка именинника, к оплате */}
+        <div class="bill" data-bill>
+          <p class="bill__row">
+            <span>Блюда <span class="sum__count" data-count></span></span>
+            <b class="tnum" data-total></b>
+          </p>
+          <p class="bill__row" data-bill-delivery>
+            <span data-bill-delivery-label>Доставка</span>
+            <b class="tnum" data-bill-delivery-value>по адресу</b>
+          </p>
+          <CartAccount content={Astro.props.content} part="summary" />
+          <p class="bill__row bill__row--pay">
+            <span>К оплате</span>
+            <b class="tnum" data-bill-pay></b>
+          </p>
+        </div>
+        <CartAccount content={Astro.props.content} part="earn" />
+        <p class="bill__note" data-bill-note hidden></p>
         <button type="submit" class="btn btn--primary btn--block" data-submit>
           <span data-submit-label>Отправить заказ</span>
         </button>
@@ -295,11 +341,11 @@ const endpoint = directus ? `${directus}/items/orders` : '';
         </p>
         <p class="done__text">
           Перезвоним на <b class="tnum" data-done-phone></b>, чтобы подтвердить состав, сумму, адрес и время.
-          Оплату и доставку обсудим там же.
+          <span data-done-after>Оплату обсудим там же.</span>
         </p>
         <ul class="done__lines" role="list" data-done-lines></ul>
         <p class="done__total">
-          <span>Сумма заказа</span>
+          <span>К оплате</span>
           <b class="tnum" data-done-total></b>
         </p>
         <CartAccount content={Astro.props.content} part="done" />

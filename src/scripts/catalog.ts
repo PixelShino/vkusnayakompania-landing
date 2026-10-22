@@ -38,12 +38,39 @@ import {
   type Errors,
 } from '../lib/order';
 import { BADGE_LABEL, positions, rub, type Badge } from '../lib/catalog';
+import {
+  HOME_CITY,
+  QUOTE_DEBOUNCE_MS,
+  SUGGEST_DEBOUNCE_MS,
+  addressOf,
+  announceFor,
+  billRow,
+  blocksOrder,
+  canQuote,
+  canSuggest,
+  deliveryCost,
+  hasHouse,
+  minOrderText,
+  normalizeAddress,
+  parseQuote,
+  parseSuggestions,
+  payable,
+  shortOfMin,
+  shortText,
+  stateFromQuote,
+  statusFor,
+  type DeliveryState,
+  type Quote,
+  type StatusAction,
+  type Suggestion,
+} from '../lib/delivery';
 import { mountCartAccount } from './account-cart';
 import { payAfterOrder, withPayment } from './payment';
 import minusIcon from '../assets/icons/minus.svg?raw';
 import plusIcon from '../assets/icons/plus.svg?raw';
 import trashIcon from '../assets/icons/trash.svg?raw';
 import clocheIcon from '../assets/icons/cloche.svg?raw';
+import pinIcon from '../assets/icons/pin.svg?raw';
 
 type Dish = CartProduct & {
   category: string;
@@ -197,6 +224,10 @@ if (dataNode && drawer && dishDialog) {
     for (const node of $$('[data-count]', drawer)) node.textContent = sum.count ? `· ${positions(sum.count)}` : '';
     for (const node of $$('[data-total]', drawer)) node.textContent = rub(sum.total);
     renderLines(sum);
+    // the delivery depends on the dishes (free from, the zone's minimum), the bill on both
+    // доставка зависит от блюд (бесплатно от, минимум зоны), счёт — от того и другого
+    paintDelivery();
+    paintBill();
     cartAccount?.refresh();
   };
 
@@ -423,6 +454,7 @@ if (dataNode && drawer && dishDialog) {
   const TITLES: Record<Step, string> = { cart: 'Корзина', checkout: 'Оформление', login: 'Вход', done: 'Готово' };
   const form = $<HTMLFormElement>('form[data-step="checkout"]', drawer)!;
   const endpoint = drawer.dataset.endpoint ?? '';
+  const deliveryApi = drawer.dataset.deliveryApi ?? '';
 
   const goto = (next: Step, focus = true) => {
     step = next;
@@ -435,6 +467,9 @@ if (dataNode && drawer && dishDialog) {
     if (next === 'checkout') {
       fillTimes();
       cartAccount?.onCheckout();
+      // a draft address is counted as soon as the form opens, not at the send
+      // адрес из черновика считается, как только открылась форма, а не при отправке
+      void ensureQuote();
     }
     if (focus) (next === 'done' ? $('#done-title', drawer) : title)?.focus({ preventScroll: true });
   };
@@ -473,12 +508,427 @@ if (dataNode && drawer && dishDialog) {
     consent: field('consent')?.checked ?? false,
   });
 
+  // ── delivery: address suggestions and the zone quote ─────────────────────
+  // The address field becomes a combobox (WAI-ARIA 1.2) once the build has
+  // the API: houses from `GET /delivery/suggest` after a 300 ms pause, ↑/↓ to
+  // move, Enter to take, Esc to close (the drawer stays open). A picked house
+  // or a typed address (on leaving the field or after a longer pause) is
+  // quoted by `POST /delivery/quote`; the line under the field and the bill
+  // say what that means, a zone's minimum not reached closes the send. The
+  // server finds the zone again on its own, so nothing but the address leaves.
+  // Поле адреса становится комбобоксом (WAI-ARIA 1.2), когда у сборки есть
+  // API: дома из `GET /delivery/suggest` после паузы 300 мс, ↑/↓ — двигать,
+  // Enter — взять, Esc — закрыть (корзина остаётся открытой). Выбранный дом
+  // или набранный адрес (при уходе с поля или после паузы подольше) считается
+  // через `POST /delivery/quote`; строка под полем и счёт говорят, что это
+  // значит, недобранный минимум зоны закрывает отправку. Зону сервер находит
+  // сам заново, поэтому, кроме адреса, ничего не уходит.
+  const addressInput = field('address');
+  const comboList = $<HTMLUListElement>('[data-combo-list]', form);
+  const addressHint = $('[data-address-hint]', form);
+  const dlv = $('[data-dlv]', form);
+  const formScroll = $('.drawer__scroll', form);
+  const suggesting = Boolean(deliveryApi && addressInput && comboList);
+  const calm = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let delivery: DeliveryState = { kind: 'empty' };
+  const quoted = new Map<string, Quote>();
+  const suggested = new Map<string, Suggestion[]>();
+  // the address that came from a suggestion: the guest has seen it, no «на карте» line for it
+  // адрес, взятый из подсказки: гость его уже видел, строки «на карте» для него не нужно
+  let pickedKey = '';
+  let quoteSeq = 0;
+  let quoting: Promise<void> | null = null;
+  let lastSaid = '';
+  const dishesTotal = () => priced(cart, index).total;
+
+  const paintDelivery = () => {
+    if (!dlv || !addressInput) return;
+    const status = statusFor(delivery, dishesTotal());
+    if (addressHint) addressHint.hidden = Boolean(status) || !suggesting;
+    dlv.hidden = !status;
+    addressInput.setAttribute(
+      'aria-describedby',
+      [addressHint && !addressHint.hidden ? addressHint.id : '', status ? dlv.id : '', 'co-address-err'].filter(Boolean).join(' '),
+    );
+    if (!status) return;
+    dlv.dataset.tone = status.tone;
+    const line = $('[data-dlv-line]', dlv)!;
+    line.hidden = !status.text;
+    const text = $('[data-dlv-text]', dlv)!;
+    const money = status.money && status.text?.includes(status.money) ? status.money : '';
+    if (money) {
+      const at = status.text!.indexOf(money);
+      text.innerHTML = `${esc(status.text!.slice(0, at))}<b class="tnum">${esc(money)}</b>${esc(status.text!.slice(at + money.length))}`;
+    } else text.textContent = status.text ?? '';
+    const meta = $('[data-dlv-meta]', dlv)!;
+    meta.hidden = !status.meta.length;
+    meta.innerHTML = status.meta.map((item) => `<span>${esc(item)}</span>`).join('');
+    $('[data-dlv-warn]', dlv)!.hidden = !status.warn;
+    $('[data-dlv-warn-text]', dlv)!.textContent = status.warn ?? '';
+    for (const action of $$('[data-dlv-act]', dlv)) action.hidden = !status.actions.includes(action.dataset.dlvAct as StatusAction);
+  };
+
+  const paintBill = () => {
+    const dishes = dishesTotal();
+    const row = billRow(delivery, dishes);
+    const rowNode = $('[data-bill-delivery]', form);
+    if (rowNode) {
+      $('[data-bill-delivery-label]', rowNode)!.textContent = row.label;
+      const value = $('[data-bill-delivery-value]', rowNode)!;
+      value.textContent = row.value;
+      value.dataset.tone = row.tone;
+    }
+    const off = cartAccount?.deductions() ?? { discount: 0, points: 0 };
+    const pay = $('[data-bill-pay]', form);
+    if (pay) pay.textContent = rub(payable({ dishes, ...off, delivery: deliveryCost(delivery, dishes) }));
+    // the zone's minimum not reached: the button says it is closed, the note under the bill says why
+    // минимум зоны не добран: кнопка говорит, что закрыта, строка под счётом — почему
+    const blocked = blocksOrder(delivery, dishes);
+    const button = $('[data-submit]', form);
+    if (blocked) button?.setAttribute('aria-disabled', 'true');
+    else button?.removeAttribute('aria-disabled');
+    const note = $('[data-bill-note]', form);
+    if (note) {
+      note.hidden = !blocked;
+      note.textContent = blocked ? shortText(shortOfMin(delivery, dishes)) : '';
+    }
+  };
+
+  const setDelivery = (next: DeliveryState, say = false) => {
+    delivery = next;
+    paintDelivery();
+    paintBill();
+    if (!say) return;
+    const text = announceFor(next, dishesTotal());
+    if (text && text !== lastSaid) announce(text);
+    lastSaid = text;
+  };
+
+  /** Посчитать доставку на адрес: из памяти страницы или у сервера; ответ на старый адрес не применяется. */
+  const quote = (address: string, picked = false): Promise<void> => {
+    const key = normalizeAddress(address);
+    if (picked) pickedKey = key;
+    if (!canQuote(address)) {
+      quoteSeq += 1;
+      quoting = null;
+      setDelivery({ kind: 'empty' });
+      return Promise.resolve();
+    }
+    if (!deliveryApi) {
+      setDelivery({ kind: 'unknown', address, why: 'off' });
+      return Promise.resolve();
+    }
+    const known = quoted.get(key);
+    if (known) {
+      quoteSeq += 1;
+      quoting = null;
+      setDelivery(stateFromQuote(address, known, key === pickedKey), true);
+      return Promise.resolve();
+    }
+    if (quoting && delivery.kind === 'pending' && normalizeAddress(delivery.address) === key) return quoting;
+    const seq = ++quoteSeq;
+    setDelivery({ kind: 'pending', address });
+    const run = fetch(`${deliveryApi}/quote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address: address.trim() }),
+      signal: AbortSignal.timeout(7000),
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return parseQuote(await response.json());
+      })
+      .then((answer) => {
+        quoted.set(key, answer);
+        if (seq === quoteSeq) setDelivery(stateFromQuote(address, answer, key === pickedKey), true);
+      })
+      .catch(() => {
+        // the server is to decide anyway: the order still goes, the price is named on the call
+        // решать всё равно серверу: заказ уходит, стоимость назовут при звонке
+        if (seq === quoteSeq) setDelivery({ kind: 'unknown', address, why: 'error' }, true);
+      })
+      .finally(() => {
+        if (seq === quoteSeq) quoting = null;
+      });
+    quoting = run;
+    return run;
+  };
+
+  /** Доставка этого адреса посчитана (или считается): на открытии формы, уходе с поля, отправке. */
+  const ensureQuote = () => {
+    if (radio('fulfillment') === 'pickup') return Promise.resolve();
+    const address = addressInput?.value ?? '';
+    const same = delivery.kind !== 'pickup' && delivery.kind !== 'empty' && normalizeAddress(delivery.address) === normalizeAddress(address);
+    if (same && delivery.kind === 'pending' && quoting) return quoting;
+    // an error is asked again: the server may have been away for a moment
+    // ошибку спрашиваем заново: сервер мог отлучиться на минуту
+    if (same && !(delivery.kind === 'unknown' && delivery.why === 'error')) return Promise.resolve();
+    return quote(address);
+  };
+
+  /** Доставка ↔ самовывоз: у самовывоза доставки нет, при возврате — снова расчёт адреса. */
+  const syncFulfillment = () => {
+    if (radio('fulfillment') === 'pickup') {
+      if (delivery.kind === 'pickup') return;
+      quoteSeq += 1;
+      quoting = null;
+      closeList();
+      setDelivery({ kind: 'pickup' });
+      return;
+    }
+    if (delivery.kind !== 'pickup') return;
+    setDelivery({ kind: 'empty' });
+    if (step === 'checkout') void ensureQuote();
+  };
+
+  // ── the suggestions / подсказки ──
+  let options: Suggestion[] = [];
+  let activeIndex = -1;
+  let suggestTimer = 0;
+  let quoteTimer = 0;
+  let suggestCtl: AbortController | null = null;
+  let revealed = false;
+  let escaped = false;
+
+  const listOpen = () => Boolean(comboList && !comboList.hidden);
+
+  function closeList() {
+    if (!comboList || !addressInput) return;
+    comboList.hidden = true;
+    comboList.innerHTML = '';
+    options = [];
+    activeIndex = -1;
+    if (suggesting) addressInput.setAttribute('aria-expanded', 'false');
+    addressInput.removeAttribute('aria-activedescendant');
+  }
+
+  const highlight = (next: number) => {
+    if (!comboList || !addressInput) return;
+    activeIndex = next;
+    for (const option of $$('[role="option"]', comboList)) {
+      const on = Number(option.dataset.opt) === next;
+      option.setAttribute('aria-selected', String(on));
+      if (on) {
+        addressInput.setAttribute('aria-activedescendant', option.id);
+        option.scrollIntoView({ block: 'nearest' });
+      }
+    }
+    if (next < 0) addressInput.removeAttribute('aria-activedescendant');
+  };
+
+  // On a phone the keyboard takes half the screen: when the list would end
+  // under it (or under the drawer's footer), the form scrolls up once per
+  // visit to the field, as far as the field itself can go.
+  // На телефоне клавиатура занимает полэкрана: если список уходит под неё (или
+  // под подвал корзины), форма один раз за заход в поле прокручивается вверх —
+  // не дальше, чем позволяет само поле.
+  const reveal = () => {
+    if (revealed || !comboList || !formScroll || !addressInput) return;
+    requestAnimationFrame(() => {
+      if (comboList.hidden) return;
+      const box = comboList.getBoundingClientRect();
+      const view = formScroll.getBoundingClientRect();
+      const screen = window.visualViewport ? window.visualViewport.offsetTop + window.visualViewport.height : window.innerHeight;
+      const overflow = box.bottom + 8 - Math.min(view.bottom, screen);
+      if (overflow <= 0) return;
+      const room = Math.max(0, addressInput.getBoundingClientRect().top - view.top - 12);
+      formScroll.scrollBy({ top: Math.min(overflow, room), behavior: calm() ? 'auto' : 'smooth' });
+      revealed = true;
+    });
+  };
+
+  const openList = (items: Suggestion[]) => {
+    if (!comboList || !addressInput) return;
+    options = items;
+    activeIndex = -1;
+    if (!items.length) {
+      closeList();
+      return;
+    }
+    comboList.innerHTML = items
+      .map(
+        (item, i) => `<li class="combo__opt" role="option" id="co-address-opt-${i}" aria-selected="false" data-opt="${i}">
+          ${icon(pinIcon)}<span class="combo__label">${esc(item.label)}</span>${item.city && normalizeAddress(item.city) !== normalizeAddress(HOME_CITY) ? `<span class="combo__city">${esc(item.city)}</span>` : ''}
+        </li>`,
+      )
+      .join('');
+    comboList.hidden = false;
+    addressInput.setAttribute('aria-expanded', 'true');
+    addressInput.removeAttribute('aria-activedescendant');
+    reveal();
+  };
+
+  const showHint = (text: string) => {
+    if (addressHint && addressHint.textContent !== text) addressHint.textContent = text;
+  };
+  const HINT = 'Подскажем дом и посчитаем доставку';
+
+  const suggest = async (query: string) => {
+    if (!addressInput) return;
+    const key = normalizeAddress(query);
+    const cached = suggested.get(key);
+    const apply = (items: Suggestion[]) => {
+      if (addressInput.value !== query || document.activeElement !== addressInput) return;
+      openList(items);
+      // only houses are offered: a street without a number gets a nudge, not silence
+      // предлагаются только дома: улица без номера получает подсказку, а не тишину
+      showHint(!items.length && !hasHouse(query) ? 'Допишите номер дома — подскажем адрес' : HINT);
+      if (items.length) announce(`${items.length} ${items.length === 1 ? 'подсказка' : items.length < 5 ? 'подсказки' : 'подсказок'} адреса, выбор — стрелками`);
+    };
+    if (cached) return apply(cached);
+    suggestCtl?.abort();
+    const ctl = new AbortController();
+    suggestCtl = ctl;
+    const timer = setTimeout(() => ctl.abort(), 6000);
+    try {
+      const response = await fetch(`${deliveryApi}/suggest?q=${encodeURIComponent(query.trim())}`, { signal: ctl.signal });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const items = parseSuggestions(await response.json());
+      if (suggested.size > 200) suggested.clear();
+      suggested.set(key, items);
+      if (ctl === suggestCtl) apply(items);
+    } catch {
+      // no suggestions — the field stays a plain field, the quote still works
+      // нет подсказок — поле остаётся обычным, расчёт по адресу всё равно работает
+      if (ctl === suggestCtl) closeList();
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+
+  const pick = (i: number) => {
+    const item = options[i];
+    if (!item || !addressInput) return;
+    const value = addressOf(item);
+    addressInput.value = value;
+    window.clearTimeout(quoteTimer);
+    window.clearTimeout(suggestTimer);
+    suggestCtl?.abort();
+    closeList();
+    saveDraft();
+    if (tried) showErrors(validate(read()));
+    void quote(value, true);
+  };
+
+  if (suggesting && addressInput && comboList) {
+    addressInput.setAttribute('role', 'combobox');
+    addressInput.setAttribute('aria-autocomplete', 'list');
+    addressInput.setAttribute('aria-expanded', 'false');
+    addressInput.setAttribute('aria-controls', comboList.id);
+    // the browser's own address list would lie on top of ours
+    // собственный список адресов браузера лёг бы поверх нашего
+    addressInput.setAttribute('autocomplete', 'off');
+    addressInput.spellcheck = false;
+
+    addressInput.addEventListener('input', () => {
+      const value = addressInput.value;
+      pickedKey = '';
+      showHint(HINT);
+      // what was counted belongs to the old address: back to «by the address» until the new one is known
+      // посчитанное относится к старому адресу: снова «по адресу», пока не известен новый
+      if (delivery.kind !== 'pickup' && delivery.kind !== 'empty' && normalizeAddress(delivery.address) !== normalizeAddress(value)) {
+        quoteSeq += 1;
+        quoting = null;
+        setDelivery({ kind: 'empty' });
+      }
+      window.clearTimeout(suggestTimer);
+      window.clearTimeout(quoteTimer);
+      if (!canSuggest(value)) {
+        suggestCtl?.abort();
+        closeList();
+      } else suggestTimer = window.setTimeout(() => void suggest(value), SUGGEST_DEBOUNCE_MS);
+      // typed without a pick: counted after a longer pause once a house number is
+      // there and no houses are on offer; a bare street waits for the field to be left
+      // набрано без выбора: считается после паузы подольше, когда номер дома уже
+      // есть, а дома не предложены; улица без номера ждёт ухода с поля
+      quoteTimer = window.setTimeout(() => {
+        if (!listOpen() && document.activeElement === addressInput && hasHouse(addressInput.value)) void quote(addressInput.value);
+      }, QUOTE_DEBOUNCE_MS);
+    });
+
+    addressInput.addEventListener('keydown', (event) => {
+      if (event.isComposing) return;
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        if (!listOpen()) {
+          if (event.key === 'ArrowDown' && canSuggest(addressInput.value)) {
+            event.preventDefault();
+            void suggest(addressInput.value);
+          }
+          return;
+        }
+        event.preventDefault();
+        const n = options.length;
+        highlight(event.key === 'ArrowDown' ? (activeIndex + 1) % n : activeIndex <= 0 ? n - 1 : activeIndex - 1);
+        return;
+      }
+      if (event.key === 'Enter' && listOpen() && activeIndex >= 0) {
+        // Enter takes the house instead of sending the form
+        // Enter берёт дом, а не отправляет форму
+        event.preventDefault();
+        pick(activeIndex);
+        return;
+      }
+      if (event.key === 'Escape' && listOpen()) {
+        // Esc closes the list, not the drawer
+        // Esc закрывает список, а не корзину
+        event.preventDefault();
+        event.stopPropagation();
+        closeList();
+        escaped = true;
+        setTimeout(() => (escaped = false), 0);
+      }
+    });
+    drawer.addEventListener('cancel', (event) => {
+      if (escaped) event.preventDefault();
+    });
+
+    // the list keeps the focus in the field: a tap on a house does not blur it first
+    // список не забирает фокус у поля: касание дома не снимает его с поля раньше времени
+    comboList.addEventListener('mousedown', (event) => event.preventDefault());
+    comboList.addEventListener('click', (event) => {
+      const option = (event.target as Element).closest<HTMLElement>('[data-opt]');
+      if (option) pick(Number(option.dataset.opt));
+    });
+
+    addressInput.addEventListener('focus', () => (revealed = false));
+    addressInput.addEventListener('blur', () => {
+      window.clearTimeout(suggestTimer);
+      window.clearTimeout(quoteTimer);
+      suggestCtl?.abort();
+      closeList();
+      void ensureQuote();
+    });
+  } else if (addressInput) {
+    // no API on this build: the price is named on the call, as before the zones
+    // у сборки нет API: стоимость называют при звонке, как до зон
+    addressInput.addEventListener('blur', () => void ensureQuote());
+  }
+
+  dlv?.addEventListener('click', (event) => {
+    const action = (event.target as Element).closest<HTMLElement>('[data-dlv-act]')?.dataset.dlvAct;
+    if (action === 'pickup') {
+      const pickup = form.querySelector<HTMLInputElement>('input[name="fulfillment"][value="pickup"]');
+      if (!pickup) return;
+      pickup.checked = true;
+      pickup.dispatchEvent(new Event('change', { bubbles: true }));
+      // the next thing to do is to say where from
+      // дальше нужно сказать, откуда заберёте
+      const place = form.querySelector<HTMLInputElement>('input[name="place"]:checked') ?? form.querySelector<HTMLInputElement>('input[name="place"]');
+      place?.focus({ preventScroll: true });
+      place?.closest('.fs')?.scrollIntoView({ block: 'nearest', behavior: calm() ? 'auto' : 'smooth' });
+      announce('Выбран самовывоз — доставки нет');
+    }
+    if (action === 'catalog') drawer.close();
+  });
+
   const togglePart = () => {
     const data = read();
     for (const part of $$('[data-for]', form)) {
       const key = part.dataset.for;
       part.hidden = key === 'later' ? data.when !== 'later' : key !== data.fulfillment;
     }
+    syncFulfillment();
   };
 
   const fillTimes = () => {
@@ -524,7 +974,7 @@ if (dataNode && drawer && dishDialog) {
     /* a broken draft is just no draft / битый черновик — просто без черновика */
   }
   togglePart();
-  cartAccount = mountCartAccount({ drawer, form, total: () => priced(cart, index).total, goto, announce });
+  cartAccount = mountCartAccount({ drawer, form, total: () => priced(cart, index).total, goto, announce, onChange: () => paintBill() });
 
   const ERROR_FIELD: Record<keyof Errors, string> = {
     name: 'name',
@@ -590,17 +1040,37 @@ if (dataNode && drawer && dishDialog) {
   const submitLabel = $('[data-submit-label]', form)!;
   let busy = false;
 
-  const finish = (number: string, sent: ReturnType<typeof buildOrder>) => {
+  /** Что заказ стоит гостю: блюда, доставка, что сняли баллы и скидка, к оплате. */
+  type Bill = { delivery: DeliveryState; dishes: number; discount: number; points: number; cost: number | null; pay: number };
+  const billNow = (points: number): Bill => {
+    const dishes = dishesTotal();
+    const discount = cartAccount?.deductions().discount ?? 0;
+    const cost = deliveryCost(delivery, dishes);
+    return { delivery, dishes, discount, points, cost, pay: payable({ dishes, discount, points, delivery: cost }) };
+  };
+
+  const finish = (number: string, sent: ReturnType<typeof buildOrder>, bill: Bill) => {
     $('[data-done-number]', drawer)!.textContent = number;
     $('[data-done-phone]', drawer)!.textContent = sent.phone;
-    $('[data-done-total]', drawer)!.textContent = rub(sent.total);
-    $('[data-done-lines]', drawer)!.innerHTML = sent.items
-      .map((line) => {
-        const choice = [line.variant, line.filling].filter(Boolean).join(', ');
-        return `<li><span>${esc(line.title)}${choice ? `, ${esc(choice)}` : ''}\u00a0×\u00a0${line.qty}</span><b class="tnum">${rub(line.sum)}</b></li>`;
-      })
-      .join('');
-    cartAccount?.done(Number((sent as { bonus_spent?: number }).bonus_spent ?? 0));
+    $('[data-done-total]', drawer)!.textContent = rub(bill.pay);
+    // under the dishes: the delivery, then what points and the birthday took off — the rows the bill had
+    // под блюдами: доставка, затем что сняли баллы и скидка именинника — те же строки, что в счёте
+    const row = billRow(bill.delivery, bill.dishes);
+    const extras = [
+      `<li class="done__extra"><span>${esc(row.label)}</span><b class="tnum${row.tone === 'quiet' ? ' is-quiet' : ''}">${esc(row.value)}</b></li>`,
+      bill.discount ? `<li class="done__extra"><span>Скидка именинника</span><b class="tnum">−${rub(bill.discount)}</b></li>` : '',
+      bill.points ? `<li class="done__extra"><span>Баллами</span><b class="tnum">−${rub(bill.points)}</b></li>` : '',
+    ];
+    $('[data-done-lines]', drawer)!.innerHTML =
+      sent.items
+        .map((line) => {
+          const choice = [line.variant, line.filling].filter(Boolean).join(', ');
+          return `<li><span>${esc(line.title)}${choice ? `, ${esc(choice)}` : ''}\u00a0×\u00a0${line.qty}</span><b class="tnum">${rub(line.sum)}</b></li>`;
+        })
+        .join('') + extras.join('');
+    const after = $('[data-done-after]', drawer);
+    if (after) after.textContent = bill.cost === null ? 'Стоимость доставки назовём там же.' : 'Оплату обсудим там же.';
+    cartAccount?.done(bill.points);
     cart = empty();
     store.set(CART_KEY, JSON.stringify(cart));
     const comment = field<HTMLTextAreaElement>('comment');
@@ -608,7 +1078,7 @@ if (dataNode && drawer && dishDialog) {
     saveDraft();
     render();
     goto('done');
-    announce(`Заказ ${number} принят. Перезвоним для подтверждения.`);
+    announce(`Заказ ${number} принят. К оплате ${rub(bill.pay)}. Перезвоним для подтверждения.`);
   };
 
   form.addEventListener('submit', async (event) => {
@@ -633,6 +1103,30 @@ if (dataNode && drawer && dishDialog) {
       goto('cart');
       return;
     }
+    // the delivery must be known before the send: a typed address may still be on its way
+    // до отправки доставка должна быть известна: набранный адрес может ещё считаться
+    if (data.fulfillment === 'delivery') {
+      busy = true;
+      if (delivery.kind === 'pending' || quoting) {
+        submit.setAttribute('aria-busy', 'true');
+        submitLabel.textContent = 'Считаем доставку…';
+      }
+      try {
+        await ensureQuote();
+      } finally {
+        busy = false;
+        submit.removeAttribute('aria-busy');
+        submitLabel.textContent = 'Отправить заказ';
+      }
+      if (blocksOrder(delivery, sum.total)) {
+        // closed by the zone's minimum: the warning with its ways out is under the address
+        // закрыто минимумом зоны: предупреждение с выходами — под адресом
+        dlv?.scrollIntoView({ block: 'center', behavior: calm() ? 'auto' : 'smooth' });
+        $<HTMLElement>('[data-dlv-act="pickup"]', dlv ?? form)?.focus({ preventScroll: true });
+        if (delivery.kind === 'zone') announce(`${minOrderText(sum.total, delivery.quote.zone)}. Добавьте блюд или выберите самовывоз.`);
+        return;
+      }
+    }
     const number = orderNumber(new Date(), Math.random());
     // a signed-in guest sends the order with his token and the points to spend;
     // the payment method rides along as for anyone
@@ -640,11 +1134,12 @@ if (dataNode && drawer && dishDialog) {
     // способ оплаты едет так же, как у всех
     const extra = cartAccount?.extras();
     const payload = withPayment({ ...buildOrder(cart, index, data, number), ...(extra?.token && { bonus_spent: extra.bonus_spent }) });
+    const bill = billNow(extra?.token ? extra.bonus_spent : 0);
 
     // a bot filled the field nobody sees: thank it and send nothing
     // бот заполнил поле, которого никто не видит: поблагодарить и ничего не отправлять
     if ((field('company')?.value ?? '').trim()) {
-      finish(number, payload);
+      finish(number, payload, bill);
       return;
     }
     if (!navigator.onLine) {
@@ -667,10 +1162,10 @@ if (dataNode && drawer && dishDialog) {
         signal: AbortSignal.timeout(20_000),
       });
       if (response.ok) {
-        finish(number, payload);
-        // online payment asks for what is left after points and the birthday discount
-        // онлайн-оплата просит то, что осталось после баллов и скидки именинника
-        payAfterOrder(number, extra?.token ? { ...payload, total: extra.pay } : payload);
+        finish(number, payload, bill);
+        // online payment asks for the dishes after points and the birthday discount, plus the delivery
+        // онлайн-оплата просит блюда после баллов и скидки именинника плюс доставку
+        payAfterOrder(number, payload, { total: bill.pay, delivery: bill.delivery.kind === 'pickup' ? undefined : bill.cost });
         return;
       }
       // the server speaks Russian for what the guest can fix (order-guard)

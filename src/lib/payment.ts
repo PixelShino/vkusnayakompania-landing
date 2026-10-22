@@ -228,7 +228,7 @@ export type PayConfig = {
 export const DEFAULT_TEXTS: PayConfig['texts'] = {
   online: 'Картой МИР, Visa или Mastercard на защищённой странице ЮKassa',
   onDelivery: 'Наличными или картой курьеру, на кассе при самовывозе',
-  note: 'Онлайн оплачиваются блюда. Платную доставку назовём при звонке и оплатите её курьеру.',
+  note: 'Онлайн оплачиваются блюда и доставка. Если адрес не найден на карте, стоимость доставки назовём при звонке.',
   paid: 'Спасибо! Перезвоним, чтобы подтвердить адрес и время.',
   failed: 'Деньги не списаны. Заказ сохранён — оформлять его заново не нужно.',
 };
@@ -297,6 +297,13 @@ export type PayRecord = {
   phone: string;
   total: number;
   lines: { title: string; qty: number; sum: number }[];
+  /**
+   * Delivery of this order: rubles (0 — free), `null` — named on the call;
+   * absent — pickup or a record from before the zones.
+   * Доставка этого заказа: рубли (0 — бесплатно), `null` — назовём при звонке;
+   * нет поля — самовывоз или запись времён до зон.
+   */
+  delivery?: number | null;
   /** когда ушли на страницу банка, мс */
   at: number;
   /** started — запрос ссылки, redirected — ушли в банк, done — итог показан, dismissed — гость закрыл экран */
@@ -319,7 +326,9 @@ export const parsePayRecord = (raw: string | null, now: number): PayRecord | nul
           .slice(0, 40)
       : [];
     const state = ['started', 'redirected', 'done', 'dismissed'].includes(data.state) ? data.state : 'started';
-    return { number: data.number, phone: data.phone, total: Number(data.total) || 0, lines, at, state };
+    const delivery =
+      typeof data.delivery === 'number' && Number.isFinite(data.delivery) && data.delivery >= 0 ? Math.round(data.delivery) : data.delivery === null ? null : undefined;
+    return { number: data.number, phone: data.phone, total: Number(data.total) || 0, lines, ...(delivery !== undefined && { delivery }), at, state };
   } catch {
     return null;
   }

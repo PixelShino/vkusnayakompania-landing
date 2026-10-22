@@ -4,14 +4,14 @@
  * takes over once the order is saved — asks Directus for the bank's page
  * (`POST /pay/start`) and leaves for it. Everything else lives here: the
  * choice shown only when the admin turned payments on, the way back from the
- * bank (`/catalog/?pay=ok|fail|wait&order=…`), «try again», «on delivery», the
+ * bank (`/catalog/?pay=ok|fail|wait&order=…`), «try again», «on delivery» (off since 21.10.2026), the
  * bank that does not answer and the order that still waits for payment.
  * Онлайн-оплата на странице каталога. Скрипт корзины (`catalog.ts`) зовёт две
  * вещи: `withPayment` добавляет выбор гостя в заказ, `payAfterOrder` берёт
  * управление, когда заказ сохранён, — просит у Directus страницу банка
  * (`POST /pay/start`) и уходит на неё. Всё остальное здесь: выбор, который
  * видно, только когда оплату включили в админке, возвращение из банка
- * (`/catalog/?pay=ok|fail|wait&order=…`), «ещё раз», «при получении», банк,
+ * (`/catalog/?pay=ok|fail|wait&order=…`), «ещё раз», «при получении» (выключено 21.10.2026), банк,
  * который не отвечает, и заказ, который всё ещё ждёт оплаты.
  */
 import {
@@ -138,8 +138,10 @@ const loadConfig = async () => {
     const response = await fetch(`${api}/config`, { signal: AbortSignal.timeout(8000) });
     offer(parsePayConfig(response.ok ? await response.json() : null));
   } catch {
-    // no answer — no online payment: the order still goes, paid on delivery
-    // нет ответа — нет онлайн-оплаты: заказ всё равно уходит, оплата при получении
+    // no answer — no online payment: the order still goes and the server marks it «on delivery»
+    // (the choice itself is off in the form since 21.10.2026)
+    // нет ответа — нет онлайн-оплаты: заказ всё равно уходит, сервер пометит его «при получении»
+    // (сам вариант в форме выключен 21.10.2026)
     offer(parsePayConfig(null));
   }
 };
@@ -192,16 +194,20 @@ const show = (state: State, record: PayRecord | null, number: string, lead: stri
   $('[data-pay-lead]')!.innerHTML = lead;
   $('[data-pay-progress]')!.hidden = !(state === 'going' || state === 'wait');
 
-  const lines = record?.number === number ? record.lines : [];
+  const own = record?.number === number ? record : null;
+  const lines = own?.lines ?? [];
   const list = $('[data-pay-lines]')!;
   list.hidden = !lines.length;
-  const total = record?.number === number ? record.total : 0;
-  // points and the birthday discount of the guest account: the dishes cost more than is paid
-  // баллы и скидка именинника из кабинета: блюда стоят больше, чем оплачено
-  const off = lines.reduce((acc, line) => acc + line.sum, 0) - total;
+  const total = own?.total ?? 0;
+  // the delivery, and the points and the birthday discount of the guest account
+  // доставка, а также баллы и скидка именинника из кабинета
+  const { delivery, off } = billOf(own);
   list.innerHTML =
     lines.map((line) => `<li><span>${esc(line.title)} × ${line.qty}</span><b class="tnum">${rub(line.sum)}</b></li>`).join('') +
-    (total && off > 0 ? `<li><span>Баллами и скидкой</span><b class="tnum">−${rub(off)}</b></li>` : '');
+    (delivery !== undefined && lines.length
+      ? `<li class="done__extra"><span>Доставка</span><b class="tnum${delivery ? '' : ' is-quiet'}">${delivery === null ? 'назовём при звонке' : delivery ? rub(delivery) : 'бесплатно'}</b></li>`
+      : '') +
+    (total && off > 0 ? `<li class="done__extra"><span>Баллами и скидкой</span><b class="tnum">−${rub(off)}</b></li>` : '');
   const sum = $('[data-pay-sum]')!;
   sum.hidden = !total;
   $('[data-pay-sum-label]')!.textContent = state === 'paid' ? 'Оплачено' : state === 'offline' ? 'Сумма заказа' : 'К оплате';
@@ -234,6 +240,29 @@ const show = (state: State, record: PayRecord | null, number: string, lead: stri
   announce(`${TITLES[state]}. Заказ ${number}.`);
 };
 
+/**
+ * The rows under the dishes: the delivery and what points and the birthday
+ * took off. The record knows the dishes, the drawer's delivery and the total
+ * the server asked for; points and the discount are what is left. Should the
+ * server have counted a dearer delivery than the drawer (it quotes the address
+ * itself), the difference is the delivery, never a negative discount.
+ * Строки под блюдами: доставка и что сняли баллы и скидка именинника. Запись
+ * знает блюда, доставку корзины и сумму, которую попросил сервер; баллы и
+ * скидка — остаток. Если сервер насчитал доставку дороже, чем корзина (адрес он
+ * считает сам), разница — это доставка, а не скидка с минусом.
+ */
+const billOf = (record: PayRecord | null) => {
+  if (!record) return { delivery: undefined, off: 0 };
+  const dishes = record.lines.reduce((acc, line) => acc + line.sum, 0);
+  let delivery = record.delivery;
+  let off = dishes + (delivery ?? 0) - record.total;
+  if (record.total && off < 0 && delivery !== undefined) {
+    delivery = (delivery ?? 0) - off;
+    off = 0;
+  }
+  return { delivery, off };
+};
+
 const leadFor = (state: State, record: PayRecord | null, why: string | null = null, message = '') => {
   const phone = record?.phone ? `<b class="tnum">${esc(record.phone)}</b>` : '';
   switch (state) {
@@ -250,17 +279,19 @@ const leadFor = (state: State, record: PayRecord | null, why: string | null = nu
         ? `${esc(failReason(why))} Заказ сохранён — оформлять его заново не нужно.`
         : `${esc(failReason(why))} ${esc(config.texts.failed)}`;
     case 'unavailable':
-      return esc(message || 'Банк сейчас не отвечает. Заказ принят — попробуйте оплатить через минуту или оплатите при получении.');
+      return esc(message || 'Банк сейчас не отвечает. Заказ принят — попробуйте оплатить через минуту или позвоните нам, примем оплату по телефону.');
     case 'wait':
       return 'Банк ещё подтверждает платёж — обычно это меньше минуты.';
     case 'waitlong':
       return 'Банк пока не прислал ответ. Если деньги списались, заказ отметится оплаченным сам — менеджер увидит это при звонке.';
     case 'pending':
-      return 'Заказ сохранён, но ещё не оплачен. Оплатите его сейчас или при получении.';
+      return 'Заказ сохранён, но ещё не оплачен — оплатите его сейчас. Если что-то не получается, позвоните нам.';
     case 'offline':
+      // the state of the «on delivery» button, switched off on 21.10.2026: the words stay neutral
+      // состояние кнопки «при получении», выключенной 21.10.2026: слова нейтральные
       return phone
-        ? `Оплата при получении. Перезвоним на ${phone}, чтобы подтвердить состав, сумму, адрес и время.`
-        : 'Оплата при получении. Перезвоним, чтобы подтвердить состав, сумму, адрес и время.';
+        ? `Перезвоним на ${phone}, чтобы подтвердить состав, сумму, адрес и время.`
+        : 'Перезвоним, чтобы подтвердить состав, сумму, адрес и время.';
   }
 };
 
@@ -277,8 +308,8 @@ const post = async (path: string, body: unknown, timeout = 25_000) => {
 
 const networkLead = (error: unknown) =>
   (error as Error)?.name === 'TimeoutError'
-    ? 'Банк долго не отвечает. Заказ принят — попробуйте оплатить ещё раз или оплатите при получении.'
-    : 'Не получилось связаться с сервером. Заказ принят — проверьте интернет и попробуйте ещё раз или оплатите при получении.';
+    ? 'Банк долго не отвечает. Заказ принят — попробуйте оплатить ещё раз или позвоните нам, примем оплату по телефону.'
+    : 'Не получилось связаться с сервером. Заказ принят — проверьте интернет и попробуйте ещё раз или позвоните нам.';
 
 /** Только https (и http для локальной заглушки): в адрес банка не пролезет `javascript:`. */
 const safeUrl = (value: unknown) => {
@@ -320,6 +351,14 @@ const start = async (record: PayRecord) => {
       saveRecord(record);
       if (shown) shown.record = record;
     }
+    // the delivery the server counted, when it names it: it wins over the drawer's quote
+    // доставка, которую насчитал сервер, если он её называет: она важнее расчёта корзины
+    const served = data.delivery_cost;
+    if (ok && record.delivery !== undefined && (served === null || (typeof served === 'number' && served >= 0)) && served !== record.delivery) {
+      record = { ...record, delivery: served as number | null };
+      saveRecord(record);
+      if (shown) shown.record = record;
+    }
     const url = safeUrl(data.url);
     if (ok && url) {
       saveRecord({ ...record, state: 'redirected', at: Date.now() });
@@ -353,22 +392,27 @@ const start = async (record: PayRecord) => {
 /**
  * Right after the order is saved (the cart script already showed «Заказ
  * принят»): online — remember the order and go to the bank; otherwise the
- * «accepted» screen stays as it is.
+ * «accepted» screen stays as it is. `bill.total` is to pay (dishes − points
+ * and discount + delivery), `bill.delivery` the drawer's delivery (`null` —
+ * named on the call, absent — pickup); `/pay/start` has the last word.
  * Сразу после сохранения заказа (скрипт корзины уже показал «Заказ
  * принят»): онлайн — запомнить заказ и уйти в банк; иначе экран «принят»
- * остаётся как есть.
+ * остаётся как есть. `bill.total` — к оплате (блюда − баллы и скидка +
+ * доставка), `bill.delivery` — доставка корзины (`null` — назовём при звонке,
+ * нет — самовывоз); последнее слово за `/pay/start`.
  */
-export const payAfterOrder = (number: string, payload: OrderPayload) => {
+export const payAfterOrder = (number: string, payload: OrderPayload, bill: { total?: number; delivery?: number | null } = {}) => {
   if (!online() || !api) return false;
   const record: PayRecord = {
     number,
     phone: payload.phone,
-    total: payload.total,
+    total: bill.total ?? payload.total,
     lines: payload.items.map((line) => ({
       title: [line.title, [line.variant, line.filling].filter(Boolean).join(', ')].filter(Boolean).join(', '),
       qty: line.qty,
       sum: line.sum,
     })),
+    ...(bill.delivery !== undefined && { delivery: bill.delivery }),
     at: Date.now(),
     state: 'started',
   };
@@ -479,7 +523,7 @@ step?.addEventListener('click', async (event) => {
       else if (ok) {
         saveRecord({ ...record, state: 'done' });
         show('offline', record, record.number, leadFor('offline', record));
-      } else show('unavailable', record, record.number, esc(String(data.message ?? 'Не получилось. Позвоните нам — примем оплату при получении.')));
+      } else show('unavailable', record, record.number, esc(String(data.message ?? 'Не получилось. Позвоните нам — поможем с оплатой.')));
     } catch (error) {
       show('unavailable', record, record.number, esc(networkLead(error)));
     } finally {

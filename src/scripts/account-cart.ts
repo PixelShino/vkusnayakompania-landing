@@ -4,28 +4,29 @@
  * name and the phone go into the form, the balance is fetched, the slider
  * and the number field «Списать баллы» stay within what the server allows
  * (the balance, the programme's share of the order after the birthday
- * discount). The footer shows what is taken off and what is to pay; the order
- * leaves with the guest's token and `bonus_spent`, and `order-guard` with the
- * `loyalty` hook check it all again. `catalog.ts` calls in at five points:
- * the drawer step, the cart total, the order, a refused token, the receipt.
+ * discount). The footer's bill gets the rows of what is taken off (the bill
+ * itself — dishes, delivery, to pay — is `catalog.ts`'s, told by `onChange`);
+ * the order leaves with the guest's token and `bonus_spent`, and `order-guard`
+ * with the `loyalty` hook check it all again. `catalog.ts` calls in at five
+ * points: the drawer step, the cart total, the order, a refused token, the receipt.
  * «Вкусные баллы» в выдвижной корзине. Не вошёл — приглашение и «Войти по
  * номеру», которое открывает вход шагом корзины; вошёл — имя и телефон
  * встают в форму, баланс подтягивается, ползунок и поле «Списать баллы»
  * держатся в пределах, которые разрешит сервер (баланс, доля программы от
- * заказа после скидки именинника). Подвал показывает, что вычтено и сколько
- * к оплате; заказ уходит с токеном гостя и `bonus_spent`, а `order-guard` с
- * хуком `loyalty` всё это проверяют ещё раз. `catalog.ts` обращается сюда в
- * пяти местах: шаг корзины, сумма, заказ, отвергнутый токен, итог.
+ * заказа после скидки именинника). В счёт подвала встают строки того, что
+ * вычтено (сам счёт — блюда, доставка, к оплате — ведёт `catalog.ts`, ему
+ * сообщает `onChange`); заказ уходит с токеном гостя и `bonus_spent`, а
+ * `order-guard` с хуком `loyalty` всё это проверяют ещё раз. `catalog.ts`
+ * обращается сюда в пяти местах: шаг корзины, сумма, заказ, отвергнутый токен, итог.
  */
 import { accountApi, displayName, isSignedOut, summarize, type Me } from '../lib/account';
 import { accrualFor, birthdayDiscountFor, dayOf, maxSpend, points, type Program } from '../lib/loyalty';
+import { rub } from '../lib/catalog';
 import { maskPhone } from '../lib/order';
 import { clearSession, loadSession, onSessionChange } from './account-session';
 import { mountLogin } from './account-login';
 
 type Step = 'cart' | 'checkout' | 'login' | 'done';
-
-const rub = (n: number) => `${new Intl.NumberFormat('ru-RU').format(n)} ₽`;
 
 export const mountCartAccount = ({
   drawer,
@@ -33,6 +34,7 @@ export const mountCartAccount = ({
   total,
   goto,
   announce,
+  onChange,
 }: {
   drawer: HTMLElement;
   form: HTMLFormElement;
@@ -40,6 +42,8 @@ export const mountCartAccount = ({
   total: () => number;
   goto: (step: Step) => void;
   announce: (text: string) => void;
+  /** скидка или баллы поменялись: корзина пересчитывает «К оплате» */
+  onChange?: () => void;
 }) => {
   const box = drawer.querySelector<HTMLElement>('[data-cart-account]');
   if (!box) return null;
@@ -53,7 +57,8 @@ export const mountCartAccount = ({
   const numberField = $<HTMLInputElement>('[data-ca-num]', box)!;
   const spendBox = $('[data-ca-spend]', box)!;
   const errorBox = $('[data-ca-error]', box)!;
-  const summary = $('[data-ca-summary]');
+  const rowDiscount = $('[data-ca-row="discount"]');
+  const rowPoints = $('[data-ca-row="points"]');
   const earn = $('[data-ca-earn]');
 
   let me: Me | null = null;
@@ -76,7 +81,14 @@ export const mountCartAccount = ({
     return { sum, program, amount, discount, max };
   };
 
+  // the drawer's bill follows every repaint: the points and the discount are in its «К оплате»
+  // счёт корзины следует за каждой перерисовкой: баллы и скидка входят в его «К оплате»
   const paint = () => {
+    paintBox();
+    onChange?.();
+  };
+
+  const paintBox = () => {
     errorBox.hidden = true;
     const s = state();
     out.hidden = Boolean(token);
@@ -89,13 +101,16 @@ export const mountCartAccount = ({
         pitch.textContent = `Войдите по номеру, чтобы копить баллы: за этот заказ начислим ≈\u00a0${points(accrualFor(amount, first))}${
           fallback.signupBonus ? `, а за первый вход — ещё ${points(fallback.signupBonus)}` : ''
         }.`;
-      if (summary) summary.hidden = true;
+      if (rowDiscount) rowDiscount.hidden = true;
+      if (rowPoints) rowPoints.hidden = true;
       if (earn) earn.hidden = true;
       return;
     }
     $('[data-ca-loading]', box)!.hidden = Boolean(me);
     if (!s) {
       spendBox.hidden = true;
+      if (rowDiscount) rowDiscount.hidden = true;
+      if (rowPoints) rowPoints.hidden = true;
       return;
     }
     const name = displayName(me!.profile);
@@ -122,14 +137,16 @@ export const mountCartAccount = ({
     discountNote.hidden = !s.discount;
     $('[data-ca-discount-text]', box)!.textContent = `С днём рождения! Скидка ${s.program.birthdayDiscount} % уже в сумме заказа.`;
 
+    // what the dishes cost in money after points and the discount: points are earned on it, not on the delivery
+    // сколько блюда стоят деньгами после баллов и скидки: баллы начисляются с этого, а не с доставки
     const pay = s.amount - s.discount - spend;
-    if (summary) {
-      summary.hidden = !s.discount && !spend;
-      $('[data-ca-row="discount"]')!.hidden = !s.discount;
-      $('[data-ca-row="points"]')!.hidden = !spend;
+    if (rowDiscount) {
+      rowDiscount.hidden = !s.discount;
       $('[data-ca-discount-sum]')!.textContent = `−${rub(s.discount)}`;
+    }
+    if (rowPoints) {
+      rowPoints.hidden = !spend;
       $('[data-ca-points-sum]')!.textContent = `−${rub(spend)}`;
-      $('[data-ca-pay]')!.textContent = rub(pay);
     }
     if (earn) {
       const coming = s.program.enabled ? accrualFor(pay, s.sum.level.tier.percent) : 0;
@@ -232,12 +249,12 @@ export const mountCartAccount = ({
     onCheckout: () => void load(),
     /** сумма корзины поменялась: пересчитать предел */
     refresh: () => paint(),
-    /** что добавить к заказу: токен, баллы и сколько останется к оплате */
-    extras: () => {
-      if (!token) return { token: null, bonus_spent: 0, pay: total() };
-      const s = state();
-      const bonus = me ? spend : 0;
-      return { token, bonus_spent: bonus, pay: Math.max(0, total() - (s?.discount ?? 0) - bonus) };
+    /** что добавить к заказу: токен и баллы к списанию */
+    extras: () => (token ? { token, bonus_spent: me ? spend : 0 } : { token: null, bonus_spent: 0 }),
+    /** что снимается с блюд в счёте: скидка именинника и баллы (без входа — ничего) */
+    deductions: () => {
+      if (!token || !me) return { discount: 0, points: 0 };
+      return { discount: state()?.discount ?? 0, points: spend };
     },
     /** сервер отверг токен: выйти и сказать об этом */
     signedOut: () => {
@@ -246,23 +263,23 @@ export const mountCartAccount = ({
       me = null;
       paint();
     },
-    /** «Заказ принят»: что списали и что начислим */
+    /**
+     * «Заказ принят»: what will be earned. What was taken off and what is to pay
+     * stand in the screen's own rows (`catalog.ts`), next to the delivery.
+     * «Заказ принят»: что начислим. Что списано и сколько к оплате — в строках
+     * самого экрана (`catalog.ts`), рядом с доставкой.
+     */
     done: (spent: number) => {
       const line = $('[data-ca-done]');
       if (!line) return;
       const s = state();
       const discount = s?.discount ?? 0;
+      // points are earned on what the dishes cost in money, not on the delivery
+      // баллы начисляются с того, что блюда стоят деньгами, а не с доставки
       const pay = s ? s.amount - discount - spent : 0;
       const coming = s && s.program.enabled ? accrualFor(pay, s.sum.level.tier.percent) : 0;
-      // the receipt says what the guest will actually pay, not only the sum of the dishes
-      // итог говорит, сколько гость заплатит на деле, а не только сумму блюд
-      const off = [discount ? `скидка именинника ${rub(discount)}` : null, spent ? `списали ${points(spent)}` : null].filter(Boolean).join(' и ');
-      const parts = [
-        off ? `${off[0].toUpperCase()}${off.slice(1)} — к оплате ${rub(pay)}.` : null,
-        coming ? `Начислим ≈\u00a0${points(coming)}, когда заказ будет выполнен.` : null,
-      ].filter(Boolean);
-      line.hidden = !parts.length;
-      $('[data-ca-done-text]', line)!.textContent = parts.join(' ');
+      line.hidden = !coming;
+      $('[data-ca-done-text]', line)!.textContent = coming ? `Начислим ≈\u00a0${points(coming)}, когда заказ будет выполнен.` : '';
       // a guest without a name in the profile keeps the one typed in the order
       // гость без имени в профиле сохраняет то, что ввёл в заказе
       const typed = (form.elements.namedItem('name') as HTMLInputElement | null)?.value.trim();

@@ -27,7 +27,8 @@ import DishDialog from '../../components/catalog/DishDialog.astro';
 import { BASE } from '../../lib/base.ts';
 import { BRAND } from '../../data/site.ts';
 import { getContent, typo } from '../../lib/content.ts';
-import { positions } from '../../lib/catalog.ts';
+import { positions, rub } from '../../lib/catalog.ts';
+import { FREE_FROM } from '../../lib/delivery.ts';
 import { DOC, docHref } from '../../lib/pages.ts';
 import '../../styles/catalog.css';
 
@@ -187,7 +188,7 @@ let rendered = 0;
         <li>
           <Icon name="delivery" />
           <span>
-            <b>Доставка по Самаре.</b> Стоимость доставки назовём при звонке{
+            <b>Доставка по Самаре.</b> Стоимость считается по адресу при оформлении, бесплатно от{'\u00a0'}{rub(FREE_FROM)}{
               deliveryHref && (
                 <>
                   {' '}— <a href={deliveryHref}>условия доставки и оплаты</a>

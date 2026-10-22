@@ -2,16 +2,16 @@
 /**
  * «Вкусные баллы» in the cart drawer, in four places of it: at the top of the
  * checkout (signed in — who and how many points, the slider «Списать баллы»;
- * signed out — «Войти по номеру, чтобы копить баллы»), in the footer's sum
- * (points, birthday discount, to pay, what will be earned), as a step of its
+ * signed out — «Войти по номеру, чтобы копить баллы»), in the footer's bill
+ * (points, birthday discount; what will be earned under it), as a step of its
  * own (the sign-in without leaving the cart) and on «Заказ принят». The
  * drawer places each `part` where it belongs; `src/scripts/account-cart.ts`
  * drives them. Without the account (no `PUBLIC_DIRECTUS_URL`, the programme
  * switched off) nothing is drawn and the cart is the plain one.
  * «Вкусные баллы» в выдвижной корзине, в четырёх её местах: вверху
  * оформления (вошёл — кто и сколько баллов, ползунок «Списать баллы»; не
- * вошёл — «Войти по номеру, чтобы копить баллы»), в сумме подвала (баллы,
- * скидка именинника, к оплате, что начислим), отдельным шагом (вход, не
+ * вошёл — «Войти по номеру, чтобы копить баллы»), в счёте подвала (баллы,
+ * скидка именинника; под счётом — что начислим), отдельным шагом (вход, не
  * выходя из корзины) и на «Заказ принят». Корзина ставит каждую `part` на
  * своё место; ведёт их `src/scripts/account-cart.ts`. Без кабинета (нет
  * `PUBLIC_DIRECTUS_URL`, программа выключена) ничего не рисуется — корзина
@@ -25,7 +25,7 @@ import '../../styles/cart-account.css';
 
 interface Props {
   content: Content;
-  part: 'checkout' | 'summary' | 'login' | 'done';
+  part: 'checkout' | 'summary' | 'earn' | 'login' | 'done';
 }
 
 const { content, part } = Astro.props;
@@ -107,26 +107,26 @@ const low = loyalty.tiers[0]?.percent ?? 0;
 }
 
 {
+  /* the rows of the bill the points and the birthday take off; the bill
+     itself (dishes, delivery, to pay) is the drawer's
+     строки счёта, которые снимают баллы и скидка именинника; сам счёт
+     (блюда, доставка, к оплате) — у корзины */
   on && part === 'summary' && (
-    <div class="ca-sum" data-ca-summary hidden>
-      <p class="ca-sum__row" data-ca-row="discount" hidden>
+    <>
+      <p class="bill__row bill__row--off" data-ca-row="discount" hidden>
         <span>Скидка именинника</span>
         <b class="tnum" data-ca-discount-sum></b>
       </p>
-      <p class="ca-sum__row" data-ca-row="points" hidden>
+      <p class="bill__row bill__row--off" data-ca-row="points" hidden>
         <span>Баллами</span>
         <b class="tnum" data-ca-points-sum></b>
       </p>
-      <p class="ca-sum__row ca-sum__row--pay">
-        <span>К оплате</span>
-        <b class="tnum" data-ca-pay></b>
-      </p>
-    </div>
+    </>
   )
 }
 
 {
-  on && part === 'summary' && <p class="ca-earn" data-ca-earn hidden />
+  on && part === 'earn' && <p class="ca-earn" data-ca-earn hidden />
 }
 
 {
