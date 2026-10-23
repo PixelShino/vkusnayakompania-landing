@@ -16,6 +16,7 @@ import { BASE } from '../../lib/base.ts';
 import { BRAND } from '../../data/site.ts';
 import { getContent, typo } from '../../lib/content.ts';
 import { longDate } from '../../lib/pages.ts';
+import { orgId, type PageSchema } from '../../lib/seo.ts';
 import '../../styles/docs.css';
 
 const content = await getContent();
@@ -27,30 +28,34 @@ const title = `Документы: оферта, доставка, реквиз�
 const description =
   'Публичная оферта, условия доставки и оплаты, политика конфиденциальности, реквизиты и контакты «Вкусной компании» в Самаре.';
 
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Главная', item: new URL(BASE, site).href },
-        { '@type': 'ListItem', position: 2, name: 'Документы', item: url },
-      ],
-    },
-    {
-      '@type': 'CollectionPage',
-      '@id': url,
-      url,
-      name: 'Документы',
-      inLanguage: 'ru-RU',
-      hasPart: pages.map((page) => ({ '@type': 'WebPage', name: page.title, url: new URL(page.href, site).href })),
-    },
+// The page node is the layout's (`CollectionPage` at the canonical address):
+// here only its kind, its crumbs and its parts — every document of the site.
+// Узел страницы строит раскладка (`CollectionPage` по каноническому адресу):
+// здесь только его вид, крошки и части — все документы сайта.
+const schema: PageSchema = {
+  type: 'CollectionPage',
+  crumbs: [
+    { name: 'Главная', url: new URL(BASE, site).href },
+    { name: 'Документы', url },
   ],
+  fields: {
+    about: { '@id': orgId(site.origin) },
+    hasPart: pages.map((page) => {
+      const href = new URL(page.href, site).href;
+      return { '@type': 'WebPage', '@id': href, url: href, name: page.title, description: page.description };
+    }),
+  },
 };
 ---
 
-<BaseLayout content={content} title={title} description={description} noindex={pages.length === 0} landing={false}>
-  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} is:inline />
+<BaseLayout
+  content={content}
+  title={title}
+  description={description}
+  noindex={pages.length === 0}
+  landing={false}
+  schema={schema}
+>
   <Header content={content} over={false} />
 
   <main id="main" class="doc" tabindex="-1">

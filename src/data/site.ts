@@ -8,6 +8,19 @@
 /** Имя и город: в модели Directus их нет, меняются раз в жизни компании. */
 export const BRAND = { name: 'Вкусная компания', city: 'Самара' } as const;
 
+/**
+ * The company as a whole on the maps, both pages confirmed in search results on
+ * 23.10.2026: the chain on Yandex Maps (both venues under one card) and the
+ * branches on 2GIS. They go to `sameAs` of the organization; each venue keeps
+ * its own Yandex card (`yandex_org` in «Точки»).
+ * Компания целиком на картах, обе страницы подтверждены выдачей 23.10.2026:
+ * сеть на Яндекс Картах (обе точки под одной карточкой) и филиалы в 2ГИС. Идут
+ * в `sameAs` организации; у каждой точки остаётся своя карточка Яндекса
+ * (`yandex_org` в «Точках»).
+ */
+export const YANDEX_CHAIN_URL = 'https://yandex.ru/maps/51/samara/chain/vkusnaya_kompaniya/132823966550/';
+export const TWOGIS_BRANCHES_URL = 'https://2gis.ru/samara/branches/70000001041932715';
+
 /** Часы одного дня: открытие и закрытие в 24-часовом формате. */
 export type Hours = [open: string, close: string];
 
@@ -79,6 +92,22 @@ export const schemaHours = (schedule: Schedule) =>
       days.length > 1 ? `${DAYS_EN[days[0]]}-${DAYS_EN[days[days.length - 1]]}` : DAYS_EN[days[0]];
     return `${name} ${hours[0]}-${hours[1]}`;
   });
+
+const DAYS_SCHEMA = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+/**
+ * The same hours as `openingHoursSpecification` — the form Google documents for
+ * a local business: one node per run of days with equal hours.
+ * Те же часы в виде `openingHoursSpecification` — так их описывает Google для
+ * местной организации: по узлу на группу дней с одинаковыми часами.
+ */
+export const schemaHoursSpec = (schedule: Schedule) =>
+  groupDays(schedule).map(({ days, hours }) => ({
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: days.map((day) => DAYS_SCHEMA[day]),
+    opens: hours[0],
+    closes: hours[1],
+  }));
 
 /** Одна строка часов из админки: день недели и время в 24-часовом формате. */
 export type HoursRow = {

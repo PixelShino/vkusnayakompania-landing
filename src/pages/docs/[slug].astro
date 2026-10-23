@@ -19,7 +19,8 @@ import DocText from '../../components/docs/DocText.astro';
 import { BASE } from '../../lib/base.ts';
 import { BRAND, plural } from '../../data/site.ts';
 import { getContent } from '../../lib/content.ts';
-import { TOC_FROM, longDate, type DocPage } from '../../lib/pages.ts';
+import { DOC, TOC_FROM, longDate, type DocPage } from '../../lib/pages.ts';
+import { orgId, type PageSchema } from '../../lib/seo.ts';
 import '../../styles/docs.css';
 
 export async function getStaticPaths() {
@@ -49,34 +50,27 @@ const sections = `${toc.length} ${plural(toc.length, 'раздел', 'разде
 // так, чтобы самое длинное слово влезло в колонку, а не ломалось посередине
 const longestWord = Math.max(...page.title.split(/[\s-]+/).map((word) => word.length));
 
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Главная', item: new URL(BASE, site).href },
-        { '@type': 'ListItem', position: 2, name: 'Документы', item: docsUrl },
-        { '@type': 'ListItem', position: 3, name: page.title, item: url },
-      ],
-    },
-    {
-      '@type': 'WebPage',
-      '@id': url,
-      url,
-      name: page.title,
-      description,
-      inLanguage: 'ru-RU',
-      ...(page.revised && { dateModified: page.revised }),
-      isPartOf: { '@type': 'WebSite', name: BRAND.name, url: new URL(BASE, site).href },
-      publisher: { '@type': 'Organization', name: content.settings.legal_name ?? BRAND.name },
-    },
+// The page node is the layout's (`WebPage` at the canonical address, not an
+// `Article`: a document of the company, not a publication); here — its crumbs,
+// the edition date and whose document it is. «Реквизиты и контакты» is the
+// site's contact page.
+// Узел страницы строит раскладка (`WebPage` по каноническому адресу, не
+// `Article`: документ компании, а не публикация); здесь — крошки, дата
+// редакции и чей это документ. «Реквизиты и контакты» — контактная страница
+// сайта.
+const org = { '@id': orgId(site.origin) };
+const schema: PageSchema = {
+  type: page.slug === DOC.requisites ? 'ContactPage' : 'WebPage',
+  crumbs: [
+    { name: 'Главная', url: new URL(BASE, site).href },
+    { name: 'Документы', url: docsUrl },
+    { name: page.title, url },
   ],
+  fields: { about: org, publisher: org, dateModified: page.revised },
 };
 ---
 
-<BaseLayout content={content} title={title} description={description} landing={false}>
-  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} is:inline />
+<BaseLayout content={content} title={title} description={description} landing={false} schema={schema}>
   <Header content={content} over={false} />
 
   <main id="main" class="doc" tabindex="-1">

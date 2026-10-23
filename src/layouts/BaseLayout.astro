@@ -77,9 +77,11 @@ import { getImage, Image } from 'astro:assets';
 import logo from '../assets/logo.png';
 import BookingDialog from '../components/BookingDialog.astro';
 import StickyBar from '../components/StickyBar.astro';
-import { BRAND, schemaHours, yandexOrgUrl } from '../data/site';
+import { BRAND } from '../data/site';
 import { HERO_SIZES, widthsFor } from '../lib/hero.ts';
 import { orderLinkFor } from '../lib/nav.ts';
+import { layoutGraph, type PageSchema } from '../lib/seo.ts';
+import { shareImage } from '../lib/share-image.ts';
 import type { Content, Img } from '../lib/content.ts';
 
 interface Props {
@@ -102,6 +104,22 @@ interface Props {
   ogImage?: Img;
   /** своё действие нижней полосы на телефоне вместо «Заказать доставку» */
   stickyAction?: { label: string; href: string };
+  /**
+   * Schema.org of this very page: the kind of its `WebPage` node, its crumbs
+   * and extra fields (documents). The layout builds the node, so a page never
+   * prints a second one at its canonical address.
+   * Разметка самой страницы: вид узла `WebPage`, крошки и дополнительные поля
+   * (документы). Узел строит раскладка, поэтому второго узла по каноническому
+   * адресу страница не печатает.
+   */
+  schema?: PageSchema;
+  /**
+   * Key phrases of the page for `<meta name="keywords">`: search engines
+   * ignore it, the owner asked for it; empty — no tag.
+   * Ключевые фразы страницы для `<meta name="keywords">`: поисковики его не
+   * учитывают, владелец попросил; пусто — тега нет.
+   */
+  keywords?: string[];
 }
 
 const { content, stickyBar = true, landing = true, stickyAction } = Astro.props;
@@ -109,6 +127,7 @@ const { home, settings, places } = content;
 
 const title = Astro.props.title ?? home.seo_title;
 const description = Astro.props.description ?? home.seo_description;
+const keywords = (Astro.props.keywords ?? []).map((k) => k.trim()).filter(Boolean);
 const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://example.com');
 
 // на превью-сборке сайт лежит в подкаталоге, поэтому файлы из `public` — через `base`
@@ -162,36 +181,57 @@ k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNo
 ym(${metrikaId},'init',{ssr:true,webvisor:true,clickmap:true,ecommerce:"dataLayer",referrer:document.referrer,url:location.href,accurateTrackBounce:true,trackLinks:true});`
   : null;
 
-// Разметка организации: две точки одной компании.
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@graph': places.map((place) => ({
-    // кондитерская печёт, ресторан кормит: рубрика у точек разная
-    '@type': place.kind.toLowerCase().includes('ресторан') ? 'Restaurant' : 'Bakery',
-    '@id': `${canonical.origin}/#place-${place.n}`,
-    name: `${BRAND.name} — ${place.name}`,
-    description,
-    telephone: place.phone,
-    url: canonical.origin,
-    sameAs: [yandexOrgUrl(place.yandex_org)],
-    priceRange: '₽₽',
-    servesCuisine: place.kind.toLowerCase().includes('ресторан')
-      ? ['Европейская', 'Завтраки', 'Десерты']
-      : ['Кондитерская', 'Завтраки', 'Кофе'],
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: place.name,
-      addressLocality: BRAND.city,
-      addressCountry: 'RU',
-    },
-    geo: { '@type': 'GeoCoordinates', latitude: place.lat, longitude: place.lng },
-    hasMap: yandexOrgUrl(place.yandex_org),
-    image: ogImage.href,
-    openingHours: schemaHours(place.schedule),
-    // без aggregateRating: Google запрещает переносить в разметку оценки
-    // с чужих площадок, а собственных отзывов у сайта нет
-  })),
-};
+// Schema.org graph of every page (`src/lib/seo.ts`): the company, the site,
+// the two venues and the page itself; the page's own blocks come through the
+// `head` slot and point at these ids.
+// Граф Schema.org каждой страницы (`src/lib/seo.ts`): компания, сайт, две
+// точки и сама страница; свои блоки страницы приходят через слот `head` и
+// ссылаются на эти идентификаторы.
+const logoImage = await getImage({ src: logo, width: 600, format: 'png' });
+// the venues show the company's picture, not the page's (catering's hero on
+// the catering pages is not a picture of the cafe)
+// у точек — картинка компании, а не страницы (кадр кейтеринга на его
+// страницах — не снимок кафе)
+const brandImage = !Astro.props.ogImage
+  ? ogImage.href
+  : home.og_image
+    ? new URL(
+        (await getImage({ src: home.og_image.src, width: 1200, height: 630, fit: 'cover', format: 'jpeg' })).src,
+        canonical,
+      ).href
+    : new URL(asset('og.jpg'), canonical).href;
+// a venue's own photo: the first real shot of its gallery
+// своё фото точки — первый настоящий кадр её галереи
+const placeImages = Object.fromEntries(
+  await Promise.all(
+    places.map(async (place) => [
+      place.n,
+      await shareImage(place.gallery.find((shot) => !shot.image.placeholder)?.image, canonical),
+    ]),
+  ),
+);
+// the 404 is not a page of the site: the company and the venues, no `WebPage`
+// 404 — не страница сайта: компания и точки, без `WebPage`
+const notFound = /\/404(\.html)?\/?$/.test(Astro.url.pathname);
+const jsonLd = layoutGraph(content, canonical, {
+  logo: {
+    url: new URL(logoImage.src, canonical).href,
+    width: Number(logoImage.attributes.width) || undefined,
+    height: Number(logoImage.attributes.height) || undefined,
+  },
+  images: { brand: brandImage, byPlace: placeImages },
+  page: notFound
+    ? null
+    : {
+        url: canonical.href,
+        name: title,
+        description,
+        // 1200×630: the cut of `getImage` above and the size of `public/og.jpg`
+        // 1200×630: обрезка `getImage` выше и размер `public/og.jpg`
+        image: { url: ogImage.href, width: 1200, height: 630 },
+        ...Astro.props.schema,
+      },
+});
 ---
 
 <!doctype html>
@@ -201,6 +241,7 @@ const jsonLd = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {keywords.length > 0 && <meta name="keywords" content={keywords.join(', ')} />}
     <link rel="canonical" href={canonical.href} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="icon" href={asset('favicon.svg')} type="image/svg+xml" />
