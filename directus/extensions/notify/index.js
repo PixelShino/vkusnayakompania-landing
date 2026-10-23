@@ -10,10 +10,10 @@
  * Since 23.10.2026 the order's Telegram message is alive: buttons under it move
  * the order («В работу», «Выполнен», «Отменить» with a second step), a status
  * change from anywhere — a button or the admin — rewrites that message with
- * «▶️ В работе — Дмитрий, 12:40» instead of posting a new one. An order paid
+ * «В работе — Дмитрий, 12:40» instead of posting a new one. An order paid
  * online is announced only once the bank confirmed the payment (an unpaid one
  * stays in the admin as «Ждём оплату» and never reaches the chat); the message
- * then already says «💳 оплачен онлайн». Presses are fetched by long polling
+ * then already says «оплачен онлайн». Presses are fetched by long polling
  * (`getUpdates`) through the relay;
  * `TELEGRAM_BUTTONS=off` turns the polling off (a second copy of Directus with
  * the same bot would steal the presses).
@@ -31,10 +31,10 @@
  * С 23.10.2026 сообщение заказа в Telegram живое: кнопки под ним переводят
  * заказ («В работу», «Выполнен», «Отменить» со вторым шагом), смена статуса
  * откуда угодно — кнопкой или из админки — переписывает это сообщение строкой
- * «▶️ В работе — Дмитрий, 12:40», а не шлёт новое. Заказ с оплатой онлайн
+ * «В работе — Дмитрий, 12:40», а не шлёт новое. Заказ с оплатой онлайн
  * объявляется только после подтверждения банка (неоплаченный остаётся в
  * админке как «Ждём оплату» и в чат не попадает); в сообщении тогда уже стоит
- * «💳 оплачен онлайн». Нажатия забираются долгим опросом (`getUpdates`) через
+ * «оплачен онлайн». Нажатия забираются долгим опросом (`getUpdates`) через
  * ретранслятор;
  * `TELEGRAM_BUTTONS=off` выключает опрос (вторая копия Directus с тем же ботом
  * отбирала бы нажатия).
@@ -349,10 +349,10 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
 
   /**
    * The payment moved. A paid order not announced yet goes out now, already
-   * with «💳 оплачен онлайн»; an announced one has its message rewritten. No
+   * with «оплачен онлайн»; an announced one has its message rewritten. No
    * extra message either way.
    * Оплата сменилась. Оплаченный, но ещё не объявленный заказ уходит сейчас,
-   * уже с «💳 оплачен онлайн»; объявленный — переписывается. Лишних сообщений
+   * уже с «оплачен онлайн»; объявленный — переписывается. Лишних сообщений
    * нет в обоих случаях.
    */
   const onPayment = async (key, payload, context = {}) => {

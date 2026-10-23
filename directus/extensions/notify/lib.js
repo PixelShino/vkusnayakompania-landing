@@ -31,14 +31,15 @@ const STATUS_WORDS = {
 };
 // what the order status looks like in a Telegram line and on a button
 // как статус заказа выглядит в строке Telegram и на кнопке
-export const STATUS_MARKS = { new: '🆕', in_work: '▶️', done: '✅', cancelled: '❌' };
+// the owner wants the order plain: no emoji anywhere in it / владелец хочет заказ без эмодзи
+export const STATUS_MARKS = { new: '', in_work: '', done: '', cancelled: '' };
 // what the payment of the order says in the message: online orders only
 // что сообщение говорит об оплате заказа: только для оплаты онлайн
 const PAYMENT_WORDS = {
-  pending: '⏳ ждём оплату онлайн',
-  paid: '💳 оплачен онлайн',
-  failed: '✗ оплата онлайн не прошла',
-  refunded: '↩️ оплата возвращена',
+  pending: 'ждём оплату онлайн',
+  paid: 'оплачен онлайн',
+  failed: 'оплата онлайн не прошла',
+  refunded: 'оплата возвращена',
 };
 const VENUE_WORDS = { hall: 'в нашем зале', offsite: 'выезд', unknown: 'место пока не выбрано' };
 const SOURCE_WORDS = { site: 'сайт', phone: 'телефон', app: 'приложение', messenger: 'мессенджер' };
@@ -215,25 +216,25 @@ export const orderModel = (order, { place = null, adminUrl = null, now = new Dat
       order.manager_note ? order.manager_note : null,
       order.source && order.source !== 'site' ? `Источник: ${SOURCE_WORDS[order.source] ?? order.source}` : null,
     ].filter(Boolean),
-    // who moved the order where, newest last: «▶️ В работе — Дмитрий, 12:40»
-    // кто и куда перевёл заказ, свежее внизу: «▶️ В работе — Дмитрий, 12:40»
+    // who moved the order where, newest last: «В работе — Дмитрий, 12:40»
+    // кто и куда перевёл заказ, свежее внизу: «В работе — Дмитрий, 12:40»
     history: meta.history.map((entry) => historyLine(entry, now)),
     keyboard: telegramKeyboard(order),
     adminUrl,
   };
 };
 
-/** «Оплата: 💳 оплачен онлайн, 12:41» for an online order; nothing for the rest. / Для заказа с оплатой онлайн; остальным — ничего. */
+/** «Оплата: оплачен онлайн, 12:41» for an online order; nothing for the rest. / Для заказа с оплатой онлайн; остальным — ничего. */
 export const paymentLine = (order, now = new Date()) => {
   const word = PAYMENT_WORDS[order.payment_status];
   if (!word) return null;
   const at = order.payment_status === 'paid' && order.paid_at ? whenText(order.paid_at, now) : '';
-  return `Оплата: ${isTestPayment(order) ? '🧪 ТЕСТ, деньги не списывались · ' : ''}${word}${at ? `, ${at}` : ''}`;
+  return `Оплата: ${isTestPayment(order) ? 'тест · ' : ''}${word}${at ? `, ${at}` : ''}`;
 };
 
 /** A payment with no money behind it: the bank's test shop or the stub. / Платёж без денег: тестовый магазин банка или заглушка. */
 export const isTestPayment = (order = {}) => order.payment_test === true || order.payment_test === 1 || order.payment_test === 'true';
-export const TEST_MARK = '🧪 ТЕСТ · ';
+export const TEST_MARK = 'ТЕСТ · ';
 
 // ── the order in Telegram: buttons, presses, history / заказ в Telegram ──────
 
@@ -259,13 +260,12 @@ export const telegramMeta = (order = {}) => {
   };
 };
 
-/** «▶️ В работе — Дмитрий, 12:40», «✅ Выполнен — Ирина · админка, 21.10 15:02» */
+/** «В работе — Дмитрий, 12:40», «Выполнен — Ирина · админка, 21.10 15:02» */
 export const historyLine = (entry, now = new Date()) => {
   const word = STATUS_WORDS.orders[entry.status] ?? entry.status;
-  const mark = STATUS_MARKS[entry.status] ?? '•';
   const via = entry.via === 'admin' ? ' · админка' : entry.via === 'site' ? ' · сайт' : '';
   const at = entry.at ? whenText(entry.at, now) : '';
-  return `${mark} ${word} — ${entry.who || 'без имени'}${via}${at ? `, ${at}` : ''}`;
+  return `${word} — ${entry.who || 'без имени'}${via}${at ? `, ${at}` : ''}`;
 };
 
 /** The same entry for the order card: «23.10 12:40 — В работе — Дмитрий (Telegram)». / Та же запись для карточки заказа. */
@@ -292,11 +292,11 @@ export const telegramKeyboard = (order = {}, { confirm = false } = {}) => {
   if (confirm) return [[button('Да, отменить заказ', id, 'cancelled'), button('Нет, оставить', id, 'keep')]];
   switch (order.status) {
     case 'new':
-      return [[button('▶️ В работу', id, 'in_work'), button('❌ Отменить', id, 'cancel?')]];
+      return [[button('В работу', id, 'in_work'), button('Отменить', id, 'cancel?')]];
     case 'in_work':
-      return [[button('✅ Выполнен', id, 'done'), button('❌ Отменить', id, 'cancel?')]];
+      return [[button('Выполнен', id, 'done'), button('Отменить', id, 'cancel?')]];
     case 'cancelled':
-      return [[button('↩️ Вернуть в работу', id, 'in_work')]];
+      return [[button('Вернуть в работу', id, 'in_work')]];
     default:
       return null;
   }

@@ -436,9 +436,9 @@ assert.ok(!scrub(`token ${TOKEN} leaked`, [TOKEN]).includes(TOKEN));
   // the buttons follow the status; a finished order has none; no id — none
   // кнопки по статусу; у выполненного нет; без id — нет
   const flat = (kb) => kb.flat().map((b) => `${b.text}|${b.callback_data}`);
-  assert.deepEqual(flat(telegramKeyboard({ id: 15, status: 'new' })), ['▶️ В работу|o:15:in_work', '❌ Отменить|o:15:cancel?']);
-  assert.deepEqual(flat(telegramKeyboard({ id: 15, status: 'in_work' })), ['✅ Выполнен|o:15:done', '❌ Отменить|o:15:cancel?']);
-  assert.deepEqual(flat(telegramKeyboard({ id: 15, status: 'cancelled' })), ['↩️ Вернуть в работу|o:15:in_work']);
+  assert.deepEqual(flat(telegramKeyboard({ id: 15, status: 'new' })), ['В работу|o:15:in_work', 'Отменить|o:15:cancel?']);
+  assert.deepEqual(flat(telegramKeyboard({ id: 15, status: 'in_work' })), ['Выполнен|o:15:done', 'Отменить|o:15:cancel?']);
+  assert.deepEqual(flat(telegramKeyboard({ id: 15, status: 'cancelled' })), ['Вернуть в работу|o:15:in_work']);
   assert.equal(telegramKeyboard({ id: 15, status: 'done' }), null);
   assert.equal(telegramKeyboard({ status: 'new' }), null);
   assert.deepEqual(flat(telegramKeyboard({ id: 15, status: 'new' }, { confirm: true })), ['Да, отменить заказ|o:15:cancelled', 'Нет, оставить|o:15:keep']);
@@ -472,9 +472,9 @@ assert.ok(!scrub(`token ${TOKEN} leaked`, [TOKEN]).includes(TOKEN));
   // the history under the order and the log line on the card / история под заказом и строка журнала в карточке
   const at = '2026-10-23T08:40:00Z'; // 12:40 в Самаре
   const today = new Date('2026-10-23T10:00:00Z');
-  assert.equal(historyLine({ status: 'in_work', who: 'Дмитрий Г.', via: 'telegram', at }, today), '▶️ В работе — Дмитрий Г., 12:40');
-  assert.equal(historyLine({ status: 'done', who: 'Ирина', via: 'admin', at }, new Date('2026-10-25T10:00:00Z')), '✅ Выполнен — Ирина · админка, 23.10 12:40');
-  assert.equal(historyLine({ status: 'cancelled', who: '', via: 'system', at }, today), '❌ Отменён — без имени, 12:40');
+  assert.equal(historyLine({ status: 'in_work', who: 'Дмитрий Г.', via: 'telegram', at }, today), 'В работе — Дмитрий Г., 12:40');
+  assert.equal(historyLine({ status: 'done', who: 'Ирина', via: 'admin', at }, new Date('2026-10-25T10:00:00Z')), 'Выполнен — Ирина · админка, 23.10 12:40');
+  assert.equal(historyLine({ status: 'cancelled', who: '', via: 'system', at }, today), 'Отменён — без имени, 12:40');
   assert.equal(statusLogLine({ status: 'in_work', who: 'Дмитрий Г.', via: 'telegram', at }), '23.10 12:40 — В работе — Дмитрий Г. (Telegram)');
   assert.equal(statusLogLine({ status: 'done', who: 'Ирина', via: 'admin', at }), '23.10 12:40 — Выполнен — Ирина (админка)');
 
@@ -491,27 +491,27 @@ assert.ok(!scrub(`token ${TOKEN} leaked`, [TOKEN]).includes(TOKEN));
   // the payment line: online orders only / строка оплаты: только онлайн
   assert.equal(paymentLine({ payment_status: 'none' }), null);
   assert.equal(paymentLine({}), null);
-  assert.equal(paymentLine({ payment_status: 'pending' }), 'Оплата: ⏳ ждём оплату онлайн');
-  assert.equal(paymentLine({ payment_status: 'paid', paid_at: at }, today), 'Оплата: 💳 оплачен онлайн, 12:40');
-  assert.equal(paymentLine({ payment_status: 'failed' }), 'Оплата: ✗ оплата онлайн не прошла');
-  assert.equal(paymentLine({ payment_status: 'refunded' }), 'Оплата: ↩️ оплата возвращена');
+  assert.equal(paymentLine({ payment_status: 'pending' }), 'Оплата: ждём оплату онлайн');
+  assert.equal(paymentLine({ payment_status: 'paid', paid_at: at }, today), 'Оплата: оплачен онлайн, 12:40');
+  assert.equal(paymentLine({ payment_status: 'failed' }), 'Оплата: оплата онлайн не прошла');
+  assert.equal(paymentLine({ payment_status: 'refunded' }), 'Оплата: оплата возвращена');
 
   // a test-shop payment is marked everywhere: the headline, the payment line, the paid reply
   // оплата тестовым магазином помечена везде: заголовок, строка оплаты, ответ об оплате
   const trial = orderModel({ ...order, status: 'new', payment_status: 'paid', paid_at: at, payment_test: true }, { adminUrl: URL, now: today });
-  assert.equal(sp(trial.headline), '🧪 ТЕСТ · Заказ №1910-4821 — 2 450 ₽');
-  assert.ok(trial.facts.includes('Оплата: 🧪 ТЕСТ, деньги не списывались · 💳 оплачен онлайн, 12:40'), trial.facts.join(' | '));
-  assert.equal(orderModel({ ...order, payment_test: false }).headline.startsWith('🧪'), false);
+  assert.equal(sp(trial.headline), 'ТЕСТ · Заказ №1910-4821 — 2 450 ₽');
+  assert.ok(trial.facts.includes('Оплата: тест · оплачен онлайн, 12:40'), trial.facts.join(' | '));
+  assert.equal(orderModel({ ...order, payment_test: false }).headline.startsWith('ТЕСТ'), false);
   // the whole message with payment, history and buttons / всё сообщение с оплатой, историей и кнопками
   const live = orderModel(
     { ...order, status: 'in_work', payment_status: 'paid', paid_at: at, telegram_meta: { messages: [{ chat: '-1001234567890', message_id: 42 }], history: [{ status: 'in_work', who: 'Дмитрий Г.', via: 'telegram', at }] } },
     { adminUrl: URL, now: today },
   );
   const text = sp(telegramText(live));
-  assert.ok(text.includes('Когда: Сегодня к 18:00\nОплата: 💳 оплачен онлайн, 12:40\n'), text);
-  assert.ok(text.endsWith('не стучите\n\n▶️ В работе — Дмитрий Г., 12:40\n\n<a href="' + URL + '">Открыть в админке</a>'), text);
+  assert.ok(text.includes('Когда: Сегодня к 18:00\nОплата: оплачен онлайн, 12:40\n'), text);
+  assert.ok(text.endsWith('не стучите\n\nВ работе — Дмитрий Г., 12:40\n\n<a href="' + URL + '">Открыть в админке</a>'), text);
   assert.deepEqual(live.keyboard.flat().map((b) => b.callback_data), ['o:15:done', 'o:15:cancel?']);
-  assert.ok(sp(emailText(live)).includes('\n\n▶️ В работе — Дмитрий Г., 12:40\n\nОткрыть в админке'));
+  assert.ok(sp(emailText(live)).includes('\n\nВ работе — Дмитрий Г., 12:40\n\nОткрыть в админке'));
   // the status notice and the request carry neither / у уведомления о статусе и у заявки ни того ни другого
   assert.equal(statusModel(live, 'done').keyboard, null);
   assert.deepEqual(statusModel(live, 'done').history, []);
