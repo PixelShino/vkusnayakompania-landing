@@ -244,7 +244,10 @@ export const TEST_MARK = '🧪 ТЕСТ · ';
  * Что расширение `notify` хранит у заказа в `telegram_meta`: отправленные
  * сообщения (чтобы потом их править) и кто когда менял статус. `job` — талон
  * очереди ретранслятора у сообщения, чей id ещё неизвестен.
- * @returns {{ messages: Array<{ chat: string, message_id?: number, job?: number }>, history: Array<{ status: string, who: string, via: string, at: string }> }}
+ * `announced` — the order already went out to the channels (an online order
+ * waits for the bank before it does).
+ * `announced` — заказ уже ушёл в каналы (заказ с оплатой онлайн ждёт банк).
+ * @returns {{ messages: Array<{ chat: string, message_id?: number, job?: number }>, history: Array<{ status: string, who: string, via: string, at: string }>, announced: boolean }}
  */
 export const telegramMeta = (order = {}) => {
   const raw = json(order.telegram_meta, null);
@@ -252,6 +255,7 @@ export const telegramMeta = (order = {}) => {
   return {
     messages: Array.isArray(meta.messages) ? meta.messages.filter((m) => m && m.chat) : [],
     history: Array.isArray(meta.history) ? meta.history.filter((h) => h && h.status) : [],
+    announced: meta.announced === true,
   };
 };
 
@@ -398,23 +402,6 @@ export const statusModel = (base, status) => {
     vars: { ...base.vars, status: word },
   };
 };
-
-/** «💳 Заказ №2310-4521 оплачен онлайн — 5 440 ₽»: the reply under the order when ЮKassa confirms. / Ответ под заказом, когда ЮKassa подтвердила оплату. */
-export const paidModel = (base, order) => ({
-  ...base,
-  kind: 'order_paid',
-  headline: isTestPayment(order)
-    ? `🧪 ТЕСТ · Заказ №${base.number}: пробная оплата прошла — ${rub(order.to_pay ?? order.total)}, деньги не списывались, не готовить`
-    : `💳 Заказ №${base.number} оплачен онлайн — ${rub(order.to_pay ?? order.total)}`,
-  person: '',
-  facts: [],
-  lines: [],
-  total: null,
-  notes: [],
-  history: [],
-  keyboard: null,
-  adminUrl: null,
-});
 
 /** `{number}` → value; an unknown key stays as typed so the editor sees the typo. / Неизвестный ключ остаётся как есть — опечатка видна. */
 export const fillTemplate = (template, vars) =>
@@ -622,13 +609,8 @@ export const telegramCall = async ({
   }
 };
 
-/**
- * One message to one chat, HTML, with buttons under an order and as a reply
- * under an earlier message when asked.
- * Одно сообщение в один чат, HTML, с кнопками под заказом и ответом под
- * прежним сообщением, когда просят.
- */
-export const sendTelegram = ({ chatId, text, keyboard = null, replyTo = null, ...rest }) =>
+/** One message to one chat, HTML, with buttons under an order. / Одно сообщение в один чат, HTML, с кнопками под заказом. */
+export const sendTelegram = ({ chatId, text, keyboard = null, ...rest }) =>
   telegramCall({
     ...rest,
     method: 'sendMessage',
@@ -638,7 +620,6 @@ export const sendTelegram = ({ chatId, text, keyboard = null, replyTo = null, ..
       parse_mode: 'HTML',
       disable_web_page_preview: true,
       ...(keyboard ? { reply_markup: { inline_keyboard: keyboard } } : {}),
-      ...(replyTo ? { reply_to_message_id: replyTo, allow_sending_without_reply: true } : {}),
     },
   });
 
@@ -803,7 +784,6 @@ export const deliver = async ({ model, settings, mail, sendMail, fetchImpl, dela
         chatId: chat.id,
         text,
         keyboard: model.keyboard ?? null,
-        replyTo: model.replyTo?.[chat.id] ?? null,
         fetchImpl,
         delays,
         sleep,

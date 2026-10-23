@@ -10,9 +10,11 @@
  * Since 23.10.2026 the order's Telegram message is alive: buttons under it move
  * the order («В работу», «Выполнен», «Отменить» with a second step), a status
  * change from anywhere — a button or the admin — rewrites that message with
- * «▶️ В работе — Дмитрий, 12:40» instead of posting a new one, and a payment
- * confirmed by the bank adds «💳 оплачен онлайн» and a short reply under the
- * order. Presses are fetched by long polling (`getUpdates`) through the relay;
+ * «▶️ В работе — Дмитрий, 12:40» instead of posting a new one. An order paid
+ * online is announced only once the bank confirmed the payment (an unpaid one
+ * stays in the admin as «Ждём оплату» and never reaches the chat); the message
+ * then already says «💳 оплачен онлайн». Presses are fetched by long polling
+ * (`getUpdates`) through the relay;
  * `TELEGRAM_BUTTONS=off` turns the polling off (a second copy of Directus with
  * the same bot would steal the presses).
  * Also `POST /notify/test` (administrators only): a demo order through the
@@ -29,9 +31,11 @@
  * С 23.10.2026 сообщение заказа в Telegram живое: кнопки под ним переводят
  * заказ («В работу», «Выполнен», «Отменить» со вторым шагом), смена статуса
  * откуда угодно — кнопкой или из админки — переписывает это сообщение строкой
- * «▶️ В работе — Дмитрий, 12:40», а не шлёт новое, а подтверждённая банком
- * оплата добавляет «💳 оплачен онлайн» и короткий ответ под заказом. Нажатия
- * забираются долгим опросом (`getUpdates`) через ретранслятор;
+ * «▶️ В работе — Дмитрий, 12:40», а не шлёт новое. Заказ с оплатой онлайн
+ * объявляется только после подтверждения банка (неоплаченный остаётся в
+ * админке как «Ждём оплату» и в чат не попадает); в сообщении тогда уже стоит
+ * «💳 оплачен онлайн». Нажатия забираются долгим опросом (`getUpdates`) через
+ * ретранслятор;
  * `TELEGRAM_BUTTONS=off` выключает опрос (вторая копия Directus с тем же ботом
  * отбирала бы нажатия).
  * И `POST /notify/test` (только администратор): пример заказа по тем же каналам
@@ -51,7 +55,6 @@ import {
   mailState,
   normalizeSettings,
   orderModel,
-  paidModel,
   parseCallback,
   pollTelegram,
   pressedBy,
@@ -129,13 +132,20 @@ const writeLog = async (database, event, model, key, results) => {
 const saveMeta = (database, key, meta) =>
   database('orders')
     .where({ id: key })
-    .update({ telegram_meta: JSON.stringify({ messages: meta.messages, history: meta.history.slice(-HISTORY_KEEP) }) });
+    .update({ telegram_meta: JSON.stringify({ messages: meta.messages, history: meta.history.slice(-HISTORY_KEEP), announced: meta.announced === true }) });
 
 /** The messages a delivery produced, remembered so they can be edited later. / Сообщения рассылки — чтобы потом их править. */
-const rememberSent = async (database, key, row, results) => {
+const rememberSent = async (database, key, row, results, { announced = false } = {}) => {
   const sent = results.filter((r) => r.channel === 'telegram' && (r.messageId || r.job));
-  if (!sent.length) return;
   const meta = telegramMeta(row);
+  if (announced) meta.announced = true;
+  if (!sent.length) {
+    if (announced) {
+      await saveMeta(database, key, meta);
+      row.telegram_meta = meta;
+    }
+    return;
+  }
   for (const r of sent) {
     const found = meta.messages.find((m) => String(m.chat) === String(r.chat));
     const entry = r.messageId ? { chat: String(r.chat), message_id: r.messageId } : { chat: String(r.chat), job: r.job };
@@ -169,7 +179,19 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
     bases: telegramBases(env),
   });
 
-  /** A new order or request: the message to every channel, as before. / Новый заказ или заявка: сообщение по всем каналам, как раньше. */
+  /** Whether the order was already announced to the channels. / Объявлен ли заказ каналам. */
+  const announced = (row) => telegramMeta(row).announced === true;
+  /** An online order waits for the bank: no message until the money is in. / Заказ с оплатой онлайн ждёт банк: без оплаты сообщения нет. */
+  const awaitsPayment = (row) => row.payment_method === 'online' && row.payment_status !== 'paid';
+
+  /**
+   * A new order or request: the message to every channel. An order paid
+   * online is announced when the bank confirms, not when the guest fills the
+   * form: the kitchen sees paid orders only.
+   * Новый заказ или заявка: сообщение по всем каналам. Заказ с оплатой онлайн
+   * объявляется, когда банк подтвердил, а не когда гость заполнил форму: кухня
+   * видит только оплаченные.
+   */
   const announce = async (event, collection, key, { database = db, schema } = {}) => {
     try {
       const settings = await loadSettings(database);
@@ -180,10 +202,17 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
         await database(collection).where({ id: key }).update({ notify_result: 'не рассылалось: заведено в админке вручную' });
         return;
       }
+      if (collection === 'orders') {
+        if (announced(row)) return;
+        if (awaitsPayment(row)) {
+          await database(collection).where({ id: key }).update({ notify_result: 'ждёт оплату онлайн — уйдёт, когда банк подтвердит' });
+          return;
+        }
+      }
       const { results, summary } = await deliver({ model, settings, secrets: secretsOf(env, settings), ...(await senders(database, schema)) });
       await writeLog(database, event, model, key, results);
       await database(collection).where({ id: key }).update({ notify_result: summary });
-      if (collection === 'orders') await rememberSent(database, key, row, results);
+      if (collection === 'orders') await rememberSent(database, key, row, results, { announced: true });
       const failed = results.filter((r) => r.status === 'failed');
       if (failed.length) logger.warn(`notify: ${event} ${key} — ${summary}`);
       else logger.info(`notify: ${event} ${key} — ${summary}`);
@@ -289,6 +318,9 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
       const first = await database('orders').where({ id: key }).first();
       if (!first) return;
       const meta = telegramMeta(first);
+      // an order nobody heard of (unpaid online) keeps its history to itself
+      // заказ, о котором никто не слышал (неоплаченный онлайн), историю никому не шлёт
+      const quiet = !announced(first);
       const entry = { status, who: actor.who, via: actor.via, at: new Date().toISOString() };
       meta.history.push(entry);
       const line = statusLogLine(entry);
@@ -298,6 +330,7 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
           telegram_meta: JSON.stringify({ messages: meta.messages, history: meta.history.slice(-HISTORY_KEEP) }),
           status_log: first.status_log ? `${first.status_log}\n${line}` : line,
         });
+      if (quiet) return;
       const loaded = await loadModel(database, env, collection, key);
       if (!loaded) return;
       const { edited } = await refresh(database, settings, key, loaded.row, loaded.model, event);
@@ -314,25 +347,29 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
     }
   };
 
-  /** The payment moved: the line in the message, and a reply when the bank confirmed. / Оплата сменилась: строка в сообщении и ответ, когда банк подтвердил. */
-  const onPayment = async (key, paymentStatus, { database = db, schema } = {}) => {
+  /**
+   * The payment moved. A paid order not announced yet goes out now, already
+   * with «💳 оплачен онлайн»; an announced one has its message rewritten. No
+   * extra message either way.
+   * Оплата сменилась. Оплаченный, но ещё не объявленный заказ уходит сейчас,
+   * уже с «💳 оплачен онлайн»; объявленный — переписывается. Лишних сообщений
+   * нет в обоих случаях.
+   */
+  const onPayment = async (key, payload, context = {}) => {
+    const { database = db } = context;
     try {
+      const first = await database('orders').where({ id: key }).first();
+      if (!first) return;
+      if (!announced(first)) {
+        // paid, or the guest chose to pay on delivery after all: now it is a real order
+        // оплачен — или гость всё-таки выбрал оплату при получении: теперь это настоящий заказ
+        if (payload.payment_status === 'paid' || (payload.payment_method === 'on_delivery' && !awaitsPayment(first))) await announce('order_new', 'orders', key, context);
+        return;
+      }
       const settings = await loadSettings(database);
       const loaded = await loadModel(database, env, 'orders', key);
       if (!loaded) return;
-      const { row, model } = loaded;
-      const { meta } = await refresh(database, settings, key, row, model, 'order_payment');
-      if (paymentStatus !== 'paid' || MANUAL_SOURCES.has(row.source)) return;
-      const replyTo = Object.fromEntries(meta.messages.filter((m) => m.message_id).map((m) => [String(m.chat), m.message_id]));
-      const paid = { ...paidModel(model, row), replyTo };
-      const { results } = await deliver({
-        model: paid,
-        settings: { ...settings, email_enabled: false },
-        secrets: secretsOf(env, settings),
-        ...(await senders(database, schema)),
-      });
-      await writeLog(database, 'order_paid', paid, key, results);
-      logger.info(`notify: заказ ${key} оплачен — ${results.map((r) => `${r.recipient}: ${r.status}`).join(', ') || 'Telegram не настроен'}`);
+      await refresh(database, settings, key, loaded.row, loaded.model, 'order_payment');
     } catch (error) {
       logger.warn(`notify: оплата заказа ${key} — ${error.message}`);
     }
@@ -425,7 +462,7 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
           if (collection === 'orders') serial(key, () => onStatus(collection, key, payload.status, context));
           else onStatus(collection, key, payload.status, context);
         }
-        if (collection === 'orders' && 'payment_status' in payload) serial(key, () => onPayment(key, payload.payment_status, context));
+        if (collection === 'orders' && ('payment_status' in payload || 'payment_method' in payload)) serial(key, () => onPayment(key, payload, context));
       }
     });
   }

@@ -16,7 +16,6 @@ import {
   editTelegram,
   editTelegramKeyboard,
   historyLine,
-  paidModel,
   parseCallback,
   paymentLine,
   pollTelegram,
@@ -481,11 +480,12 @@ assert.ok(!scrub(`token ${TOKEN} leaked`, [TOKEN]).includes(TOKEN));
 
   // the memory on the order: a string from the database or an object, junk ignored
   // память у заказа: строка из базы или объект, мусор пропускается
-  assert.deepEqual(telegramMeta({}), { messages: [], history: [] });
-  assert.deepEqual(telegramMeta({ telegram_meta: 'не json' }), { messages: [], history: [] });
-  assert.deepEqual(telegramMeta({ telegram_meta: JSON.stringify({ messages: [{ chat: '-1', message_id: 7 }, null, { job: 3 }], history: [{ status: 'done' }, {}] }) }), {
+  assert.deepEqual(telegramMeta({}), { messages: [], history: [], announced: false });
+  assert.deepEqual(telegramMeta({ telegram_meta: 'не json' }), { messages: [], history: [], announced: false });
+  assert.deepEqual(telegramMeta({ telegram_meta: JSON.stringify({ messages: [{ chat: '-1', message_id: 7 }, null, { job: 3 }], history: [{ status: 'done' }, {}], announced: true }) }), {
     messages: [{ chat: '-1', message_id: 7 }],
     history: [{ status: 'done' }],
+    announced: true,
   });
 
   // the payment line: online orders only / строка оплаты: только онлайн
@@ -501,7 +501,6 @@ assert.ok(!scrub(`token ${TOKEN} leaked`, [TOKEN]).includes(TOKEN));
   const trial = orderModel({ ...order, status: 'new', payment_status: 'paid', paid_at: at, payment_test: true }, { adminUrl: URL, now: today });
   assert.equal(sp(trial.headline), '🧪 ТЕСТ · Заказ №1910-4821 — 2 450 ₽');
   assert.ok(trial.facts.includes('Оплата: 🧪 ТЕСТ, деньги не списывались · 💳 оплачен онлайн, 12:40'), trial.facts.join(' | '));
-  assert.equal(sp(paidModel(trial, { ...order, payment_test: true, to_pay: 2450 }).headline), '🧪 ТЕСТ · Заказ №1910-4821: пробная оплата прошла — 2 450 ₽, деньги не списывались, не готовить');
   assert.equal(orderModel({ ...order, payment_test: false }).headline.startsWith('🧪'), false);
   // the whole message with payment, history and buttons / всё сообщение с оплатой, историей и кнопками
   const live = orderModel(
@@ -517,10 +516,6 @@ assert.ok(!scrub(`token ${TOKEN} leaked`, [TOKEN]).includes(TOKEN));
   assert.equal(statusModel(live, 'done').keyboard, null);
   assert.deepEqual(statusModel(live, 'done').history, []);
   assert.equal(requestModel(request).keyboard, null);
-  // the paid reply / ответ об оплате
-  const paid = paidModel(live, { ...order, to_pay: 2050 });
-  assert.equal(sp(paid.headline), '💳 Заказ №1910-4821 оплачен онлайн — 2 050 ₽');
-  assert.equal(sp(telegramText(paid)), '<b>💳 Заказ №1910-4821 оплачен онлайн — 2 050 ₽</b>');
   // the demo has no buttons: it is not an order anyone can move / у примера кнопок нет
   assert.equal(demoModel('order').keyboard, null);
 }
@@ -530,7 +525,6 @@ assert.ok(!scrub(`token ${TOKEN} leaked`, [TOKEN]).includes(TOKEN));
   const { impl, calls } = fakeFetch([{ status: 200, body: { ok: true, result: { message_id: 42 } } }]);
   const { results } = await deliver({ model: live, settings: { ...settings, email_enabled: false }, mail: { ok: false, reason: 'x' }, fetchImpl: impl, sleep: noSleep, now: NOON });
   assert.deepEqual(calls[0].body.reply_markup.inline_keyboard.flat().map((b) => b.callback_data), ['o:15:in_work', 'o:15:cancel?']);
-  assert.equal(calls[0].body.reply_to_message_id, undefined);
   const tg = results.find((r) => r.channel === 'telegram');
   assert.equal(tg.status, 'sent');
   assert.equal(tg.chat, '-1001234567890');
@@ -543,12 +537,6 @@ assert.ok(!scrub(`token ${TOKEN} leaked`, [TOKEN]).includes(TOKEN));
   assert.equal(qt.status, 'queued');
   assert.equal(qt.messageId, null);
   assert.equal(qt.job, 9);
-  // a reply under the order's message / ответ под сообщением заказа
-  const p = fakeFetch([{ status: 200, body: { ok: true, result: { message_id: 43 } } }]);
-  const paid = { ...paidModel(live, order), replyTo: { '-1001234567890': 42 } };
-  await deliver({ model: paid, settings: { ...settings, email_enabled: false }, mail: { ok: false, reason: 'x' }, fetchImpl: p.impl, sleep: noSleep, now: NOON });
-  assert.equal(p.calls[0].body.reply_to_message_id, 42);
-  assert.equal(p.calls[0].body.reply_markup, undefined);
   // the status notice goes without buttons / уведомление о статусе — без кнопок
   const st = fakeFetch([{ status: 200, body: { ok: true, result: { message_id: 44 } } }]);
   await deliver({ model: statusModel(live, 'done'), settings: { ...settings, email_enabled: false }, mail: { ok: false, reason: 'x' }, fetchImpl: st.impl, sleep: noSleep, now: NOON });
