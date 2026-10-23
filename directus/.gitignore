@@ -14,3 +14,4 @@ extensions/*
 !extensions/guest-auth/
 !extensions/loyalty/
 !extensions/delivery/
+!extensions/email-guard/

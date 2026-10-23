@@ -11,6 +11,7 @@
  * обёртки над fetch: DOM у скриптов страниц, проверки гоняют эти функции.
  */
 import { add, empty, type Cart } from './cart.ts';
+import type { AddressInput, SavedAddress } from './addresses.ts';
 import {
   TX_LABEL,
   birthdayWindow,
@@ -44,7 +45,12 @@ export type Profile = {
   tier: string | null;
   guest_since: string | null;
   birthday_set_at: string | null;
+  /** сохранённые адреса «Дом / Работа / своя метка» — с 24.10.2026; у старых ответов их нет */
+  addresses?: SavedAddress[];
 };
+
+/** Одна смена статуса, как её видит гость: без имени сотрудника и канала. / One status move as the guest sees it. */
+export type OrderHistoryEntry = { status: string; at: string };
 
 export type OrderItem = { product: number; title: string; variant: string | null; filling: string | null; qty: number; price: number; sum: number };
 
@@ -68,6 +74,19 @@ export type Order = {
   discount: number | null;
   to_pay: number | null;
   bonus_earned: number | null;
+  /** полная карточка заказа — с 24.10.2026; у старых ответов `/me` этих полей нет */
+  delivery_zone?: string | null;
+  delivery_cost?: number | null;
+  address_details?: string | null;
+  comment?: string | null;
+  customer_name?: string | null;
+  phone?: string | null;
+  payment_method?: 'online' | 'on_delivery' | string | null;
+  payment_status?: 'none' | 'pending' | 'paid' | 'failed' | 'refunded' | string | null;
+  payment_test?: boolean | null;
+  paid_at?: string | null;
+  /** история статусов, старое сверху; первая запись — «Принят» датой заказа */
+  history?: OrderHistoryEntry[];
 };
 
 export type RawTx = {
@@ -191,6 +210,14 @@ export const accountApi = (base: string) => ({
   me: (token: string) => request<Me>(base, '/guest-auth/me', { token }).then((r) => r.data),
   saveProfile: (token: string, profile: ProfileInput) => request<Profile>(base, '/guest-auth/profile', { method: 'POST', token, body: profile }).then((r) => r.data),
   logout: (token: string) => request<null>(base, '/guest-auth/logout', { method: 'POST', token }).then(() => undefined),
+  // saved addresses: POST only — the admin's CORS allows GET and POST / сохранённые адреса: только POST — CORS админки пускает GET и POST
+  /** 400 `INVALID_ADDRESS` с `extensions.fields`, 409 `ADDRESS_LIMIT` — пять адресов уже есть */
+  addAddress: (token: string, input: AddressInput) =>
+    request<{ addresses: SavedAddress[]; id: string }>(base, '/guest-auth/addresses/add', { method: 'POST', token, body: input }).then((r) => r.data),
+  updateAddress: (token: string, id: string, input: AddressInput) =>
+    request<{ addresses: SavedAddress[] }>(base, '/guest-auth/addresses/update', { method: 'POST', token, body: { id, ...input } }).then((r) => r.data),
+  removeAddress: (token: string, id: string) =>
+    request<{ addresses: SavedAddress[] }>(base, '/guest-auth/addresses/remove', { method: 'POST', token, body: { id } }).then((r) => r.data),
 });
 
 // ── profile / профиль ──────────────────────────────────────────────────────
