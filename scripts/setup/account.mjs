@@ -24,18 +24,28 @@ export const GUEST_PROFILE_READ = [
   'bonus_balance', 'total_spent', 'tier', 'guest_since', 'birthday_set_at',
 ];
 export const GUEST_PROFILE_WRITE = ['first_name', 'middle_name', 'last_name', 'birthday', 'gender', 'recovery_email'];
-const GUEST_ORDER_READ = [
+// `ORDER_FIELDS` of `guest-auth` reads exactly these; never the staff's fields
+// (`status_log`, `telegram_meta`, `manager_note`, `payment_url/_id/_log/_meta`, `notify_result`)
+// `ORDER_FIELDS` расширения `guest-auth` читает ровно их; служебных полей — никогда
+export const GUEST_ORDER_READ = [
   'id', 'number', 'status', 'date_created', 'fulfillment', 'place', 'address', 'desired_time',
   'items', 'total', 'bonus_spent', 'discount', 'to_pay', 'bonus_earned', 'delivery_zone', 'delivery_cost',
   // the address by parts (since 23.10.2026) / адрес по пунктам (с 23.10.2026)
   'address_flat', 'address_entrance', 'address_floor', 'address_intercom',
+  // the full card in the account (since 24.10.2026) / полная карточка в кабинете (с 24.10.2026)
+  'comment', 'customer_name', 'phone', 'address_details',
+  'payment_method', 'payment_status', 'payment_test', 'paid_at',
 ];
 // what `order-guard` adds to a guest's order on top of the public fields
 // что `order-guard` добавляет к заказу гостя поверх публичных полей
 const GUEST_ORDER_EXTRA = ['customer', 'bonus_spent', 'discount', 'to_pay'];
 const GUEST_TX_READ = ['id', 'type', 'amount', 'date_created', 'expires_at', 'comment', 'order'];
+// `addresses` — the guest's saved addresses: the editor sees them, only the
+// guest changes them (through `/guest-auth/addresses/*`, not through the API)
+// `addresses` — сохранённые адреса гостя: редактор видит, меняет только гость
+// (маршрутами `/guest-auth/addresses/*`, не через API)
 const EDITOR_GUEST_READ = [
-  ...GUEST_PROFILE_READ, 'email', 'status', 'last_access', 'birthday_bonus_year', 'bonus_history', 'guest_orders',
+  ...GUEST_PROFILE_READ, 'email', 'status', 'last_access', 'birthday_bonus_year', 'bonus_history', 'guest_orders', 'addresses',
 ];
 const EDITOR_GUEST_WRITE = [...GUEST_PROFILE_WRITE, 'status', 'bonus_history'];
 const ONLY_GUESTS = { role: { name: { _eq: 'Гость' } } };

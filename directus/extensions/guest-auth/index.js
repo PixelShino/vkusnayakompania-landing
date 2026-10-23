@@ -23,6 +23,9 @@
  *   POST /guest-auth/verify   { phone, code? }     → { token, expires, created } | 202 { pending }
  *   GET  /guest-auth/me                            → profile, orders, points, programme
  *   POST /guest-auth/profile  { first_name, … }    → profile
+ *   POST /guest-auth/addresses/add     { label, address, flat?, entrance?, floor?, intercom? } → { addresses, id }
+ *   POST /guest-auth/addresses/update  { id, …the fields to change / что поменять }          → { addresses }
+ *   POST /guest-auth/addresses/remove  { id }                                                → { addresses }
  *   POST /guest-auth/logout                        → 204
  *
  * Code: four digits, five minutes, five tries; the table keeps only an HMAC of
@@ -43,6 +46,9 @@
  */
 import crypto from 'node:crypto';
 import { smsaero } from './smsaero.js';
+import { ADDRESS_ERROR_CODES, addressInput, applyAddressOp, cleanAddresses } from './addresses.js';
+import { RU_MAIL_ERROR, isRuEmail } from '../email-guard/domains.js';
+import { telegramMeta } from '../notify/lib.js';
 
 const GUEST_ROLE = 'Гость';
 const MINUTE = 60_000;
@@ -56,10 +62,26 @@ const PROFILE_FIELDS = [
   'id', 'first_name', 'middle_name', 'last_name', 'phone', 'birthday', 'gender', 'recovery_email',
   'bonus_balance', 'total_spent', 'tier', 'guest_since', 'birthday_set_at',
 ];
-const ORDER_FIELDS = [
+/** What the guest's read right gave before 24.10.2026. / Что давало право гостя на чтение до 24.10.2026. */
+export const LEGACY_ORDER_FIELDS = [
   'id', 'number', 'status', 'date_created', 'fulfillment', 'place', 'address', 'desired_time',
   'address_flat', 'address_entrance', 'address_floor', 'address_intercom', 'delivery_zone', 'delivery_cost',
   'items', 'total', 'bonus_spent', 'discount', 'to_pay', 'bonus_earned',
+];
+/**
+ * The full order card (since 24.10.2026) — the same list as `GUEST_ORDER_READ`
+ * in `scripts/setup/account.mjs`. Never the staff's fields: `status_log`,
+ * `telegram_meta` (names of the staff), `manager_note`, `payment_url/_id/_log/_meta`,
+ * `notify_result`.
+ * Полная карточка заказа (с 24.10.2026) — тот же список, что `GUEST_ORDER_READ`
+ * в `scripts/setup/account.mjs`. Без служебных полей: `status_log`,
+ * `telegram_meta` (имена сотрудников), `manager_note`, `payment_url/_id/_log/_meta`,
+ * `notify_result`.
+ */
+export const ORDER_FIELDS = [
+  ...LEGACY_ORDER_FIELDS,
+  'comment', 'customer_name', 'phone', 'address_details',
+  'payment_method', 'payment_status', 'payment_test', 'paid_at',
 ];
 const TX_FIELDS = ['id', 'type', 'amount', 'date_created', 'expires_at', 'comment', 'order.number'];
 
@@ -118,8 +140,38 @@ export const profileErrors = (input, today = samaraToday()) => {
   }
   if (input.gender && !['female', 'male'].includes(input.gender)) errors.gender = 'Выберите из списка';
   const email = String(input.recovery_email ?? '').trim();
-  if (email && (email.length > 120 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))) errors.recovery_email = 'Проверьте адрес: name@example.ru';
+  if (email && (email.length > 120 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))) errors.recovery_email = 'Проверьте адрес: name@mail.ru';
+  // Russian mail services only — the owner's decision (`email-guard/domains.js`)
+  // только российские почтовые службы — решение владельца (`email-guard/domains.js`)
+  else if (email && !isRuEmail(email)) errors.recovery_email = RU_MAIL_ERROR;
   return errors;
+};
+
+/**
+ * The order's status history as the guest sees it: «Принят» at the order's
+ * time, then the moves `notify` wrote into `telegram_meta.history` without
+ * who and how, the same status twice in a row once. An order whose status
+ * moved with no trace (before 23.10.2026) ends with its status at an unknown
+ * time (`at: null`).
+ * История статусов заказа, как её видит гость: «Принят» временем заказа, затем
+ * смены, которые `notify` записал в `telegram_meta.history`, — без того, кто и
+ * откуда, один и тот же статус подряд — один раз. Заказ, чей статус менялся
+ * без следа (до 23.10.2026), заканчивается своим статусом с неизвестным
+ * временем (`at: null`).
+ * @param {unknown} meta `orders.telegram_meta` как в базе (JSON-строка, объект, null)
+ * @param {string | Date | null} dateCreated
+ * @param {string | null} [status] текущий статус заказа
+ * @returns {Array<{ status: string, at: string | null }>}
+ */
+export const historyFor = (meta, dateCreated, status = null) => {
+  const iso = (value) => (value instanceof Date ? (Number.isNaN(value.getTime()) ? null : value.toISOString()) : value ? String(value) : null);
+  const out = [{ status: 'new', at: iso(dateCreated) }];
+  for (const entry of telegramMeta({ telegram_meta: meta }).history) {
+    if (typeof entry.status !== 'string' || out.at(-1).status === entry.status) continue;
+    out.push({ status: entry.status, at: iso(entry.at) });
+  }
+  if (typeof status === 'string' && status && out.at(-1).status !== status) out.push({ status, at: null });
+  return out;
 };
 
 const cleanProfile = (input) => {
@@ -181,6 +233,43 @@ export default {
     };
 
     const route = (handler) => (req, res, next) => handler(req, res).catch(next);
+
+    // after a deploy and before `pnpm setup` the guest may not read the new
+    // order fields yet: the account (and the points in the cart) must not fall
+    // with 403 — the old set is read, the log says so once
+    // после выкатки и до `pnpm setup` у гостя может ещё не быть права на новые
+    // поля заказа: кабинет (и баллы в корзине) не должны падать 403 — читается
+    // прежний набор, в логе об этом один раз
+    let legacyWarned = false;
+    const readOrders = async (items) => {
+      const query = { sort: ['-date_created'], limit: 100 };
+      try {
+        return await items.readByQuery({ ...query, fields: ORDER_FIELDS });
+      } catch (error) {
+        if (error?.code !== 'FORBIDDEN' && Number(error?.status) !== 403) throw error;
+        if (!legacyWarned) {
+          legacyWarned = true;
+          logger.warn('guest-auth: у роли «Гость» нет права на полную карточку заказа — кабинет показывает прежние поля. Прогоните `pnpm setup`');
+        }
+        return items.readByQuery({ ...query, fields: LEGACY_ORDER_FIELDS });
+      }
+    };
+    // the saved addresses are read past the policy: the guest has no right on
+    // the field — he changes it only through the routes below
+    // сохранённые адреса читаются мимо политики: права на поле у гостя нет —
+    // он меняет его только маршрутами ниже
+    let addressesWarned = false;
+    const savedAddresses = async (user) => {
+      try {
+        return cleanAddresses((await database('directus_users').where({ id: user }).first('addresses'))?.addresses);
+      } catch (error) {
+        if (!addressesWarned) {
+          addressesWarned = true;
+          logger.warn(`guest-auth: нет поля directus_users.addresses — кабинет без сохранённых адресов (${error.message}). Прогоните scripts/setup/account-schema.mjs`);
+        }
+        return [];
+      }
+    };
     /** id гостя за токеном запроса; null — не вошёл или это не гость */
     const guestOf = async (req) => {
       const accountability = req.accountability;
@@ -434,12 +523,23 @@ export default {
         const accountability = req.accountability;
         // read under the guest's own policy: the API gives only what the «Гость» role may see
         // чтение по политике самого гостя: API отдаёт только то, что можно роли «Гость»
-        const [profile, orders, transactions, programme] = await Promise.all([
+        const [profile, orders, transactions, programme, addresses] = await Promise.all([
           new services.UsersService({ schema, accountability }).readOne(user, { fields: PROFILE_FIELDS }),
-          new services.ItemsService('orders', { schema, accountability }).readByQuery({ fields: ORDER_FIELDS, sort: ['-date_created'], limit: 100 }),
+          readOrders(new services.ItemsService('orders', { schema, accountability })),
           new services.ItemsService('bonus_transactions', { schema, accountability }).readByQuery({ fields: TX_FIELDS, sort: ['-date_created', '-id'], limit: 1000 }),
           database('loyalty_settings').first().catch(() => null),
+          savedAddresses(user),
         ]);
+        profile.addresses = addresses;
+        // the status history comes from the staff's own field: only the status and the time leave it
+        // история статусов — из служебного поля: наружу уходят только статус и время
+        const ids = orders.map((order) => order.id).filter((id) => id != null);
+        const rows = ids.length ? await database('orders').whereIn('id', ids).select('id', 'telegram_meta', 'date_created') : [];
+        const rowOf = new Map(rows.map((row) => [String(row.id), row]));
+        for (const order of orders) {
+          const row = rowOf.get(String(order.id));
+          order.history = historyFor(row?.telegram_meta, order.date_created ?? row?.date_created ?? null, order.status);
+        }
         const program = programme && {
           enabled: programme.enabled,
           program_name: programme.program_name,
@@ -477,6 +577,44 @@ export default {
         res.json({ data: await users.readOne(user, { fields: PROFILE_FIELDS }) });
       }),
     );
+
+    // ── saved addresses: POST only, the admin's CORS allows GET and POST ──
+    // ── сохранённые адреса: только POST — CORS админки пускает GET и POST ──
+    // One change at a time: the guest's row is locked, read, changed, written
+    // back — two tabs adding at once cannot make six addresses or lose one.
+    // По одному изменению: строка гостя блокируется, читается, меняется и
+    // пишется обратно — две вкладки разом не сделают шесть адресов и не потеряют один.
+    const addressRoute = (path, opOf) =>
+      router.post(
+        `/addresses/${path}`,
+        route(async (req, res) => {
+          const user = await guestOf(req);
+          if (!user) return fail(res, 401, 'NOT_SIGNED_IN', 'Войдите по номеру телефона.');
+          const body = req.body && typeof req.body === 'object' ? req.body : {};
+          let result;
+          try {
+            result = await database.transaction(async (trx) => {
+              const row = await trx('directus_users').where({ id: user }).forUpdate().first('addresses');
+              const next = applyAddressOp(cleanAddresses(row?.addresses), opOf(body));
+              await trx('directus_users').where({ id: user }).update({ addresses: JSON.stringify(next.list) });
+              return next;
+            });
+          } catch (error) {
+            if (ADDRESS_ERROR_CODES.includes(error?.code))
+              return fail(res, error.status, error.code, error.message, error.fields ? { fields: error.fields } : {});
+            // no column yet: the schema step of the deploy was skipped / колонки ещё нет: шаг схемы выкатки пропущен
+            if (error?.code === '42703' || /no such column|addresses.*does not exist/i.test(String(error?.message))) {
+              logger.warn(`guest-auth: нет поля directus_users.addresses — адрес не сохранён (${error.message})`);
+              return fail(res, 503, 'ADDRESSES_OFF', 'Сохранять адреса пока нельзя — укажите адрес в корзине.');
+            }
+            throw error;
+          }
+          res.json({ data: { addresses: result.list, ...(result.id && { id: result.id }) } });
+        }),
+      );
+    addressRoute('add', (body) => ({ kind: 'add', input: addressInput(body) }));
+    addressRoute('update', (body) => ({ kind: 'update', id: body.id, input: addressInput(body) }));
+    addressRoute('remove', (body) => ({ kind: 'remove', id: body.id }));
 
     router.post(
       '/logout',

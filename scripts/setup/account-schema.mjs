@@ -323,7 +323,35 @@ const EXTRA_FIELDS = {
     field('birthday_set_at', 'timestamp', { label: 'Дата рождения указана', readonly: true, interface: 'datetime', display: 'datetime' }),
     field('middle_name', 'string', { label: 'Отчество' }),
     select('gender', [['female', 'Женский'], ['male', 'Мужской']], { label: 'Пол' }),
-    field('recovery_email', 'string', { label: 'Email для восстановления', note: 'Настоящая почта гостя. «Email» выше — служебный адрес для входа' }),
+    // the same note as `scripts/setup/email.mjs` — otherwise the two scripts rewrite each other's
+    // та же подсказка, что в `scripts/setup/email.mjs`, — иначе два скрипта переписывают друг друга
+    field('recovery_email', 'string', {
+      label: 'Email для восстановления',
+      note: 'Настоящая почта гостя, только российская (mail.ru, yandex.ru, rambler.ru, vk.com…). «Email» выше — служебный адрес для входа',
+    }),
+    // written only by `/guest-auth/addresses/*` (since 24.10.2026); readonly here,
+    // the guest has no API right on it
+    // пишут только маршруты `/guest-auth/addresses/*` (с 24.10.2026); здесь только
+    // чтение, права через API у гостя на поле нет
+    field('addresses', 'json', {
+      label: 'Адреса доставки',
+      note: 'Гость сохраняет сам, до 5',
+      interface: 'list',
+      special: ['cast-json'],
+      readonly: true,
+      width: 'full',
+      options: {
+        template: '{{label}}: {{address}}',
+        fields: [
+          { field: 'label', name: 'Метка', type: 'string', meta: { interface: 'input', width: 'half' } },
+          { field: 'address', name: 'Улица и дом', type: 'string', meta: { interface: 'input', width: 'full' } },
+          { field: 'flat', name: 'Квартира / офис', type: 'string', meta: { interface: 'input', width: 'half' } },
+          { field: 'entrance', name: 'Подъезд', type: 'string', meta: { interface: 'input', width: 'half' } },
+          { field: 'floor', name: 'Этаж', type: 'string', meta: { interface: 'input', width: 'half' } },
+          { field: 'intercom', name: 'Домофон', type: 'string', meta: { interface: 'input', width: 'half' } },
+        ],
+      },
+    }),
     field('bonus_history', 'alias', {
       label: 'Операции по баллам',
       width: 'full',

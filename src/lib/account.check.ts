@@ -7,7 +7,28 @@
  */
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
-import { parseSession, profileErrors, repeatOrder, summarize, txTitle, displayName, relativeDays, monthIn, dateText, tokenExpiry, type Me } from './account.ts';
+import {
+  parseSession,
+  profileErrors,
+  repeatOrder,
+  summarize,
+  txTitle,
+  displayName,
+  relativeDays,
+  monthIn,
+  dateText,
+  dateTimeText,
+  tokenExpiry,
+  orderCard,
+  orderAnchor,
+  payLabel,
+  placeText,
+  PAY_METHOD,
+  PAY_STATUS,
+  type Me,
+  type Order,
+} from './account.ts';
+import { RU_MAIL_ERROR } from './email.ts';
 import { DEFAULT_PROGRAM } from './loyalty.ts';
 import { normalizePhone as sitePhone } from './order.ts';
 import { parseCart } from './cart.ts';
@@ -131,11 +152,111 @@ const cases = [
   { gender: 'other' },
   { recovery_email: 'anna@' },
   { recovery_email: 'Anna@Example.RU' },
+  // только российская почта: Gmail — нет, Яндекс в верхнем регистре — да, пустая — можно
+  { recovery_email: 'anna@gmail.com' },
+  { recovery_email: 'Anna@YANDEX.RU' },
+  { recovery_email: ' anna@mail.ru ' },
+  { recovery_email: '' },
 ] as const;
 for (const input of cases) {
   assert.deepEqual(profileErrors(input as never, '2026-10-19'), guard.profileErrors(input, '2026-10-19'), JSON.stringify(input));
 }
 assert.deepEqual(Object.keys(profileErrors({ birthday: '2027-01-01', recovery_email: 'x' }, '2026-10-19')), ['birthday', 'recovery_email']);
+assert.equal(profileErrors({ recovery_email: 'anna@gmail.com' }, '2026-10-19').recovery_email, RU_MAIL_ERROR);
+assert.equal(profileErrors({ recovery_email: 'Anna@YANDEX.RU' }, '2026-10-19').recovery_email, undefined);
+assert.equal(profileErrors({ recovery_email: '' }, '2026-10-19').recovery_email, undefined);
+// кривой адрес — сначала формат, а не «укажите российскую»
+assert.equal(profileErrors({ recovery_email: 'anna@' }, '2026-10-19').recovery_email, 'Проверьте адрес: name@mail.ru');
+
+// ── заказ целиком ─────────────────────────────────────────────────────────
+{
+  const sp = (text: string) => text.replace(/\u00a0/g, ' ');
+  const places = [
+    { id: 1, name: 'Садовая, 212Б', street: 'Садовая' },
+    { id: 2, name: 'Ресторан', street: 'Советской Армии, 177' },
+  ];
+  const today = '2026-10-23';
+  assert.equal(dateTimeText('2026-10-23T09:12:00Z', today), '23 октября, 13:12');
+  assert.equal(dateTimeText('2025-09-01T16:30:00Z', today), '1 сентября 2025, 20:30');
+  assert.equal(dateTimeText(null, today), '');
+  assert.equal(dateTimeText('мусор', today), '');
+  assert.equal(orderAnchor('2310-4821'), 'order-2310-4821');
+  assert.equal(placeText(places[0]), 'Садовая, 212Б');
+  assert.equal(placeText(places[1]), 'Ресторан, Советской Армии, 177');
+  assert.equal(placeText(undefined), null);
+  assert.deepEqual(Object.keys(PAY_STATUS), ['none', 'pending', 'paid', 'failed', 'refunded']);
+  assert.equal(PAY_METHOD.online, 'Онлайн картой');
+
+  const base: Order = {
+    id: 31, number: '2310-4821', status: 'in_work', date_created: '2026-10-23T09:12:00Z', fulfillment: 'delivery', place: null,
+    address: 'улица Советской Армии, 177', address_flat: 'кв. 12', address_entrance: '2', address_floor: '5', address_intercom: '12К',
+    delivery_zone: 'Рядом с нами', delivery_cost: 400, desired_time: 'Сегодня, к 19:00', comment: ' Позвоните за 10 минут ',
+    customer_name: 'Анна', phone: '+7 987 955-25-65',
+    items: [{ product: 1, title: 'Торт «Прага», 1,5 кг', variant: '1,5 кг', filling: null, qty: 2, price: 2400, sum: 4800 }],
+    total: 4800, bonus_spent: 0, discount: 0, to_pay: 5200, bonus_earned: null,
+    payment_method: 'online', payment_status: 'paid', payment_test: true, paid_at: '2026-10-23T09:14:30Z',
+    history: [{ status: 'new', at: '2026-10-23T09:12:00Z' }, { status: 'in_work', at: '2026-10-23T09:31:00Z' }],
+  };
+  const card = orderCard(base, places, today);
+  // название как есть: размер уже в нём, вариант не повторяется
+  assert.deepEqual(card.lines, [{ title: 'Торт «Прага», 1,5 кг', qty: 2, sum: 4800 }]);
+  assert.deepEqual(card.bill.map((row) => [row.label, sp(row.value)]), [['Блюда', '4 800 ₽'], ['Доставка', '400 ₽']]);
+  assert.deepEqual([card.total.label, card.total.value], ['Оплачено', 5200]);
+  assert.equal(card.where.label, 'Куда');
+  assert.equal(sp(card.where.value), 'улица Советской Армии, 177, кв. 12, подъезд 2, этаж 5, домофон 12К');
+  assert.equal(card.where.note, 'Зона доставки: Рядом с нами');
+  assert.equal(card.comment, 'Позвоните за 10 минут');
+  assert.equal(card.who, 'Анна · +7 (987) 955-25-65');
+  assert.deepEqual(card.pay, { method: 'Онлайн картой', state: 'paid', status: 'Оплачен', at: '23 октября, 13:14', test: true });
+  assert.deepEqual(card.history, [
+    { status: 'new', label: 'Принят', at: '23 октября, 13:12' },
+    { status: 'in_work', label: 'Готовим', at: '23 октября, 13:31' },
+  ]);
+
+  // доставка: не посчитана — словами, бесплатно — словом; скидка и баллы — минусом
+  const unknown = orderCard({ ...base, delivery_cost: null, payment_status: 'pending', payment_test: false }, places, today);
+  assert.deepEqual(unknown.bill[1], { label: 'Доставка', value: 'назовём при звонке', tone: 'quiet' });
+  assert.equal(unknown.total.label, 'К оплате');
+  assert.deepEqual(unknown.pay, { method: 'Онлайн картой', state: 'pending', status: 'Ждём оплату', at: null, test: false });
+  assert.deepEqual(orderCard({ ...base, status: 'done', delivery_cost: undefined }, places, today).bill[1].value, 'по звонку');
+  const free = orderCard({ ...base, delivery_cost: 0, discount: 480, bonus_spent: 200, to_pay: 4120 }, places, today);
+  assert.deepEqual(free.bill.map((row) => [row.label, sp(row.value), row.tone]), [
+    ['Блюда', '4 800 ₽', 'money'],
+    ['Доставка', 'бесплатно', 'free'],
+    ['Скидка именинника', '−480 ₽', 'minus'],
+    ['Баллами', '−200 ₽', 'minus'],
+  ]);
+  assert.equal(free.total.value, 4120);
+
+  // самовывоз: строки доставки нет, точка с улицей; одна строка «Блюда» над той же суммой не повторяется
+  const pickup = orderCard({ ...base, fulfillment: 'pickup', place: 2, delivery_zone: null, delivery_cost: 0, to_pay: 4800 }, places, today);
+  assert.deepEqual(pickup.bill, []);
+  assert.deepEqual(pickup.total, { label: 'Оплачено', value: 4800 });
+  assert.deepEqual(orderCard({ ...base, fulfillment: 'pickup', place: 2, bonus_spent: 300, to_pay: 4500 }, places, today).bill.map((row) => row.label), ['Блюда', 'Баллами']);
+  assert.deepEqual(pickup.where, { label: 'Откуда', value: 'Ресторан, Советской Армии, 177', note: null });
+
+  // старый ответ: без пунктов — строка `address_details`, без истории — «Принят» и статус без времени
+  const old = orderCard(
+    { ...base, status: 'cancelled', address_flat: undefined, address_entrance: undefined, address_floor: undefined, address_intercom: undefined, address_details: 'кв. 7, подъезд 1', delivery_zone: null, history: undefined, payment_method: 'on_delivery', payment_status: 'none', payment_test: false, paid_at: null, to_pay: null, customer_name: null, phone: null, comment: null },
+    places,
+    today,
+  );
+  assert.equal(old.where.value, 'улица Советской Армии, 177, кв. 7, подъезд 1');
+  assert.equal(old.where.note, null);
+  assert.deepEqual(old.history, [
+    { status: 'new', label: 'Принят', at: '23 октября, 13:12' },
+    { status: 'cancelled', label: 'Отменён', at: null },
+  ]);
+  assert.deepEqual(old.pay, { method: 'При получении', state: null, status: null, at: null, test: false });
+  assert.deepEqual([old.total.label, old.total.value, old.who, old.comment], ['Итого', 4800, null, null]);
+  // онлайн-заказ в работе, к оплате не приступали — «Не оплачен»; без способа оплаты строки оплаты нет
+  assert.equal(orderCard({ ...base, payment_status: 'none', payment_test: false }, places, today).pay?.status, 'Не оплачен');
+  assert.equal(orderCard({ ...base, payment_method: null, payment_status: null, payment_test: null }, places, today).pay, null);
+  // история с сервера: «at: null» — без времени
+  assert.deepEqual(orderCard({ ...base, history: [{ status: 'new', at: base.date_created }, { status: 'done', at: null }] }, places, today).history.at(-1), { status: 'done', label: 'Выполнен', at: null });
+  assert.equal(payLabel({ status: 'cancelled', payment_status: 'refunded' }), 'Итого');
+  assert.equal(payLabel({ status: 'new', payment_status: null }), 'К оплате');
+}
 
 // ── points × online payment and notifications / баллы × онлайн-оплата и оповещения
 // the bank is asked for what is left after points; the managers' message says the same

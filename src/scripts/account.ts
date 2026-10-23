@@ -20,7 +20,10 @@ import {
   displayName,
   isSignedOut,
   monthIn,
+  orderAnchor,
+  orderCard,
   paidOf,
+  payLabel,
   profileErrors,
   relativeDays,
   repeatOrder,
@@ -28,9 +31,12 @@ import {
   txTitle,
   type Me,
   type Order,
+  type PickupPlace,
   type ProfileInput,
   type RawTx,
 } from '../lib/account';
+import { LABEL_PRESETS, MAX_ADDRESSES, addressErrors, defaultLabel, savedLine, type AddressInput, type SavedAddress } from '../lib/addresses';
+import { canQuote, normalizeAddress, parseQuote } from '../lib/delivery';
 import { addDays, daysBetween, dayOf, points, type Program } from '../lib/loyalty';
 import { CART_KEY, parseCart } from '../lib/cart';
 import { CHECKOUT_KEY, addressLine, maskPhone } from '../lib/order';
@@ -39,6 +45,10 @@ import { mountLogin } from './account-login';
 import repeatIcon from '../assets/icons/repeat.svg?raw';
 import giftIcon from '../assets/icons/gift.svg?raw';
 import calendarIcon from '../assets/icons/calendar.svg?raw';
+import chevronIcon from '../assets/icons/chevron-down.svg?raw';
+import pinIcon from '../assets/icons/pin.svg?raw';
+import deliveryIcon from '../assets/icons/delivery.svg?raw';
+import infoIcon from '../assets/icons/info.svg?raw';
 
 type Offer = { title: string; text: string; place: string | null; until: string | null };
 type PageData = {
@@ -47,7 +57,7 @@ type PageData = {
   catalog: string | null;
   phone: string;
   phoneHref: string;
-  places: Record<string, string>;
+  places: PickupPlace[];
   promos: Offer[];
   birthdayPromos: Offer[];
 };
@@ -60,6 +70,14 @@ const ico = (svg: string) => `<span class="ico" aria-hidden="true">${svg}</span>
 const rub = (n: number) => `${new Intl.NumberFormat('ru-RU').format(n)} ₽`;
 const num = (n: number) => new Intl.NumberFormat('ru-RU').format(n);
 const typo = (text: string) => text.replace(/ ([—–]) /g, ' $1 ');
+/**
+ * «Торт «Прага», 1,5 кг × 2»: the number keeps its unit and the sign its
+ * number when the line wraps — «1,5 / кг» read as two things.
+ * «Торт «Прага», 1,5 кг × 2»: число не отрывается от единицы, а знак — от
+ * числа при переносе: «1,5 / кг» читалось двумя вещами.
+ */
+const times = (title: string, qty: number) =>
+  `${esc(title.replace(/(\d)\s+(?=(?:кг|г|л|мл|шт|см|мм|порц)(?![\p{L}]))/gu, '$1\u00a0'))}\u00a0×\u00a0${qty}`;
 
 const node = document.getElementById('account-data');
 if (node) {
@@ -120,6 +138,10 @@ if (node) {
     const notice = $('[data-expired]');
     if (notice) notice.hidden = !expired;
     login?.reset();
+    // a form left open belongs to the guest who left
+    // открытая форма адреса принадлежала ушедшему гостю
+    editing = null;
+    asking = null;
     show('login');
   };
 
@@ -249,22 +271,87 @@ if (node) {
   };
 
   // ── orders / заказы ─────────────────────────────────────────────────────
+  // Orders the guest opened stay open through every `render()` (a saved
+  // profile redraws the list).
+  // Заказы, которые гость раскрыл, остаются раскрытыми при любом `render()`
+  // (сохранение профиля перерисовывает список).
+  const openOrders = new Set<number>();
+
+  /**
+   * The whole order under its row: the dishes and the bill on the left, where,
+   * when, who and the payment with the history on the right (one column on a
+   * phone). Folded with `hidden="until-found"`, so the browser's search still
+   * finds a dish in a folded order and opens it.
+   * Заказ целиком под строкой: блюда и счёт слева, куда, когда, кто и оплата с
+   * историей справа (одной колонкой на телефоне). Свёрнут через
+   * `hidden="until-found"`: поиск браузера находит блюдо и в свёрнутом заказе и
+   * раскрывает его.
+   */
+  const orderDetails = (order: Order) => {
+    const card = orderCard(order, data.places, me!.today);
+    const open = openOrders.has(order.id);
+    const lines = card.lines.map((line) => `<li><span>${times(line.title, line.qty)}</span><b class="tnum">${rub(line.sum)}</b></li>`).join('');
+    const bill = card.bill
+      .map((row) => `<div data-tone="${row.tone}"><dt>${esc(row.label)}</dt><dd class="tnum">${esc(row.value)}</dd></div>`)
+      .join('');
+    const fact = (label: string, value: string, note: string | null = null) =>
+      `<div><dt>${esc(label)}</dt><dd>${value}${note ? `<span class="acc-order__note">${esc(note)}</span>` : ''}</dd></div>`;
+    const pay = card.pay
+      ? [
+          card.pay.status ? `<span class="acc-pay" data-pay="${esc(card.pay.state ?? '')}">${esc(card.pay.status)}</span>` : '',
+          `<span class="acc-pay__how">${esc([card.pay.method, card.pay.at].filter(Boolean).join(' · '))}</span>`,
+          card.pay.test ? `<span class="acc-pay__test">Тестовая оплата</span>` : '',
+        ].join('')
+      : '';
+    const facts = [
+      fact(card.where.label, esc(card.where.value), card.where.note),
+      card.when ? fact('Когда', esc(card.when)) : '',
+      card.comment ? fact('Комментарий', esc(typo(card.comment))) : '',
+      card.who ? fact('Получатель', `<span class="tnum">${esc(card.who)}</span>`) : '',
+      pay ? fact('Оплата', `<span class="acc-pay__line">${pay}</span>`) : '',
+    ].join('');
+    const history = card.history
+      .map(
+        (step) =>
+          `<li data-status="${esc(step.status)}"><span class="acc-order__step">${esc(step.label)}</span>${
+            step.at ? `<span class="acc-order__at tnum">${esc(step.at)}</span>` : ''
+          }</li>`,
+      )
+      .join('');
+    return `<div class="acc-order__more" id="order-${order.id}-more" data-order-more="${order.id}"${open ? '' : ' hidden="until-found"'}>
+        <div class="acc-order__col">
+          <p class="acc-order__cap">Состав</p>
+          ${lines ? `<ul class="acc-order__lines" role="list">${lines}</ul>` : ''}
+          <dl class="acc-order__bill">${bill}
+            <div class="acc-order__total"><dt>${esc(card.total.label)}</dt><dd class="tnum">${rub(card.total.value)}</dd></div>
+          </dl>
+        </div>
+        <div class="acc-order__col">
+          <dl class="acc-order__facts">${facts}</dl>
+          <p class="acc-order__cap">История</p>
+          <ol class="acc-order__history" role="list">${history}</ol>
+        </div>
+        <p class="acc-order__fold"><button type="button" class="tlink" data-order-fold="${order.id}">Свернуть заказ</button></p>
+      </div>`;
+  };
+
   const orderRow = (order: Order, percent: number) => {
     const status = ORDER_STATUS[order.status] ?? order.status;
     const items = order.items ?? [];
-    const names = items.map((item) => `${item.title} × ${item.qty}`);
+    const names = items.map((item) => times(item.title, item.qty));
     const shown = names.slice(0, 3).join(', ');
     const more = names.length > 3 ? ` и ещё ${names.length - 3}` : '';
+    const place = data.places.find((item) => item.id === Number(order.place));
     const how =
       order.fulfillment === 'pickup'
-        ? `самовывоз${order.place && data.places[order.place] ? `, ${data.places[order.place]}` : ''}`
+        ? `самовывоз${place ? `, ${place.name}` : ''}`
         : `доставка${order.address ? `, ${addressLine(order)}` : ''}`;
     const paid = paidOf(order);
     const sums = [
       `<div><dt>Сумма</dt><dd class="tnum">${rub(order.total)}</dd></div>`,
       Number(order.discount) > 0 ? `<div><dt>Скидка</dt><dd class="tnum">−${rub(Number(order.discount))}</dd></div>` : '',
-      Number(order.bonus_spent) > 0 ? `<div><dt>Баллами</dt><dd class="tnum">−${num(Number(order.bonus_spent))}</dd></div>` : '',
-      paid !== order.total ? `<div><dt>К оплате</dt><dd class="tnum">${rub(paid)}</dd></div>` : '',
+      Number(order.bonus_spent) > 0 ? `<div><dt>Баллами</dt><dd class="tnum">−${rub(Number(order.bonus_spent))}</dd></div>` : '',
+      paid !== order.total ? `<div><dt>${esc(payLabel(order))}</dt><dd class="tnum">${rub(paid)}</dd></div>` : '',
     ].join('');
     const earned = Number(order.bonus_earned) || 0;
     const pts =
@@ -275,19 +362,58 @@ if (node) {
           : order.status === 'cancelled' && Number(order.bonus_spent) > 0
             ? `<p class="acc-order__pts acc-order__pts--soon">Баллы вернулись на счёт</p>`
             : '';
-    return `<li class="acc-order">
+    const open = openOrders.has(order.id);
+    // the toggle ends the line of dishes: «… и ещё 2 · Весь заказ»
+    // кнопка заканчивает строку блюд: «… и ещё 2 · Весь заказ»
+    const toggle = `<button type="button" class="tlink acc-order__toggle" aria-expanded="${open}" aria-controls="order-${order.id}-more" data-order-toggle="${order.id}"><span data-order-toggle-label>${open ? 'Свернуть' : 'Весь заказ'}</span>${ico(chevronIcon)}</button>`;
+    return `<li class="acc-order${open ? ' is-open' : ''}" id="${esc(orderAnchor(order.number))}" data-order="${order.id}">
         <div class="acc-order__top">
           <p class="acc-order__no">Заказ <span class="tnum">${esc(order.number)}</span></p>
           <span class="acc-status" data-status="${esc(order.status)}">${esc(status)}</span>
         </div>
         <p class="acc-order__when">${esc(dateText(order.date_created, me!.today))} · ${esc(how)}</p>
-        <p class="acc-order__items">${esc(shown + more)}</p>
+        <p class="acc-order__items">${shown ? `${shown}${esc(more)}<span class="acc-order__dot" aria-hidden="true">\u00a0· </span>` : ''}${toggle}</p>
+        ${orderDetails(order)}
         <div class="acc-order__bottom">
           <dl class="acc-order__sums">${sums}</dl>
           ${pts}
           ${items.length && data.catalog ? `<button type="button" class="btn btn--secondary btn--sm acc-order__again" data-repeat="${order.id}">${ico(repeatIcon)}Повторить</button>` : ''}
         </div>
       </li>`;
+  };
+
+  /** Раскрыть или свернуть заказ; состояние переживает перерисовку списка. */
+  const setOrderOpen = (id: number, open: boolean) => {
+    if (open) openOrders.add(id);
+    else openOrders.delete(id);
+    const row = $(`[data-order="${id}"]`);
+    const more = document.getElementById(`order-${id}-more`);
+    const toggle = $<HTMLButtonElement>(`[data-order-toggle="${id}"]`);
+    if (!row || !more || !toggle) return;
+    row.classList.toggle('is-open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+    $('[data-order-toggle-label]', toggle)!.textContent = open ? 'Свернуть' : 'Весь заказ';
+    if (open) more.removeAttribute('hidden');
+    else more.setAttribute('hidden', 'until-found');
+  };
+
+  const bindOrders = (root: HTMLElement) => {
+    // the browser's search opens a folded order on its own and says so here
+    // поиск браузера раскрывает свёрнутый заказ сам и сообщает об этом здесь
+    for (const more of $$('[data-order-more]', root)) more.addEventListener('beforematch', () => setOrderOpen(Number(more.dataset.orderMore), true));
+  };
+
+  /** `#order-2310-4821`: вкладка «Заказы», заказ раскрыт и перед глазами. */
+  const openFromHash = () => {
+    const hash = decodeURIComponent(location.hash.slice(1));
+    if (!me || !hash.startsWith('order-')) return false;
+    const order = me.orders.find((item) => orderAnchor(item.number) === hash);
+    if (!order) return false;
+    selectTab('orders', false);
+    setOrderOpen(order.id, true);
+    $(`[data-order="${order.id}"]`)?.scrollIntoView({ block: 'start' });
+    $<HTMLButtonElement>(`[data-order-toggle="${order.id}"]`)?.focus({ preventScroll: true });
+    return true;
   };
 
   // ── points / баллы ──────────────────────────────────────────────────────
@@ -358,6 +484,367 @@ if (node) {
     }
   };
 
+  // ── saved addresses / сохранённые адреса ────────────────────────────────
+  // A list of up to five, each with its own «Изменить» and «Удалить»; one
+  // form adds and edits — editing opens it in place of the row. Removing asks
+  // once, in the row. After «street and house» the map is asked for the zone,
+  // as the cart does; the address saves without it all the same.
+  // Список до пяти адресов, у каждого свои «Изменить» и «Удалить»; одна форма
+  // добавляет и правит — правка открывает её на месте строки. Удаление
+  // переспрашивает один раз, в строке. После «Улицы и дома» карта называет
+  // зону, как в корзине; сохранить адрес можно и без этого.
+  const addrList = $('[data-addrs-list]')!;
+  const addrForm = $<HTMLFormElement>('[data-addr-form]')!;
+  const addrHome = $('[data-addr-home]')!;
+  const addBtn = $<HTMLButtonElement>('[data-addr-add]')!;
+  const addrField = (name: string) => addrForm.elements.namedItem(name) as HTMLInputElement;
+  const addrErrorBox = $('[data-addr-error]', addrForm)!;
+  const addrSubmit = $<HTMLButtonElement>('[data-submit]', addrForm)!;
+  const quoteLine = $('[data-addr-quote]', addrForm)!;
+  const addrNote = $('[data-addrs-err]')!;
+  const APT_NAME: Record<string, string> = { flat: 'Квартира / офис', entrance: 'Подъезд', floor: 'Этаж', intercom: 'Код домофона' };
+  let saved: SavedAddress[] = [];
+  /** `'new'` — добавляем, id — правим этот адрес, `null` — формы нет */
+  let editing: string | null = null;
+  /** id адреса, который спрашивает «Удалить?» */
+  let asking: string | null = null;
+  let addrBusy = false;
+
+  const addrRow = (a: SavedAddress) => {
+    const id = esc(a.id);
+    const label = esc(a.label);
+    const actions =
+      asking === a.id
+        ? `<p class="acc-addr__ask" role="group" aria-labelledby="ask-${id}">
+            <span id="ask-${id}">Удалить «${label}»?</span>
+            <button type="button" class="tlink acc-addr__yes" data-addr-yes="${id}">Да</button>
+            <button type="button" class="tlink" data-addr-no="${id}">Нет</button>
+          </p>`
+        : `<p class="acc-addr__actions">
+            <button type="button" class="tlink" data-addr-edit="${id}" aria-label="Изменить адрес «${label}»">Изменить</button>
+            <button type="button" class="tlink acc-addr__remove" data-addr-remove="${id}" aria-label="Удалить адрес «${label}»">Удалить</button>
+          </p>`;
+    return `<li class="acc-addr${asking === a.id ? ' is-asking' : ''}" data-addr="${id}">
+        <span class="acc-addr__ico">${ico(pinIcon)}</span>
+        <div class="acc-addr__body">
+          <p class="acc-addr__label">${label}</p>
+          <p class="acc-addr__line">${esc(savedLine(a))}</p>
+        </div>
+        ${actions}
+      </li>`;
+  };
+
+  const paintAddresses = () => {
+    // the form is kept out of the list while the rows are redrawn: it is one node with the guest's typing in it
+    // форма на время перерисовки уходит из списка: это один узел, в нём набранное гостем
+    addrHome.prepend(addrForm);
+    addrList.innerHTML = saved.map(addrRow).join('');
+    const row = editing && editing !== 'new' ? $(`[data-addr="${CSS.escape(editing)}"]`, addrList) : null;
+    if (row) {
+      row.classList.add('is-editing');
+      row.replaceChildren(addrForm);
+    }
+    addrForm.hidden = !editing;
+    $('[data-addrs-empty]')!.hidden = saved.length > 0 || editing === 'new';
+    // «Корзина предложит их» needs something to offer; an empty list says it in its own line
+    // «Корзина предложит их» — когда есть что предложить; пустой список говорит своей строкой
+    $('[data-addrs-lead]')!.hidden = saved.length === 0;
+    $('[data-addrs-count]')!.textContent = saved.length ? `${saved.length} из ${MAX_ADDRESSES}` : '';
+    const full = saved.length >= MAX_ADDRESSES;
+    addBtn.setAttribute('aria-disabled', String(full));
+    $('[data-addr-limit]')!.hidden = !full;
+    $('[data-addr-foot]')!.hidden = editing === 'new';
+  };
+
+  const showAddrErrors = (errors: Partial<Record<string, string>>) => {
+    for (const box of $$('[data-addr-err]', addrForm)) {
+      const key = box.dataset.addrErr!;
+      const message = errors[key];
+      box.hidden = !message;
+      // the four parts share one line under their grid: the message names its field
+      // у четырёх пунктов общая строка под сеткой: сообщение называет своё поле
+      box.textContent = message ? (APT_NAME[key] ? `${APT_NAME[key]}: ${message.charAt(0).toLowerCase()}${message.slice(1)}` : message) : '';
+      const field = key === 'label' ? addrField('own') : addrField(key);
+      if (field) {
+        if (message) field.setAttribute('aria-invalid', 'true');
+        else field.removeAttribute('aria-invalid');
+      }
+    }
+  };
+
+  const kind = () => addrForm.querySelector<HTMLInputElement>('input[name="kind"]:checked')?.value ?? 'own';
+  const paintKind = () => {
+    $('[data-addr-own]', addrForm)!.hidden = kind() !== 'own';
+  };
+  const readAddr = (): AddressInput => ({
+    label: kind() === 'own' ? addrField('own').value : kind(),
+    address: addrField('address').value,
+    flat: addrField('flat').value,
+    entrance: addrField('entrance').value,
+    floor: addrField('floor').value,
+    intercom: addrField('intercom').value,
+  });
+
+  // «Нашли: зона …» after the street, the same `POST /delivery/quote` as the cart
+  // «Нашли: зона …» после улицы — тот же `POST /delivery/quote`, что у корзины
+  let quoteSeq = 0;
+  let quotedKey = '';
+  // the line never disappears: at rest it is a hint, so leaving the field does not move «Сохранить»
+  // from under the pointer (the click that blurred the field would land on nothing)
+  // строка не исчезает: в покое это подсказка, и уход с поля не сдвигает «Сохранить» из-под
+  // курсора (нажатие, которое увело фокус с поля, пришлось бы в пустоту)
+  const QUOTE_HINT = data.api ? 'Найдём дом на карте и назовём зону доставки' : '';
+  const setQuote = (tone: 'wait' | 'found' | 'miss' | null, html = '') => {
+    quoteLine.hidden = !tone && !QUOTE_HINT;
+    quoteLine.dataset.tone = tone ?? 'hint';
+    quoteLine.innerHTML = tone ? `${ico(tone === 'miss' ? infoIcon : deliveryIcon)}<span>${html}</span>` : `<span>${QUOTE_HINT}</span>`;
+  };
+  const quoteAddress = async (value: string) => {
+    const key = normalizeAddress(value);
+    if (!canQuote(value) || !data.api) {
+      quoteSeq += 1;
+      quotedKey = '';
+      setQuote(null);
+      return;
+    }
+    if (key === quotedKey) return;
+    quotedKey = key;
+    const seq = ++quoteSeq;
+    setQuote('wait', 'Ищем адрес на карте…');
+    try {
+      const response = await fetch(`${data.api}/delivery/quote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: value.trim() }),
+        signal: AbortSignal.timeout(7000),
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const quote = parseQuote(await response.json());
+      if (seq !== quoteSeq) return;
+      if (quote.found)
+        setQuote(
+          'found',
+          `Нашли: зона «${esc(quote.zone.name)}»<span class="acc-addr-form__meta">доставка ${quote.zone.price ? rub(quote.zone.price) : 'бесплатно'}${
+            quote.zone.price && quote.zone.free_from ? `, бесплатно от ${rub(quote.zone.free_from)}` : ''
+          }</span>`,
+        );
+      else setQuote('miss', quote.outside ? 'Адрес вне зон доставки — стоимость назовём при звонке' : 'Не нашли на карте — проверьте адрес');
+    } catch {
+      // the map is a help, not a gate: no answer — no line, the address saves anyway
+      // карта — подсказка, а не проверка: нет ответа — нет строки, адрес сохранится и так
+      if (seq === quoteSeq) {
+        quotedKey = '';
+        setQuote(null);
+      }
+    }
+  };
+
+  const openAddrForm = (mode: string) => {
+    const address = mode === 'new' ? null : saved.find((a) => a.id === mode);
+    if (mode !== 'new' && !address) return;
+    editing = mode;
+    asking = null;
+    const label = address?.label ?? defaultLabel(saved);
+    const preset = LABEL_PRESETS.find((item) => item.toLowerCase() === label.toLowerCase());
+    for (const option of $$<HTMLInputElement>('input[name="kind"]', addrForm)) option.checked = option.value === (preset ?? 'own');
+    addrField('own').value = preset ? '' : label;
+    addrField('address').value = address?.address ?? '';
+    for (const key of ['flat', 'entrance', 'floor', 'intercom'] as const) addrField(key).value = address?.[key] ?? '';
+    $('[data-addr-form-title]', addrForm)!.textContent = address ? `Изменить «${address.label}»` : 'Новый адрес';
+    paintKind();
+    showAddrErrors({});
+    addrErrorBox.hidden = true;
+    addrNote.hidden = true;
+    quoteSeq += 1;
+    quotedKey = '';
+    setQuote(null);
+    paintAddresses();
+    if (address) void quoteAddress(address.address);
+    addrField('address').focus();
+  };
+
+  const closeAddrForm = () => {
+    const was = editing;
+    editing = null;
+    quoteSeq += 1;
+    paintAddresses();
+    // back to where the guest came from: the row's «Изменить» or «Добавить адрес»
+    // туда, откуда пришёл гость: к «Изменить» своей строки или к «Добавить адрес»
+    const back = was && was !== 'new' ? $<HTMLButtonElement>(`[data-addr-edit="${CSS.escape(was)}"]`, addrList) : null;
+    (back ?? addBtn).focus();
+  };
+
+  const addrFailure = (error: unknown) => {
+    const e = error as ApiError;
+    if (isSignedOut(e)) {
+      clearSession();
+      showLogin(true);
+      return null;
+    }
+    // the field is not in the database yet: a calm word instead of the server's
+    // поля ещё нет в базе: спокойные слова вместо серверных
+    return e.code === 'ADDRESSES_OFF' ? 'Адреса пока недоступны, попробуйте позже.' : e.message;
+  };
+
+  addrForm.addEventListener('change', (event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.name !== 'kind') return;
+    paintKind();
+    showAddrErrors({});
+    if (kind() === 'own') addrField('own').focus();
+  });
+  addrForm.addEventListener('input', (event) => {
+    const target = event.target as HTMLInputElement;
+    // a changed street makes the old answer of the map stale
+    // изменённая улица делает старый ответ карты устаревшим
+    if (target.name === 'address' && normalizeAddress(target.value) !== quotedKey) {
+      quoteSeq += 1;
+      quotedKey = '';
+      setQuote(null);
+    }
+    if (target.getAttribute('aria-invalid') === 'true') {
+      const key = target.name === 'own' ? 'label' : target.name;
+      const left = addressErrors(readAddr());
+      const box = $(`[data-addr-err="${key}"]`, addrForm);
+      if (box && !left[key as keyof typeof left]) {
+        box.hidden = true;
+        target.removeAttribute('aria-invalid');
+      }
+    }
+  });
+  addrField('address').addEventListener('blur', () => void quoteAddress(addrField('address').value));
+  addrForm.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || addrBusy) return;
+    event.preventDefault();
+    closeAddrForm();
+  });
+
+  addrForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!me || !token || addrBusy || !editing) return;
+    const values = readAddr();
+    const errors = addressErrors(values);
+    showAddrErrors(errors);
+    const first = Object.keys(errors)[0];
+    if (first) {
+      (first === 'label' ? addrField('own') : addrField(first))?.focus();
+      return;
+    }
+    addrErrorBox.hidden = true;
+    const mode = editing;
+    const label = $('[data-addr-submit-label]', addrSubmit)!;
+    addrBusy = true;
+    addrSubmit.setAttribute('aria-busy', 'true');
+    label.textContent = 'Сохраняем…';
+    try {
+      const before = new Set(saved.map((a) => a.id));
+      let id = mode;
+      if (mode === 'new') {
+        const result = await api.addAddress(token, values);
+        saved = result.addresses;
+        id = result.id;
+      } else saved = (await api.updateAddress(token, mode, values)).addresses;
+      me.profile.addresses = saved;
+      editing = null;
+      paintAddresses();
+      const name = saved.find((a) => a.id === id)?.label ?? values.label ?? '';
+      // the same street and flat again is not a second address: the server updated the one it had
+      // та же улица и квартира — не второй адрес: сервер обновил уже сохранённый
+      announce(mode === 'new' && before.has(id) ? `Такой адрес уже был — обновили «${name}»` : `Адрес «${name}» сохранён`);
+      const row = $(`[data-addr="${CSS.escape(id)}"]`, addrList);
+      row?.classList.add('is-fresh');
+      $<HTMLButtonElement>('[data-addr-edit]', row ?? addrList)?.focus();
+    } catch (error) {
+      const message = addrFailure(error);
+      if (message === null) return;
+      const fields = (error as ApiError).fields ?? {};
+      if (Object.keys(fields).length) {
+        showAddrErrors(fields);
+        const key = Object.keys(fields)[0];
+        (key === 'label' ? addrField('own') : addrField(key))?.focus();
+      } else {
+        $('[data-addr-error-text]', addrErrorBox)!.textContent = message;
+        addrErrorBox.hidden = false;
+      }
+    } finally {
+      addrBusy = false;
+      addrSubmit.removeAttribute('aria-busy');
+      label.textContent = 'Сохранить адрес';
+    }
+  });
+
+  const removeAddress = async (id: string) => {
+    if (!me || !token || addrBusy) return;
+    const address = saved.find((a) => a.id === id);
+    if (!address) return;
+    addrBusy = true;
+    const ask = $(`[data-addr="${CSS.escape(id)}"] .acc-addr__ask`, addrList);
+    ask?.setAttribute('aria-busy', 'true');
+    try {
+      saved = (await api.removeAddress(token, id)).addresses;
+      me.profile.addresses = saved;
+      asking = null;
+      addrNote.hidden = true;
+      paintAddresses();
+      announce(`Адрес «${address.label}» удалён`);
+      // the row is gone: focus goes to «Добавить адрес», the next thing to do here
+      // строки больше нет: фокус — на «Добавить адрес», следующее действие здесь
+      addBtn.focus();
+    } catch (error) {
+      const message = addrFailure(error);
+      if (message === null) return;
+      asking = null;
+      paintAddresses();
+      addrNote.textContent = `Не удалилось: ${message}`;
+      addrNote.hidden = false;
+      $<HTMLButtonElement>(`[data-addr-remove="${CSS.escape(id)}"]`, addrList)?.focus();
+    } finally {
+      addrBusy = false;
+    }
+  };
+
+  $('[data-addrs]')!.addEventListener('click', (event) => {
+    const target = event.target as Element;
+    const pick = (attr: string) => target.closest<HTMLElement>(`[${attr}]`)?.getAttribute(attr) ?? null;
+    if (target.closest('[data-addr-add]')) {
+      if (addBtn.getAttribute('aria-disabled') === 'true') {
+        announce($('[data-addr-limit]')!.textContent ?? '');
+        return;
+      }
+      openAddrForm('new');
+      return;
+    }
+    if (target.closest('[data-addr-cancel]')) {
+      if (!addrBusy) closeAddrForm();
+      return;
+    }
+    const edit = pick('data-addr-edit');
+    if (edit) {
+      openAddrForm(edit);
+      return;
+    }
+    const remove = pick('data-addr-remove');
+    if (remove && !addrBusy) {
+      if (editing && editing !== 'new') editing = null;
+      asking = remove;
+      addrNote.hidden = true;
+      paintAddresses();
+      // the safe answer takes the focus: «Нет»
+      // фокус — на безопасный ответ: «Нет»
+      $<HTMLButtonElement>(`[data-addr-no="${CSS.escape(remove)}"]`, addrList)?.focus();
+      return;
+    }
+    const no = pick('data-addr-no');
+    if (no && !addrBusy) {
+      asking = null;
+      paintAddresses();
+      $<HTMLButtonElement>(`[data-addr-remove="${CSS.escape(no)}"]`, addrList)?.focus();
+      return;
+    }
+    const yes = pick('data-addr-yes');
+    if (yes) void removeAddress(yes);
+  });
+
   // ── draw everything / нарисовать всё ────────────────────────────────────
   const render = () => {
     if (!me) return;
@@ -386,6 +873,7 @@ if (node) {
 
     const orders = $('[data-orders]')!;
     orders.innerHTML = me.orders.map((order) => orderRow(order, sum.level.tier.percent)).join('');
+    bindOrders(orders);
     $('[data-orders-empty]')!.hidden = me.orders.length > 0;
     $('[data-orders-n]')!.textContent = me.orders.length ? String(me.orders.length) : '';
 
@@ -404,6 +892,10 @@ if (node) {
     }
 
     if (!profileDirty) paintProfile(sum.program);
+    // an open address form keeps its node and its typing: the list waits for it to close
+    // открытая форма адреса сохраняет свой узел и набранное: список ждёт, пока её закроют
+    saved = me.profile.addresses ?? [];
+    if (!editing) paintAddresses();
   };
 
   // ── load / загрузка ─────────────────────────────────────────────────────
@@ -431,6 +923,7 @@ if (node) {
       render();
       show('account');
       selectTab(tabFromHash() ?? currentTab, false);
+      openFromHash();
       if (welcome) announce($('[data-welcome-text]')?.textContent ?? '');
       welcome = false;
     } catch (error) {
@@ -477,6 +970,7 @@ if (node) {
   window.addEventListener('hashchange', () => {
     const tab = tabFromHash();
     if (tab && me) selectTab(tab, false);
+    else openFromHash();
   });
 
   // ── clicks / нажатия ────────────────────────────────────────────────────
@@ -505,6 +999,24 @@ if (node) {
       if (!order) return;
       storage.set(CART_KEY, JSON.stringify(repeatOrder(order, parseCart(storage.get(CART_KEY)))));
       location.href = `${data.catalog}#cart`;
+      return;
+    }
+    const toggle = target.closest<HTMLButtonElement>('[data-order-toggle]');
+    if (toggle) {
+      const open = toggle.getAttribute('aria-expanded') !== 'true';
+      setOrderOpen(Number(toggle.dataset.orderToggle), open);
+      // folding a long order must not leave the guest far below it
+      // свёрнутый длинный заказ не должен оставить гостя далеко под собой
+      if (!open) toggle.scrollIntoView({ block: 'nearest' });
+      return;
+    }
+    const fold = target.closest<HTMLButtonElement>('[data-order-fold]');
+    if (fold) {
+      const id = Number(fold.dataset.orderFold);
+      setOrderOpen(id, false);
+      const back = $<HTMLButtonElement>(`[data-order-toggle="${id}"]`);
+      back?.scrollIntoView({ block: 'nearest' });
+      back?.focus({ preventScroll: true });
       return;
     }
     const more = target.closest<HTMLButtonElement>('[data-offers-more]');

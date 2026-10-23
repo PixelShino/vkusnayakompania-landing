@@ -12,6 +12,9 @@
  */
 import { add, empty, type Cart } from './cart.ts';
 import type { AddressInput, SavedAddress } from './addresses.ts';
+import { RU_MAIL_ERROR, isRuEmail } from './email.ts';
+import { rub } from './catalog.ts';
+import { addressLine, maskPhone } from './order.ts';
 import {
   TX_LABEL,
   birthdayWindow,
@@ -49,8 +52,12 @@ export type Profile = {
   addresses?: SavedAddress[];
 };
 
-/** Одна смена статуса, как её видит гость: без имени сотрудника и канала. / One status move as the guest sees it. */
-export type OrderHistoryEntry = { status: string; at: string };
+/**
+ * Одна смена статуса, как её видит гость: без имени сотрудника и канала;
+ * `at: null` — статус сменился до 23.10.2026, время не записано.
+ * One status move as the guest sees it; `at: null` — moved before the log existed.
+ */
+export type OrderHistoryEntry = { status: string; at: string | null };
 
 export type OrderItem = { product: number; title: string; variant: string | null; filling: string | null; qty: number; price: number; sum: number };
 
@@ -254,7 +261,10 @@ export const profileErrors = (input: ProfileInput, today: string) => {
   }
   if (input.gender && !['female', 'male'].includes(input.gender)) errors.gender = 'Выберите из списка';
   const email = String(input.recovery_email ?? '').trim();
-  if (email && (email.length > 120 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))) errors.recovery_email = 'Проверьте адрес: name@example.ru';
+  if (email && (email.length > 120 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))) errors.recovery_email = 'Проверьте адрес: name@mail.ru';
+  // Russian mail services only — the owner's decision (`email.ts`); an empty mail is fine
+  // только российские почтовые службы — решение владельца (`email.ts`); пустая почта допустима
+  else if (email && !isRuEmail(email)) errors.recovery_email = RU_MAIL_ERROR;
   return errors;
 };
 
@@ -366,4 +376,148 @@ export const relativeDays = (distance: number) => {
   if (distance === -1) return 'завтра';
   if (distance === 1) return 'вчера';
   return distance < 0 ? `через ${n} ${word}` : `${n} ${word} назад`;
+};
+
+/** «23 октября, 13:12» по Самаре, для другого года — «1 сентября 2025, 20:30»; не дата — пусто. */
+export const dateTimeText = (iso: string | null | undefined, today: string) => {
+  if (!iso || Number.isNaN(Date.parse(iso))) return '';
+  const time = new Intl.DateTimeFormat('ru-RU', { timeZone: ZONE, hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(iso));
+  return `${dateText(iso, today)}, ${time}`;
+};
+
+// ── the whole order / заказ целиком ────────────────────────────────────────
+
+/** Как гость платил: слова те же, что в корзине. */
+export const PAY_METHOD: Record<string, string> = {
+  online: 'Онлайн картой',
+  on_delivery: 'При получении',
+};
+
+/** Что с оплатой — те же слова, что на шаге оплаты корзины (`PayStep`). */
+export const PAY_STATUS: Record<string, string> = {
+  none: 'Не оплачен',
+  pending: 'Ждём оплату',
+  paid: 'Оплачен',
+  failed: 'Оплата не прошла',
+  refunded: 'Возврат',
+};
+
+/** Точка самовывоза, как её знает страница: имя и улица. */
+export type PickupPlace = { id: number; name: string; street: string };
+
+/** Якорь заказа в адресе: `#order-2310-4821` открывает его карточку. */
+export const orderAnchor = (number: string) => `order-${number}`;
+
+const active = (order: Pick<Order, 'status'>) => order.status === 'new' || order.status === 'in_work';
+
+/**
+ * The word over the last sum of an order: what was paid, what is still to
+ * pay, or a plain total for an order that is over and was not paid online.
+ * Подпись последней суммы заказа: «Оплачено», «К оплате» или «Итого» у
+ * завершённого заказа, который не платили онлайн.
+ */
+export const payLabel = (order: Pick<Order, 'status' | 'payment_status'>) =>
+  order.payment_status === 'paid' ? 'Оплачено' : active(order) ? 'К оплате' : 'Итого';
+
+/** Строка счёта: подпись, значение; `quiet` — слово вместо суммы, `free` — бесплатно. */
+export type BillRow = { label: string; value: string; tone: 'money' | 'quiet' | 'free' | 'minus' };
+
+/**
+ * Where the order goes, in one line: the address by its parts (since
+ * 23.10.2026), an older order's one line of details after the street.
+ * Куда едет заказ одной строкой: адрес по пунктам (с 23.10.2026), у старого
+ * заказа — его строка «квартира, подъезд» после улицы.
+ */
+export const orderAddress = (order: Pick<Order, 'address' | 'address_flat' | 'address_entrance' | 'address_floor' | 'address_intercom' | 'address_details'>) => {
+  const line = addressLine(order);
+  const parts = [order.address_flat, order.address_entrance, order.address_floor, order.address_intercom].some((part) => String(part ?? '').trim());
+  const details = parts ? '' : String(order.address_details ?? '').replace(/\s+/g, ' ').trim();
+  return [line, details].filter(Boolean).join(', ');
+};
+
+/** «Советской Армии, 177» — имя точки, а если улицы в нём нет, то и улица. */
+export const placeText = (place: PickupPlace | undefined) => {
+  if (!place) return null;
+  const street = place.street?.trim();
+  return street && !place.name.toLowerCase().includes(street.toLowerCase()) ? `${place.name}, ${street}` : place.name;
+};
+
+/**
+ * Everything the full card of an order shows, counted from the order itself:
+ * the dishes, the bill row by row (the same rows as «Заказ принят»), where
+ * and when, the comment, who receives it, the payment and the status history.
+ * An order from before the history was kept gets the server's own rule:
+ * «Принят» at its time, then its status with no time.
+ * Всё, что показывает карточка заказа целиком, из самого заказа: блюда, счёт
+ * строками (те же строки, что на «Заказ принят»), куда и когда, комментарий,
+ * получатель, оплата и история статусов. Заказу из времени до истории — то же
+ * правило, что у сервера: «Принят» его временем, затем статус без времени.
+ */
+export const orderCard = (order: Order, places: PickupPlace[], today: string) => {
+  const pickup = order.fulfillment === 'pickup';
+  const lines = (order.items ?? []).map((item) => ({ title: String(item.title ?? ''), qty: Math.max(1, Number(item.qty) || 1), sum: Number(item.sum) || 0 }));
+
+  const bill: BillRow[] = [{ label: 'Блюда', value: rub(Number(order.total) || 0), tone: 'money' }];
+  if (!pickup) {
+    const cost = order.delivery_cost;
+    bill.push(
+      cost === null || cost === undefined
+        ? // an order that is over was priced on the call already / у завершённого заказа цену уже назвали
+          { label: 'Доставка', value: active(order) ? 'назовём при звонке' : 'по звонку', tone: 'quiet' }
+        : Number(cost) > 0
+          ? { label: 'Доставка', value: rub(Number(cost)), tone: 'money' }
+          : { label: 'Доставка', value: 'бесплатно', tone: 'free' },
+    );
+  }
+  if (Number(order.discount) > 0) bill.push({ label: 'Скидка именинника', value: `−${rub(Number(order.discount))}`, tone: 'minus' });
+  if (Number(order.bonus_spent) > 0) bill.push({ label: 'Баллами', value: `−${rub(Number(order.bonus_spent))}`, tone: 'minus' });
+
+  const zone = !pickup && order.delivery_zone ? String(order.delivery_zone).trim() : '';
+  const where = pickup
+    ? { label: 'Откуда', value: placeText(places.find((place) => place.id === Number(order.place))) ?? 'точку назовём при звонке', note: null }
+    : { label: 'Куда', value: orderAddress(order) || 'адрес уточним при звонке', note: zone ? `Зона доставки: ${zone}` : null };
+
+  const who = [order.customer_name?.trim(), order.phone ? maskPhone(order.phone) : null].filter(Boolean).join(' · ') || null;
+
+  // the payment: a word for the state only when it says something — an order
+  // paid on delivery has no state of its own until the bank is involved
+  // оплата: слово о состоянии только когда оно что-то говорит — у заказа с
+  // оплатой при получении своего состояния нет, пока не вмешался банк
+  const method = order.payment_method ? (PAY_METHOD[order.payment_method] ?? null) : null;
+  const state =
+    order.payment_status && order.payment_status !== 'none'
+      ? order.payment_status
+      : order.payment_method === 'online' && active(order)
+        ? 'none'
+        : null;
+  const pay =
+    method || state || order.payment_test
+      ? {
+          method,
+          state,
+          status: state ? (PAY_STATUS[state] ?? null) : null,
+          at: state === 'paid' && order.paid_at ? dateTimeText(order.paid_at, today) : null,
+          test: Boolean(order.payment_test),
+        }
+      : null;
+
+  const raw: OrderHistoryEntry[] = order.history?.length
+    ? order.history
+    : [{ status: 'new', at: order.date_created }, ...(order.status && order.status !== 'new' ? [{ status: order.status, at: null }] : [])];
+  const history = raw.map((entry) => ({ status: entry.status, label: ORDER_STATUS[entry.status] ?? entry.status, at: entry.at ? dateTimeText(entry.at, today) : null }));
+
+  // «Блюда 4 500 ₽» right over «Оплачено 4 500 ₽» says one number twice: a lone dishes row goes
+  // «Блюда 4 500 ₽» прямо над «Оплачено 4 500 ₽» — одно число дважды: одинокая строка блюд уходит
+  const total = paidOf(order);
+  return {
+    lines,
+    bill: bill.length === 1 && total === (Number(order.total) || 0) ? [] : bill,
+    total: { label: payLabel(order), value: total },
+    where,
+    when: order.desired_time?.trim() || null,
+    comment: order.comment?.trim() || null,
+    who,
+    pay,
+    history,
+  };
 };

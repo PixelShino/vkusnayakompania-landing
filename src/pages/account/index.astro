@@ -27,6 +27,7 @@ import { BASE } from '../../lib/base.ts';
 import { BRAND } from '../../data/site.ts';
 import { getContent, typo } from '../../lib/content.ts';
 import { points } from '../../lib/loyalty.ts';
+import { ADDRESS_MAX, LIMIT_MESSAGE } from '../../lib/addresses.ts';
 import '../../styles/catalog.css';
 import '../../styles/account.css';
 
@@ -40,16 +41,17 @@ const catalogHref = catalog.count > 0 ? `${BASE}catalog/` : null;
 const top = loyalty.tiers.at(-1)?.percent ?? 0;
 
 // what the script needs and the page already knows: the programme as built,
-// the offers, the venues by id; the guest's own data comes from the API
+// the offers, the venues with their streets (pickup in the order card); the
+// guest's own data comes from the API
 // что нужно скрипту и уже знает страница: программа на момент сборки, акции,
-// точки по id; данные самого гостя приходят из API
+// точки с улицей (самовывоз в карточке заказа); данные самого гостя приходят из API
 const data = {
   api,
   program: loyalty,
   catalog: catalogHref,
   phone: settings.phone,
   phoneHref: settings.phoneHref,
-  places: Object.fromEntries(places.map((place) => [place.id, place.name])),
+  places: places.map((place) => ({ id: place.id, name: place.name, street: place.street })),
   promos: promos.map((promo) => ({ title: promo.title, text: promo.text, place: promo.place?.name ?? null, until: promo.until ?? null })),
   birthdayPromos: birthdayPromos.map((promo) => ({ title: promo.title, text: promo.text, place: promo.place?.name ?? null, until: promo.until ?? null })),
 };
@@ -258,6 +260,7 @@ const data = {
 
               <div class="acc-panel" role="tabpanel" id="panel-profile" aria-labelledby="tab-profile" tabindex="0" data-panel="profile" hidden>
                 <div class="acc-profile-wrap">
+                <div class="acc-profile-main">
                 <form class="acc-profile" data-profile novalidate aria-label="Профиль">
                   <fieldset class="fs">
                     <legend class="fs__legend">Как к вам обращаться</legend>
@@ -325,8 +328,20 @@ const data = {
                       </div>
                       <div class="field">
                         <label for="pf-email">Email для восстановления <span class="field__opt">необязательно</span></label>
-                        <input id="pf-email" name="recovery_email" type="email" autocomplete="email" maxlength="120" inputmode="email" aria-describedby="pf-email-hint pf-email-err" />
-                        <p class="field__hint" id="pf-email-hint">Если смените номер, по этой почте подтвердим, что кабинет ваш</p>
+                        <input
+                          id="pf-email"
+                          name="recovery_email"
+                          type="email"
+                          autocomplete="email"
+                          maxlength="120"
+                          inputmode="email"
+                          placeholder="name@mail.ru"
+                          spellcheck="false"
+                          aria-describedby="pf-email-hint pf-email-err"
+                        />
+                        <p class="field__hint" id="pf-email-hint">
+                          {typo('Подойдёт российская почта: Mail.ru, Яндекс, Рамблер, VK. Если смените номер, по ней подтвердим, что кабинет ваш')}
+                        </p>
                         <p class="field__err" id="pf-email-err" data-err="recovery_email" hidden></p>
                       </div>
                     </div>
@@ -342,12 +357,110 @@ const data = {
                       <span data-submit-label>Сохранить</span>
                     </button>
                     <p class="acc-saved" data-saved role="status" aria-live="polite"></p>
-                    <button type="button" class="tlink acc-profile__out" data-logout>
-                      <Icon name="logout" />
-                      Выйти из кабинета
-                    </button>
                   </div>
                 </form>
+
+                {/* Saved addresses: outside the profile form — every address saves and
+                    goes on its own, the profile's «Сохранить» has nothing to do with them.
+                    The same form adds and edits; editing opens it in place of the row.
+                    Сохранённые адреса: вне формы профиля — каждый адрес сохраняется и
+                    удаляется сам, «Сохранить» профиля к ним отношения не имеет. Одна и та
+                    же форма добавляет и правит; правка открывает её на месте строки. */}
+                <section class="acc-addrs" aria-labelledby="addrs-title" data-addrs>
+                  <div class="acc-addrs__head">
+                    <h2 class="acc-addrs__title" id="addrs-title" tabindex="-1">Адреса доставки</h2>
+                    <span class="acc-addrs__count tnum" data-addrs-count></span>
+                  </div>
+                  <p class="acc-addrs__lead" data-addrs-lead>{typo('Корзина предложит их при оформлении доставки — не нужно набирать заново.')}</p>
+                  <ul class="acc-addrs__list" role="list" data-addrs-list></ul>
+                  <p class="acc-addrs__empty" data-addrs-empty hidden>
+                    <Icon name="pin" />
+                    <span>{typo('Сохраните адрес при оформлении заказа или добавьте здесь.')}</span>
+                  </p>
+                  <div class="acc-addrs__slot" data-addr-home>
+                    <form class="acc-addr-form" data-addr-form novalidate hidden aria-labelledby="ad-title">
+                      <p class="acc-addr-form__title" id="ad-title" data-addr-form-title>Новый адрес</p>
+                      <fieldset class="acc-addr-form__labels" aria-describedby="ad-label-err">
+                        <legend class="acc-profile__label">Как назвать</legend>
+                        <div class="acc-chips">
+                          <label class="acc-chip"><input type="radio" name="kind" value="Дом" /><span>Дом</span></label>
+                          <label class="acc-chip"><input type="radio" name="kind" value="Работа" /><span>Работа</span></label>
+                          <label class="acc-chip"><input type="radio" name="kind" value="own" /><span>Своя</span></label>
+                        </div>
+                        <div class="field acc-addr-form__own" data-addr-own hidden>
+                          <label for="ad-own" class="sr-only">Своя метка</label>
+                          <input
+                            id="ad-own"
+                            name="own"
+                            maxlength={ADDRESS_MAX.label}
+                            placeholder="Например: Дача, Мама"
+                            autocomplete="off"
+                            aria-describedby="ad-label-err"
+                          />
+                        </div>
+                        <p class="field__err" id="ad-label-err" data-addr-err="label" hidden></p>
+                      </fieldset>
+                      <div class="field">
+                        <label for="ad-address">Улица и дом</label>
+                        <input
+                          id="ad-address"
+                          name="address"
+                          maxlength={ADDRESS_MAX.address}
+                          autocomplete="street-address"
+                          placeholder="Например: Советской Армии, 177"
+                          aria-describedby="ad-address-quote ad-address-err"
+                        />
+                        <p class="acc-addr-form__quote" id="ad-address-quote" data-addr-quote role="status" aria-live="polite" hidden></p>
+                        <p class="field__err" id="ad-address-err" data-addr-err="address" hidden></p>
+                      </div>
+                      <fieldset class="apt">
+                        <legend class="apt__legend">Для курьера <span class="field__opt">необязательно</span></legend>
+                        <div class="apt__grid">
+                          <div class="field apt__field">
+                            <label for="ad-flat">Квартира / офис</label>
+                            <input id="ad-flat" name="flat" maxlength={ADDRESS_MAX.flat} autocomplete="address-line2" aria-describedby="ad-flat-err" />
+                          </div>
+                          <div class="field apt__field">
+                            <label for="ad-entrance">Подъезд</label>
+                            <input id="ad-entrance" name="entrance" maxlength={ADDRESS_MAX.entrance} inputmode="numeric" autocomplete="off" aria-describedby="ad-entrance-err" />
+                          </div>
+                          <div class="field apt__field">
+                            <label for="ad-floor">Этаж</label>
+                            <input id="ad-floor" name="floor" maxlength={ADDRESS_MAX.floor} inputmode="numeric" autocomplete="off" aria-describedby="ad-floor-err" />
+                          </div>
+                          <div class="field apt__field">
+                            <label for="ad-intercom">Код домофона</label>
+                            <input id="ad-intercom" name="intercom" maxlength={ADDRESS_MAX.intercom} autocomplete="off" spellcheck="false" aria-describedby="ad-intercom-err" />
+                          </div>
+                        </div>
+                        <p class="field__err" id="ad-flat-err" data-addr-err="flat" hidden></p>
+                        <p class="field__err" id="ad-entrance-err" data-addr-err="entrance" hidden></p>
+                        <p class="field__err" id="ad-floor-err" data-addr-err="floor" hidden></p>
+                        <p class="field__err" id="ad-intercom-err" data-addr-err="intercom" hidden></p>
+                      </fieldset>
+                      <div class="alert" data-addr-error role="alert" hidden>
+                        <p class="alert__title">Не сохранилось</p>
+                        <p data-addr-error-text></p>
+                      </div>
+                      <div class="acc-addr-form__foot">
+                        <button type="submit" class="btn btn--primary btn--sm" data-submit>
+                          <span data-addr-submit-label>Сохранить адрес</span>
+                        </button>
+                        <button type="button" class="tlink" data-addr-cancel>Отмена</button>
+                      </div>
+                    </form>
+                  </div>
+                  <p class="field__err acc-addrs__err" data-addrs-err role="alert" hidden></p>
+                  <div class="acc-addrs__foot" data-addr-foot>
+                    <button type="button" class="btn btn--secondary btn--sm" data-addr-add aria-describedby="addrs-limit">
+                      <Icon name="plus" />
+                      Добавить адрес
+                    </button>
+                    <p class="field__hint acc-addrs__limit" id="addrs-limit" data-addr-limit hidden>{LIMIT_MESSAGE}</p>
+                  </div>
+                </section>
+
+                </div>
                 {/* why each field is asked: the answer sits next to the question, not in a policy
                     зачем спрашиваем каждое поле: ответ рядом с вопросом, а не в политике */}
                 <aside class="acc-why" aria-labelledby="why-title">
@@ -369,10 +482,22 @@ const data = {
                     </div>
                     <div>
                       <dt>Почта</dt>
-                      <dd>{typo('Подтвердить, что кабинет ваш, если смените номер телефона.')}</dd>
+                      <dd>{typo('Подтвердить, что кабинет ваш, если смените номер телефона. Принимаем только российскую: Mail.ru, Яндекс, Рамблер, VK.')}</dd>
+                    </div>
+                    <div>
+                      <dt>Адреса</dt>
+                      <dd>{typo('Чтобы не набирать адрес в корзине заново: выберите сохранённый — подставим улицу, квартиру и подъезд.')}</dd>
                     </div>
                   </dl>
                 </aside>
+                {/* the way out ends the tab: after the addresses, and on a phone after «why» too
+                    выход заканчивает вкладку: после адресов, а на телефоне и после «зачем» */}
+                <p class="acc-profile__end">
+                  <button type="button" class="tlink acc-profile__out" data-logout>
+                    <Icon name="logout" />
+                    Выйти из кабинета
+                  </button>
+                </p>
                 </div>
               </div>
             </section>
