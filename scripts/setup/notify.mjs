@@ -10,9 +10,107 @@
 // the bot token is a key to the bot: only an administrator sees it
 // токен бота — ключ от бота: его видит только администратор
 const SECRET_FIELDS = ['telegram_token'];
-// written by the `notify` extension on start, not by people
-// пишет расширение `notify` при запуске, а не люди
-const MACHINE_FIELDS = ['email_state', 'email_ready'];
+// written by the `notify` extension, not by people: the mail state on start,
+// the chats and topics the bot saw while polling
+// пишет расширение `notify`, а не люди: состояние почты при запуске, чаты и
+// темы, которые бот видел в опросе
+const MACHINE_FIELDS = ['email_state', 'email_ready', 'telegram_seen'];
+
+const SETTINGS = 'notify_settings';
+// the chat rows (since 23.10.2026 evening): a forum topic and a third tick.
+// `schema apply` does not update `meta.options` of an existing field, so the
+// list's sub-fields are PATCHed here; «Заказы» and «Заявки» stay on by
+// default, «Неоформленные» is off
+// строки чатов (с вечера 23.10.2026): тема форума и третья галочка. `schema
+// apply` не обновляет `meta.options` существующего поля, поэтому подполя
+// списка правятся здесь PATCH-ем; «Заказы» и «Заявки» по умолчанию включены,
+// «Неоформленные» — выключены
+const CHATS_META = {
+  note:
+    'Личный чат или рабочая группа. Бот должен быть добавлен в группу (лучше администратором), а в личке — запущен кнопкой «Старт». ' +
+    'Группа с темами: chat_id один, по строке на тему; «Тема (ID)» — из «Чатов и тем, которые видел бот», пусто — General. ' +
+    'Галочки независимы: снимите лишние явно.',
+  options: {
+    addLabel: 'Добавить чат',
+    template: '{{label}} · {{chat_id}}',
+    fields: [
+      { field: 'label', name: 'Подпись', type: 'string', meta: { interface: 'input', width: 'half', options: { placeholder: 'Группа «Заказы»' } } },
+      {
+        field: 'chat_id',
+        name: 'chat_id',
+        type: 'string',
+        meta: { interface: 'input', width: 'half', required: true, options: { placeholder: '-1001234567890', font: 'monospace', trim: true } },
+      },
+      {
+        field: 'thread_id',
+        name: 'Тема (ID)',
+        type: 'string',
+        meta: {
+          interface: 'input',
+          width: 'full',
+          note: 'Номер темы в группе с темами. Пусто — общий чат (General) или группа без тем.',
+          options: { placeholder: 'пусто — General', font: 'monospace', trim: true },
+        },
+      },
+      { field: 'orders', name: 'Заказы', type: 'boolean', schema: { default_value: true }, meta: { interface: 'boolean', width: 'half', options: { label: 'Заказы доставки' } } },
+      { field: 'requests', name: 'Заявки', type: 'boolean', schema: { default_value: true }, meta: { interface: 'boolean', width: 'half', options: { label: 'Заявки на кейтеринг' } } },
+      {
+        field: 'pending',
+        name: 'Неоформленные',
+        type: 'boolean',
+        schema: { default_value: false },
+        meta: {
+          interface: 'boolean',
+          width: 'full',
+          note: 'Короткое сообщение «Начал оформление», когда гость пошёл платить онлайн, а банк ещё не подтвердил; потом в нём появится «Оплачен…» или «Не оплачен…».',
+          options: { label: 'Неоформленные' },
+        },
+      },
+    ],
+  },
+};
+// the old help sent people to getUpdates in a browser: with the poll running
+// that answers «Conflict», so the help now points to the seen list
+// старая подсказка посылала в браузер к getUpdates: при работающем опросе там
+// «Conflict», поэтому подсказка теперь ведёт к списку виденного
+const HELP_TEXT =
+  'Как подключить бота. 1) В Telegram откройте @BotFather → /newbot, придумайте имя и адрес бота — BotFather пришлёт токен, вставьте его в «Токен бота», ' +
+  'отметьте «Отправлять в Telegram» и сохраните. 2) Добавьте бота в рабочую группу администратором (или нажмите «Старт» в личке с ботом). ' +
+  '3) Напишите в группе любое слово — в нужной теме, если темы включены: через несколько секунд чат и тема появятся ниже, в «Чатах и темах, ' +
+  'которые видел бот», с chat_id и «Темой (ID)». 4) Добавьте строку в «Чаты» с этими числами и галочками и сохраните. Проверочное сообщение ' +
+  'отправляет администратор — см. docs/NOTIFY.md.';
+const SEEN_FIELD = {
+  field: 'telegram_seen',
+  type: 'json',
+  meta: {
+    interface: 'list',
+    special: ['cast-json'],
+    readonly: true,
+    width: 'full',
+    note:
+      'Добавьте бота в группу администратором и напишите в нужной теме любое слово — через несколько секунд она появится здесь с chat_id и ' +
+      '«Темой (ID)» (обновите страницу). Работает, когда отмечено «Отправлять в Telegram». Бот хранит только названия и номера, не тексты.',
+    translations: [{ language: 'ru-RU', translation: 'Чаты и темы, которые видел бот' }],
+    options: {
+      template: '{{label}}',
+      fields: [
+        { field: 'title', name: 'Чат', type: 'string', meta: { interface: 'input', width: 'half', readonly: true } },
+        { field: 'chat_id', name: 'chat_id', type: 'string', meta: { interface: 'input', width: 'half', readonly: true, options: { font: 'monospace' } } },
+        { field: 'topic', name: 'Тема', type: 'string', meta: { interface: 'input', width: 'half', readonly: true } },
+        { field: 'thread_id', name: 'Тема (ID)', type: 'string', meta: { interface: 'input', width: 'half', readonly: true, options: { font: 'monospace' } } },
+        { field: 'last_seen', name: 'Когда видел', type: 'string', meta: { interface: 'input', width: 'half', readonly: true } },
+        { field: 'label', name: 'Строка', type: 'string', meta: { interface: 'input', width: 'full', readonly: true } },
+      ],
+    },
+  },
+  schema: {},
+};
+// the log's events the extension writes since 23.10.2026, named in the admin
+// события журнала, которые расширение пишет с 23.10.2026, — по-русски в админке
+const LOG_EVENTS = [
+  { text: 'Начал оформление', value: 'order_pending' },
+  { text: 'Оплата заказа', value: 'order_payment' },
+];
 
 const ORDERS = 'orders';
 const tr = (text) => [{ language: 'ru-RU', translation: text }];
@@ -62,6 +160,41 @@ export async function setup(api, { editorPolicy, builderPolicy }) {
   if (!collections.has('notify_settings') || !collections.has('notify_log')) {
     console.log('notify: коллекций оповещений нет (schema apply ещё не сделан) — пропускаю');
     return;
+  }
+
+  // 0. Telegram topics: the seen list (new, after the help), the chat rows'
+  //    sub-fields and the help text (PATCH: `schema apply` keeps old options),
+  //    the log's new events. Before the rights: the editor reads the new field
+  //    темы Telegram: список виденного (новое поле, после подсказки), подполя
+  //    строк чатов и текст подсказки (PATCH: `schema apply` оставляет старые
+  //    options), новые события журнала. До прав: редактор читает новое поле
+  if (await insertAfter(api, SETTINGS, 'telegram_help', SEEN_FIELD)) console.log(`+ field ${SETTINGS}.telegram_seen`);
+  const chats = (await api('GET', `/fields/${SETTINGS}`)).find((f) => f.field === 'telegram_chats');
+  if (chats && (stable(chats.meta?.options) !== stable(CHATS_META.options) || chats.meta?.note !== CHATS_META.note)) {
+    await api('PATCH', `/fields/${SETTINGS}/telegram_chats`, { meta: CHATS_META });
+    console.log(`= field ${SETTINGS}.telegram_chats: «Тема (ID)», «Неоформленные», заметка`);
+  }
+  const help = (await api('GET', `/fields/${SETTINGS}`)).find((f) => f.field === 'telegram_help');
+  // only the old text is replaced: a text the owner rewrote stays / меняется только старый текст: переписанный владельцем остаётся
+  if (help && /getUpdates/.test(help.meta?.options?.text ?? '')) {
+    await api('PATCH', `/fields/${SETTINGS}/telegram_help`, { meta: { options: { ...help.meta.options, text: HELP_TEXT } } });
+    console.log(`= field ${SETTINGS}.telegram_help: chat_id и тема — из «Чатов и тем, которые видел бот»`);
+  }
+  const event = (await api('GET', '/fields/notify_log')).find((f) => f.field === 'event');
+  if (event) {
+    const choices = event.meta?.options?.choices ?? [];
+    const shown = event.meta?.display_options?.choices ?? [];
+    const lacking = LOG_EVENTS.filter((e) => !choices.some((c) => c.value === e.value));
+    const unshown = LOG_EVENTS.filter((e) => !shown.some((c) => c.value === e.value));
+    if (lacking.length || (event.meta?.display_options && unshown.length)) {
+      await api('PATCH', '/fields/notify_log/event', {
+        meta: {
+          options: { ...event.meta.options, choices: [...choices, ...lacking] },
+          ...(event.meta?.display_options ? { display_options: { ...event.meta.display_options, choices: [...shown, ...unshown] } } : {}),
+        },
+      });
+      console.log(`= field notify_log.event: + ${[...new Set([...lacking, ...unshown].map((e) => e.value))].join(', ')}`);
+    }
   }
 
   // 1. editors: settings without the token, the log read-only
@@ -134,28 +267,10 @@ export async function setup(api, { editorPolicy, builderPolicy }) {
     console.log(`+ preset notify_log${preset.bookmark ? ` «${preset.bookmark}»` : ''}`);
   }
 
-  // 4. the order's notify fields: a missing one goes right after its
-  //    neighbour, the fields below move down to make room (only when the field
-  //    is new); a tie in `sort` keeps the API order, as the admin form does
-  //    поля заказа для оповещений: недостающее встаёт сразу после соседа, поля
-  //    ниже сдвигаются, освобождая место (только когда поле новое); при
-  //    равном `sort` порядок как в ответе API — так его показывает карточка
+  // 4. the order's notify fields, each right after its neighbour
+  //    поля заказа для оповещений, каждое сразу после соседа
   for (const { after, field } of ORDER_FIELDS) {
-    const orderFields = await api('GET', `/fields/${ORDERS}`);
-    if (orderFields.some((f) => f.field === field.field)) continue;
-    const order = orderFields.filter((f) => Number.isFinite(f.meta?.sort)).sort((a, b) => a.meta.sort - b.meta.sort);
-    const at = order.findIndex((f) => f.field === after);
-    // no neighbour (an install without the payments) — the field goes last
-    // соседа нет (установка без оплаты) — поле встаёт в конец
-    let sort = order.length ? order[order.length - 1].meta.sort + 1 : 1;
-    if (at >= 0) {
-      sort = order[at].meta.sort + 1;
-      const below = order.slice(at + 1);
-      const shift = below.length ? Math.max(0, sort + 1 - below[0].meta.sort) : 0;
-      if (shift) await api('PATCH', `/fields/${ORDERS}`, below.map((f) => ({ field: f.field, meta: { sort: f.meta.sort + shift } })));
-    }
-    await api('POST', `/fields/${ORDERS}`, { ...field, meta: { ...field.meta, sort } });
-    console.log(`+ field ${ORDERS}.${field.field}`);
+    if (await insertAfter(api, ORDERS, after, field)) console.log(`+ field ${ORDERS}.${field.field}`);
   }
   const orderRules = await api('GET', `/permissions?filter[policy][_eq]=${editorPolicy}&filter[collection][_eq]=${ORDERS}&limit=-1`);
   for (const [action, need] of Object.entries(EDITOR_ORDER_FIELDS)) {
@@ -166,4 +281,35 @@ export async function setup(api, { editorPolicy, builderPolicy }) {
     await api('PATCH', `/permissions/${rule.id}`, { fields: [...(rule.fields ?? []), ...lacking] });
     console.log(`= permission Редактор: ${ORDERS} ${action} + ${lacking.join(', ')}`);
   }
+}
+
+/**
+ * A missing field goes right after its neighbour, the fields below move down
+ * to make room (only when the field is new); a tie in `sort` keeps the API
+ * order, as the admin form does. Returns whether the field was created.
+ * Недостающее поле встаёт сразу после соседа, поля ниже сдвигаются,
+ * освобождая место (только когда поле новое); при равном `sort` порядок как в
+ * ответе API — так его показывает форма. Возвращает, создано ли поле.
+ */
+async function insertAfter(api, collection, after, field) {
+  const fields = await api('GET', `/fields/${collection}`);
+  if (fields.some((f) => f.field === field.field)) return false;
+  const order = fields.filter((f) => Number.isFinite(f.meta?.sort)).sort((a, b) => a.meta.sort - b.meta.sort);
+  const at = order.findIndex((f) => f.field === after);
+  // no neighbour (an install without it) — the field goes last
+  // соседа нет (установка без него) — поле встаёт в конец
+  let sort = order.length ? order[order.length - 1].meta.sort + 1 : 1;
+  if (at >= 0) {
+    sort = order[at].meta.sort + 1;
+    const below = order.slice(at + 1);
+    const shift = below.length ? Math.max(0, sort + 1 - below[0].meta.sort) : 0;
+    if (shift) await api('PATCH', `/fields/${collection}`, below.map((f) => ({ field: f.field, meta: { sort: f.meta.sort + shift } })));
+  }
+  await api('POST', `/fields/${collection}`, { ...field, meta: { ...field.meta, sort } });
+  return true;
+}
+
+/** JSON with sorted keys: «the same options» whatever order the API keeps them in. / JSON с упорядоченными ключами. */
+function stable(value) {
+  return JSON.stringify(value ?? null, (_key, v) => (v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b))) : v));
 }

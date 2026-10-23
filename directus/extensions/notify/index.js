@@ -17,6 +17,12 @@
  * (`getUpdates`) through the relay;
  * `TELEGRAM_BUTTONS=off` turns the polling off (a second copy of Directus with
  * the same bot would steal the presses).
+ * Since 23.10.2026 (evening) a chat row may name a forum topic («Тема (ID)»):
+ * one group, a topic per kind — «Заказы», «Заявки», «Неоформленные». The last
+ * one gets «Начал оформление» when a guest goes to pay online, and that
+ * message is rewritten with the outcome: paid and sent to «Заказы», or not
+ * paid. The poll also learns the chats and topics the bot is in («Чаты и темы,
+ * которые видел бот») and follows a group that became a supergroup.
  * Also `POST /notify/test` (administrators only): a demo order through the
  * same channels, to check the settings.
  *
@@ -38,6 +44,12 @@
  * ретранслятор;
  * `TELEGRAM_BUTTONS=off` выключает опрос (вторая копия Directus с тем же ботом
  * отбирала бы нажатия).
+ * С 23.10.2026 (вечер) у строки чата может быть тема форума («Тема (ID)»):
+ * одна группа, по теме на вид — «Заказы», «Заявки», «Неоформленные». В
+ * последнюю уходит «Начал оформление», когда гость пошёл платить онлайн, и
+ * это сообщение потом дописывается исходом: оплачен и ушёл в «Заказы» или не
+ * оплачен. Опрос ещё и узнаёт чаты и темы, где есть бот («Чаты и темы, которые
+ * видел бот»), и следует за группой, ставшей супергруппой.
  * И `POST /notify/test` (только администратор): пример заказа по тем же каналам
  * для проверки настроек.
  *
@@ -47,19 +59,27 @@
 import {
   TELEGRAM_API,
   answerCallback,
+  chatKey,
   decideCallback,
   deliver,
+  deliverPending,
   demoModel,
   editTelegram,
   editTelegramKeyboard,
   mailState,
+  mergeSeen,
+  migrateChats,
+  migrationFromUpdate,
   normalizeSettings,
   orderModel,
   parseCallback,
+  pendingModel,
   pollTelegram,
   pressedBy,
+  recipientText,
   relayJob,
   requestModel,
+  seenFromUpdate,
   statusLogLine,
   statusModel,
   telegramBases,
@@ -68,6 +88,7 @@ import {
   telegramMeta,
   telegramText,
   testAddressProblem,
+  threadOf,
 } from './lib.js';
 
 // orders and requests typed in by the staff are not announced: they already know
@@ -129,32 +150,101 @@ const writeLog = async (database, event, model, key, results) => {
   );
 };
 
+/**
+ * The order's Telegram memory as it is stored: every part of it, so that one
+ * writer never drops what another keeps (the status history once lost
+ * `announced`, and the order could go out twice).
+ * Память заказа о Telegram в том виде, как она хранится: целиком, чтобы один
+ * писатель не терял то, что держит другой (история статусов когда-то
+ * теряла `announced`, и заказ мог уйти дважды).
+ */
+const metaJson = (meta) =>
+  JSON.stringify({
+    messages: meta.messages,
+    ...(meta.pending?.length ? { pending: meta.pending } : {}),
+    ...(meta.pending_outcome ? { pending_outcome: meta.pending_outcome } : {}),
+    history: meta.history.slice(-HISTORY_KEEP),
+    announced: meta.announced === true,
+  });
+
 /** The order's Telegram memory written back. / Память заказа о Telegram, записанная обратно. */
-const saveMeta = (database, key, meta) =>
-  database('orders')
-    .where({ id: key })
-    .update({ telegram_meta: JSON.stringify({ messages: meta.messages, history: meta.history.slice(-HISTORY_KEEP), announced: meta.announced === true }) });
+const saveMeta = (database, key, meta) => database('orders').where({ id: key }).update({ telegram_meta: metaJson(meta) });
+
+/**
+ * The sent messages put into a list of the memory (`messages` or `pending`):
+ * one entry per chat+topic — its message id, or the relay's ticket until the
+ * id is known.
+ * Отправленные сообщения — в список памяти (`messages` или `pending`): по
+ * записи на пару чат+тема — id сообщения или талон ретранслятора, пока id
+ * неизвестен.
+ */
+const putSent = (list, results) => {
+  for (const r of results.filter((x) => x.channel === 'telegram' && (x.messageId || x.job))) {
+    const thread = threadOf(r.thread);
+    const found = list.find((m) => chatKey(m.chat, m.thread) === chatKey(r.chat, thread));
+    const entry = r.messageId ? { chat: String(r.chat), thread, message_id: r.messageId } : { chat: String(r.chat), thread, job: r.job };
+    if (found) {
+      Object.assign(found, entry);
+      if (entry.message_id) delete found.job;
+    } else list.push(entry);
+  }
+};
 
 /** The messages a delivery produced, remembered so they can be edited later. / Сообщения рассылки — чтобы потом их править. */
 const rememberSent = async (database, key, row, results, { announced = false } = {}) => {
   const sent = results.filter((r) => r.channel === 'telegram' && (r.messageId || r.job));
   const meta = telegramMeta(row);
   if (announced) meta.announced = true;
-  if (!sent.length) {
-    if (announced) {
-      await saveMeta(database, key, meta);
-      row.telegram_meta = meta;
-    }
-    return;
-  }
-  for (const r of sent) {
-    const found = meta.messages.find((m) => String(m.chat) === String(r.chat));
-    const entry = r.messageId ? { chat: String(r.chat), message_id: r.messageId } : { chat: String(r.chat), job: r.job };
-    if (found) Object.assign(found, entry);
-    else meta.messages.push(entry);
-  }
+  if (!sent.length && !announced) return;
+  putSent(meta.messages, sent);
   await saveMeta(database, key, meta);
   row.telegram_meta = meta;
+};
+
+/**
+ * A group became a supergroup (topics switched on): its old chat_id in
+ * «Чаты» is replaced by the new one, the old chat leaves «Чаты и темы, которые
+ * видел бот». The order's remembered messages are left alone: Telegram gives
+ * them new ids in the supergroup, so the old ones are forgotten at the first
+ * edit anyway.
+ * Группа стала супергруппой (включили темы): старый chat_id в «Чатах»
+ * заменяется новым, старый чат уходит из «Чатов и тем, которые видел бот».
+ * Запомненные сообщения заказов не трогаем: в супергруппе у них новые id, и
+ * старые всё равно забудутся при первой правке.
+ */
+const applyMigration = async (database, logger, from, to, why) => {
+  if (!from || !to || String(from) === String(to)) return;
+  try {
+    const row = await database('notify_settings').first();
+    if (!row) return;
+    const settings = normalizeSettings(row);
+    const { rows, changed } = migrateChats(settings.telegram_chats, from, to);
+    const update = {};
+    if (changed) update.telegram_chats = JSON.stringify(rows);
+    // the field arrives with `pnpm setup`: until then there is nothing to clean
+    // поле появляется с `pnpm setup`: до тех пор чистить нечего
+    if (Object.hasOwn(row, 'telegram_seen')) {
+      const seen = settings.telegram_seen.filter((e) => String(e?.chat_id) !== String(from));
+      if (seen.length !== settings.telegram_seen.length) update.telegram_seen = JSON.stringify(seen);
+    }
+    if (Object.keys(update).length) await database('notify_settings').where({ id: row.id }).update(update);
+    if (changed) logger.warn(`notify: группа ${from} стала супергруппой ${to} (${why}) — chat_id заменён в «Чатах»: ${changed} строк(и)`);
+    // both sides announce the move: the second one finds the work done and says nothing
+    // о переезде говорят обе стороны: вторая застаёт всё сделанным и молчит
+    else if (!rows.some((r) => String(r?.chat_id ?? '').trim() === String(to))) logger.info(`notify: группа ${from} стала супергруппой ${to} (${why}) — в «Чатах» её не было`);
+  } catch (error) {
+    logger.warn(`notify: смена chat_id ${from} → ${to} не записана — ${error.message}`);
+  }
+};
+
+/** The migrations a delivery met on the way, applied once per group. / Переезды групп, встреченные рассылкой, — по разу на группу. */
+const followMigrations = async (database, logger, results) => {
+  const done = new Set();
+  for (const r of results) {
+    if (!r.migratedTo || !r.migratedFrom || done.has(r.migratedFrom)) continue;
+    done.add(r.migratedFrom);
+    await applyMigration(database, logger, r.migratedFrom, r.migratedTo, 'ответ Telegram');
+  }
 };
 
 const hook = ({ action, init }, { services, env, logger, database: db, getSchema }) => {
@@ -198,7 +288,7 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
       const settings = await loadSettings(database);
       const loaded = await loadModel(database, env, collection, key);
       if (!loaded) return;
-      const { row, model } = loaded;
+      const { row, model, place } = loaded;
       if (MANUAL_SOURCES.has(row.source)) {
         await database(collection).where({ id: key }).update({ notify_result: 'не рассылалось: заведено в админке вручную' });
         return;
@@ -206,14 +296,22 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
       if (collection === 'orders') {
         if (announced(row)) return;
         if (awaitsPayment(row)) {
-          await database(collection).where({ id: key }).update({ notify_result: 'ждёт оплату онлайн — уйдёт, когда банк подтвердит' });
+          // only «Неоформленные» hear of it now / сейчас о нём слышат только «Неоформленные»
+          const tail = await announcePending(database, settings, key, row, place);
+          await database(collection).where({ id: key }).update({ notify_result: `ждёт оплату онлайн — уйдёт, когда банк подтвердит${tail}` });
           return;
         }
       }
       const { results, summary } = await deliver({ model, settings, secrets: secretsOf(env, settings), ...(await senders(database, schema)) });
       await writeLog(database, event, model, key, results);
       await database(collection).where({ id: key }).update({ notify_result: summary });
-      if (collection === 'orders') await rememberSent(database, key, row, results, { announced: true });
+      await followMigrations(database, logger, results);
+      if (collection === 'orders') {
+        await rememberSent(database, key, row, results, { announced: true });
+        // the «Начал оформление» message learns that the order went to «Заказы»
+        // сообщение «Начал оформление» узнаёт, что заказ ушёл в «Заказы»
+        if (telegramMeta(row).pending.length) await settlePending(database, key, row.payment_status === 'paid' ? 'paid' : 'on_delivery');
+      }
       const failed = results.filter((r) => r.status === 'failed');
       if (failed.length) logger.warn(`notify: ${event} ${key} — ${summary}`);
       else logger.info(`notify: ${event} ${key} — ${summary}`);
@@ -229,27 +327,23 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
   };
 
   /**
-   * The order's messages in Telegram rewritten for its current state. A
-   * message the relay still holds gets its id from the relay's ticket; one
-   * Telegram no longer finds is forgotten. Returns the chats that now show
-   * the fresh text.
-   * Сообщения заказа в Telegram, переписанные под его текущее состояние.
-   * Сообщение, которое ретранслятор ещё держит, получает id по талону; то,
-   * которого Telegram уже не находит, забывается. Возвращает чаты, где текст
-   * теперь свежий.
+   * Remembered messages rewritten with one text. A message the relay still
+   * holds gets its id from the relay's ticket; one Telegram no longer finds
+   * is dropped from `keep`. `edited` — the chat+topic pairs that now show the
+   * fresh text.
+   * Запомненные сообщения, переписанные одним текстом. Сообщение, которое
+   * ретранслятор ещё держит, получает id по талону; то, которого Telegram уже
+   * не находит, выпадает из `keep`. `edited` — пары чат+тема, где текст теперь
+   * свежий.
    */
-  const refresh = async (database, settings, key, row, model, event) => {
-    const meta = telegramMeta(row);
-    const edited = new Set();
-    if (!meta.messages.length || !settings.telegram_enabled || !settings.telegram_token) return { edited, meta };
+  const editEntries = async (database, settings, entries, text, keyboard, kind) => {
     const bases = telegramBases(env);
     const relay = bases[0] !== TELEGRAM_API ? bases[0] : null;
-    const text = telegramText(model);
-    const keyboard = model.keyboard ?? null;
     const keep = [];
     const results = [];
+    const edited = new Set();
     let changed = false;
-    for (const m of meta.messages) {
+    for (const m of entries) {
       let messageId = m.message_id ?? null;
       if (!messageId && m.job) {
         const fate = await relayJob({ base: relay, token: settings.telegram_token, job: m.job });
@@ -269,21 +363,93 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
         continue;
       }
       const r = await editTelegram({ token: settings.telegram_token, chatId: m.chat, messageId, text, keyboard, bases });
+      if (r.migratedTo) await applyMigration(database, logger, String(m.chat), r.migratedTo, 'ответ Telegram');
       if (r.status === 'failed' && /message to edit not found|message can't be edited|MESSAGE_ID_INVALID/i.test(r.error ?? '')) {
         changed = true;
         continue;
       }
       keep.push(m);
-      if (r.status !== 'failed') edited.add(String(m.chat));
-      const chat = telegramChats(settings, 'order', true).find((c) => c.id === String(m.chat));
-      results.push({ channel: 'telegram', recipient: chat?.label ? `${chat.label} (${m.chat})` : String(m.chat), status: r.status, error: r.error, attempts: r.attempts });
+      if (r.status !== 'failed') edited.add(chatKey(m.chat, m.thread));
+      const chat = telegramChats(settings, kind, true).find((c) => chatKey(c.id, c.thread) === chatKey(m.chat, m.thread));
+      results.push({ channel: 'telegram', recipient: recipientText(chat ?? { id: String(m.chat), label: '', thread: threadOf(m.thread) }), status: r.status, error: r.error, attempts: r.attempts });
     }
-    if (changed || keep.length !== meta.messages.length) {
+    return { keep, edited, results, changed: changed || keep.length !== entries.length };
+  };
+
+  /**
+   * The order's messages in Telegram rewritten for its current state.
+   * Returns the chat+topic pairs that now show the fresh text.
+   * Сообщения заказа в Telegram, переписанные под его текущее состояние.
+   * Возвращает пары чат+тема, где текст теперь свежий.
+   */
+  const refresh = async (database, settings, key, row, model, event) => {
+    const meta = telegramMeta(row);
+    if (!meta.messages.length || !settings.telegram_enabled || !settings.telegram_token) return { edited: new Set(), meta };
+    const { keep, edited, results, changed } = await editEntries(database, settings, meta.messages, telegramText(model), model.keyboard ?? null, 'order');
+    if (changed) {
       meta.messages = keep;
       await saveMeta(database, key, meta);
     }
     await writeLog(database, event, model, key, results);
     return { edited, meta };
+  };
+
+  /**
+   * «Начал оформление» to the chats ticked «Неоформленные», once per order:
+   * not again when it was sent or the order is already announced. Returns the
+   * tail of the card's line: « · Неоформленные ✓», « · Неоформленные ✗ …», or
+   * nothing when no chat is ticked.
+   * «Начал оформление» в чаты с галочкой «Неоформленные», один раз на заказ:
+   * не повторяется, если уже ушло или заказ уже объявлен. Возвращает хвост
+   * строки карточки: « · Неоформленные ✓», « · Неоформленные ✗ …» или ничего,
+   * если галочки нет ни у одного чата.
+   */
+  const announcePending = async (database, settings, key, row, place) => {
+    const meta = telegramMeta(row);
+    if (meta.pending.length || meta.announced) return '';
+    const model = pendingModel(row, { place, adminUrl: adminLink(env, 'orders', key) });
+    const { results, part } = await deliverPending({ model, settings, bases: telegramBases(env) });
+    if (!part) return '';
+    await writeLog(database, 'order_pending', model, key, results);
+    await followMigrations(database, logger, results);
+    if (results.some((r) => r.messageId || r.job)) {
+      putSent(meta.pending, results);
+      await saveMeta(database, key, meta);
+      row.telegram_meta = meta;
+    }
+    const failed = results.some((r) => r.status === 'failed');
+    logger[failed ? 'warn' : 'info'](`notify: order_pending ${key} — ${part}`);
+    return ` · ${part}`;
+  };
+
+  /**
+   * The «Начал оформление» messages get their outcome line: «Оплачен в 12:41,
+   * ушёл в заказы» (or the guest chose to pay on delivery), «Не оплачен:
+   * отменён 12:50». Paid beats not paid (a retry after a failed payment); the
+   * same outcome is not written twice, and nothing beats «ушёл в заказы».
+   * Сообщения «Начал оформление» получают строку исхода. Оплата перекрывает
+   * «не оплачен» (повтор после неудачной оплаты); тот же исход второй раз не
+   * пишется, а «ушёл в заказы» уже ничто не перекрывает.
+   */
+  const settlePending = async (database, key, kind) => {
+    const loaded = await loadModel(database, env, 'orders', key);
+    if (!loaded) return;
+    const { row, place } = loaded;
+    const meta = telegramMeta(row);
+    if (!meta.pending.length) return;
+    const was = meta.pending_outcome?.kind;
+    if (was && (was === kind || was !== 'unpaid')) return;
+    meta.pending_outcome = { kind, at: (kind === 'paid' && row.paid_at ? new Date(row.paid_at) : new Date()).toISOString() };
+    row.telegram_meta = meta;
+    const settings = await loadSettings(database);
+    const model = pendingModel(row, { place, adminUrl: adminLink(env, 'orders', key) });
+    if (settings.telegram_enabled && settings.telegram_token) {
+      const { keep, results, changed } = await editEntries(database, settings, meta.pending, telegramText(model), null, 'pending');
+      if (changed) meta.pending = keep;
+      await writeLog(database, 'order_pending', model, key, results);
+    }
+    await saveMeta(database, key, meta);
+    logger.info(`notify: order_pending ${key} — ${kind === 'unpaid' ? 'не оплачен' : 'ушёл в заказы'}, сообщение «Начал оформление» дописано`);
   };
 
   /** Who changed the status, when it was not a button: the admin user, else the machine. / Кто сменил статус, если не кнопкой. */
@@ -313,6 +479,7 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
         const model = statusModel(loaded.model, status);
         const { results } = await deliver({ model, settings, secrets: secretsOf(env, settings), ...(await senders(database, schema)) });
         await writeLog(database, event, model, key, results);
+        await followMigrations(database, logger, results);
         return;
       }
       const actor = await actorOf(database, key, accountability);
@@ -328,10 +495,15 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
       await database('orders')
         .where({ id: key })
         .update({
-          telegram_meta: JSON.stringify({ messages: meta.messages, history: meta.history.slice(-HISTORY_KEEP) }),
+          telegram_meta: metaJson(meta),
           status_log: first.status_log ? `${first.status_log}\n${line}` : line,
         });
-      if (quiet) return;
+      if (quiet) {
+        // cancelled before the bank said yes: «Неоформленные» learn it was not paid
+        // отменён до оплаты: «Неоформленные» узнают, что он не оплачен
+        if (status === 'cancelled' && meta.pending.length) await settlePending(database, key, 'unpaid');
+        return;
+      }
       const loaded = await loadModel(database, env, collection, key);
       if (!loaded) return;
       const { edited } = await refresh(database, settings, key, loaded.row, loaded.model, event);
@@ -340,9 +512,10 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
       // отдельное сообщение, как до кнопок: почта и чаты, где переписывать нечего
       if (!settings.status_changes) return;
       const model = statusModel(loaded.model, status);
-      const rest = { ...settings, telegram_chats: settings.telegram_chats.filter((c) => !edited.has(String(c?.chat_id ?? '').trim())) };
+      const rest = { ...settings, telegram_chats: settings.telegram_chats.filter((c) => !edited.has(chatKey(c?.chat_id, c?.thread_id))) };
       const { results } = await deliver({ model, settings: rest, secrets: secretsOf(env, settings), ...(await senders(database, schema)) });
       await writeLog(database, event, model, key, results);
+      await followMigrations(database, logger, results);
     } catch (error) {
       logger.warn(`notify: статус ${collection} ${key} — ${error.message}`);
     }
@@ -351,10 +524,12 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
   /**
    * The payment moved. A paid order not announced yet goes out now, already
    * with «оплачен онлайн»; an announced one has its message rewritten. No
-   * extra message either way.
+   * extra message either way. A payment that failed or was returned before
+   * the announcement marks «Начал оформление» as not paid.
    * Оплата сменилась. Оплаченный, но ещё не объявленный заказ уходит сейчас,
    * уже с «оплачен онлайн»; объявленный — переписывается. Лишних сообщений
-   * нет в обоих случаях.
+   * нет в обоих случаях. Оплата, не прошедшая или возвращённая до объявления,
+   * помечает «Начал оформление» как не оплаченный.
    */
   const onPayment = async (key, payload, context = {}) => {
     const { database = db } = context;
@@ -365,6 +540,7 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
         // paid, or the guest chose to pay on delivery after all: now it is a real order
         // оплачен — или гость всё-таки выбрал оплату при получении: теперь это настоящий заказ
         if (payload.payment_status === 'paid' || (payload.payment_method === 'on_delivery' && !awaitsPayment(first))) await announce('order_new', 'orders', key, context);
+        else if (['failed', 'refunded'].includes(payload.payment_status) && telegramMeta(first).pending.length) await settlePending(database, key, 'unpaid');
         return;
       }
       const settings = await loadSettings(database);
@@ -406,8 +582,9 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
     // у заказа, сделанного до кнопок, сообщение не записано: вот оно
     if (messageId) {
       const meta = telegramMeta(row);
-      if (!meta.messages.some((m) => String(m.chat) === chat)) {
-        meta.messages.push({ chat, message_id: messageId });
+      const thread = query.message?.is_topic_message ? threadOf(query.message?.message_thread_id) : null;
+      if (!meta.messages.some((m) => chatKey(m.chat, m.thread) === chatKey(chat, thread))) {
+        meta.messages.push({ chat, thread, message_id: messageId });
         await saveMeta(db, row.id, meta);
       }
     }
@@ -418,14 +595,46 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
     logger.info(`notify: заказ ${row.id} → «${verdict.status}» кнопкой, ${pressedBy(query.from)}`);
   };
 
-  /** The long poll for presses, forever, quiet until something changes. / Долгий опрос нажатий, навсегда, молча, пока ничего не меняется. */
+  /**
+   * Where the bot was seen, into «Чаты и темы, которые видел бот»: one write
+   * per poll at most, and only when something new or old enough came.
+   * Где видели бота — в «Чаты и темы, которые видел бот»: не больше одной
+   * записи на опрос и только если пришло новое или давнее.
+   */
+  const rememberSeen = async (entries) => {
+    const row = await db('notify_settings').first();
+    // the field arrives with `pnpm setup` / поле появляется с `pnpm setup`
+    if (!row || !Object.hasOwn(row, 'telegram_seen')) return;
+    const { list, changed, added } = mergeSeen(normalizeSettings(row).telegram_seen, entries);
+    if (!changed) return;
+    await db('notify_settings').where({ id: row.id }).update({ telegram_seen: JSON.stringify(list) });
+    for (const entry of added) logger.info(`notify: бот видит ${entry.label}`);
+  };
+
+  /** The bot added to a chat or taken out of it: a line in the log. / Бота добавили в чат или убрали из него: строка в логе. */
+  const memberNews = (member) => {
+    const chat = member?.chat ?? {};
+    const name = chat.title ?? ([chat.first_name, chat.last_name].filter(Boolean).join(' ') || chat.id);
+    const status = member?.new_chat_member?.status;
+    if (['left', 'kicked'].includes(status)) logger.warn(`notify: бота убрали из «${name}» (${chat.id}) — туда сообщения больше не дойдут`);
+    else if (['member', 'administrator'].includes(status)) logger.info(`notify: бот в «${name}» (${chat.id}): ${status === 'administrator' ? 'администратор' : 'участник'}`);
+  };
+
+  /**
+   * The long poll, forever, quiet until something changes: button presses,
+   * the chats and topics the bot sees, a group that became a supergroup.
+   * Долгий опрос, навсегда, молча, пока ничего не меняется: нажатия кнопок,
+   * чаты и темы, которые видит бот, группа, ставшая супергруппой.
+   */
   const pollForever = async () => {
     let offset = null;
     let lastError = '';
     for (;;) {
       try {
         const settings = await loadSettings(db);
-        if (!settings.telegram_enabled || !settings.telegram_token || !settings.telegram_chats.length) {
+        // no chats yet is fine: the poll is how the bot learns them
+        // чатов ещё нет — не беда: опрос и узнаёт их
+        if (!settings.telegram_enabled || !settings.telegram_token) {
           await sleep(20_000);
           continue;
         }
@@ -439,10 +648,20 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
         }
         if (lastError) logger.info('notify: опрос кнопок Telegram снова работает');
         lastError = '';
+        const seen = [];
         for (const update of r.updates) {
-          if (!update.callback_query) continue;
-          await onPress(update.callback_query, settings).catch((error) => logger.warn(`notify: нажатие кнопки — ${error.message}`));
+          if (update.callback_query) {
+            await onPress(update.callback_query, settings).catch((error) => logger.warn(`notify: нажатие кнопки — ${error.message}`));
+            continue;
+          }
+          const moved = migrationFromUpdate(update);
+          if (moved) await applyMigration(db, logger, moved.from, moved.to, 'сообщение Telegram');
+          if (update.my_chat_member) memberNews(update.my_chat_member);
+          // the old group's farewell is not a place to write to / прощание старой группы — не адрес
+          const entry = update.message?.migrate_to_chat_id ? null : seenFromUpdate(update);
+          if (entry) seen.push(entry);
         }
+        if (seen.length) await rememberSeen(seen).catch((error) => logger.warn(`notify: «Чаты и темы, которые видел бот» не записаны — ${error.message}`));
         offset = r.offset;
       } catch (error) {
         logger.warn(`notify: опрос кнопок Telegram — ${error.message}`);
@@ -526,6 +745,7 @@ const endpoint = (router, { services, env, logger, database, getSchema }) => {
         bases: telegramBases(env),
       });
       await writeLog(database, 'test', model, undefined, results);
+      await followMigrations(database, logger, results);
       logger.info(`notify: проверка — ${summary}`);
       res.json({ data: { summary, results } });
     } catch (error) {

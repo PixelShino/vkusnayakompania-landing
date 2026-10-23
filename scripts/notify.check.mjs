@@ -41,6 +41,20 @@ import {
   NOT_RU_REASON,
   senderWarning,
   testAddressProblem,
+  POLL_UPDATES,
+  chatKey,
+  deliverPending,
+  mergeSeen,
+  migrateChats,
+  migrationFromUpdate,
+  pendingModel,
+  pendingOutcomeLine,
+  seenFromUpdate,
+  telegramCall,
+  telegramChats,
+  threadOf,
+  wants,
+  SEEN_LIMIT,
 } from '../directus/extensions/notify/lib.js';
 import { RULES, emailProblem, payloadProblem, recipientProblems, recipientsError } from '../directus/extensions/email-guard/rules.js';
 import { RU_MAIL_ERROR, RU_MAIL_ERROR_ADMIN } from '../directus/extensions/email-guard/domains.js';
@@ -531,13 +545,28 @@ assert.ok(!scrub(`token ${TOKEN} leaked`, [TOKEN]).includes(TOKEN));
 
   // the memory on the order: a string from the database or an object, junk ignored
   // память у заказа: строка из базы или объект, мусор пропускается
-  assert.deepEqual(telegramMeta({}), { messages: [], history: [], announced: false });
-  assert.deepEqual(telegramMeta({ telegram_meta: 'не json' }), { messages: [], history: [], announced: false });
-  assert.deepEqual(telegramMeta({ telegram_meta: JSON.stringify({ messages: [{ chat: '-1', message_id: 7 }, null, { job: 3 }], history: [{ status: 'done' }, {}], announced: true }) }), {
-    messages: [{ chat: '-1', message_id: 7 }],
-    history: [{ status: 'done' }],
-    announced: true,
-  });
+  const blank = { messages: [], pending: [], pending_outcome: null, history: [], announced: false };
+  assert.deepEqual(telegramMeta({}), blank);
+  assert.deepEqual(telegramMeta({ telegram_meta: 'не json' }), blank);
+  assert.deepEqual(
+    telegramMeta({
+      telegram_meta: JSON.stringify({
+        messages: [{ chat: '-1', message_id: 7 }, null, { job: 3 }],
+        pending: [{ chat: '-1', thread: '2', message_id: 8 }, { thread: '2' }],
+        pending_outcome: { kind: 'paid', at: '2026-10-23T08:41:00Z' },
+        history: [{ status: 'done' }, {}],
+        announced: true,
+      }),
+    }),
+    {
+      messages: [{ chat: '-1', message_id: 7 }],
+      pending: [{ chat: '-1', thread: '2', message_id: 8 }],
+      pending_outcome: { kind: 'paid', at: '2026-10-23T08:41:00Z' },
+      history: [{ status: 'done' }],
+      announced: true,
+    },
+  );
+  assert.equal(telegramMeta({ telegram_meta: { pending_outcome: { at: 'x' } } }).pending_outcome, null, 'исход без вида — нет исхода');
 
   // the payment line: online orders only / строка оплаты: только онлайн
   assert.equal(paymentLine({ payment_status: 'none' }), null);
@@ -633,7 +662,8 @@ assert.ok(!scrub(`token ${TOKEN} leaked`, [TOKEN]).includes(TOKEN));
   assert.equal(r.updates.length, 2);
   assert.equal(r.offset, 102);
   assert.ok(a.calls[0].url.startsWith(`${RELAY}/bot`) && a.calls[0].url.endsWith('/getUpdates'));
-  assert.deepEqual(a.calls[0].body, { timeout: 20, allowed_updates: ['callback_query'] });
+  assert.deepEqual(a.calls[0].body, { timeout: 20, allowed_updates: ['callback_query', 'message', 'my_chat_member'] });
+  assert.deepEqual(POLL_UPDATES, ['callback_query', 'message', 'my_chat_member'], 'опрос слышит и сообщения: чаты, темы, переезд группы');
   // nothing new keeps the offset / без новостей смещение прежнее
   const b = fakeFetch([{ status: 200, body: { ok: true, result: [] } }]);
   const empty = await pollTelegram({ token: TOKEN, offset: 102, fetchImpl: b.impl, bases: [RELAY, TELEGRAM_API] });
@@ -671,6 +701,294 @@ assert.ok(!scrub(`token ${TOKEN} leaked`, [TOKEN]).includes(TOKEN));
   assert.equal(await relayJob({ base: RELAY, token: TOKEN, job: 9, fetchImpl: off.impl }), null);
   assert.equal(await relayJob({ base: TELEGRAM_API, token: TOKEN, job: 9, fetchImpl: off.impl }), null);
   assert.equal(off.calls.length, 1);
+}
+
+// ── topics, «Неоформленные», a group turned supergroup, the chats the bot saw ──
+// ── темы, «Неоформленные», группа-супергруппа, чаты, которые видел бот ───────
+{
+  const GROUP = '-1003012345678';
+  // one supergroup, a topic per kind: General for orders, 4 for requests, 2 for «Неоформленные»
+  // одна супергруппа, по теме на вид: General — заказы, 4 — заявки, 2 — «Неоформленные»
+  const topics = normalizeSettings({
+    telegram_enabled: true,
+    telegram_token: TOKEN,
+    email_enabled: false,
+    telegram_chats: [
+      { label: 'Заказы', chat_id: GROUP, thread_id: '', orders: true, requests: false, pending: false },
+      { label: 'Заявки', chat_id: GROUP, thread_id: '4', orders: false, requests: true, pending: false },
+      { label: 'Неоформленные', chat_id: GROUP, thread_id: '2', orders: false, requests: false, pending: true },
+      // the same pair twice, typed differently: one recipient / та же пара другим почерком — один получатель
+      { label: 'Дубль', chat_id: ` ${GROUP} `, thread_id: ' 2 ', orders: false, requests: false, pending: true },
+      // «1» is General for Telegram: the same pair as the first row / «1» — это General: та же пара, что первая строка
+      { label: 'General по ошибке', chat_id: GROUP, thread_id: '1', orders: true, requests: false },
+    ],
+  });
+
+  // the ticks: «Заказы»/«Заявки» on unless unticked, «Неоформленные» only when ticked
+  // галочки: «Заказы»/«Заявки» включены, пока не сняты, «Неоформленные» — только отмеченные
+  assert.equal(wants({}, 'pending'), false, 'без галочки «Неоформленные» — нет');
+  assert.equal(wants({ pending: true }, 'pending'), true);
+  assert.equal(wants({ pending: false, orders: true }, 'pending'), false);
+  assert.equal(wants({ pending: 'true' }, 'pending'), false, 'только настоящее true');
+  assert.equal(wants({}, 'pending', true), true, 'проверка уходит всем');
+  assert.equal(wants({}, 'order'), true, 'строка до галочек получает заказы, как раньше');
+  assert.equal(wants({ pending: true }, 'order'), true, 'отсутствие «orders» — по-прежнему «да»');
+  assert.equal(wants({ orders: false }, 'order_status'), false);
+  assert.equal(wants({}, 'request_status'), true);
+
+  // one recipient per chat+topic / получатель — пара чат+тема
+  assert.equal(threadOf(' 4 '), '4');
+  assert.equal(threadOf(4), '4');
+  assert.equal(threadOf('1'), null, 'General — без темы');
+  assert.equal(threadOf(''), null);
+  assert.equal(threadOf(null), null);
+  assert.equal(chatKey(' -1 ', ''), chatKey('-1', null));
+  assert.equal(chatKey('-1', '1'), chatKey('-1'));
+  assert.notEqual(chatKey('-1', '2'), chatKey('-1', '4'));
+  assert.deepEqual(telegramChats(topics, 'order'), [{ id: GROUP, label: 'Заказы', thread: null }], 'General один раз');
+  assert.deepEqual(telegramChats(topics, 'request'), [{ id: GROUP, label: 'Заявки', thread: '4' }]);
+  assert.deepEqual(telegramChats(topics, 'pending'), [{ id: GROUP, label: 'Неоформленные', thread: '2' }], 'дубль схлопнут');
+  assert.deepEqual(
+    telegramChats(topics, 'order', true).map((c) => chatKey(c.id, c.thread)),
+    [`${GROUP}|`, `${GROUP}|4`, `${GROUP}|2`],
+    'проверка: каждая тема по разу',
+  );
+  // rows that only name their own tick still get orders and requests: untick them explicitly
+  // строки, где названа только своя галочка, получают и заказы, и заявки — снимать явно
+  const loose = normalizeSettings({
+    telegram_chats: [{ chat_id: GROUP, orders: true }, { chat_id: GROUP, thread_id: '4', requests: true }, { chat_id: GROUP, thread_id: '2', pending: true }],
+  });
+  assert.equal(telegramChats(loose, 'order').length, 3, 'без orders:false заказ уйдёт во все три темы');
+  assert.equal(telegramChats(loose, 'pending').length, 1);
+
+  // the order goes to General without a thread id, the request into topic 4
+  // заказ — в General без id темы, заявка — в тему 4
+  const live = orderModel({ ...order, status: 'new' }, { adminUrl: URL });
+  const o = fakeFetch([{ status: 200, body: { ok: true, result: { message_id: 50 } } }]);
+  const sent = await deliver({ model: live, settings: topics, mail: { ok: false, reason: 'x' }, fetchImpl: o.impl, sleep: noSleep, now: NOON });
+  assert.equal(o.calls.length, 1);
+  assert.equal(o.calls[0].body.chat_id, GROUP);
+  assert.ok(!('message_thread_id' in o.calls[0].body), 'General — без message_thread_id');
+  assert.equal(sent.summary, 'почта выключена · Telegram ✓ · 12:05');
+  assert.deepEqual([sent.results[0].chat, sent.results[0].thread, sent.results[0].messageId], [GROUP, null, 50]);
+  const q = fakeFetch([{ status: 200, body: { ok: true, result: { message_id: 51 } } }]);
+  const req = await deliver({ model: rm, settings: topics, mail: { ok: false, reason: 'x' }, fetchImpl: q.impl, sleep: noSleep, now: NOON });
+  assert.equal(q.calls[0].body.message_thread_id, 4, 'id темы — числом');
+  assert.equal(req.results[0].thread, '4');
+  assert.equal(req.results[0].recipient, `Заявки (${GROUP}, тема 4)`);
+  // a typo in «Тема (ID)» is not quietly turned into General / опечатка в «Теме (ID)» не превращается молча в General
+  const typo = fakeFetch([{ status: 400, body: { ok: false, description: 'Bad Request: message thread not found' } }]);
+  const bad = await sendTelegram({ token: TOKEN, chatId: GROUP, threadId: '2a', text: 'x', fetchImpl: typo.impl, sleep: noSleep });
+  assert.equal(typo.calls[0].body.message_thread_id, '2a');
+  assert.equal(bad.error, 'тема не найдена: проверьте «Тему (ID)» и что в группе включены темы');
+  const general = fakeFetch([{ status: 200, body: { ok: true } }]);
+  await sendTelegram({ token: TOKEN, chatId: GROUP, threadId: '1', text: 'x', fetchImpl: general.impl, sleep: noSleep });
+  assert.ok(!('message_thread_id' in general.calls[0].body), '«1» — General, без id');
+
+  // «Начал оформление»: short, no buttons, no emoji / коротко, без кнопок и без эмодзи
+  const ADMIN = 'https://admin.vkus-com.ru/admin/content/orders/23';
+  const waiting = {
+    id: 23,
+    number: '1023-4812',
+    customer_name: 'Анна <Тест>',
+    phone: '+7 919 111-11-11',
+    fulfillment: 'delivery',
+    address: 'Советской Армии, 177',
+    address_flat: '12',
+    delivery_zone: 'Рядом с нами',
+    items: JSON.stringify([
+      { title: 'Торт «Наполеон» (1 кг)', qty: 1, sum: 1500 },
+      { title: 'Морс', qty: 2, sum: 300 },
+      { title: 'Пирожок', qty: 1, sum: 50 },
+    ]),
+    total: 1850,
+    payment_method: 'online',
+    payment_status: 'pending',
+    status: 'new',
+    source: 'site',
+  };
+  const pm = pendingModel(waiting, { adminUrl: ADMIN });
+  assert.equal(pm.kind, 'pending');
+  assert.equal(pm.keyboard, null, 'без кнопок');
+  assert.equal(
+    sp(telegramText(pm)),
+    [
+      '<b>Начал оформление: заказ №1023-4812 — 1 850 ₽</b>',
+      '+7 919 111-11-11, Анна &lt;Тест&gt;',
+      'Оплата онлайн, банк ещё не подтвердил',
+      'Состав: Торт «Наполеон» (1 кг) ×1, Морс ×2, Пирожок ×1',
+      'Доставка: Советской Армии, 177, кв. 12 · зона «Рядом с нами»',
+      '',
+      `<a href="${ADMIN}">Открыть в админке</a>`,
+    ].join('\n'),
+  );
+  assert.ok(!/\p{Extended_Pictographic}/u.test(telegramText(pm)), 'ни одного эмодзи');
+  // more than three dishes: «и ещё N» / больше трёх блюд — «и ещё N»
+  const many = pendingModel({ ...waiting, items: [...JSON.parse(waiting.items), { title: 'Чай', qty: 3 }, { title: 'Кофе', qty: 1 }] });
+  assert.equal(many.facts[1], 'Состав: Торт «Наполеон» (1 кг) ×1, Морс ×2, Пирожок ×1 и ещё 2');
+  // pickup, the test shop / самовывоз, тестовый магазин
+  const trial = pendingModel({ ...waiting, fulfillment: 'pickup', payment_test: true }, { place: 'Садовая' });
+  assert.equal(sp(trial.headline), 'ТЕСТ · Начал оформление: заказ №1023-4812 — 1 850 ₽');
+  assert.equal(trial.facts.at(-1), 'Самовывоз: Садовая');
+  assert.ok(!/\p{Extended_Pictographic}/u.test(telegramText(trial)));
+  // an empty or broken composition: no «Состав» line, nothing breaks / пустой или битый состав
+  for (const items of ['[]', null, 'не json', JSON.stringify([null, 5])]) {
+    const empty = pendingModel({ ...waiting, items });
+    assert.deepEqual(empty.facts, ['Оплата онлайн, банк ещё не подтвердил', 'Доставка: Советской Армии, 177, кв. 12 · зона «Рядом с нами»'], String(items));
+  }
+  assert.equal(pendingModel({ ...waiting, items: [{ title: '', qty: null }] }).facts[1], 'Состав: блюдо ×1');
+  // the outcome line, appended by the edit / строка исхода, которую дописывает правка
+  assert.equal(pendingOutcomeLine({ kind: 'paid', at: '2026-10-23T08:41:00Z' }), 'Оплачен в 12:41, ушёл в заказы');
+  assert.equal(pendingOutcomeLine({ kind: 'unpaid', at: '2026-10-23T08:50:00Z' }), 'Не оплачен: отменён 12:50');
+  assert.equal(pendingOutcomeLine({ kind: 'on_delivery', at: '2026-10-23T08:45:00Z' }), 'Выбрал оплату при получении в 12:45, ушёл в заказы');
+  assert.equal(pendingOutcomeLine(null), null);
+  assert.equal(pendingOutcomeLine({ kind: 'странное' }), null);
+  const paidText = sp(telegramText(pendingModel({ ...waiting, telegram_meta: { pending: [{ chat: GROUP, thread: '2', message_id: 51 }], pending_outcome: { kind: 'paid', at: '2026-10-23T08:41:00Z' } } }, { adminUrl: ADMIN })));
+  assert.ok(paidText.startsWith(sp(telegramText(pm)).split('\n\n<a')[0]), 'тот же текст…');
+  assert.ok(paidText.endsWith(`\n\nОплачен в 12:41, ушёл в заказы\n\n<a href="${ADMIN}">Открыть в админке</a>`), paidText);
+
+  // «Неоформленные» delivery: topic 2 only, no buttons, the card's tail / рассылка: только тема 2, без кнопок, хвост карточки
+  const p = fakeFetch([{ status: 200, body: { ok: true, result: { message_id: 52 } } }]);
+  const pend = await deliverPending({ model: pm, settings: topics, fetchImpl: p.impl, sleep: noSleep });
+  assert.equal(pend.part, 'Неоформленные ✓');
+  assert.equal(p.calls.length, 1);
+  assert.equal(p.calls[0].body.chat_id, GROUP);
+  assert.equal(p.calls[0].body.message_thread_id, 2);
+  assert.equal(p.calls[0].body.reply_markup, undefined);
+  assert.deepEqual([pend.results[0].thread, pend.results[0].messageId], ['2', 52]);
+  assert.deepEqual(await deliverPending({ model: pm, settings }), { results: [], part: null }, 'галочки нет ни у кого — хвоста нет');
+  assert.deepEqual(await deliverPending({ model: pm, settings: { ...topics, telegram_enabled: false } }), { results: [], part: null });
+  assert.equal((await deliverPending({ model: pm, settings: { ...topics, telegram_token: '' } })).part, 'Неоформленные ✗ нет токена бота');
+  const lostTopic = fakeFetch([{ status: 400, body: { ok: false, description: 'Bad Request: message thread not found' } }]);
+  assert.match((await deliverPending({ model: pm, settings: topics, fetchImpl: lostTopic.impl, sleep: noSleep })).part, /^Неоформленные ✗ тема не найдена/);
+  const queued = fakeFetch([{ status: 202, body: { ok: true, queued: true, job: 9 } }]);
+  const inQueue = await deliverPending({ model: pm, settings: topics, fetchImpl: queued.impl, sleep: noSleep, bases: ['http://relay:8787', TELEGRAM_API] });
+  assert.equal(inQueue.part, 'Неоформленные ⏳ в очереди');
+  assert.equal(inQueue.results[0].job, 9);
+
+  // the group became a supergroup: once more into the new chat, and say so
+  // группа стала супергруппой: ещё раз в новый чат и сказать об этом
+  const OLD = '-4001234567';
+  const NEW = '-1009876543210';
+  const upgraded = (to) => ({ status: 400, body: { ok: false, error_code: 400, description: 'Bad Request: group chat was upgraded to a supergroup chat', parameters: { migrate_to_chat_id: Number(to) } } });
+  const mv = fakeFetch([upgraded(NEW), { status: 200, body: { ok: true, result: { message_id: 5 } } }]);
+  const moved = await sendTelegram({ token: TOKEN, chatId: OLD, threadId: '2', text: 'x', fetchImpl: mv.impl, sleep: noSleep });
+  assert.equal(moved.status, 'sent');
+  assert.equal(moved.migratedTo, NEW);
+  assert.equal(moved.result.message_id, 5);
+  assert.deepEqual(mv.calls.map((c) => c.body.chat_id), [OLD, NEW]);
+  assert.equal(mv.calls[1].body.message_thread_id, 2, 'тема та же');
+  // only once: a second upgrade answer is a failure, not a loop / только раз: второй такой ответ — ошибка, не цикл
+  const twice = fakeFetch([upgraded(NEW), upgraded('-1001111111111')]);
+  const stuck = await sendTelegram({ token: TOKEN, chatId: OLD, text: 'x', fetchImpl: twice.impl, sleep: noSleep });
+  assert.equal(stuck.status, 'failed');
+  assert.equal(twice.calls.length, 2);
+  assert.equal(stuck.error, 'группа стала супергруппой: chat_id сменился');
+  assert.equal(stuck.migratedTo, NEW);
+  // a plain 400 is not a move; a call without a chat is never moved / обычный 400 — не переезд
+  const plain = fakeFetch([{ status: 400, body: { ok: false, description: 'Bad Request: chat not found' } }]);
+  const notMoved = await sendTelegram({ token: TOKEN, chatId: OLD, text: 'x', fetchImpl: plain.impl, sleep: noSleep });
+  assert.equal(notMoved.migratedTo, undefined);
+  assert.equal(plain.calls.length, 1);
+  const noChat = fakeFetch([upgraded(NEW)]);
+  const cb = await telegramCall({ token: TOKEN, method: 'answerCallbackQuery', payload: { callback_query_id: 'x' }, fetchImpl: noChat.impl, sleep: noSleep, delays: [] });
+  assert.equal(cb.migratedTo, undefined);
+  // through the relay the same / через ретранслятор так же
+  const viaRelay = fakeFetch([upgraded(NEW), { status: 200, body: { ok: true, result: { message_id: 6 } } }]);
+  const relayed = await sendTelegram({ token: TOKEN, chatId: OLD, text: 'x', fetchImpl: viaRelay.impl, sleep: noSleep, bases: ['http://relay:8787', TELEGRAM_API] });
+  assert.equal(relayed.migratedTo, NEW);
+  assert.ok(viaRelay.calls.every((c) => c.url.startsWith('http://relay:8787/')));
+  // an edit follows it too / правка тоже следует за ним
+  const ed = fakeFetch([upgraded(NEW), { status: 400, body: { ok: false, description: 'Bad Request: message to edit not found' } }]);
+  const edit = await editTelegram({ token: TOKEN, chatId: OLD, messageId: 42, text: 't', fetchImpl: ed.impl, sleep: noSleep });
+  assert.equal(edit.migratedTo, NEW);
+  assert.match(edit.error, /message to edit not found/);
+  // the delivery remembers the new chat and reports the move / рассылка запоминает новый чат и сообщает о переезде
+  const dm = fakeFetch([upgraded(NEW), { status: 200, body: { ok: true, result: { message_id: 7 } } }]);
+  const oldSettings = normalizeSettings({ telegram_enabled: true, telegram_token: TOKEN, email_enabled: false, telegram_chats: [{ label: 'Заказы', chat_id: OLD }] });
+  const dr = await deliver({ model: live, settings: oldSettings, mail: { ok: false, reason: 'x' }, fetchImpl: dm.impl, sleep: noSleep, now: NOON });
+  assert.deepEqual([dr.results[0].chat, dr.results[0].migratedFrom, dr.results[0].migratedTo, dr.results[0].recipient], [NEW, OLD, NEW, `Заказы (${NEW})`]);
+  assert.equal(dr.summary, 'почта выключена · Telegram ✓ · 12:05');
+  // the service messages of both sides / служебные сообщения обеих сторон
+  assert.deepEqual(migrationFromUpdate({ update_id: 1, message: { message_id: 9, chat: { id: Number(OLD), type: 'group', title: 'ВК - ЗАКАЗЫ' }, migrate_to_chat_id: Number(NEW) } }), { from: OLD, to: NEW });
+  assert.deepEqual(migrationFromUpdate({ update_id: 2, message: { message_id: 1, chat: { id: Number(NEW), type: 'supergroup' }, migrate_from_chat_id: Number(OLD) } }), { from: OLD, to: NEW });
+  assert.equal(migrationFromUpdate({ update_id: 3, message: { chat: { id: 1 }, text: 'привет' } }), null);
+  assert.equal(migrationFromUpdate({ update_id: 4, callback_query: { id: 'x' } }), null);
+  // the settings follow: every row of the old chat, its topic and ticks kept / настройки: все строки старого чата, тема и галочки на месте
+  const rows = [{ label: 'Неоформленные', chat_id: OLD, thread_id: '2', pending: true }, { label: 'Лично', chat_id: '546757654' }, { label: 'Заказы', chat_id: ` ${OLD} ` }];
+  const mig = migrateChats(rows, OLD, NEW);
+  assert.equal(mig.changed, 2);
+  assert.deepEqual(mig.rows[0], { label: 'Неоформленные', chat_id: NEW, thread_id: '2', pending: true });
+  assert.equal(mig.rows[1], rows[1], 'чужая строка не тронута');
+  assert.equal(mig.rows[2].chat_id, NEW);
+  assert.deepEqual(migrateChats(rows, '-1', NEW).changed, 0);
+
+  // the chats and topics the bot saw: never what people wrote / чаты и темы, которые видел бот: без текстов людей
+  const AT = new Date('2026-10-23T15:00:00Z');
+  const forum = { id: Number(NEW), type: 'supergroup', title: 'ВК - ЗАКАЗЫ', is_forum: true };
+  const inTopic = {
+    update_id: 10,
+    message: {
+      message_id: 100,
+      message_thread_id: 2,
+      is_topic_message: true,
+      chat: forum,
+      from: { id: 5, first_name: 'Дмитрий' },
+      text: 'секретный текст гостя',
+      reply_to_message: { message_id: 2, message_thread_id: 2, chat: forum, forum_topic_created: { name: 'Неоформленные', icon_color: 7322096 } },
+    },
+  };
+  const seenTopic = seenFromUpdate(inTopic, AT);
+  assert.deepEqual(seenTopic, {
+    chat_id: NEW,
+    title: 'ВК - ЗАКАЗЫ',
+    thread_id: '2',
+    topic: 'Неоформленные',
+    last_seen: AT.toISOString(),
+    label: `ВК - ЗАКАЗЫ · тема «Неоформленные» · chat_id ${NEW} · Тема (ID) 2`,
+  });
+  assert.ok(!JSON.stringify(seenTopic).includes('секретный'), 'текст сообщения не хранится');
+  // General: no thread id at all / General: id темы нет вовсе
+  const inGeneral = seenFromUpdate({ update_id: 11, message: { message_id: 101, chat: forum, text: 'x' } }, AT);
+  assert.deepEqual([inGeneral.thread_id, inGeneral.topic], [null, null]);
+  assert.equal(inGeneral.label, `ВК - ЗАКАЗЫ · General, «Тему (ID)» не заполнять · chat_id ${NEW}`);
+  // a reply in a plain supergroup carries a thread id, but it is no topic / ответ в обычной супергруппе — не тема
+  const reply = seenFromUpdate({ update_id: 12, message: { message_id: 102, message_thread_id: 77, chat: { id: -1002, type: 'supergroup', title: 'Кухня' }, reply_to_message: { message_id: 77 } } }, AT);
+  assert.deepEqual([reply.thread_id, reply.label], [null, 'Кухня · chat_id -1002']);
+  // a topic is created / создана тема
+  assert.equal(seenFromUpdate({ update_id: 13, message: { message_id: 6, message_thread_id: 6, is_topic_message: true, chat: forum, forum_topic_created: { name: 'Кухня' } } }, AT).topic, 'Кухня');
+  // the private chat / личный чат
+  const direct = seenFromUpdate({ update_id: 14, message: { message_id: 1, chat: { id: 546757654, type: 'private', first_name: 'Дмитрий', last_name: 'Г' }, text: '/start' } }, AT);
+  assert.deepEqual([direct.chat_id, direct.title, direct.label], ['546757654', 'Дмитрий Г', 'Дмитрий Г · личный чат · chat_id 546757654']);
+  // the bot added to a group counts, removed — not / бота добавили — считается, убрали — нет
+  assert.equal(seenFromUpdate({ update_id: 15, my_chat_member: { chat: forum, new_chat_member: { status: 'administrator' } } }, AT).thread_id, null);
+  assert.equal(seenFromUpdate({ update_id: 16, my_chat_member: { chat: forum, new_chat_member: { status: 'kicked' } } }, AT), null);
+  assert.equal(seenFromUpdate({ update_id: 17, callback_query: { id: 'x' } }, AT), null);
+
+  // the list: one row per pair, a known topic name kept, at most once in 10 s, at most 30
+  // список: строка на пару, известное название темы хранится, не чаще раза в 10 с, не больше 30
+  const first = mergeSeen([], [seenTopic]);
+  assert.deepEqual([first.changed, first.list.length, first.added.length], [true, 1, 1]);
+  // a reply inside the topic does not carry its name / ответ внутри темы не несёт её названия
+  const later = () => ({ ...inTopic, message: { ...inTopic.message, reply_to_message: { message_id: 100, chat: forum } } });
+  const soon = seenFromUpdate(later(), new Date(AT.getTime() + 5_000));
+  assert.equal(soon.topic, null);
+  const quiet = mergeSeen(first.list, [soon]);
+  assert.equal(quiet.changed, false, 'та же тема через 5 с — не писать');
+  assert.equal(quiet.list[0].last_seen, AT.toISOString());
+  const after = mergeSeen(first.list, [seenFromUpdate(later(), new Date(AT.getTime() + 11_000))]);
+  assert.equal(after.changed, true, 'через 11 с — обновить');
+  assert.deepEqual([after.list[0].topic, after.list[0].label, after.added.length], ['Неоформленные', seenTopic.label, 0]);
+  const renamed = mergeSeen(first.list, [{ ...soon, title: 'ВК - ЗАКАЗЫ (новое имя)' }]);
+  assert.equal(renamed.changed, true, 'новое имя чата пишется сразу');
+  const crowd = Array.from({ length: SEEN_LIMIT + 5 }, (_, i) =>
+    seenFromUpdate({ update_id: 100 + i, message: { message_id: 1, chat: { id: 1000 + i, type: 'private', first_name: `Гость ${i}` } } }, new Date(AT.getTime() + i * 1000)),
+  );
+  const full = mergeSeen([null, {}, ...first.list], crowd);
+  assert.equal(full.list.length, SEEN_LIMIT);
+  assert.equal(full.list[0].chat_id, String(1000 + SEEN_LIMIT + 4), 'свежие сверху');
+  assert.ok(!full.list.some((e) => e.chat_id === NEW), 'самое давнее вытеснено');
+  assert.equal(SEEN_LIMIT, 30);
 }
 
 // ── email-guard: Russian mail only / только российская почта ────────────────
@@ -720,4 +1038,4 @@ assert.ok(!scrub(`token ${TOKEN} leaked`, [TOKEN]).includes(TOKEN));
   assert.equal(payloadProblem(rule('settings.items.update'), { email: null }), null);
 }
 
-console.log('оповещения: темы, тексты, повторы Telegram, кнопки и опрос нажатий, почта без SMTP, только российская почта — проверки прошли');
+console.log('оповещения: темы, тексты, повторы Telegram, кнопки и опрос нажатий, темы форума и «Неоформленные», переезд группы, виденные чаты, почта без SMTP, только российская почта — проверки прошли');

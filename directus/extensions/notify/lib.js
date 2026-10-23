@@ -107,6 +107,7 @@ export const normalizeSettings = (row) => {
     email_subject_request: String(s.email_subject_request ?? '').trim() || DEFAULTS.email_subject_request,
     email_recipients: list(s.email_recipients),
     telegram_chats: list(s.telegram_chats),
+    telegram_seen: list(s.telegram_seen),
     telegram_token: String(s.telegram_token ?? '').trim(),
   };
 };
@@ -200,12 +201,15 @@ export const addressLine = (order = {}) => {
  * и те же факты. `rows` — строки базы, `names` — названия связей (`place`,
  * `format`), `adminUrl` — карточка в админке.
  */
+/** «Самовывоз: Садовая» or «Доставка: <адрес> · зона «…»». / Самовывоз с точкой или доставка с адресом и зоной. */
+export const fulfillmentLine = (order = {}, place = null) =>
+  order.fulfillment === 'pickup'
+    ? `Самовывоз${place ? `: ${place}` : ''}`
+    : `Доставка: ${addressLine(order) || 'адрес не указан'}${order.delivery_zone ? ` · зона «${order.delivery_zone}»` : ''}`;
+
 export const orderModel = (order, { place = null, adminUrl = null, now = new Date() } = {}) => {
   const items = json(order.items, []) ?? [];
-  const how =
-    order.fulfillment === 'pickup'
-      ? `Самовывоз${place ? `: ${place}` : ''}`
-      : `Доставка: ${addressLine(order) || 'адрес не указан'}${order.delivery_zone ? ` · зона «${order.delivery_zone}»` : ''}`;
+  const how = fulfillmentLine(order, place);
   const payment = paymentLine(order, now);
   const meta = telegramMeta(order);
   return {
@@ -255,6 +259,68 @@ export const paymentLine = (order, now = new Date()) => {
 export const isTestPayment = (order = {}) => order.payment_test === true || order.payment_test === 1 || order.payment_test === 'true';
 export const TEST_MARK = 'ТЕСТ · ';
 
+// ── an order that waits for the bank / заказ, который ждёт банк ─────────────
+
+// the short message names this many dishes, then «и ещё N»
+// короткое сообщение называет столько блюд, дальше «и ещё N»
+const PENDING_ITEMS = 3;
+
+/**
+ * How a «Неоформленные» message ended, from `telegram_meta.pending_outcome`:
+ * paid (or the guest chose to pay on delivery) — the order went to «Заказы»;
+ * cancelled or the payment failed before that — «Не оплачен». Null — still waiting.
+ * Чем кончилось сообщение «Неоформленные», по `telegram_meta.pending_outcome`:
+ * оплачен (или гость выбрал оплату при получении) — заказ ушёл в «Заказы»;
+ * отменён или оплата не прошла до этого — «Не оплачен». Null — ещё ждёт.
+ */
+export const pendingOutcomeLine = (outcome) => {
+  if (!outcome?.kind) return null;
+  const at = samaraTime(outcome.at ? new Date(outcome.at) : new Date());
+  if (outcome.kind === 'paid') return `Оплачен в ${at}, ушёл в заказы`;
+  if (outcome.kind === 'on_delivery') return `Выбрал оплату при получении в ${at}, ушёл в заказы`;
+  if (outcome.kind === 'unpaid') return `Не оплачен: отменён ${at}`;
+  return null;
+};
+
+/**
+ * «Начал оформление»: a guest filled the cart and went to pay online, the
+ * bank has not confirmed yet. A short message without buttons for the chats
+ * ticked «Неоформленные»; the full order goes to «Заказы» once paid, and this
+ * one then gets the outcome line.
+ * «Начал оформление»: гость собрал корзину и ушёл платить онлайн, банк ещё
+ * не подтвердил. Короткое сообщение без кнопок для чатов с галочкой
+ * «Неоформленные»; полный заказ уйдёт в «Заказы» после оплаты, а это
+ * сообщение получит строку исхода.
+ */
+export const pendingModel = (order, { place = null, adminUrl = null } = {}) => {
+  const raw = json(order.items, []);
+  const items = Array.isArray(raw) ? raw.filter((line) => line && typeof line === 'object') : [];
+  const shown = items.slice(0, PENDING_ITEMS).map((line) => `${line.title || 'блюдо'} ×${line.qty ?? 1}`);
+  const more = items.length - shown.length;
+  const outcome = pendingOutcomeLine(telegramMeta(order).pending_outcome);
+  const number = order.number ?? String(order.id ?? '');
+  return {
+    kind: 'pending',
+    collection: 'orders',
+    title: 'Начал оформление',
+    number,
+    vars: { number, total: money(order.total), name: order.customer_name ?? '', phone: order.phone ?? '', when: order.desired_time ?? '' },
+    headline: `${isTestPayment(order) ? TEST_MARK : ''}Начал оформление: заказ №${order.number ?? order.id} — ${rub(order.total)}`,
+    person: [order.phone, order.customer_name].filter(Boolean).join(', '),
+    facts: [
+      'Оплата онлайн, банк ещё не подтвердил',
+      ...(shown.length ? [`Состав: ${shown.join(', ')}${more > 0 ? ` и ещё ${more}` : ''}`] : []),
+      fulfillmentLine(order, place),
+    ],
+    lines: [],
+    total: null,
+    notes: outcome ? [outcome] : [],
+    history: [],
+    keyboard: null,
+    adminUrl,
+  };
+};
+
 // ── the order in Telegram: buttons, presses, history / заказ в Telegram ──────
 
 /**
@@ -267,13 +333,21 @@ export const TEST_MARK = 'ТЕСТ · ';
  * `announced` — the order already went out to the channels (an online order
  * waits for the bank before it does).
  * `announced` — заказ уже ушёл в каналы (заказ с оплатой онлайн ждёт банк).
- * @returns {{ messages: Array<{ chat: string, message_id?: number, job?: number }>, history: Array<{ status: string, who: string, via: string, at: string }>, announced: boolean }}
+ * `thread` — the forum topic of the chat (null — none); `pending` — the
+ * «Начал оформление» messages, `pending_outcome` — how they ended
+ * (`{ kind: 'paid' | 'on_delivery' | 'unpaid', at }`).
+ * `thread` — тема чата (null — без темы); `pending` — сообщения «Начал
+ * оформление», `pending_outcome` — чем они кончились.
+ * @returns {{ messages: Array<{ chat: string, thread?: string | null, message_id?: number, job?: number }>, pending: Array<{ chat: string, thread?: string | null, message_id?: number, job?: number }>, pending_outcome: { kind: string, at: string } | null, history: Array<{ status: string, who: string, via: string, at: string }>, announced: boolean }}
  */
 export const telegramMeta = (order = {}) => {
   const raw = json(order.telegram_meta, null);
   const meta = raw && typeof raw === 'object' ? raw : {};
+  const sent = (list) => (Array.isArray(list) ? list.filter((m) => m && m.chat) : []);
   return {
-    messages: Array.isArray(meta.messages) ? meta.messages.filter((m) => m && m.chat) : [],
+    messages: sent(meta.messages),
+    pending: sent(meta.pending),
+    pending_outcome: meta.pending_outcome && typeof meta.pending_outcome === 'object' && meta.pending_outcome.kind ? meta.pending_outcome : null,
     history: Array.isArray(meta.history) ? meta.history.filter((h) => h && h.status) : [],
     announced: meta.announced === true,
   };
@@ -512,10 +586,15 @@ export const NOT_RU_REASON = 'не российская почта — испр�
 /** `POST /notify/test` with `to`: the refusal for an address the alerts would never use, or null. / Отказ для адреса проверки, который оповещения не примут, или null. */
 export const testAddressProblem = (to) => (isRuEmail(to, { own: true }) ? null : `${RU_MAIL_ERROR_ADMIN}: ${String(to ?? '').trim()}`);
 
-// a test goes to everyone listed, whatever the ticks say
-// проверка уходит всем из списка, что бы ни стояло в галочках
-const wants = (row, kind, everyone = false) => {
+// a test goes to everyone listed, whatever the ticks say; «Заказы» and
+// «Заявки» are on unless unticked (rows from before the ticks), «Неоформленные»
+// only when ticked
+// проверка уходит всем из списка, что бы ни стояло в галочках; «Заказы» и
+// «Заявки» включены, пока их не сняли (строки до галочек), «Неоформленные» —
+// только если отмечены
+export const wants = (row, kind, everyone = false) => {
   if (everyone) return true;
+  if (kind.startsWith('pending')) return row?.pending === true;
   const key = kind.startsWith('order') ? 'orders' : 'requests';
   return row?.[key] !== false;
 };
@@ -528,12 +607,34 @@ export const emailRecipients = (settings, kind, everyone = false) => {
     .filter((email) => email && !seen.has(email.toLowerCase()) && seen.add(email.toLowerCase()));
 };
 
+/**
+ * The forum topic of a chat row: «Тема (ID)» as a string, null — none. The
+ * General topic is no topic for the Bot API (its id 1 is refused), so «1»
+ * means none too.
+ * Тема строки чата: «Тема (ID)» строкой, null — без темы. General для Bot API
+ * — не тема (id 1 он не принимает), поэтому «1» — тоже без темы.
+ */
+export const threadOf = (value) => {
+  const thread = String(value ?? '').trim();
+  return thread && thread !== '1' ? thread : null;
+};
+
+/** One recipient is a chat and its topic: the same group with two topics is two recipients. / Получатель — пара чат + тема. */
+export const chatKey = (chat, thread = null) => `${String(chat ?? '').trim()}|${threadOf(thread) ?? ''}`;
+
+/** How a recipient reads in the log: «Заказы (-100…)», «Неоформленные (-100…, тема 2)». / Как получатель читается в журнале. */
+export const recipientText = (chat) => {
+  const where = `${chat.id}${chat.thread ? `, тема ${chat.thread}` : ''}`;
+  return chat.label ? `${chat.label} (${where})` : chat.thread ? `${chat.id} (тема ${chat.thread})` : chat.id;
+};
+
+/** The chats for this kind of event, `{ id, label, thread }`, each chat+topic once. / Чаты для события, каждая пара чат+тема — один раз. */
 export const telegramChats = (settings, kind, everyone = false) => {
   const seen = new Set();
   return settings.telegram_chats
     .filter((row) => wants(row, kind, everyone))
-    .map((row) => ({ id: String(row?.chat_id ?? '').trim(), label: String(row?.label ?? '').trim() }))
-    .filter((chat) => chat.id && !seen.has(chat.id) && seen.add(chat.id));
+    .map((row) => ({ id: String(row?.chat_id ?? '').trim(), label: String(row?.label ?? '').trim(), thread: threadOf(row?.thread_id) }))
+    .filter((chat) => chat.id && !seen.has(chatKey(chat.id, chat.thread)) && seen.add(chatKey(chat.id, chat.thread)));
 };
 
 // ── delivery / отправка ──────────────────────────────────────────────────────
@@ -552,6 +653,8 @@ const telegramReason = (status, description) => {
   if (status === 400 && /chat not found/i.test(description)) return 'чат не найден: проверьте chat_id и что бот добавлен в чат';
   if (status === 403) return 'бот не может писать в этот чат: его удалили из группы или не запустили';
   if (status === 400 && /parse entities/i.test(description)) return 'Telegram не разобрал разметку сообщения';
+  if (status === 400 && /thread not found/i.test(description)) return 'тема не найдена: проверьте «Тему (ID)» и что в группе включены темы';
+  if (status === 400 && /upgraded to a supergroup/i.test(description)) return 'группа стала супергруппой: chat_id сменился';
   return `Telegram ответил ${status}${description ? `: ${description}` : ''}`;
 };
 
@@ -587,7 +690,13 @@ export const telegramBases = (env = {}) => {
  * взявший вызов в очередь (202 `queued`), — это «в очереди»: до Telegram он
  * дойдёт без нас, повторять нечего; `job` — его талон. `result` — `result`
  * Telegram (отправленное сообщение с его id).
- * @returns {Promise<{ status: 'sent' | 'queued' | 'failed', attempts: number, error: string | null, result?: any, job?: number, code?: number }>}
+ * A group that became a supergroup (topics switched on) answers 400 with
+ * `parameters.migrate_to_chat_id`: the call is repeated once in the new chat
+ * and `migratedTo` says where, so the caller can fix the settings.
+ * Группа, ставшая супергруппой (включили темы), отвечает 400 с
+ * `parameters.migrate_to_chat_id`: вызов один раз повторяется в новый чат, а
+ * `migratedTo` говорит куда — вызывающий поправит настройки.
+ * @returns {Promise<{ status: 'sent' | 'queued' | 'failed', attempts: number, error: string | null, result?: any, job?: number, code?: number, migratedTo?: string }>}
  */
 export const telegramCall = async ({
   token,
@@ -602,24 +711,37 @@ export const telegramCall = async ({
   let attempts = 0;
   let reason = '';
   let code = 0;
+  let body = payload;
+  let migratedTo = null;
+  const done = (r) => (migratedTo ? { ...r, migratedTo } : r);
   for (;;) {
     attempts += 1;
     let retry = false;
+    let moved = false;
     for (const [i, base] of bases.entries()) {
       const viaRelay = base !== TELEGRAM_API;
       try {
         const response = await fetchImpl(`${base}/bot${token}/${method}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(body),
           signal: AbortSignal.timeout(viaRelay ? timeout + 2_000 : timeout),
         });
         const answer = await response.json().catch(() => ({}));
         code = response.status;
-        if (response.status === 202 && answer.queued) return { status: 'queued', attempts, error: null, job: answer.job ?? null, code };
-        if (response.ok && answer.ok !== false) return { status: 'sent', attempts, error: null, result: answer.result ?? null, code };
+        if (response.status === 202 && answer.queued) return done({ status: 'queued', attempts, error: null, job: answer.job ?? null, code });
+        if (response.ok && answer.ok !== false) return done({ status: 'sent', attempts, error: null, result: answer.result ?? null, code });
         reason = telegramReason(response.status, answer.description ?? '');
         retry = response.status >= 500 || response.status === 429;
+        // the group became a supergroup: once more, at once, in the new chat
+        // группа стала супергруппой: ещё раз, сразу, в новый чат
+        const target = answer.parameters?.migrate_to_chat_id;
+        if (response.status === 400 && target && !migratedTo && body?.chat_id !== undefined) {
+          migratedTo = String(target);
+          body = { ...body, chat_id: migratedTo };
+          moved = true;
+          break;
+        }
         // a dead relay is not Telegram's verdict: the next base gets its turn
         // мёртвый ретранслятор — не вердикт Telegram: очередь за следующим адресом
         if (viaRelay && [502, 503, 504].includes(response.status) && i < bases.length - 1) continue;
@@ -632,18 +754,27 @@ export const telegramCall = async ({
         if (i < bases.length - 1) continue;
       }
     }
-    if (!retry || attempts > delays.length) return { status: 'failed', attempts, error: scrub(reason, [token]), code };
+    if (moved) continue;
+    if (!retry || attempts > delays.length) return done({ status: 'failed', attempts, error: scrub(reason, [token]), code });
     await sleep(delays[attempts - 1]);
   }
 };
 
-/** One message to one chat, HTML, with buttons under an order. / Одно сообщение в один чат, HTML, с кнопками под заказом. */
-export const sendTelegram = ({ chatId, text, keyboard = null, ...rest }) =>
+/**
+ * One message to one chat, HTML, with buttons under an order; `threadId` — the
+ * forum topic it goes to (none — the chat itself or its General).
+ * Одно сообщение в один чат, HTML, с кнопками под заказом; `threadId` — тема
+ * форума (нет — сам чат или его General).
+ */
+export const sendTelegram = ({ chatId, threadId = null, text, keyboard = null, ...rest }) =>
   telegramCall({
     ...rest,
     method: 'sendMessage',
     payload: {
       chat_id: chatId,
+      // a typo stays a string: Telegram refuses it instead of posting to General
+      // опечатка остаётся строкой: Telegram её отвергнет, а не отправит в General
+      ...(threadOf(threadId) ? { message_thread_id: /^\d+$/.test(threadOf(threadId)) ? Number(threadOf(threadId)) : threadOf(threadId) } : {}),
       text,
       parse_mode: 'HTML',
       disable_web_page_preview: true,
@@ -686,6 +817,16 @@ export const answerCallback = ({ callbackId, text = '', ...rest }) =>
   telegramCall({ ...rest, method: 'answerCallbackQuery', payload: { callback_query_id: callbackId, text, show_alert: false }, delays: [], timeout: 8_000 });
 
 /**
+ * What the long poll asks for: button presses; messages — to learn the chats
+ * and topics the bot is in and a group that became a supergroup; the bot
+ * added to or removed from a chat.
+ * Что просит долгий опрос: нажатия кнопок; сообщения — чтобы узнать чаты и
+ * темы, где есть бот, и группу, ставшую супергруппой; бота добавили или
+ * убрали из чата.
+ */
+export const POLL_UPDATES = ['callback_query', 'message', 'my_chat_member'];
+
+/**
  * One long poll for button presses: `getUpdates` with `offset`, through the
  * relay first and Telegram itself second. Returns the presses and the next
  * offset, or the reason nothing came. Not retried here — the loop calls again.
@@ -703,7 +844,7 @@ export const pollTelegram = async ({ token, offset = null, timeout = 20, fetchIm
       const response = await fetchImpl(`${base}/bot${token}/getUpdates`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ timeout, allowed_updates: ['callback_query'], ...(offset === null ? {} : { offset }) }),
+        body: JSON.stringify({ timeout, allowed_updates: POLL_UPDATES, ...(offset === null ? {} : { offset }) }),
         signal: AbortSignal.timeout((timeout + (viaRelay ? 15 : 10)) * 1000),
       });
       const answer = await response.json().catch(() => ({}));
@@ -747,6 +888,113 @@ export const relayJob = async ({ base, token, job, fetchImpl = fetch }) => {
   } catch {
     return null;
   }
+};
+
+// ── chats and topics the bot saw / чаты и темы, которые видел бот ────────────
+
+// the list stays short, and one busy topic does not rewrite the settings on every word
+// список короткий, и шумная тема не переписывает настройки на каждое слово
+export const SEEN_LIMIT = 30;
+export const SEEN_GAP_MS = 10_000;
+
+/** «ВК - ЗАКАЗЫ · тема «Неоформленные» · chat_id -100… · Тема (ID) 2» — the row in the admin. / Строка в админке. */
+export const seenLabel = (entry, { forum = false, direct = false } = {}) => {
+  const title = entry.title || 'без названия';
+  if (entry.thread_id) return `${title} · тема «${entry.topic || 'без названия'}» · chat_id ${entry.chat_id} · Тема (ID) ${entry.thread_id}`;
+  if (direct) return `${title} · личный чат · chat_id ${entry.chat_id}`;
+  if (forum) return `${title} · General, «Тему (ID)» не заполнять · chat_id ${entry.chat_id}`;
+  return `${title} · chat_id ${entry.chat_id}`;
+};
+
+/**
+ * Where an update came from, for «Чаты и темы, которые видел бот»: the chat,
+ * its topic (`message_thread_id` of a topic message; General has none) and the
+ * topic's name when the update carries it. What people wrote is not kept.
+ * The bot added to a chat counts too; a bot removed — not.
+ * Откуда пришло обновление — для «Чатов и тем, которые видел бот»: чат, его
+ * тема (`message_thread_id` сообщения в теме; у General его нет) и название
+ * темы, если оно есть в обновлении. Что написали люди, не хранится. Бота
+ * добавили в чат — тоже считается; убрали — нет.
+ * @returns {{ chat_id: string, title: string, thread_id: string | null, topic: string | null, label: string, last_seen: string } | null}
+ */
+export const seenFromUpdate = (update, now = new Date()) => {
+  const message = update?.message;
+  const member = update?.my_chat_member;
+  const chat = message?.chat ?? member?.chat;
+  if (!chat || chat.id === undefined || chat.id === null) return null;
+  if (!message && !['member', 'administrator', 'creator'].includes(member?.new_chat_member?.status)) return null;
+  // in a plain supergroup a reply has a thread id too: only a forum topic is a topic
+  // в обычной супергруппе id ветки есть и у ответа: тема — только тема форума
+  const thread = message?.is_topic_message && message.message_thread_id ? threadOf(message.message_thread_id) : null;
+  const topic = thread
+    ? (message.forum_topic_created?.name ?? message.forum_topic_edited?.name ?? message.reply_to_message?.forum_topic_created?.name ?? null)
+    : null;
+  const direct = chat.type === 'private';
+  const title = String(chat.title ?? ([chat.first_name, chat.last_name].filter(Boolean).join(' ') || (chat.username ? `@${chat.username}` : ''))).trim();
+  const entry = { chat_id: String(chat.id), title, thread_id: thread, topic, last_seen: now.toISOString() };
+  return { ...entry, label: seenLabel(entry, { forum: chat.is_forum === true, direct }) };
+};
+
+/**
+ * The seen list with new sightings merged in: one row per chat+topic, newest
+ * first, at most `limit`. A known topic name is kept when the new message does
+ * not carry it. `changed` is false when nothing worth a write happened: the
+ * same rows seen again within `gap`.
+ * Список виденного с новыми встречами: строка на пару чат+тема, свежие
+ * сверху, не больше `limit`. Известное название темы сохраняется, если в новом
+ * сообщении его нет. `changed` — false, когда писать нечего: те же строки
+ * снова в пределах `gap`. `added` — пары, которых раньше не было.
+ */
+export const mergeSeen = (list, entries, { limit = SEEN_LIMIT, gap = SEEN_GAP_MS } = {}) => {
+  const out = (Array.isArray(list) ? list : []).filter((e) => e && e.chat_id).map((e) => ({ ...e }));
+  const added = [];
+  let changed = false;
+  for (const entry of entries.filter(Boolean)) {
+    const at = out.findIndex((e) => chatKey(e.chat_id, e.thread_id) === chatKey(entry.chat_id, entry.thread_id));
+    if (at < 0) {
+      out.push(entry);
+      added.push(entry);
+      changed = true;
+      continue;
+    }
+    const old = out[at];
+    const topic = entry.topic ?? old.topic ?? null;
+    const next = { ...entry, topic, label: topic === entry.topic ? entry.label : seenLabel({ ...entry, topic }) };
+    const stale = (Date.parse(entry.last_seen) || 0) - (Date.parse(old.last_seen) || 0) >= gap;
+    if (stale || next.title !== old.title || next.topic !== old.topic || next.label !== old.label) {
+      out[at] = next;
+      changed = true;
+    }
+  }
+  out.sort((a, b) => (Date.parse(b.last_seen) || 0) - (Date.parse(a.last_seen) || 0));
+  if (out.length > limit) changed = true;
+  return { list: out.slice(0, limit), changed, added };
+};
+
+/**
+ * A group that became a supergroup, from the service message of either side:
+ * `migrate_to_chat_id` in the old group, `migrate_from_chat_id` in the new one.
+ * Группа, ставшая супергруппой, по служебному сообщению любой стороны:
+ * `migrate_to_chat_id` в старой группе, `migrate_from_chat_id` в новой.
+ * @returns {{ from: string, to: string } | null}
+ */
+export const migrationFromUpdate = (update) => {
+  const message = update?.message;
+  if (!message?.chat) return null;
+  if (message.migrate_to_chat_id) return { from: String(message.chat.id), to: String(message.migrate_to_chat_id) };
+  if (message.migrate_from_chat_id) return { from: String(message.migrate_from_chat_id), to: String(message.chat.id) };
+  return null;
+};
+
+/** The chat rows with the old chat_id replaced by the new one; `changed` — how many. / Строки чатов со старым chat_id, заменённым на новый. */
+export const migrateChats = (rows, from, to) => {
+  let changed = 0;
+  const out = (Array.isArray(rows) ? rows : []).map((row) => {
+    if (!row || String(row.chat_id ?? '').trim() !== String(from)) return row;
+    changed += 1;
+    return { ...row, chat_id: String(to) };
+  });
+  return { rows: out, changed };
 };
 
 const mailReason = (error) => {
@@ -807,35 +1055,67 @@ export const deliver = async ({ model, settings, mail, sendMail, fetchImpl, dela
   else if (!settings.telegram_token) telegramPart = 'Telegram ✗ нет токена бота';
   else if (!chats.length) telegramPart = 'Telegram — нет чатов';
   else {
-    const text = telegramText(model);
-    // chats go one after another: a retry pause in one must not reorder the rest
-    // чаты по очереди: пауза повтора в одном не должна путать остальные
-    for (const chat of chats) {
-      const { result, job, code, ...outcome } = await sendTelegram({
-        token: settings.telegram_token,
-        chatId: chat.id,
-        text,
-        keyboard: model.keyboard ?? null,
-        fetchImpl,
-        delays,
-        sleep,
-        bases,
-      });
-      results.push({
-        channel: 'telegram',
-        recipient: chat.label ? `${chat.label} (${chat.id})` : chat.id,
-        ...outcome,
-        // what lets the message be edited later: its id, or the relay's ticket until the id is known
-        // что позволит потом править сообщение: его id или талон ретранслятора, пока id неизвестен
-        chat: chat.id,
-        messageId: result?.message_id ?? null,
-        job: outcome.status === 'queued' ? (job ?? null) : null,
-      });
-    }
+    results.push(...(await sendToChats({ model, chats, token: settings.telegram_token, fetchImpl, delays, sleep, bases })));
     telegramPart = partLine('Telegram', results.filter((r) => r.channel === 'telegram'), ['чат', 'чата', 'чатов']);
   }
 
   return { results, summary: `${emailPart} · ${telegramPart} · ${samaraTime(now)}` };
+};
+
+/**
+ * One model to every chat in the list, one after another (a retry pause in
+ * one must not reorder the rest). Each result keeps what lets the message be
+ * edited later: the chat and topic, its id or the relay's ticket; a group that
+ * became a supergroup on the way is reported in `migratedTo`/`migratedFrom`.
+ * Одна модель во все чаты списка по очереди (пауза повтора в одном не должна
+ * путать остальные). В каждом итоге — то, что позволит потом править
+ * сообщение: чат и тема, id или талон ретранслятора; группа, ставшая по
+ * дороге супергруппой, — в `migratedTo`/`migratedFrom`.
+ */
+const sendToChats = async ({ model, chats, token, fetchImpl, delays, sleep, bases }) => {
+  const text = telegramText(model);
+  const results = [];
+  for (const chat of chats) {
+    const { result, job, code, migratedTo, ...outcome } = await sendTelegram({
+      token,
+      chatId: chat.id,
+      threadId: chat.thread,
+      text,
+      keyboard: model.keyboard ?? null,
+      fetchImpl,
+      delays,
+      sleep,
+      bases,
+    });
+    results.push({
+      channel: 'telegram',
+      recipient: recipientText(migratedTo ? { ...chat, id: migratedTo } : chat),
+      ...outcome,
+      chat: migratedTo ?? chat.id,
+      thread: chat.thread,
+      messageId: result?.message_id ?? null,
+      job: outcome.status === 'queued' ? (job ?? null) : null,
+      ...(migratedTo ? { migratedTo, migratedFrom: chat.id } : {}),
+    });
+  }
+  return results;
+};
+
+/**
+ * «Начал оформление» to the chats ticked «Неоформленные»: Telegram only, no
+ * mail. `part` is the tail of the card's line — «Неоформленные ✓», «… ✗
+ * причина» — or null when there is nobody to tell.
+ * «Начал оформление» в чаты с галочкой «Неоформленные»: только Telegram, без
+ * почты. `part` — хвост строки карточки («Неоформленные ✓», «… ✗ причина»)
+ * или null, когда сообщать некому.
+ * @returns {Promise<{ results: any[], part: string | null }>}
+ */
+export const deliverPending = async ({ model, settings, fetchImpl, delays, sleep, bases = [TELEGRAM_API] }) => {
+  const chats = telegramChats(settings, 'pending');
+  if (!settings.telegram_enabled || !chats.length) return { results: [], part: null };
+  if (!settings.telegram_token) return { results: [], part: 'Неоформленные ✗ нет токена бота' };
+  const results = await sendToChats({ model, chats, token: settings.telegram_token, fetchImpl, delays, sleep, bases });
+  return { results, part: partLine('Неоформленные', results, ['чат', 'чата', 'чатов']) };
 };
 
 /** «почта ✓», «почта ✓ 2 адреса», «почта ✓ 1 из 2», «почта ✗ <причина>» */
