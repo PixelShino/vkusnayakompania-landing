@@ -38,6 +38,14 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    # api.telegram.org: from a server in Russia only some of Telegram's addresses
+    # answer (23.10.2026: 149.154.167.220 does, 149.154.166.110 from DNS does not);
+    # the pin can be changed in .env without touching this file
+    # api.telegram.org: с сервера в России отвечают не все адреса Telegram
+    # (23.10.2026: 149.154.167.220 — да, 149.154.166.110 из DNS — нет);
+    # закрепление меняется в .env, этот файл трогать не нужно
+    extra_hosts:
+      - "api.telegram.org:${TELEGRAM_API_IP:-149.154.167.220}"
     environment:
       SECRET: ${SECRET}
       PUBLIC_URL: ${PUBLIC_URL}
