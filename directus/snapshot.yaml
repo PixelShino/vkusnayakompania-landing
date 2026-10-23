@@ -8019,7 +8019,9 @@ fields:
       group: null
       hidden: false
       interface: input
-      note: Настоящая почта гостя. «Email» выше — служебный адрес для входа
+      note: >-
+        Настоящая почта гостя, только российская (mail.ru, yandex.ru,
+        rambler.ru, vk.com…). «Email» выше — служебный адрес для входа
       options: null
       readonly: false
       required: false
@@ -8038,6 +8040,87 @@ fields:
       data_type: character varying
       default_value: null
       max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: directus_users
+    field: addresses
+    type: json
+    meta:
+      collection: directus_users
+      conditions: null
+      display: null
+      display_options: null
+      field: addresses
+      group: null
+      hidden: false
+      interface: list
+      note: Гость сохраняет сам, до 5
+      options:
+        fields:
+          - field: label
+            meta:
+              interface: input
+              width: half
+            name: Метка
+            type: string
+          - field: address
+            meta:
+              interface: input
+              width: full
+            name: Улица и дом
+            type: string
+          - field: flat
+            meta:
+              interface: input
+              width: half
+            name: Квартира / офис
+            type: string
+          - field: entrance
+            meta:
+              interface: input
+              width: half
+            name: Подъезд
+            type: string
+          - field: floor
+            meta:
+              interface: input
+              width: half
+            name: Этаж
+            type: string
+          - field: intercom
+            meta:
+              interface: input
+              width: half
+            name: Домофон
+            type: string
+        template: '{{label}}: {{address}}'
+      readonly: true
+      required: false
+      searchable: true
+      sort: 112
+      special:
+        - cast-json
+      translations:
+        - language: ru-RU
+          translation: Адреса доставки
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: addresses
+      table: directus_users
+      data_type: json
+      default_value: null
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
@@ -10767,16 +10850,20 @@ fields:
       display: labels
       display_options:
         choices:
-          - text: Новый заказ
-            value: order_new
-          - text: Новая заявка
-            value: request_new
-          - text: Статус заказа
-            value: order_status
-          - text: Статус заявки
-            value: request_status
-          - text: Проверка
-            value: test
+        - text: Новый заказ
+          value: order_new
+        - text: Новая заявка
+          value: request_new
+        - text: Статус заказа
+          value: order_status
+        - text: Статус заявки
+          value: request_status
+        - text: Проверка
+          value: test
+        - text: Начал оформление
+          value: order_pending
+        - text: Оплата заказа
+          value: order_payment
       field: event
       group: null
       hidden: false
@@ -10784,24 +10871,28 @@ fields:
       note: null
       options:
         choices:
-          - text: Новый заказ
-            value: order_new
-          - text: Новая заявка
-            value: request_new
-          - text: Статус заказа
-            value: order_status
-          - text: Статус заявки
-            value: request_status
-          - text: Проверка
-            value: test
+        - text: Новый заказ
+          value: order_new
+        - text: Новая заявка
+          value: request_new
+        - text: Статус заказа
+          value: order_status
+        - text: Статус заявки
+          value: request_status
+        - text: Проверка
+          value: test
+        - text: Начал оформление
+          value: order_pending
+        - text: Оплата заказа
+          value: order_payment
       readonly: true
       required: false
       searchable: true
       sort: 4
       special: null
       translations:
-        - language: ru-RU
-          translation: Событие
+      - language: ru-RU
+        translation: Событие
       validation: null
       validation_message: null
       width: half
@@ -11410,7 +11501,8 @@ fields:
       interface: list
       note: >-
         Можно несколько адресов: каждому уйдёт своё письмо. Галочки — что
-        присылать на этот адрес.
+        присылать на этот адрес. Только российская почта: mail.ru, yandex.ru,
+        rambler.ru, vk.com… или адрес на vkus-com.ru
       options:
         addLabel: Добавить адрес
         fields:
@@ -11695,61 +11787,81 @@ fields:
       group: null
       hidden: false
       interface: list
-      note: >-
-        Личный чат или рабочая группа. Бот должен быть добавлен в группу, а в
-        личке — запущен кнопкой «Старт».
+      note: 'Личный чат или рабочая группа. Бот должен быть добавлен в группу (лучше администратором), а в личке — запущен кнопкой «Старт». Группа с темами: chat_id один, по строке на тему; «Тема (ID)» — из «Чатов и тем, которые видел бот», пусто — General. Галочки независимы: снимите лишние явно.'
       options:
         addLabel: Добавить чат
         fields:
-          - field: label
-            meta:
-              interface: input
-              options:
-                placeholder: Группа «Заказы»
-              width: half
-            name: Подпись
-            type: string
-          - field: chat_id
-            meta:
-              interface: input
-              options:
-                font: monospace
-                placeholder: '-1001234567890'
-                trim: true
-              required: true
-              width: half
-            name: chat_id
-            type: string
-          - field: orders
-            meta:
-              interface: boolean
-              options:
-                label: Заказы доставки
-              width: half
-            name: Заказы
-            schema:
-              default_value: true
-            type: boolean
-          - field: requests
-            meta:
-              interface: boolean
-              options:
-                label: Заявки на кейтеринг
-              width: half
-            name: Заявки
-            schema:
-              default_value: true
-            type: boolean
+        - field: label
+          meta:
+            interface: input
+            options:
+              placeholder: Группа «Заказы»
+            width: half
+          name: Подпись
+          type: string
+        - field: chat_id
+          meta:
+            interface: input
+            options:
+              font: monospace
+              placeholder: '-1001234567890'
+              trim: true
+            required: true
+            width: half
+          name: chat_id
+          type: string
+        - field: thread_id
+          meta:
+            interface: input
+            note: Номер темы в группе с темами. Пусто — общий чат (General) или группа без тем.
+            options:
+              font: monospace
+              placeholder: пусто — General
+              trim: true
+            width: full
+          name: Тема (ID)
+          type: string
+        - field: orders
+          meta:
+            interface: boolean
+            options:
+              label: Заказы доставки
+            width: half
+          name: Заказы
+          schema:
+            default_value: true
+          type: boolean
+        - field: requests
+          meta:
+            interface: boolean
+            options:
+              label: Заявки на кейтеринг
+            width: half
+          name: Заявки
+          schema:
+            default_value: true
+          type: boolean
+        - field: pending
+          meta:
+            interface: boolean
+            note: Короткое сообщение «Начал оформление», когда гость пошёл платить онлайн, а банк ещё не подтвердил; потом в нём появится «Оплачен…» или «Не оплачен…».
+            options:
+              label: Неоформленные
+            width: full
+          name: Неоформленные
+          schema:
+            default_value: false
+          type: boolean
         template: '{{label}} · {{chat_id}}'
       readonly: false
       required: false
       searchable: true
       sort: 14
       special:
-        - cast-json
+      - cast-json
       translations:
-        - language: ru-RU
-          translation: Чаты
+      - language: ru-RU
+        translation: Чаты
       validation: null
       validation_message: null
       width: full
@@ -11786,26 +11898,109 @@ fields:
       options:
         color: normal
         icon: help
-        text: >-
-          Как подключить бота. 1) В Telegram откройте @BotFather → /newbot,
-          придумайте имя и адрес бота — BotFather пришлёт токен, вставьте его в
-          «Токен бота». 2) Добавьте бота в рабочую группу и напишите там
-          /start@адрес_бота (или нажмите «Старт» в личке с ботом). 3) Откройте в
-          браузере api.telegram.org/bot<токен>/getUpdates — chat_id стоит после
-          "chat":{"id": (у группы число с минусом). 4) Добавьте чат, отметьте
-          «Отправлять в Telegram» и сохраните. Проверочное сообщение отправляет
-          администратор — см. docs/NOTIFY.md.
+        text: 'Как подключить бота. 1) В Telegram откройте @BotFather → /newbot, придумайте имя и адрес бота — BotFather пришлёт токен, вставьте его в «Токен бота», отметьте «Отправлять в Telegram» и сохраните. 2) Добавьте бота в рабочую группу администратором (или нажмите «Старт» в личке с ботом). 3) Напишите в группе любое слово — в нужной теме, если темы включены: через несколько секунд чат и тема появятся ниже, в «Чатах и темах, которые видел бот», с chat_id и «Темой (ID)». 4) Добавьте строку в «Чаты» с этими числами и галочками и сохраните. Проверочное сообщение отправляет администратор — см. docs/NOTIFY.md.'
       readonly: false
       required: false
       searchable: true
       sort: 15
       special:
-        - alias
-        - no-data
+      - alias
+      - no-data
       translations: null
       validation: null
       validation_message: null
       width: full
+  - collection: notify_settings
+    field: telegram_seen
+    type: json
+    meta:
+      collection: notify_settings
+      conditions: null
+      display: null
+      display_options: null
+      field: telegram_seen
+      group: null
+      hidden: false
+      interface: list
+      note: Добавьте бота в группу администратором и напишите в нужной теме любое слово — через несколько секунд она появится здесь с chat_id и «Темой (ID)» (обновите страницу). Работает, когда отмечено «Отправлять в Telegram». Бот хранит только названия и номера, не тексты.
+      options:
+        fields:
+        - field: title
+          meta:
+            interface: input
+            readonly: true
+            width: half
+          name: Чат
+          type: string
+        - field: chat_id
+          meta:
+            interface: input
+            options:
+              font: monospace
+            readonly: true
+            width: half
+          name: chat_id
+          type: string
+        - field: topic
+          meta:
+            interface: input
+            readonly: true
+            width: half
+          name: Тема
+          type: string
+        - field: thread_id
+          meta:
+            interface: input
+            options:
+              font: monospace
+            readonly: true
+            width: half
+          name: Тема (ID)
+          type: string
+        - field: last_seen
+          meta:
+            interface: input
+            readonly: true
+            width: half
+          name: Когда видел
+          type: string
+        - field: label
+          meta:
+            interface: input
+            readonly: true
+            width: full
+          name: Строка
+          type: string
+        template: '{{label}}'
+      readonly: true
+      required: false
+      searchable: true
+      sort: 16
+      special:
+      - cast-json
+      translations:
+      - language: ru-RU
+        translation: Чаты и темы, которые видел бот
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: telegram_seen
+      table: notify_settings
+      data_type: json
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: notify_settings
     field: div_more
     type: alias
@@ -11826,7 +12021,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 16
+      sort: 17
       special:
         - alias
         - no-data
@@ -11854,7 +12049,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 17
+      sort: 18
       special:
         - cast-boolean
       translations:
@@ -13491,8 +13686,8 @@ fields:
         color: warning
         icon: science
         text: >-
-          ТЕСТОВАЯ ОПЛАТА — проверка связи с банком. Деньги не списывались,
-          заказ не готовить и не везти.
+          ТЕСТОВАЯ ОПЛАТА — проверка связи с банком. Заказ не готовить и не
+          везти.
       readonly: false
       required: false
       searchable: true
@@ -19745,6 +19940,50 @@ fields:
       foreign_key_table: null
       foreign_key_column: null
   - collection: settings
+    field: yandex_verification
+    type: string
+    meta:
+      collection: settings
+      conditions: null
+      display: null
+      display_options: null
+      field: yandex_verification
+      group: analytics
+      hidden: false
+      interface: input
+      note: Только код из content="…" метатега yandex-verification. Пусто — метатег не ставится
+      options:
+        font: monospace
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 33
+      special: null
+      translations:
+      - language: ru-RU
+        translation: Код Яндекс Вебмастера
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: yandex_verification
+      table: settings
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: settings
     field: email
     type: string
     meta:
@@ -19759,7 +19998,8 @@ fields:
       note: >-
         Почта для гостей: печатается в «Реквизитах и контактах» и в политике
         конфиденциальности (туда пишут об отзыве согласия и претензиях). Пусто —
-        вместо почты телефон
+        вместо почты телефон. Только российская почта: mail.ru, yandex.ru,
+        rambler.ru, vk.com… или адрес на vkus-com.ru
       options:
         placeholder: info@vkus-com.ru
         trim: true
