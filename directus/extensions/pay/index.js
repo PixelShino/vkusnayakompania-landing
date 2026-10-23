@@ -27,7 +27,7 @@ import { mockOrders } from './providers/mock.js';
 import { isYooKassaIp } from './core.js';
 
 // written by the server only / пишет только сервер
-const SERVER_FIELDS = ['payment_status', 'payment_id', 'payment_url', 'paid_at', 'payment_meta', 'payment_log'];
+const SERVER_FIELDS = ['payment_status', 'payment_id', 'payment_url', 'paid_at', 'payment_meta', 'payment_log', 'payment_test'];
 const METHODS = ['online', 'on_delivery'];
 // one visitor, ten minutes: enough for a retry and a status poll, too few for a script
 // один посетитель, десять минут: хватит на повтор и опрос статуса, мало для скрипта

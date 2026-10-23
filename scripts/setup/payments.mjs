@@ -445,7 +445,37 @@ const ORDER_FIELDS = [
       width: 'full',
       sort: 6,
       options: { color: 'success', icon: 'credit_score', text: 'Оплачен картой на сайте — сумму с гостем обсуждать не нужно. Позвоните, подтвердите адрес и время — и переведите заказ в «В работе».' },
-      conditions: [{ name: 'Не оплачен', rule: { _and: [{ payment_status: { _neq: 'paid' } }] }, hidden: true }],
+      conditions: [{ name: 'Не оплачен или тест', rule: { _or: [{ payment_status: { _neq: 'paid' } }, { payment_test: { _eq: true } }] }, hidden: true }],
+    },
+  },
+  // a payment with no money behind it: the bank's test shop or the stub
+  // платёж без денег: тестовый магазин банка или заглушка
+  {
+    field: 'payment_test',
+    type: 'boolean',
+    schema: { default_value: false, is_nullable: false },
+    meta: {
+      interface: 'boolean',
+      readonly: true,
+      display: 'boolean',
+      options: { label: 'Тестовый магазин банка: деньги не списывались' },
+      note: 'Ставит сервер, когда ссылка на оплату выдана тестовым магазином или заглушкой',
+      width: 'half',
+      sort: 18,
+      translations: tr('Тестовая оплата'),
+      conditions: [{ name: 'Не тест', rule: { _and: [{ payment_test: { _neq: true } }] }, hidden: true }],
+    },
+  },
+  {
+    field: 'test_hint',
+    type: 'alias',
+    meta: {
+      special: ['alias', 'no-data'],
+      interface: 'presentation-notice',
+      width: 'full',
+      sort: 5,
+      options: { color: 'warning', icon: 'science', text: 'ТЕСТОВАЯ ОПЛАТА — проверка связи с банком. Деньги не списывались, заказ не готовить и не везти.' },
+      conditions: [{ name: 'Не тест', rule: { _and: [{ payment_test: { _neq: true } }] }, hidden: true }],
     },
   },
 ];

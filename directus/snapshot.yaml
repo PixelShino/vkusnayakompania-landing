@@ -13436,11 +13436,13 @@ fields:
       collection: orders
       conditions:
         - hidden: true
-          name: Не оплачен
+          name: Не оплачен или тест
           rule:
-            _and:
+            _or:
               - payment_status:
                   _neq: paid
+              - payment_test:
+                  _eq: true
       display: null
       display_options: null
       field: paid_hint
@@ -13466,6 +13468,93 @@ fields:
       validation: null
       validation_message: null
       width: full
+  - collection: orders
+    field: test_hint
+    type: alias
+    meta:
+      collection: orders
+      conditions:
+        - hidden: true
+          name: Не тест
+          rule:
+            _and:
+              - payment_test:
+                  _neq: true
+      display: null
+      display_options: null
+      field: test_hint
+      group: null
+      hidden: false
+      interface: presentation-notice
+      note: null
+      options:
+        color: warning
+        icon: science
+        text: >-
+          ТЕСТОВАЯ ОПЛАТА — проверка связи с банком. Деньги не списывались,
+          заказ не готовить и не везти.
+      readonly: false
+      required: false
+      searchable: true
+      sort: 5
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: orders
+    field: payment_test
+    type: boolean
+    meta:
+      collection: orders
+      conditions:
+        - hidden: true
+          name: Не тест
+          rule:
+            _and:
+              - payment_test:
+                  _neq: true
+      display: boolean
+      display_options: null
+      field: payment_test
+      group: null
+      hidden: false
+      interface: boolean
+      note: >-
+        Ставит сервер, когда ссылка на оплату выдана тестовым магазином или
+        заглушкой
+      options:
+        label: 'Тестовый магазин банка: деньги не списывались'
+      readonly: true
+      required: false
+      searchable: true
+      sort: 18
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Тестовая оплата
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: payment_test
+      table: orders
+      data_type: boolean
+      default_value: false
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: orders
     field: delivery_zone
     type: string

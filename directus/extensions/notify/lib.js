@@ -200,7 +200,7 @@ export const orderModel = (order, { place = null, adminUrl = null, now = new Dat
       phone: order.phone ?? '',
       when: order.desired_time ?? '',
     },
-    headline: `Заказ №${order.number ?? order.id} — ${rub(order.total)}`,
+    headline: `${isTestPayment(order) ? TEST_MARK : ''}Заказ №${order.number ?? order.id} — ${rub(order.total)}`,
     person: [order.customer_name, order.phone].filter(Boolean).join(', '),
     facts: [how, `Когда: ${order.desired_time || 'как можно скорее'}`, ...(payment ? [payment] : [])],
     lines: items.map((line) => `${line.title} × ${line.qty} — ${rub(line.sum ?? Number(line.price) * Number(line.qty))}`),
@@ -228,8 +228,12 @@ export const paymentLine = (order, now = new Date()) => {
   const word = PAYMENT_WORDS[order.payment_status];
   if (!word) return null;
   const at = order.payment_status === 'paid' && order.paid_at ? whenText(order.paid_at, now) : '';
-  return `Оплата: ${word}${at ? `, ${at}` : ''}`;
+  return `Оплата: ${isTestPayment(order) ? '🧪 ТЕСТ, деньги не списывались · ' : ''}${word}${at ? `, ${at}` : ''}`;
 };
+
+/** A payment with no money behind it: the bank's test shop or the stub. / Платёж без денег: тестовый магазин банка или заглушка. */
+export const isTestPayment = (order = {}) => order.payment_test === true || order.payment_test === 1 || order.payment_test === 'true';
+export const TEST_MARK = '🧪 ТЕСТ · ';
 
 // ── the order in Telegram: buttons, presses, history / заказ в Telegram ──────
 
@@ -399,7 +403,9 @@ export const statusModel = (base, status) => {
 export const paidModel = (base, order) => ({
   ...base,
   kind: 'order_paid',
-  headline: `💳 Заказ №${base.number} оплачен онлайн — ${rub(order.to_pay ?? order.total)}`,
+  headline: isTestPayment(order)
+    ? `🧪 ТЕСТ · Заказ №${base.number}: пробная оплата прошла — ${rub(order.to_pay ?? order.total)}, деньги не списывались, не готовить`
+    : `💳 Заказ №${base.number} оплачен онлайн — ${rub(order.to_pay ?? order.total)}`,
   person: '',
   facts: [],
   lines: [],

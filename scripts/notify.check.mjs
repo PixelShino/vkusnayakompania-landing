@@ -496,6 +496,13 @@ assert.ok(!scrub(`token ${TOKEN} leaked`, [TOKEN]).includes(TOKEN));
   assert.equal(paymentLine({ payment_status: 'failed' }), 'Оплата: ✗ оплата онлайн не прошла');
   assert.equal(paymentLine({ payment_status: 'refunded' }), 'Оплата: ↩️ оплата возвращена');
 
+  // a test-shop payment is marked everywhere: the headline, the payment line, the paid reply
+  // оплата тестовым магазином помечена везде: заголовок, строка оплаты, ответ об оплате
+  const trial = orderModel({ ...order, status: 'new', payment_status: 'paid', paid_at: at, payment_test: true }, { adminUrl: URL, now: today });
+  assert.equal(sp(trial.headline), '🧪 ТЕСТ · Заказ №1910-4821 — 2 450 ₽');
+  assert.ok(trial.facts.includes('Оплата: 🧪 ТЕСТ, деньги не списывались · 💳 оплачен онлайн, 12:40'), trial.facts.join(' | '));
+  assert.equal(sp(paidModel(trial, { ...order, payment_test: true, to_pay: 2450 }).headline), '🧪 ТЕСТ · Заказ №1910-4821: пробная оплата прошла — 2 450 ₽, деньги не списывались, не готовить');
+  assert.equal(orderModel({ ...order, payment_test: false }).headline.startsWith('🧪'), false);
   // the whole message with payment, history and buttons / всё сообщение с оплатой, историей и кнопками
   const live = orderModel(
     { ...order, status: 'in_work', payment_status: 'paid', paid_at: at, telegram_meta: { messages: [{ chat: '-1001234567890', message_id: 42 }], history: [{ status: 'in_work', who: 'Дмитрий Г.', via: 'telegram', at }] } },

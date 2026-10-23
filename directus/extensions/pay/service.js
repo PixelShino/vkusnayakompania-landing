@@ -388,9 +388,15 @@ export const createPayService = ({ services, database, getSchema, env, logger })
         nextMeta.back[key] = page.id;
         nextMeta.until = Date.now() + sessionSeconds * 1000;
         nextMeta.amount = amount;
+        // no real money behind this payment: a test shop of the bank or the stub —
+        // the card and the chat message say so, the kitchen does not cook it
+        // за этим платежом нет настоящих денег: тестовый магазин банка или
+        // заглушка — карточка и сообщение в чате говорят об этом, кухня его не готовит
+        const test = page.test === true || s.provider === 'mock';
+        nextMeta.test = test;
         await write(
           order,
-          { payment_method: 'online', payment_status: 'pending', payment_id: page.id, payment_url: page.url, payment_meta: nextMeta },
+          { payment_method: 'online', payment_status: 'pending', payment_id: page.id, payment_url: page.url, payment_meta: nextMeta, payment_test: test },
           `ссылка на оплату ${rub(payable(order))} (${provider.label}, ${MODE[s.mode]}${page.test ? ', тестовый магазин' : ''}${attempt > 1 ? `, попытка ${attempt}` : ''})`,
         );
         return { url: page.url, number: order.number, total: payable(order), delivery_cost: order.delivery_cost ?? null };
