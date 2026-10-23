@@ -11,7 +11,7 @@
  * страницы `/docs/`; пока их нет — политика и оферта файлами из «Настроек».
  */
 import { BRAND, hoursRows } from '../data/site';
-import { footerGroupsFor, navFor } from '../lib/nav.ts';
+import { footerGroupsFor, landingGroupsFor, navFor } from '../lib/nav.ts';
 import type { Content } from '../lib/content.ts';
 
 interface Props {
@@ -26,6 +26,9 @@ const { settings, places, home, pages } = content;
 // «Главная» внизу страницы не нужна — подвал и так конец
 const sections = navFor(content, base).filter((link) => !link.href.endsWith('#top'));
 const { social } = footerGroupsFor(content);
+// the landing pages of the SEO core: two more lists under «Разделы»
+// посадочные страницы ядра: ещё два списка под «Разделами»
+const { food, events } = landingGroupsFor(content);
 const year = new Date().getFullYear();
 
 // 15 digits is an individual entrepreneur's number / 15 цифр — номер ИП
@@ -95,6 +98,22 @@ const docs = (
           <p class="footer__head" id="footer-sections">Разделы</p>
           {sections.map((link) => <a href={link.href}>{link.label}</a>)}
         </nav>
+        {
+          food.length > 0 && (
+            <nav class="footer__list" aria-labelledby="footer-food">
+              <p class="footer__head" id="footer-food">Кафе и меню</p>
+              {food.map((link) => <a href={link.href}>{link.label}</a>)}
+            </nav>
+          )
+        }
+        {
+          events.length > 0 && (
+            <nav class="footer__list" aria-labelledby="footer-events">
+              <p class="footer__head" id="footer-events">Праздники</p>
+              {events.map((link) => <a href={link.href}>{link.label}</a>)}
+            </nav>
+          )
+        }
         {
           docs.length > 0 && (
             <nav class="footer__list" aria-labelledby="footer-docs">
@@ -222,6 +241,10 @@ const docs = (
   }
 
   .footer__list {
+    /* four lists since 24.10.2026: two per row wherever ~140 px each fit
+       с 24.10.2026 списков четыре: по два в ряд везде, где помещаются ~140 px */
+    flex: 1 1 140px;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: flex-start;

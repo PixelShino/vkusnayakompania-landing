@@ -1,0 +1,6482 @@
+{
+ "meta": {
+  "site": "https://vkus-com.ru",
+  "date": "23.10.2026",
+  "region": "Самара, lr 51",
+  "frequency_source": "XMLstock → Wordstat, 30 дней, регион Самара (51). broad — широкая частота («Ч», из выдачи «что ещё ищут» или отдельным запросом), exact — точная «\"!Ч\"» (именно эта фраза в этих словоформах, без добавочных слов)",
+  "positions_source": "XMLstock, живая органика Яндекса (реклама исключена, номера сжаты), 23.10.2026 ≈17:50 МСК, регион Самара lr 51, mobile, глубина 50",
+  "priority_rule": "релевантность A (услуга есть): точная ≥20 — высокий, 5–19 — средний, <5 — низкий; B (уместно частично/смешанный интент): ≥50 — высокий, 10–49 — средний; C (нет в ассортименте/нужно подтверждение) — условный; бренд: ≥5 — высокий; общие «кафе самара» — низкий",
+  "spent": {
+   "requests": 488,
+   "rub": 12.203,
+   "by_kind": {
+    "check_key": {
+     "requests": 1,
+     "rub": 0.025
+    },
+    "similar": {
+     "requests": 44,
+     "rub": 1.1
+    },
+    "frequency": {
+     "requests": 292,
+     "rub": 7.3
+    },
+    "serp": {
+     "requests": 150,
+     "rub": 3.75
+    },
+    "xml_site": {
+     "requests": 1,
+     "rub": 0.028
+    }
+   }
+  }
+ },
+ "clusters": [
+  {
+   "cluster": "Бренд",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/",
+   "page_status": "есть",
+   "queries": 11,
+   "exact_sum": 435,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "вкусная компания самара",
+   "top_exact": 256
+  },
+  {
+   "cluster": "Бренд + Садовая",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/sadovaya/",
+   "page_status": "новая",
+   "queries": 5,
+   "exact_sum": 77,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "вкусная компания садовая ул 212б фото",
+   "top_exact": 39
+  },
+  {
+   "cluster": "Бренд + Советской Армии",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/sovetskoy-armii/",
+   "page_status": "новая",
+   "queries": 7,
+   "exact_sum": 167,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "вкусная компания самара советская армия",
+   "top_exact": 80
+  },
+  {
+   "cluster": "Бренд + меню",
+   "intent": "навигационный",
+   "page_now": "/ (PDF меню)",
+   "page_target": "/menu/",
+   "page_status": "новая",
+   "queries": 5,
+   "exact_sum": 91,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "вкусная компания самара меню",
+   "top_exact": 38
+  },
+  {
+   "cluster": "Доставка еды",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/",
+   "page_status": "есть",
+   "queries": 18,
+   "exact_sum": 1046,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "доставка еды в самаре",
+   "top_exact": 304
+  },
+  {
+   "cluster": "Доставка обедов",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/ (блок «Обед в офис»)",
+   "page_status": "есть (нужен блок «Обед в офис»)",
+   "queries": 5,
+   "exact_sum": 20,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "готовые обеды с доставкой самара",
+   "top_exact": 13
+  },
+  {
+   "cluster": "Бизнес-ланч",
+   "intent": "коммерческий/локальный",
+   "page_now": "—",
+   "page_target": "/business-lunch/",
+   "page_status": "новая (при подтверждении ланча)",
+   "queries": 5,
+   "exact_sum": 184,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "бизнес ланч самара",
+   "top_exact": 112
+  },
+  {
+   "cluster": "Завтраки",
+   "intent": "локальный/коммерческий",
+   "page_now": "/catalog/#zavtraki",
+   "page_target": "/breakfasts/",
+   "page_status": "новая",
+   "queries": 14,
+   "exact_sum": 243,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "завтраки в самаре",
+   "top_exact": 90
+  },
+  {
+   "cluster": "Торты на заказ",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "page_status": "новая",
+   "queries": 16,
+   "exact_sum": 449,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "торт на заказ",
+   "top_exact": 270
+  },
+  {
+   "cluster": "Детские торты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "page_status": "новая (блок или /cakes/kids/)",
+   "queries": 6,
+   "exact_sum": 4,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "торт детский на день рождения",
+   "top_exact": 2
+  },
+  {
+   "cluster": "Свадебные торты",
+   "intent": "коммерческий",
+   "page_now": "—",
+   "page_target": "/cakes/",
+   "page_status": "новая (блок или /cakes/wedding/)",
+   "queries": 8,
+   "exact_sum": 112,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "свадебные торты в самаре",
+   "top_exact": 61
+  },
+  {
+   "cluster": "Бенто-торты",
+   "intent": "коммерческий",
+   "page_now": "—",
+   "page_target": "/cakes/",
+   "page_status": "новая (только если в ассортименте)",
+   "queries": 5,
+   "exact_sum": 321,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "бенто торт",
+   "top_exact": 154
+  },
+  {
+   "cluster": "Купить торт (готовый)",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#torty-v-nalichii",
+   "page_target": "/cakes/",
+   "page_status": "есть (раздел «Торты в наличии»), далее /cakes/",
+   "queries": 14,
+   "exact_sum": 160,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "торты самара",
+   "top_exact": 62
+  },
+  {
+   "cluster": "Торты по названию",
+   "intent": "коммерческий (товар)",
+   "page_now": "/catalog/#p-<slug>",
+   "page_target": "карточка товара с отдельным URL",
+   "page_status": "есть как якорь; нужны URL карточек",
+   "queries": 8,
+   "exact_sum": 71,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "торт молочная девочка купить в самаре",
+   "top_exact": 22
+  },
+  {
+   "cluster": "Кондитерская",
+   "intent": "локальный/коммерческий",
+   "page_now": "/",
+   "page_target": "/ + /desserts/ + /sadovaya/",
+   "page_status": "есть (далее /desserts/ и страницы точек)",
+   "queries": 8,
+   "exact_sum": 103,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "кондитерская самара",
+   "top_exact": 68
+  },
+  {
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "page_status": "новая",
+   "queries": 21,
+   "exact_sum": 979,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "корпусные десерты самара",
+   "top_exact": 661
+  },
+  {
+   "cluster": "Выпечка и пироги",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#vypechka",
+   "page_target": "/catalog/#vypechka",
+   "page_status": "есть (раздел «Выпечка»)",
+   "queries": 6,
+   "exact_sum": 53,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "пироги на заказ самара",
+   "top_exact": 35
+  },
+  {
+   "cluster": "Кейтеринг",
+   "intent": "коммерческий",
+   "page_now": "/catering/",
+   "page_target": "/catering/",
+   "page_status": "есть",
+   "queries": 13,
+   "exact_sum": 779,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "кейтеринг",
+   "top_exact": 506
+  },
+  {
+   "cluster": "Кейтеринг: цены и форматы",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/services/",
+   "page_status": "есть",
+   "queries": 7,
+   "exact_sum": 26,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "фуршет бокс самара",
+   "top_exact": 15
+  },
+  {
+   "cluster": "Фуршет",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/buffet/",
+   "page_status": "новая (сейчас якорь /catering/services/#furshet)",
+   "queries": 13,
+   "exact_sum": 80,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "фуршет",
+   "top_exact": 34
+  },
+  {
+   "cluster": "Кофе-брейк",
+   "intent": "коммерческий (B2B)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/services/",
+   "page_status": "есть (якорь #kofe-breyk)",
+   "queries": 4,
+   "exact_sum": 25,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "кофе брейк",
+   "top_exact": 25
+  },
+  {
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "page_status": "новая",
+   "queries": 30,
+   "exact_sum": 246,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "банкетный зал самара",
+   "top_exact": 118
+  },
+  {
+   "cluster": "Свадьба в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "page_status": "новая (блок «Свадьба»)",
+   "queries": 7,
+   "exact_sum": 99,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "банкетные залы самара для свадьбы",
+   "top_exact": 53
+  },
+  {
+   "cluster": "Корпоратив",
+   "intent": "коммерческий (сезон ноябрь–декабрь)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/corporate/",
+   "page_status": "новая",
+   "queries": 18,
+   "exact_sum": 559,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "новогодний корпоратив в самаре",
+   "top_exact": 159
+  },
+  {
+   "cluster": "День рождения в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/birthday/",
+   "page_status": "новая",
+   "queries": 15,
+   "exact_sum": 341,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "где отметить день рождения в самаре",
+   "top_exact": 94
+  },
+  {
+   "cluster": "Поминальные обеды",
+   "intent": "коммерческий/локальный",
+   "page_now": "—",
+   "page_target": "/catering/memorial/",
+   "page_status": "новая (только после подтверждения владельцем)",
+   "queries": 10,
+   "exact_sum": 54,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "поминальные обеды самара",
+   "top_exact": 21
+  },
+  {
+   "cluster": "Кафе и рестораны Самары (общие)",
+   "intent": "локальный (агрегаторный)",
+   "page_now": "/",
+   "page_target": "/",
+   "page_status": "есть",
+   "queries": 3,
+   "exact_sum": 481,
+   "broad_sum_note": "широкие частоты пересекаются, не суммируются",
+   "top_query": "кафе самара",
+   "top_exact": 385
+  }
+ ],
+ "queries": [
+  {
+   "query": "вкусная компания самара",
+   "broad": 587,
+   "exact": 256,
+   "cluster": "Бренд",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "вкусная компания",
+   "broad": 1032,
+   "exact": 98,
+   "cluster": "Бренд",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "вкусная компания самара официальный сайт",
+   "broad": 27,
+   "exact": 22,
+   "cluster": "Бренд",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "ресторан вкусная компания в самаре",
+   "broad": 30,
+   "exact": 21,
+   "cluster": "Бренд",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "самара ресторан вкусная компания телефон",
+   "broad": 12,
+   "exact": 12,
+   "cluster": "Бренд",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "вкусная компания ресторан",
+   "broad": 90,
+   "exact": 9,
+   "cluster": "Бренд",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "кафе вкусная компания самара",
+   "broad": 12,
+   "exact": 9,
+   "cluster": "Бренд",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "вкусная компания кейтеринг",
+   "broad": 7,
+   "exact": 6,
+   "cluster": "Бренд",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/catering/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "вкусная компания самара адрес",
+   "broad": 5,
+   "exact": 2,
+   "cluster": "Бренд",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "вкусная компания торты",
+   "broad": 3,
+   "exact": 0,
+   "cluster": "Бренд",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "вкусная компания доставка",
+   "broad": 2,
+   "exact": 0,
+   "cluster": "Бренд",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/catalog/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "вкусная компания садовая ул 212б фото",
+   "broad": 50,
+   "exact": 39,
+   "cluster": "Бренд + Садовая",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/sadovaya/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "вкусная компания садовая ул 212б отзывы",
+   "broad": 22,
+   "exact": 23,
+   "cluster": "Бренд + Садовая",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/sadovaya/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "вкусная компания самара садовая",
+   "broad": 20,
+   "exact": 8,
+   "cluster": "Бренд + Садовая",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/sadovaya/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "вкусная компания садовая ул 212б",
+   "broad": 120,
+   "exact": 7,
+   "cluster": "Бренд + Садовая",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/sadovaya/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "кафе на садовой",
+   "broad": 55,
+   "exact": 0,
+   "cluster": "Бренд + Садовая",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/sadovaya/",
+   "relevance": "B",
+   "priority": "средний",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "вкусная компания самара советская армия",
+   "broad": 116,
+   "exact": 80,
+   "cluster": "Бренд + Советской Армии",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/sovetskoy-armii/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "вкусная компания ул советской армии 177 отзывы",
+   "broad": 26,
+   "exact": 26,
+   "cluster": "Бренд + Советской Армии",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/sovetskoy-armii/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "вкусная компания ул советской армии 177 фото",
+   "broad": 30,
+   "exact": 22,
+   "cluster": "Бренд + Советской Армии",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/sovetskoy-armii/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "вкусная компания ул советской армии 177",
+   "broad": 80,
+   "exact": 12,
+   "cluster": "Бренд + Советской Армии",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/sovetskoy-armii/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "кафе на советской армии в самаре",
+   "broad": 80,
+   "exact": 11,
+   "cluster": "Бренд + Советской Армии",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/sovetskoy-armii/",
+   "relevance": "B",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "ресторан на советской армии самара",
+   "broad": 26,
+   "exact": 10,
+   "cluster": "Бренд + Советской Армии",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/sovetskoy-armii/",
+   "relevance": "B",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "вкусная компания на советской армии",
+   "broad": 12,
+   "exact": 6,
+   "cluster": "Бренд + Советской Армии",
+   "intent": "навигационный",
+   "page_now": "/",
+   "page_target": "/sovetskoy-armii/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "вкусная компания самара меню",
+   "broad": 63,
+   "exact": 38,
+   "cluster": "Бренд + меню",
+   "intent": "навигационный",
+   "page_now": "/ (PDF меню)",
+   "page_target": "/menu/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "вкусная компания садовая ул 212б меню",
+   "broad": 35,
+   "exact": 30,
+   "cluster": "Бренд + меню",
+   "intent": "навигационный",
+   "page_now": "/ (PDF меню)",
+   "page_target": "/menu/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "вкусная компания ул советской армии 177 меню",
+   "broad": 11,
+   "exact": 11,
+   "cluster": "Бренд + меню",
+   "intent": "навигационный",
+   "page_now": "/ (PDF меню)",
+   "page_target": "/menu/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "вкусная компания самара советская армия меню",
+   "broad": 12,
+   "exact": 8,
+   "cluster": "Бренд + меню",
+   "intent": "навигационный",
+   "page_now": "/ (PDF меню)",
+   "page_target": "/menu/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "вкусная компания меню",
+   "broad": 115,
+   "exact": 4,
+   "cluster": "Бренд + меню",
+   "intent": "навигационный",
+   "page_now": "/ (PDF меню)",
+   "page_target": "/menu/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "доставка еды в самаре",
+   "broad": 1006,
+   "exact": 304,
+   "cluster": "Доставка еды",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "доставка еды самара",
+   "broad": 2570,
+   "exact": 233,
+   "cluster": "Доставка еды",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "доставка еды",
+   "broad": 5476,
+   "exact": 225,
+   "cluster": "Доставка еды",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/",
+   "relevance": "B",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "доставка еды в самаре на дом",
+   "broad": 269,
+   "exact": 107,
+   "cluster": "Доставка еды",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "доставка готовой еды в самаре",
+   "broad": 120,
+   "exact": 46,
+   "cluster": "Доставка еды",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "заказать еду",
+   "broad": 1091,
+   "exact": 36,
+   "cluster": "Доставка еды",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/",
+   "relevance": "B",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "заказать еду в самаре с доставкой",
+   "broad": 65,
+   "exact": 26,
+   "cluster": "Доставка еды",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "заказать еду самара",
+   "broad": 314,
+   "exact": 22,
+   "cluster": "Доставка еды",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "доставка готовой еды",
+   "broad": 311,
+   "exact": 20,
+   "cluster": "Доставка еды",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "доставка еды из ресторана самара",
+   "broad": 41,
+   "exact": 10,
+   "cluster": "Доставка еды",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "доставка еды новокуйбышевск",
+   "broad": 17,
+   "exact": 10,
+   "cluster": "Доставка еды",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/",
+   "relevance": "B",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "где заказать еду в самаре",
+   "broad": 33,
+   "exact": 4,
+   "cluster": "Доставка еды",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "заказать готовую еду",
+   "broad": 40,
+   "exact": 3,
+   "cluster": "Доставка еды",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "заказать еду с доставкой",
+   "broad": 134,
+   "exact": 0,
+   "cluster": "Доставка еды",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "заказать еду на дом",
+   "broad": 79,
+   "exact": 0,
+   "cluster": "Доставка еды",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "еда на дом с доставкой",
+   "broad": 78,
+   "exact": 0,
+   "cluster": "Доставка еды",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "доставка вкусной еды",
+   "broad": 75,
+   "exact": 0,
+   "cluster": "Доставка еды",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "доставка еды из ресторана",
+   "broad": 56,
+   "exact": 0,
+   "cluster": "Доставка еды",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "готовые обеды с доставкой самара",
+   "broad": 16,
+   "exact": 13,
+   "cluster": "Доставка обедов",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/ (блок «Обед в офис»)",
+   "relevance": "B",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "доставка обедов самара",
+   "broad": 91,
+   "exact": 7,
+   "cluster": "Доставка обедов",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/ (блок «Обед в офис»)",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "доставка обедов",
+   "broad": 137,
+   "exact": 0,
+   "cluster": "Доставка обедов",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/ (блок «Обед в офис»)",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "обеды в офис",
+   "broad": 105,
+   "exact": 0,
+   "cluster": "Доставка обедов",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/ (блок «Обед в офис»)",
+   "relevance": "B",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "доставка обедов в офис",
+   "broad": 15,
+   "exact": 0,
+   "cluster": "Доставка обедов",
+   "intent": "коммерческий",
+   "page_now": "/catalog/",
+   "page_target": "/catalog/ (блок «Обед в офис»)",
+   "relevance": "B",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "бизнес ланч самара",
+   "broad": 1169,
+   "exact": 112,
+   "cluster": "Бизнес-ланч",
+   "intent": "коммерческий/локальный",
+   "page_now": "—",
+   "page_target": "/business-lunch/",
+   "relevance": "B",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "бизнес ланч",
+   "broad": 2447,
+   "exact": 34,
+   "cluster": "Бизнес-ланч",
+   "intent": "коммерческий/локальный",
+   "page_now": "—",
+   "page_target": "/business-lunch/",
+   "relevance": "B",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "бизнес ланч самара рестораны",
+   "broad": 172,
+   "exact": 25,
+   "cluster": "Бизнес-ланч",
+   "intent": "коммерческий/локальный",
+   "page_now": "—",
+   "page_target": "/business-lunch/",
+   "relevance": "B",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "бизнес ланч самара доставка",
+   "broad": 24,
+   "exact": 13,
+   "cluster": "Бизнес-ланч",
+   "intent": "коммерческий/локальный",
+   "page_now": "—",
+   "page_target": "/business-lunch/",
+   "relevance": "B",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "меню бизнес ланча",
+   "broad": 160,
+   "exact": 0,
+   "cluster": "Бизнес-ланч",
+   "intent": "коммерческий/локальный",
+   "page_now": "—",
+   "page_target": "/business-lunch/",
+   "relevance": "B",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "завтраки в самаре",
+   "broad": 576,
+   "exact": 90,
+   "cluster": "Завтраки",
+   "intent": "локальный/коммерческий",
+   "page_now": "/catalog/#zavtraki",
+   "page_target": "/breakfasts/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "где позавтракать в самаре",
+   "broad": 131,
+   "exact": 60,
+   "cluster": "Завтраки",
+   "intent": "локальный/коммерческий",
+   "page_now": "/catalog/#zavtraki",
+   "page_target": "/breakfasts/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "лучшие завтраки в самаре",
+   "broad": 73,
+   "exact": 26,
+   "cluster": "Завтраки",
+   "intent": "локальный/коммерческий",
+   "page_now": "/catalog/#zavtraki",
+   "page_target": "/breakfasts/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "где вкусно позавтракать в самаре",
+   "broad": 27,
+   "exact": 18,
+   "cluster": "Завтраки",
+   "intent": "локальный/коммерческий",
+   "page_now": "/catalog/#zavtraki",
+   "page_target": "/breakfasts/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "вкусные завтраки в самаре",
+   "broad": 48,
+   "exact": 17,
+   "cluster": "Завтраки",
+   "intent": "локальный/коммерческий",
+   "page_now": "/catalog/#zavtraki",
+   "page_target": "/breakfasts/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "где можно позавтракать в самаре",
+   "broad": 29,
+   "exact": 8,
+   "cluster": "Завтраки",
+   "intent": "локальный/коммерческий",
+   "page_now": "/catalog/#zavtraki",
+   "page_target": "/breakfasts/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "ранние завтраки в самаре",
+   "broad": 12,
+   "exact": 8,
+   "cluster": "Завтраки",
+   "intent": "локальный/коммерческий",
+   "page_now": "/catalog/#zavtraki",
+   "page_target": "/breakfasts/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "бизнес завтрак самара",
+   "broad": 118,
+   "exact": 5,
+   "cluster": "Завтраки",
+   "intent": "локальный/коммерческий",
+   "page_now": "/catalog/#zavtraki",
+   "page_target": "/breakfasts/",
+   "relevance": "B",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "завтрак доставка самара",
+   "broad": 21,
+   "exact": 5,
+   "cluster": "Завтраки",
+   "intent": "локальный/коммерческий",
+   "page_now": "/catalog/#zavtraki",
+   "page_target": "/breakfasts/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "кафе завтраки самара",
+   "broad": 39,
+   "exact": 3,
+   "cluster": "Завтраки",
+   "intent": "локальный/коммерческий",
+   "page_now": "/catalog/#zavtraki",
+   "page_target": "/breakfasts/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "где позавтракать",
+   "broad": 259,
+   "exact": 2,
+   "cluster": "Завтраки",
+   "intent": "локальный/коммерческий",
+   "page_now": "/catalog/#zavtraki",
+   "page_target": "/breakfasts/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "где вкусно позавтракать",
+   "broad": 36,
+   "exact": 1,
+   "cluster": "Завтраки",
+   "intent": "локальный/коммерческий",
+   "page_now": "/catalog/#zavtraki",
+   "page_target": "/breakfasts/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "где можно позавтракать",
+   "broad": 55,
+   "exact": 0,
+   "cluster": "Завтраки",
+   "intent": "локальный/коммерческий",
+   "page_now": "/catalog/#zavtraki",
+   "page_target": "/breakfasts/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "доставка завтраков",
+   "broad": 52,
+   "exact": 0,
+   "cluster": "Завтраки",
+   "intent": "локальный/коммерческий",
+   "page_now": "/catalog/#zavtraki",
+   "page_target": "/breakfasts/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "торт на заказ",
+   "broad": 1435,
+   "exact": 270,
+   "cluster": "Торты на заказ",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "торт на заказ самара",
+   "broad": 693,
+   "exact": 113,
+   "cluster": "Торты на заказ",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "заказать торт в самаре на день рождения",
+   "broad": 41,
+   "exact": 38,
+   "cluster": "Торты на заказ",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "заказать торт в самаре",
+   "broad": 147,
+   "exact": 20,
+   "cluster": "Торты на заказ",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "самара торты на заказ с доставкой",
+   "broad": 72,
+   "exact": 5,
+   "cluster": "Торты на заказ",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "сколько стоит торт на заказ",
+   "broad": 28,
+   "exact": 2,
+   "cluster": "Торты на заказ",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "тортики на заказ",
+   "broad": 17,
+   "exact": 1,
+   "cluster": "Торты на заказ",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "торт на заказ с доставкой",
+   "broad": 75,
+   "exact": 0,
+   "cluster": "Торты на заказ",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "торт на заказ недорого",
+   "broad": 45,
+   "exact": 0,
+   "cluster": "Торты на заказ",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "B",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "заказ торта на дом",
+   "broad": 38,
+   "exact": 0,
+   "cluster": "Торты на заказ",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "торты на заказ каталог",
+   "broad": 35,
+   "exact": 0,
+   "cluster": "Торты на заказ",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "торт на заказ цена",
+   "broad": 33,
+   "exact": 0,
+   "cluster": "Торты на заказ",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "торт на заказ на день рождения",
+   "broad": 21,
+   "exact": 0,
+   "cluster": "Торты на заказ",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "купить торт на заказ",
+   "broad": 11,
+   "exact": 0,
+   "cluster": "Торты на заказ",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "праздничный торт самара",
+   "broad": 4,
+   "exact": 0,
+   "cluster": "Торты на заказ",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "праздничные торты на заказ",
+   "broad": 0,
+   "exact": 0,
+   "cluster": "Торты на заказ",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "торт детский на день рождения",
+   "broad": 15,
+   "exact": 2,
+   "cluster": "Детские торты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "торт детский",
+   "broad": 191,
+   "exact": 1,
+   "cluster": "Детские торты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "детский торт для мальчика",
+   "broad": 6,
+   "exact": 1,
+   "cluster": "Детские торты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "детский торт заказать",
+   "broad": 6,
+   "exact": 0,
+   "cluster": "Детские торты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "детский торт для девочки",
+   "broad": 6,
+   "exact": 0,
+   "cluster": "Детские торты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "детские торты на заказ",
+   "broad": 4,
+   "exact": 0,
+   "cluster": "Детские торты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#prazdnichnye-torty",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "свадебные торты в самаре",
+   "broad": 110,
+   "exact": 61,
+   "cluster": "Свадебные торты",
+   "intent": "коммерческий",
+   "page_now": "—",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "свадебный торт",
+   "broad": 567,
+   "exact": 30,
+   "cluster": "Свадебные торты",
+   "intent": "коммерческий",
+   "page_now": "—",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "торт свадебный цена самара",
+   "broad": 8,
+   "exact": 13,
+   "cluster": "Свадебные торты",
+   "intent": "коммерческий",
+   "page_now": "—",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "торт на свадьбу",
+   "broad": 398,
+   "exact": 7,
+   "cluster": "Свадебные торты",
+   "intent": "коммерческий",
+   "page_now": "—",
+   "page_target": "/cakes/",
+   "relevance": "B",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "свадебный торт на заказ",
+   "broad": 11,
+   "exact": 1,
+   "cluster": "Свадебные торты",
+   "intent": "коммерческий",
+   "page_now": "—",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "купить торт на свадьбу",
+   "broad": 23,
+   "exact": 0,
+   "cluster": "Свадебные торты",
+   "intent": "коммерческий",
+   "page_now": "—",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "купить свадебный торт",
+   "broad": 13,
+   "exact": 0,
+   "cluster": "Свадебные торты",
+   "intent": "коммерческий",
+   "page_now": "—",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "свадебный торт цена",
+   "broad": 11,
+   "exact": 0,
+   "cluster": "Свадебные торты",
+   "intent": "коммерческий",
+   "page_now": "—",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "бенто торт",
+   "broad": 2484,
+   "exact": 154,
+   "cluster": "Бенто-торты",
+   "intent": "коммерческий",
+   "page_now": "—",
+   "page_target": "/cakes/",
+   "relevance": "C",
+   "priority": "условный, спрос высокий",
+   "note": "только если в ассортименте"
+  },
+  {
+   "query": "бенто торт самара",
+   "broad": 708,
+   "exact": 126,
+   "cluster": "Бенто-торты",
+   "intent": "коммерческий",
+   "page_now": "—",
+   "page_target": "/cakes/",
+   "relevance": "C",
+   "priority": "условный, спрос высокий",
+   "note": "только если в ассортименте"
+  },
+  {
+   "query": "бенто торт купить в самаре",
+   "broad": 40,
+   "exact": 21,
+   "cluster": "Бенто-торты",
+   "intent": "коммерческий",
+   "page_now": "—",
+   "page_target": "/cakes/",
+   "relevance": "C",
+   "priority": "условный, спрос высокий",
+   "note": "только если в ассортименте"
+  },
+  {
+   "query": "бенто торт заказать самара",
+   "broad": 36,
+   "exact": 15,
+   "cluster": "Бенто-торты",
+   "intent": "коммерческий",
+   "page_now": "—",
+   "page_target": "/cakes/",
+   "relevance": "C",
+   "priority": "условный",
+   "note": "только если в ассортименте"
+  },
+  {
+   "query": "бенто торт на заказ",
+   "broad": 99,
+   "exact": 5,
+   "cluster": "Бенто-торты",
+   "intent": "коммерческий",
+   "page_now": "—",
+   "page_target": "/cakes/",
+   "relevance": "C",
+   "priority": "условный",
+   "note": "только если в ассортименте"
+  },
+  {
+   "query": "торты самара",
+   "broad": 6883,
+   "exact": 62,
+   "cluster": "Купить торт (готовый)",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#torty-v-nalichii",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "купить торт в самаре",
+   "broad": 947,
+   "exact": 58,
+   "cluster": "Купить торт (готовый)",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#torty-v-nalichii",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "торты купить",
+   "broad": 2213,
+   "exact": 18,
+   "cluster": "Купить торт (готовый)",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#torty-v-nalichii",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "где купить торт в самаре",
+   "broad": 194,
+   "exact": 10,
+   "cluster": "Купить торт (готовый)",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#torty-v-nalichii",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "торт с доставкой самара",
+   "broad": 108,
+   "exact": 4,
+   "cluster": "Купить торт (готовый)",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#torty-v-nalichii",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "вкусные торты в самаре",
+   "broad": 53,
+   "exact": 4,
+   "cluster": "Купить торт (готовый)",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#torty-v-nalichii",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "где купить торт",
+   "broad": 444,
+   "exact": 2,
+   "cluster": "Купить торт (готовый)",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#torty-v-nalichii",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "магазин тортов в самаре",
+   "broad": 140,
+   "exact": 1,
+   "cluster": "Купить торт (готовый)",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#torty-v-nalichii",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "купить торт на день рождения",
+   "broad": 19,
+   "exact": 1,
+   "cluster": "Купить торт (готовый)",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#torty-v-nalichii",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "доставка тортов",
+   "broad": 272,
+   "exact": 0,
+   "cluster": "Купить торт (готовый)",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#torty-v-nalichii",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "торт с доставкой на дом",
+   "broad": 48,
+   "exact": 0,
+   "cluster": "Купить торт (готовый)",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#torty-v-nalichii",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "заказать торт с доставкой",
+   "broad": 27,
+   "exact": 0,
+   "cluster": "Купить торт (готовый)",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#torty-v-nalichii",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "купить готовый торт",
+   "broad": 21,
+   "exact": 0,
+   "cluster": "Купить торт (готовый)",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#torty-v-nalichii",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "купить торт с доставкой",
+   "broad": 16,
+   "exact": 0,
+   "cluster": "Купить торт (готовый)",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#torty-v-nalichii",
+   "page_target": "/cakes/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "торт молочная девочка купить в самаре",
+   "broad": 22,
+   "exact": 22,
+   "cluster": "Торты по названию",
+   "intent": "коммерческий (товар)",
+   "page_now": "/catalog/#p-<slug>",
+   "page_target": "карточка товара с отдельным URL",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "торт эстерхази купить в самаре",
+   "broad": 21,
+   "exact": 14,
+   "cluster": "Торты по названию",
+   "intent": "коммерческий (товар)",
+   "page_now": "/catalog/#p-<slug>",
+   "page_target": "карточка товара с отдельным URL",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "торт красный бархат купить",
+   "broad": 20,
+   "exact": 10,
+   "cluster": "Торты по названию",
+   "intent": "коммерческий (товар)",
+   "page_now": "/catalog/#p-<slug>",
+   "page_target": "карточка товара с отдельным URL",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "торт наполеон купить в самаре",
+   "broad": 17,
+   "exact": 10,
+   "cluster": "Торты по названию",
+   "intent": "коммерческий (товар)",
+   "page_now": "/catalog/#p-<slug>",
+   "page_target": "карточка товара с отдельным URL",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "торт прага купить в самаре",
+   "broad": 9,
+   "exact": 7,
+   "cluster": "Торты по названию",
+   "intent": "коммерческий (товар)",
+   "page_now": "/catalog/#p-<slug>",
+   "page_target": "карточка товара с отдельным URL",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "торт медовик купить",
+   "broad": 25,
+   "exact": 6,
+   "cluster": "Торты по названию",
+   "intent": "коммерческий (товар)",
+   "page_now": "/catalog/#p-<slug>",
+   "page_target": "карточка товара с отдельным URL",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "морковный торт купить",
+   "broad": 12,
+   "exact": 2,
+   "cluster": "Торты по названию",
+   "intent": "коммерческий (товар)",
+   "page_now": "/catalog/#p-<slug>",
+   "page_target": "карточка товара с отдельным URL",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "торт птичье молоко купить",
+   "broad": 10,
+   "exact": 0,
+   "cluster": "Торты по названию",
+   "intent": "коммерческий (товар)",
+   "page_now": "/catalog/#p-<slug>",
+   "page_target": "карточка товара с отдельным URL",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "кондитерская самара",
+   "broad": 4137,
+   "exact": 68,
+   "cluster": "Кондитерская",
+   "intent": "локальный/коммерческий",
+   "page_now": "/",
+   "page_target": "/ + /desserts/ + /sadovaya/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "кондитерская",
+   "broad": 9693,
+   "exact": 25,
+   "cluster": "Кондитерская",
+   "intent": "локальный/коммерческий",
+   "page_now": "/",
+   "page_target": "/ + /desserts/ + /sadovaya/",
+   "relevance": "B",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "кондитерские в самаре торты",
+   "broad": 26,
+   "exact": 5,
+   "cluster": "Кондитерская",
+   "intent": "локальный/коммерческий",
+   "page_now": "/",
+   "page_target": "/ + /desserts/ + /sadovaya/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "кафе кондитерская самара",
+   "broad": 35,
+   "exact": 4,
+   "cluster": "Кондитерская",
+   "intent": "локальный/коммерческий",
+   "page_now": "/",
+   "page_target": "/ + /desserts/ + /sadovaya/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "кондитерская рядом",
+   "broad": 24,
+   "exact": 1,
+   "cluster": "Кондитерская",
+   "intent": "локальный/коммерческий",
+   "page_now": "/",
+   "page_target": "/ + /desserts/ + /sadovaya/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "кондитерская торты",
+   "broad": 196,
+   "exact": 0,
+   "cluster": "Кондитерская",
+   "intent": "локальный/коммерческий",
+   "page_now": "/",
+   "page_target": "/ + /desserts/ + /sadovaya/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "кафе кондитерская",
+   "broad": 93,
+   "exact": 0,
+   "cluster": "Кондитерская",
+   "intent": "локальный/коммерческий",
+   "page_now": "/",
+   "page_target": "/ + /desserts/ + /sadovaya/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "кондитерская доставка",
+   "broad": 21,
+   "exact": 0,
+   "cluster": "Кондитерская",
+   "intent": "локальный/коммерческий",
+   "page_now": "/",
+   "page_target": "/ + /desserts/ + /sadovaya/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "корпусные десерты самара",
+   "broad": 1849,
+   "exact": 661,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "B",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "корпусные десерты самара где купить",
+   "broad": 237,
+   "exact": 100,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "B",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "корпусные десерты самара купить",
+   "broad": 400,
+   "exact": 87,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "B",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "корпусные пирожные самара",
+   "broad": 105,
+   "exact": 43,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "B",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "десерты самара",
+   "broad": 2084,
+   "exact": 32,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "корпусные десерты купить",
+   "broad": 489,
+   "exact": 17,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "B",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "конфеты ручной работы самара",
+   "broad": 17,
+   "exact": 14,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "эклеры самара",
+   "broad": 135,
+   "exact": 9,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "пирожные самара",
+   "broad": 403,
+   "exact": 4,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "пирожные купить",
+   "broad": 281,
+   "exact": 4,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "пирожные на заказ",
+   "broad": 22,
+   "exact": 3,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "десерты купить",
+   "broad": 672,
+   "exact": 2,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "набор пирожных",
+   "broad": 54,
+   "exact": 2,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "макаронс купить",
+   "broad": 12,
+   "exact": 1,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "заказать десерты",
+   "broad": 96,
+   "exact": 0,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "конфеты ручной работы",
+   "broad": 65,
+   "exact": 0,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "пирожные на день рождения",
+   "broad": 39,
+   "exact": 0,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "доставка десертов",
+   "broad": 34,
+   "exact": 0,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "заказать пирожные",
+   "broad": 34,
+   "exact": 0,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "эклеры купить",
+   "broad": 30,
+   "exact": 0,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "где купить пирожное",
+   "broad": 22,
+   "exact": 0,
+   "cluster": "Пирожные и десерты",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#pirojnye",
+   "page_target": "/desserts/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "пироги на заказ самара",
+   "broad": 129,
+   "exact": 35,
+   "cluster": "Выпечка и пироги",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#vypechka",
+   "page_target": "/catalog/#vypechka",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "пироги на заказ",
+   "broad": 201,
+   "exact": 10,
+   "cluster": "Выпечка и пироги",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#vypechka",
+   "page_target": "/catalog/#vypechka",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "выпечка самара",
+   "broad": 241,
+   "exact": 8,
+   "cluster": "Выпечка и пироги",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#vypechka",
+   "page_target": "/catalog/#vypechka",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "пироги на заказ с доставкой",
+   "broad": 44,
+   "exact": 0,
+   "cluster": "Выпечка и пироги",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#vypechka",
+   "page_target": "/catalog/#vypechka",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "заказ выпечки",
+   "broad": 30,
+   "exact": 0,
+   "cluster": "Выпечка и пироги",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#vypechka",
+   "page_target": "/catalog/#vypechka",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "заказ пирогов на дом",
+   "broad": 10,
+   "exact": 0,
+   "cluster": "Выпечка и пироги",
+   "intent": "коммерческий",
+   "page_now": "/catalog/#vypechka",
+   "page_target": "/catalog/#vypechka",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "кейтеринг",
+   "broad": 2275,
+   "exact": 506,
+   "cluster": "Кейтеринг",
+   "intent": "коммерческий",
+   "page_now": "/catering/",
+   "page_target": "/catering/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "кейтеринг самара",
+   "broad": 739,
+   "exact": 196,
+   "cluster": "Кейтеринг",
+   "intent": "коммерческий",
+   "page_now": "/catering/",
+   "page_target": "/catering/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "кейтеринг самара заказать с доставкой",
+   "broad": 67,
+   "exact": 66,
+   "cluster": "Кейтеринг",
+   "intent": "коммерческий",
+   "page_now": "/catering/",
+   "page_target": "/catering/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "кейтеринг самара заказать",
+   "broad": 80,
+   "exact": 6,
+   "cluster": "Кейтеринг",
+   "intent": "коммерческий",
+   "page_now": "/catering/",
+   "page_target": "/catering/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "услуги кейтеринга",
+   "broad": 19,
+   "exact": 3,
+   "cluster": "Кейтеринг",
+   "intent": "коммерческий",
+   "page_now": "/catering/",
+   "page_target": "/catering/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "кейтеринг заказать",
+   "broad": 98,
+   "exact": 1,
+   "cluster": "Кейтеринг",
+   "intent": "коммерческий",
+   "page_now": "/catering/",
+   "page_target": "/catering/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "кейтеринг доставка",
+   "broad": 89,
+   "exact": 1,
+   "cluster": "Кейтеринг",
+   "intent": "коммерческий",
+   "page_now": "/catering/",
+   "page_target": "/catering/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "выездное обслуживание",
+   "broad": 36,
+   "exact": 0,
+   "cluster": "Кейтеринг",
+   "intent": "коммерческий",
+   "page_now": "/catering/",
+   "page_target": "/catering/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "выездной банкет",
+   "broad": 18,
+   "exact": 0,
+   "cluster": "Кейтеринг",
+   "intent": "коммерческий",
+   "page_now": "/catering/",
+   "page_target": "/catering/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "кейтеринг на свадьбу",
+   "broad": 17,
+   "exact": 0,
+   "cluster": "Кейтеринг",
+   "intent": "коммерческий",
+   "page_now": "/catering/",
+   "page_target": "/catering/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "заказ кейтеринга",
+   "broad": 10,
+   "exact": 0,
+   "cluster": "Кейтеринг",
+   "intent": "коммерческий",
+   "page_now": "/catering/",
+   "page_target": "/catering/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "организация выездного обслуживания",
+   "broad": 9,
+   "exact": 0,
+   "cluster": "Кейтеринг",
+   "intent": "коммерческий",
+   "page_now": "/catering/",
+   "page_target": "/catering/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "кейтеринг на 50 человек",
+   "broad": 8,
+   "exact": 0,
+   "cluster": "Кейтеринг",
+   "intent": "коммерческий",
+   "page_now": "/catering/",
+   "page_target": "/catering/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "фуршет бокс самара",
+   "broad": 18,
+   "exact": 15,
+   "cluster": "Кейтеринг: цены и форматы",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/services/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "кейтеринг в самаре цены и отзывы",
+   "broad": 9,
+   "exact": 9,
+   "cluster": "Кейтеринг: цены и форматы",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/services/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "фуршет бокс",
+   "broad": 30,
+   "exact": 2,
+   "cluster": "Кейтеринг: цены и форматы",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/services/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "кейтеринг цена",
+   "broad": 23,
+   "exact": 0,
+   "cluster": "Кейтеринг: цены и форматы",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/services/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "кейтеринг на человека",
+   "broad": 14,
+   "exact": 0,
+   "cluster": "Кейтеринг: цены и форматы",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/services/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "кейтеринг меню",
+   "broad": 8,
+   "exact": 0,
+   "cluster": "Кейтеринг: цены и форматы",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/services/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "бокс кейтеринг",
+   "broad": 8,
+   "exact": 0,
+   "cluster": "Кейтеринг: цены и форматы",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/services/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "фуршет",
+   "broad": 1096,
+   "exact": 34,
+   "cluster": "Фуршет",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/buffet/",
+   "relevance": "B",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "фуршет самара",
+   "broad": 215,
+   "exact": 22,
+   "cluster": "Фуршет",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/buffet/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "фуршет самара доставка",
+   "broad": 36,
+   "exact": 18,
+   "cluster": "Фуршет",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/buffet/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "фуршет на заказ",
+   "broad": 21,
+   "exact": 3,
+   "cluster": "Фуршет",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/buffet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "заказать фуршет",
+   "broad": 51,
+   "exact": 2,
+   "cluster": "Фуршет",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/buffet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "канапе для фуршета заказать",
+   "broad": 12,
+   "exact": 1,
+   "cluster": "Фуршет",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/buffet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "фуршет кейтеринг",
+   "broad": 27,
+   "exact": 0,
+   "cluster": "Фуршет",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/buffet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "фуршет на день рождения",
+   "broad": 23,
+   "exact": 0,
+   "cluster": "Фуршет",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/buffet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "фуршет на работе",
+   "broad": 22,
+   "exact": 0,
+   "cluster": "Фуршет",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/buffet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "фуршет с доставкой",
+   "broad": 19,
+   "exact": 0,
+   "cluster": "Фуршет",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/buffet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "фуршет на дом",
+   "broad": 12,
+   "exact": 0,
+   "cluster": "Фуршет",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/buffet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "фуршет на свадьбу",
+   "broad": 10,
+   "exact": 0,
+   "cluster": "Фуршет",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/buffet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "заказать закуски для фуршета",
+   "broad": 9,
+   "exact": 0,
+   "cluster": "Фуршет",
+   "intent": "коммерческий",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/buffet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "кофе брейк",
+   "broad": 127,
+   "exact": 25,
+   "cluster": "Кофе-брейк",
+   "intent": "коммерческий (B2B)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/services/",
+   "relevance": "B",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "кофе брейк самара",
+   "broad": 4,
+   "exact": 0,
+   "cluster": "Кофе-брейк",
+   "intent": "коммерческий (B2B)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/services/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "организация кофе брейка",
+   "broad": 3,
+   "exact": 0,
+   "cluster": "Кофе-брейк",
+   "intent": "коммерческий (B2B)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/services/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "кофе брейк заказать",
+   "broad": 1,
+   "exact": 0,
+   "cluster": "Кофе-брейк",
+   "intent": "коммерческий (B2B)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/services/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "банкетный зал самара",
+   "broad": 1577,
+   "exact": 118,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "банкет самара",
+   "broad": 858,
+   "exact": 23,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "банкет",
+   "broad": 2296,
+   "exact": 22,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "B",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "банкетный зал самара на 30 человек",
+   "broad": 32,
+   "exact": 18,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "где отметить юбилей в самаре",
+   "broad": 66,
+   "exact": 15,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "банкетный зал самара на 20 человек",
+   "broad": 24,
+   "exact": 15,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "аренда банкетного зала самара",
+   "broad": 15,
+   "exact": 6,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "банкетные залы самара для выпускного",
+   "broad": 16,
+   "exact": 5,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "B",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "рестораны с банкетным залом самара",
+   "broad": 13,
+   "exact": 5,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "кафе для банкета самара",
+   "broad": 12,
+   "exact": 5,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "банкетные залы",
+   "broad": 3014,
+   "exact": 4,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "банкетный зал для юбилея",
+   "broad": 12,
+   "exact": 3,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "банкет на 20 человек в самаре",
+   "broad": 8,
+   "exact": 2,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "где отметить юбилей",
+   "broad": 111,
+   "exact": 1,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "новогодние банкеты",
+   "broad": 73,
+   "exact": 1,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "меню на банкет",
+   "broad": 24,
+   "exact": 1,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "банкет под ключ",
+   "broad": 15,
+   "exact": 1,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "сколько стоит банкетный зал",
+   "broad": 9,
+   "exact": 1,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "рестораны банкетные залы",
+   "broad": 102,
+   "exact": 0,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "кафе банкет",
+   "broad": 90,
+   "exact": 0,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "ресторан для банкета",
+   "broad": 63,
+   "exact": 0,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "банкет цена",
+   "broad": 62,
+   "exact": 0,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "заказать банкет",
+   "broad": 36,
+   "exact": 0,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "ресторан с банкетным залом",
+   "broad": 26,
+   "exact": 0,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "сколько стоит банкет",
+   "broad": 26,
+   "exact": 0,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "где отметить юбилей ресторан",
+   "broad": 15,
+   "exact": 0,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "банкет на новый год",
+   "broad": 15,
+   "exact": 0,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "банкет на юбилей",
+   "broad": 13,
+   "exact": 0,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "банкетный зал на 60 человек",
+   "broad": 11,
+   "exact": 0,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "банкетный зал на 50 человек",
+   "broad": 8,
+   "exact": 0,
+   "cluster": "Банкетный зал и банкет",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "банкетные залы самара для свадьбы",
+   "broad": 138,
+   "exact": 53,
+   "cluster": "Свадьба в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "кафе в самаре для свадьбы",
+   "broad": 32,
+   "exact": 25,
+   "cluster": "Свадьба в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "рестораны в самаре для свадьбы",
+   "broad": 42,
+   "exact": 12,
+   "cluster": "Свадьба в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "ресторан для свадьбы",
+   "broad": 351,
+   "exact": 6,
+   "cluster": "Свадьба в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "свадебный банкет самара",
+   "broad": 27,
+   "exact": 3,
+   "cluster": "Свадьба в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "свадебный банкет",
+   "broad": 87,
+   "exact": 0,
+   "cluster": "Свадьба в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "банкет на свадьбу",
+   "broad": 37,
+   "exact": 0,
+   "cluster": "Свадьба в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/banquet/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "новогодний корпоратив в самаре",
+   "broad": 484,
+   "exact": 159,
+   "cluster": "Корпоратив",
+   "intent": "коммерческий (сезон ноябрь–декабрь)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/corporate/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "новогодний корпоратив 2027 самара",
+   "broad": 334,
+   "exact": 141,
+   "cluster": "Корпоратив",
+   "intent": "коммерческий (сезон ноябрь–декабрь)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/corporate/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "новогодние корпоративы 2026 самара",
+   "broad": 194,
+   "exact": 108,
+   "cluster": "Корпоратив",
+   "intent": "коммерческий (сезон ноябрь–декабрь)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/corporate/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "корпоратив самара",
+   "broad": 2478,
+   "exact": 45,
+   "cluster": "Корпоратив",
+   "intent": "коммерческий (сезон ноябрь–декабрь)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/corporate/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "где отметить корпоратив в самаре",
+   "broad": 81,
+   "exact": 25,
+   "cluster": "Корпоратив",
+   "intent": "коммерческий (сезон ноябрь–декабрь)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/corporate/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "где отметить новогодний корпоратив в самаре",
+   "broad": 34,
+   "exact": 21,
+   "cluster": "Корпоратив",
+   "intent": "коммерческий (сезон ноябрь–декабрь)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/corporate/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "где провести корпоратив в самаре",
+   "broad": 66,
+   "exact": 18,
+   "cluster": "Корпоратив",
+   "intent": "коммерческий (сезон ноябрь–декабрь)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/corporate/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "новогодний корпоратив самара рестораны",
+   "broad": 247,
+   "exact": 14,
+   "cluster": "Корпоратив",
+   "intent": "коммерческий (сезон ноябрь–декабрь)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/corporate/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "корпоратив на новый год самара",
+   "broad": 74,
+   "exact": 10,
+   "cluster": "Корпоратив",
+   "intent": "коммерческий (сезон ноябрь–декабрь)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/corporate/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "ресторан для корпоратива самара",
+   "broad": 75,
+   "exact": 9,
+   "cluster": "Корпоратив",
+   "intent": "коммерческий (сезон ноябрь–декабрь)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/corporate/",
+   "relevance": "A",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "рестораны для корпоратива",
+   "broad": 114,
+   "exact": 3,
+   "cluster": "Корпоратив",
+   "intent": "коммерческий (сезон ноябрь–декабрь)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/corporate/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "рестораны для новогоднего корпоратива",
+   "broad": 38,
+   "exact": 3,
+   "cluster": "Корпоратив",
+   "intent": "коммерческий (сезон ноябрь–декабрь)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/corporate/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "кафе для корпоратива",
+   "broad": 34,
+   "exact": 2,
+   "cluster": "Корпоратив",
+   "intent": "коммерческий (сезон ноябрь–декабрь)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/corporate/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "организация корпоративных мероприятий",
+   "broad": 24,
+   "exact": 1,
+   "cluster": "Корпоратив",
+   "intent": "коммерческий (сезон ноябрь–декабрь)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/corporate/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "где отметить корпоратив",
+   "broad": 153,
+   "exact": 0,
+   "cluster": "Корпоратив",
+   "intent": "коммерческий (сезон ноябрь–декабрь)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/corporate/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "новогодний корпоратив цена",
+   "broad": 79,
+   "exact": 0,
+   "cluster": "Корпоратив",
+   "intent": "коммерческий (сезон ноябрь–декабрь)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/corporate/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "проведение корпоративов",
+   "broad": 38,
+   "exact": 0,
+   "cluster": "Корпоратив",
+   "intent": "коммерческий (сезон ноябрь–декабрь)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/corporate/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "зал для корпоратива",
+   "broad": 16,
+   "exact": 0,
+   "cluster": "Корпоратив",
+   "intent": "коммерческий (сезон ноябрь–декабрь)",
+   "page_now": "/catering/services/",
+   "page_target": "/catering/corporate/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "где отметить день рождения в самаре",
+   "broad": 941,
+   "exact": 94,
+   "cluster": "День рождения в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/birthday/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "где отметить день рождения в самаре взрослому",
+   "broad": 154,
+   "exact": 80,
+   "cluster": "День рождения в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/birthday/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "где отметить день рождения ребенка самара",
+   "broad": 296,
+   "exact": 48,
+   "cluster": "День рождения в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/birthday/",
+   "relevance": "B",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "отметить день рождения в самаре взрослому",
+   "broad": 227,
+   "exact": 31,
+   "cluster": "День рождения в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/birthday/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "кафе в самаре для день рождения",
+   "broad": 81,
+   "exact": 31,
+   "cluster": "День рождения в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/birthday/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "где отметить день рождения",
+   "broad": 1622,
+   "exact": 23,
+   "cluster": "День рождения в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/birthday/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "где можно отметить день рождения в самаре",
+   "broad": 205,
+   "exact": 22,
+   "cluster": "День рождения в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/birthday/",
+   "relevance": "A",
+   "priority": "высокий",
+   "note": ""
+  },
+  {
+   "query": "отметить детский день рождения в самаре",
+   "broad": 86,
+   "exact": 10,
+   "cluster": "День рождения в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/birthday/",
+   "relevance": "B",
+   "priority": "средний",
+   "note": ""
+  },
+  {
+   "query": "кафе где отметить день рождения",
+   "broad": 30,
+   "exact": 1,
+   "cluster": "День рождения в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/birthday/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "банкетный зал для дня рождения",
+   "broad": 16,
+   "exact": 1,
+   "cluster": "День рождения в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/birthday/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": ""
+  },
+  {
+   "query": "где отметить день рождения взрослому",
+   "broad": 191,
+   "exact": 0,
+   "cluster": "День рождения в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/birthday/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "ресторан отметить день рождения",
+   "broad": 93,
+   "exact": 0,
+   "cluster": "День рождения в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/birthday/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "кафе отметить день рождения",
+   "broad": 42,
+   "exact": 0,
+   "cluster": "День рождения в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/birthday/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "ресторан где отметить день рождения",
+   "broad": 37,
+   "exact": 0,
+   "cluster": "День рождения в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/birthday/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "банкет на день рождения",
+   "broad": 11,
+   "exact": 0,
+   "cluster": "День рождения в ресторане",
+   "intent": "коммерческий/локальный",
+   "page_now": "/catering/",
+   "page_target": "/catering/birthday/",
+   "relevance": "A",
+   "priority": "низкий",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title"
+  },
+  {
+   "query": "поминальные обеды самара",
+   "broad": 106,
+   "exact": 21,
+   "cluster": "Поминальные обеды",
+   "intent": "коммерческий/локальный",
+   "page_now": "—",
+   "page_target": "/catering/memorial/",
+   "relevance": "C",
+   "priority": "условный, спрос высокий",
+   "note": "только после подтверждения владельцем"
+  },
+  {
+   "query": "поминки в самаре кафе",
+   "broad": 25,
+   "exact": 13,
+   "cluster": "Поминальные обеды",
+   "intent": "коммерческий/локальный",
+   "page_now": "—",
+   "page_target": "/catering/memorial/",
+   "relevance": "C",
+   "priority": "условный",
+   "note": "только после подтверждения владельцем"
+  },
+  {
+   "query": "поминки в самаре",
+   "broad": 60,
+   "exact": 5,
+   "cluster": "Поминальные обеды",
+   "intent": "коммерческий/локальный",
+   "page_now": "—",
+   "page_target": "/catering/memorial/",
+   "relevance": "C",
+   "priority": "условный",
+   "note": "только после подтверждения владельцем"
+  },
+  {
+   "query": "поминальные кафе самара",
+   "broad": 36,
+   "exact": 5,
+   "cluster": "Поминальные обеды",
+   "intent": "коммерческий/локальный",
+   "page_now": "—",
+   "page_target": "/catering/memorial/",
+   "relevance": "C",
+   "priority": "условный",
+   "note": "только после подтверждения владельцем"
+  },
+  {
+   "query": "поминальный обед",
+   "broad": 285,
+   "exact": 4,
+   "cluster": "Поминальные обеды",
+   "intent": "коммерческий/локальный",
+   "page_now": "—",
+   "page_target": "/catering/memorial/",
+   "relevance": "C",
+   "priority": "условный",
+   "note": "только после подтверждения владельцем"
+  },
+  {
+   "query": "поминальный обед меню",
+   "broad": 16,
+   "exact": 4,
+   "cluster": "Поминальные обеды",
+   "intent": "коммерческий/локальный",
+   "page_now": "—",
+   "page_target": "/catering/memorial/",
+   "relevance": "C",
+   "priority": "условный",
+   "note": "только после подтверждения владельцем"
+  },
+  {
+   "query": "кафе поминальные обеды",
+   "broad": 39,
+   "exact": 1,
+   "cluster": "Поминальные обеды",
+   "intent": "коммерческий/локальный",
+   "page_now": "—",
+   "page_target": "/catering/memorial/",
+   "relevance": "C",
+   "priority": "условный",
+   "note": "только после подтверждения владельцем"
+  },
+  {
+   "query": "кафе для поминок",
+   "broad": 35,
+   "exact": 1,
+   "cluster": "Поминальные обеды",
+   "intent": "коммерческий/локальный",
+   "page_now": "—",
+   "page_target": "/catering/memorial/",
+   "relevance": "C",
+   "priority": "условный",
+   "note": "только после подтверждения владельцем"
+  },
+  {
+   "query": "заказать поминальный обед",
+   "broad": 27,
+   "exact": 0,
+   "cluster": "Поминальные обеды",
+   "intent": "коммерческий/локальный",
+   "page_now": "—",
+   "page_target": "/catering/memorial/",
+   "relevance": "C",
+   "priority": "условный",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title; только после подтверждения владельцем"
+  },
+  {
+   "query": "цена поминального обеда",
+   "broad": 16,
+   "exact": 0,
+   "cluster": "Поминальные обеды",
+   "intent": "коммерческий/локальный",
+   "page_now": "—",
+   "page_target": "/catering/memorial/",
+   "relevance": "C",
+   "priority": "условный",
+   "note": "точная 0: хвост широкой частоты, в текст, а не в title; только после подтверждения владельцем"
+  },
+  {
+   "query": "кафе самара",
+   "broad": 24007,
+   "exact": 385,
+   "cluster": "Кафе и рестораны Самары (общие)",
+   "intent": "локальный (агрегаторный)",
+   "page_now": "/",
+   "page_target": "/",
+   "relevance": "B",
+   "priority": "низкий",
+   "note": "выдача из каталогов, продвигать карточкой на Картах"
+  },
+  {
+   "query": "кафе и рестораны самара",
+   "broad": 735,
+   "exact": 85,
+   "cluster": "Кафе и рестораны Самары (общие)",
+   "intent": "локальный (агрегаторный)",
+   "page_now": "/",
+   "page_target": "/",
+   "relevance": "B",
+   "priority": "низкий",
+   "note": "выдача из каталогов, продвигать карточкой на Картах"
+  },
+  {
+   "query": "семейное кафе самара",
+   "broad": 101,
+   "exact": 11,
+   "cluster": "Кафе и рестораны Самары (общие)",
+   "intent": "локальный (агрегаторный)",
+   "page_now": "/",
+   "page_target": "/",
+   "relevance": "B",
+   "priority": "низкий",
+   "note": "выдача из каталогов, продвигать карточкой на Картах"
+  }
+ ],
+ "positions": [
+  {
+   "query": "вкусная компания самара",
+   "exact": 256,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": 1,
+    "url": "https://vkus-com.ru/"
+   },
+   "vkusnayakompania.ru": {
+    "pos": 4,
+    "url": "https://vkusnayakompania.ru/"
+   },
+   "vkusdostavka.shop": {
+    "pos": 5,
+    "url": "https://vkusdostavka.shop/"
+   },
+   "top10_mix": {
+    "Яндекс": 2,
+    "2ГИС": 1,
+    "агрегатор": 2,
+    "медиа/соцсети": 2,
+    "наш": 3
+   },
+   "top10_business_sites": [],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "vkus-com.ru",
+     "type": "наш"
+    },
+    {
+     "pos": 2,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 3,
+     "domain": "vk.ru",
+     "type": "медиа/соцсети"
+    },
+    {
+     "pos": 4,
+     "domain": "vkusnayakompania.ru",
+     "type": "наш"
+    },
+    {
+     "pos": 5,
+     "domain": "vkusdostavka.shop",
+     "type": "наш"
+    },
+    {
+     "pos": 6,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 7,
+     "domain": "eda.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 8,
+     "domain": "samara.gorko.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 9,
+     "domain": "t.me",
+     "type": "медиа/соцсети"
+    },
+    {
+     "pos": 10,
+     "domain": "vkusnaja-kompanija.clients.site",
+     "type": "агрегатор"
+    }
+   ]
+  },
+  {
+   "query": "вкусная компания",
+   "exact": 98,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": 1,
+    "url": "https://vkus-com.ru/"
+   },
+   "vkusnayakompania.ru": {
+    "pos": 4,
+    "url": "https://vkusnayakompania.ru/"
+   },
+   "vkusdostavka.shop": {
+    "pos": 5,
+    "url": "https://vkusdostavka.shop/"
+   },
+   "top10_mix": {
+    "Яндекс": 3,
+    "2ГИС": 1,
+    "агрегатор": 2,
+    "медиа/соцсети": 1,
+    "наш": 3
+   },
+   "top10_business_sites": [],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "vkus-com.ru",
+     "type": "наш"
+    },
+    {
+     "pos": 2,
+     "domain": "vk.ru",
+     "type": "медиа/соцсети"
+    },
+    {
+     "pos": 3,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 4,
+     "domain": "vkusnayakompania.ru",
+     "type": "наш"
+    },
+    {
+     "pos": 5,
+     "domain": "vkusdostavka.shop",
+     "type": "наш"
+    },
+    {
+     "pos": 6,
+     "domain": "eda.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 7,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 8,
+     "domain": "samara.gorko.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 9,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 10,
+     "domain": "vkusnaja-kompanija.clients.site",
+     "type": "агрегатор"
+    }
+   ]
+  },
+  {
+   "query": "вкусная компания самара советская армия",
+   "exact": 80,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": 1,
+    "url": "https://vkus-com.ru/"
+   },
+   "vkusnayakompania.ru": {
+    "pos": 8,
+    "url": "https://vkusnayakompania.ru/"
+   },
+   "vkusdostavka.shop": {
+    "pos": 31,
+    "url": "https://vkusdostavka.shop/"
+   },
+   "top10_mix": {
+    "Яндекс": 2,
+    "2ГИС": 1,
+    "агрегатор": 3,
+    "медиа/соцсети": 2,
+    "наш": 2
+   },
+   "top10_business_sites": [],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "vkus-com.ru",
+     "type": "наш"
+    },
+    {
+     "pos": 2,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 3,
+     "domain": "eda.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 4,
+     "domain": "vk.ru",
+     "type": "медиа/соцсети"
+    },
+    {
+     "pos": 5,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 6,
+     "domain": "samara.gorko.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 7,
+     "domain": "vkusnaja-kompanija-ulitsa-sovetskoj-armii.clients.site",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 8,
+     "domain": "vkusnayakompania.ru",
+     "type": "наш"
+    },
+    {
+     "pos": 9,
+     "domain": "t.me",
+     "type": "медиа/соцсети"
+    },
+    {
+     "pos": 10,
+     "domain": "zoon.ru",
+     "type": "агрегатор"
+    }
+   ]
+  },
+  {
+   "query": "вкусная компания самара меню",
+   "exact": 38,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": 2,
+    "url": "https://vkus-com.ru/"
+   },
+   "vkusnayakompania.ru": {
+    "pos": 16,
+    "url": "https://vkusnayakompania.ru/"
+   },
+   "vkusdostavka.shop": {
+    "pos": 1,
+    "url": "https://vkusdostavka.shop/"
+   },
+   "top10_mix": {
+    "Яндекс": 2,
+    "2ГИС": 1,
+    "агрегатор": 4,
+    "медиа/соцсети": 1,
+    "наш": 2
+   },
+   "top10_business_sites": [],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "vkusdostavka.shop",
+     "type": "наш"
+    },
+    {
+     "pos": 2,
+     "domain": "vkus-com.ru",
+     "type": "наш"
+    },
+    {
+     "pos": 3,
+     "domain": "eda.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 4,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 5,
+     "domain": "vk.ru",
+     "type": "медиа/соцсети"
+    },
+    {
+     "pos": 6,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 7,
+     "domain": "samara.lunch-park.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 8,
+     "domain": "sam.caterme.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 9,
+     "domain": "restaurantguru.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 10,
+     "domain": "zoon.ru",
+     "type": "агрегатор"
+    }
+   ]
+  },
+  {
+   "query": "доставка еды в самаре",
+   "exact": 304,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 2,
+    "2ГИС": 1,
+    "агрегатор": 2,
+    "сайт компании": 5
+   },
+   "top10_business_sites": [
+    "willfood.pro",
+    "fuji.ru",
+    "jacofood.ru",
+    "milimon.ru",
+    "lovkus.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "willfood.pro",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 2,
+     "domain": "eda.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 3,
+     "domain": "fuji.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 4,
+     "domain": "jacofood.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 5,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 6,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 7,
+     "domain": "milimon.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 8,
+     "domain": "kuper.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 9,
+     "domain": "lovkus.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 10,
+     "domain": "chibbis.ru",
+     "type": "агрегатор"
+    }
+   ]
+  },
+  {
+   "query": "доставка еды в самаре на дом",
+   "exact": 107,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 3,
+    "2ГИС": 1,
+    "агрегатор": 2,
+    "сайт компании": 4
+   },
+   "top10_business_sites": [
+    "jacofood.ru",
+    "milimon.ru",
+    "шашлык63.рф",
+    "willfood.pro"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "eda.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 2,
+     "domain": "jacofood.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 3,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 4,
+     "domain": "milimon.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 5,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 6,
+     "domain": "kuper.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 7,
+     "domain": "шашлык63.рф",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 8,
+     "domain": "willfood.pro",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 9,
+     "domain": "lavka.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 10,
+     "domain": "chibbis.ru",
+     "type": "агрегатор"
+    }
+   ]
+  },
+  {
+   "query": "доставка готовой еды в самаре",
+   "exact": 46,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 1,
+    "2ГИС": 1,
+    "агрегатор": 1,
+    "сайт компании": 7
+   },
+   "top10_business_sites": [
+    "willfood.pro",
+    "jacofood.ru",
+    "smr.priem.menu",
+    "palich.ru",
+    "smr.perfectbalance.ru",
+    "chistoeda.ru",
+    "kulinar-63.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "willfood.pro",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 2,
+     "domain": "jacofood.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 3,
+     "domain": "smr.priem.menu",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 4,
+     "domain": "palich.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 5,
+     "domain": "eda.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 6,
+     "domain": "smr.perfectbalance.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 7,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 8,
+     "domain": "chistoeda.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 9,
+     "domain": "chibbis.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 10,
+     "domain": "kulinar-63.ru",
+     "type": "сайт компании"
+    }
+   ]
+  },
+  {
+   "query": "заказать еду самара",
+   "exact": 22,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 3,
+    "2ГИС": 1,
+    "агрегатор": 2,
+    "сайт компании": 4
+   },
+   "top10_business_sites": [
+    "fuji.ru",
+    "jacofood.ru",
+    "milimon.ru",
+    "lovkus.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "eda.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 2,
+     "domain": "fuji.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 3,
+     "domain": "jacofood.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 4,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 5,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 6,
+     "domain": "kuper.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 7,
+     "domain": "lavka.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 8,
+     "domain": "milimon.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 9,
+     "domain": "lovkus.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 10,
+     "domain": "chibbis.ru",
+     "type": "агрегатор"
+    }
+   ]
+  },
+  {
+   "query": "торт на заказ самара",
+   "exact": 113,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 2,
+    "агрегатор": 3,
+    "сайт компании": 5
+   },
+   "top10_business_sites": [
+    "sbkk.ru",
+    "самара.о-пушка.рф",
+    "tortelia.ru",
+    "tortoff.net",
+    "kulinar-63.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "flowwow.com",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 2,
+     "domain": "flowwow.com",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 3,
+     "domain": "sbkk.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 4,
+     "domain": "m.avito.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 5,
+     "domain": "самара.о-пушка.рф",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 6,
+     "domain": "tortelia.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 7,
+     "domain": "uslugi.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 8,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 9,
+     "domain": "tortoff.net",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 10,
+     "domain": "kulinar-63.ru",
+     "type": "сайт компании"
+    }
+   ]
+  },
+  {
+   "query": "торт на заказ",
+   "exact": 270,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 1,
+    "агрегатор": 2,
+    "сайт компании": 7
+   },
+   "top10_business_sites": [
+    "tortelia.ru",
+    "sweetlana63.ru",
+    "sbkk.ru",
+    "kulinar-63.ru",
+    "tortoff.net",
+    "самара.сладкоежкин.рф",
+    "moydesert.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "flowwow.com",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 2,
+     "domain": "tortelia.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 3,
+     "domain": "sweetlana63.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 4,
+     "domain": "sbkk.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 5,
+     "domain": "m.avito.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 6,
+     "domain": "kulinar-63.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 7,
+     "domain": "uslugi.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 8,
+     "domain": "tortoff.net",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 9,
+     "domain": "самара.сладкоежкин.рф",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 10,
+     "domain": "moydesert.ru",
+     "type": "сайт компании"
+    }
+   ]
+  },
+  {
+   "query": "купить торт в самаре",
+   "exact": 58,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 1,
+    "агрегатор": 1,
+    "сайт компании": 8
+   },
+   "top10_business_sites": [
+    "samara.palich.ru",
+    "sbkk.ru",
+    "самара.о-пушка.рф",
+    "kondi-choko.ru",
+    "tortwill.ru",
+    "самара.безсахара.рф",
+    "shopcakes.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "samara.palich.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 2,
+     "domain": "sbkk.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 3,
+     "domain": "m.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 4,
+     "domain": "самара.о-пушка.рф",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 5,
+     "domain": "flowwow.com",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 6,
+     "domain": "kondi-choko.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 7,
+     "domain": "kondi-choko.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 8,
+     "domain": "tortwill.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 9,
+     "domain": "самара.безсахара.рф",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 10,
+     "domain": "shopcakes.ru",
+     "type": "сайт компании"
+    }
+   ]
+  },
+  {
+   "query": "свадебные торты в самаре",
+   "exact": 61,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 2,
+    "агрегатор": 3,
+    "медиа/соцсети": 1,
+    "сайт компании": 4
+   },
+   "top10_business_sites": [
+    "sbkk.ru",
+    "tortoff.net",
+    "samara.i-tort.ru",
+    "moydesert.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "sbkk.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 2,
+     "domain": "m.avito.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 3,
+     "domain": "samara.gorko.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 4,
+     "domain": "flowwow.com",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 5,
+     "domain": "uslugi.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 6,
+     "domain": "tortoff.net",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 7,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 8,
+     "domain": "samara.i-tort.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 9,
+     "domain": "moydesert.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 10,
+     "domain": "vk.ru",
+     "type": "медиа/соцсети"
+    }
+   ]
+  },
+  {
+   "query": "заказать торт в самаре на день рождения",
+   "exact": 38,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 1,
+    "агрегатор": 3,
+    "сайт компании": 6
+   },
+   "top10_business_sites": [
+    "samara.i-tort.ru",
+    "tortoff.net",
+    "sbkk.ru",
+    "moydesert.ru",
+    "sweetlana63.ru",
+    "самара.о-пушка.рф"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "flowwow.com",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 2,
+     "domain": "m.avito.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 3,
+     "domain": "flowwow.com",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 4,
+     "domain": "samara.i-tort.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 5,
+     "domain": "tortoff.net",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 6,
+     "domain": "sbkk.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 7,
+     "domain": "moydesert.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 8,
+     "domain": "uslugi.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 9,
+     "domain": "sweetlana63.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 10,
+     "domain": "самара.о-пушка.рф",
+     "type": "сайт компании"
+    }
+   ]
+  },
+  {
+   "query": "корпусные десерты самара",
+   "exact": 661,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": 34,
+    "url": "https://vkusdostavka.shop/"
+   },
+   "top10_mix": {
+    "Яндекс": 4,
+    "2ГИС": 1,
+    "агрегатор": 3,
+    "медиа/соцсети": 1,
+    "сайт компании": 1
+   },
+   "top10_business_sites": [
+    "praha-cafe.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "flowwow.com",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 2,
+     "domain": "praha-cafe.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 3,
+     "domain": "m.avito.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 4,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 5,
+     "domain": "vk.ru",
+     "type": "медиа/соцсети"
+    },
+    {
+     "pos": 6,
+     "domain": "market-delivery.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 7,
+     "domain": "pragasamara.uds.app",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 8,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 9,
+     "domain": "market.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 10,
+     "domain": "eda.yandex.ru",
+     "type": "Яндекс"
+    }
+   ]
+  },
+  {
+   "query": "кондитерская самара",
+   "exact": 68,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": 15,
+    "url": "https://vkus-com.ru/"
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 2,
+    "2ГИС": 1,
+    "агрегатор": 3,
+    "сайт компании": 4
+   },
+   "top10_business_sites": [
+    "praha-cafe.ru",
+    "sbkk.ru",
+    "bon-matin.ru",
+    "butiktort.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 2,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 3,
+     "domain": "praha-cafe.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 4,
+     "domain": "eda.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 5,
+     "domain": "sbkk.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 6,
+     "domain": "bon-matin.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 7,
+     "domain": "flowwow.com",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 8,
+     "domain": "tripadvisor.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 9,
+     "domain": "butiktort.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 10,
+     "domain": "zoon.ru",
+     "type": "агрегатор"
+    }
+   ]
+  },
+  {
+   "query": "пироги на заказ самара",
+   "exact": 35,
+   "status": "ok",
+   "depth_checked": 49,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 1,
+    "2ГИС": 1,
+    "сайт компании": 8
+   },
+   "top10_business_sites": [
+    "kafe-fantaziya.ru",
+    "mashaspies.ru",
+    "vremya-pirogov-samara.ru",
+    "kulinar-63.ru",
+    "bistrobed.ru",
+    "stolle-samara.ru",
+    "osetin63pirog.ru",
+    "obed63.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "kafe-fantaziya.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 2,
+     "domain": "mashaspies.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 3,
+     "domain": "vremya-pirogov-samara.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 4,
+     "domain": "kulinar-63.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 5,
+     "domain": "bistrobed.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 6,
+     "domain": "stolle-samara.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 7,
+     "domain": "osetin63pirog.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 8,
+     "domain": "obed63.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 9,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 10,
+     "domain": "eda.yandex.ru",
+     "type": "Яндекс"
+    }
+   ]
+  },
+  {
+   "query": "завтраки в самаре",
+   "exact": 90,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": 25,
+    "url": "https://vkus-com.ru/"
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": 48,
+    "url": "https://vkusdostavka.shop/s/zavtraki_1"
+   },
+   "top10_mix": {
+    "Яндекс": 3,
+    "2ГИС": 1,
+    "агрегатор": 5,
+    "медиа/соцсети": 1
+   },
+   "top10_business_sites": [],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 2,
+     "domain": "eda.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 3,
+     "domain": "restaurantguru.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 4,
+     "domain": "tripadvisor.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 5,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 6,
+     "domain": "restoclub.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 7,
+     "domain": "afisha.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 8,
+     "domain": "openkitchen.eda.yandex",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 9,
+     "domain": "kakest.me",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 10,
+     "domain": "vk.ru",
+     "type": "медиа/соцсети"
+    }
+   ]
+  },
+  {
+   "query": "где позавтракать в самаре",
+   "exact": 60,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 3,
+    "2ГИС": 1,
+    "агрегатор": 6
+   },
+   "top10_business_sites": [],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 2,
+     "domain": "eda.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 3,
+     "domain": "tripadvisor.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 4,
+     "domain": "restaurantguru.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 5,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 6,
+     "domain": "afisha.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 7,
+     "domain": "restoclub.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 8,
+     "domain": "openkitchen.eda.yandex",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 9,
+     "domain": "kakest.me",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 10,
+     "domain": "zoon.ru",
+     "type": "агрегатор"
+    }
+   ]
+  },
+  {
+   "query": "бизнес ланч самара",
+   "exact": 112,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 1,
+    "2ГИС": 1,
+    "агрегатор": 6,
+    "сайт компании": 2
+   },
+   "top10_business_sites": [
+    "perchini.ru",
+    "samara.maximilians.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 2,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 3,
+     "domain": "restaurantguru.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 4,
+     "domain": "afisha.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 5,
+     "domain": "samara.lunch-park.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 6,
+     "domain": "zoon.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 7,
+     "domain": "perchini.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 8,
+     "domain": "restoclub.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 9,
+     "domain": "chibbis.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 10,
+     "domain": "samara.maximilians.ru",
+     "type": "сайт компании"
+    }
+   ]
+  },
+  {
+   "query": "кейтеринг самара",
+   "exact": 196,
+   "status": "ok",
+   "depth_checked": 47,
+   "vkus-com.ru": {
+    "pos": 37,
+    "url": "https://vkus-com.ru/"
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "агрегатор": 2,
+    "сайт компании": 8
+   },
+   "top10_business_sites": [
+    "ucatering.ru",
+    "furshet-samara.ru",
+    "picnic-catering.ru",
+    "probrunch-samara.ru",
+    "кейтеринг-самара.рф",
+    "shef63.ru",
+    "praha-cafe.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "ucatering.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 2,
+     "domain": "furshet-samara.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 3,
+     "domain": "picnic-catering.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 4,
+     "domain": "probrunch-samara.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 5,
+     "domain": "sam.caterme.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 6,
+     "domain": "кейтеринг-самара.рф",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 7,
+     "domain": "shef63.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 8,
+     "domain": "m.avito.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 9,
+     "domain": "probrunch-samara.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 10,
+     "domain": "praha-cafe.ru",
+     "type": "сайт компании"
+    }
+   ]
+  },
+  {
+   "query": "кейтеринг",
+   "exact": 506,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": 49,
+    "url": "https://vkus-com.ru/"
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 1,
+    "2ГИС": 1,
+    "агрегатор": 2,
+    "медиа/соцсети": 1,
+    "сайт компании": 5
+   },
+   "top10_business_sites": [
+    "ucatering.ru",
+    "furshet-samara.ru",
+    "picnic-catering.ru",
+    "кейтеринг-самара.рф",
+    "soulcatering.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "ucatering.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 2,
+     "domain": "sam.caterme.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 3,
+     "domain": "furshet-samara.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 4,
+     "domain": "picnic-catering.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 5,
+     "domain": "кейтеринг-самара.рф",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 6,
+     "domain": "m.avito.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 7,
+     "domain": "ru.m.wikipedia.org",
+     "type": "медиа/соцсети"
+    },
+    {
+     "pos": 8,
+     "domain": "uslugi.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 9,
+     "domain": "soulcatering.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 10,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    }
+   ]
+  },
+  {
+   "query": "кейтеринг самара заказать с доставкой",
+   "exact": 66,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": 34,
+    "url": "https://vkus-com.ru/"
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "агрегатор": 2,
+    "сайт компании": 8
+   },
+   "top10_business_sites": [
+    "praha-cafe.ru",
+    "ucatering.ru",
+    "furshet-samara.ru",
+    "probrunch-samara.ru",
+    "кейтеринг-самара.рф",
+    "gold.brusketta.pro",
+    "picnic-catering.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "praha-cafe.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 2,
+     "domain": "ucatering.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 3,
+     "domain": "furshet-samara.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 4,
+     "domain": "praha-cafe.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 5,
+     "domain": "probrunch-samara.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 6,
+     "domain": "кейтеринг-самара.рф",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 7,
+     "domain": "gold.brusketta.pro",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 8,
+     "domain": "picnic-catering.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 9,
+     "domain": "sam.caterme.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 10,
+     "domain": "taplink.cc",
+     "type": "агрегатор"
+    }
+   ]
+  },
+  {
+   "query": "фуршет самара",
+   "exact": 22,
+   "status": "ok",
+   "depth_checked": 49,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "агрегатор": 2,
+    "сайт компании": 8
+   },
+   "top10_business_sites": [
+    "ucatering.ru",
+    "praha-cafe.ru",
+    "furshet-samara.ru",
+    "probrunch-samara.ru",
+    "gold.brusketta.pro",
+    "кейтеринг-самара.рф",
+    "picnic-catering.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "ucatering.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 2,
+     "domain": "praha-cafe.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 3,
+     "domain": "furshet-samara.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 4,
+     "domain": "probrunch-samara.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 5,
+     "domain": "m.avito.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 6,
+     "domain": "gold.brusketta.pro",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 7,
+     "domain": "praha-cafe.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 8,
+     "domain": "кейтеринг-самара.рф",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 9,
+     "domain": "picnic-catering.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 10,
+     "domain": "sam.caterme.ru",
+     "type": "агрегатор"
+    }
+   ]
+  },
+  {
+   "query": "банкетный зал самара",
+   "exact": 118,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 2,
+    "2ГИС": 1,
+    "агрегатор": 4,
+    "сайт компании": 3
+   },
+   "top10_business_sites": [
+    "dvaperca.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "dvaperca.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 2,
+     "domain": "dvaperca.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 3,
+     "domain": "dvaperca.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 4,
+     "domain": "samara.gorko.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 5,
+     "domain": "samara.moybanket.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 6,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 7,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 8,
+     "domain": "banket.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 9,
+     "domain": "smr.wed-expert.com",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 10,
+     "domain": "eda.yandex.ru",
+     "type": "Яндекс"
+    }
+   ]
+  },
+  {
+   "query": "банкетные залы самара для свадьбы",
+   "exact": 53,
+   "status": "ok",
+   "depth_checked": 47,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 2,
+    "2ГИС": 1,
+    "агрегатор": 6,
+    "сайт компании": 1
+   },
+   "top10_business_sites": [
+    "dvaperca.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "dvaperca.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 2,
+     "domain": "samara.gorko.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 3,
+     "domain": "samara.moybanket.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 4,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 5,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 6,
+     "domain": "smr.wed-expert.com",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 7,
+     "domain": "samara.so-svoim.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 8,
+     "domain": "samara.arendazala.net",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 9,
+     "domain": "eda.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 10,
+     "domain": "samara.ugosti.com",
+     "type": "агрегатор"
+    }
+   ]
+  },
+  {
+   "query": "банкет самара",
+   "exact": 23,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": 43,
+    "url": "https://vkus-com.ru/"
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 1,
+    "2ГИС": 1,
+    "агрегатор": 4,
+    "сайт компании": 4
+   },
+   "top10_business_sites": [
+    "dvaperca.ru",
+    "fruktevent.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "dvaperca.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 2,
+     "domain": "dvaperca.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 3,
+     "domain": "dvaperca.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 4,
+     "domain": "samara.gorko.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 5,
+     "domain": "samara.moybanket.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 6,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 7,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 8,
+     "domain": "banket.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 9,
+     "domain": "smr.wed-expert.com",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 10,
+     "domain": "fruktevent.ru",
+     "type": "сайт компании"
+    }
+   ]
+  },
+  {
+   "query": "новогодний корпоратив в самаре",
+   "exact": 159,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 1,
+    "2ГИС": 1,
+    "агрегатор": 4,
+    "сайт компании": 4
+   },
+   "top10_business_sites": [
+    "samara.maximilians.ru",
+    "makhall.ru",
+    "mayak-samara.ru",
+    "banket.mushmula.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "samara.maximilians.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 2,
+     "domain": "samara.gorko.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 3,
+     "domain": "makhall.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 4,
+     "domain": "samara.goodnight.show",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 5,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 6,
+     "domain": "restoclub.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 7,
+     "domain": "mayak-samara.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 8,
+     "domain": "samara.korporativ-ng.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 9,
+     "domain": "banket.mushmula.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 10,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    }
+   ]
+  },
+  {
+   "query": "корпоратив самара",
+   "exact": 45,
+   "status": "ok",
+   "depth_checked": 50,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 1,
+    "2ГИС": 1,
+    "агрегатор": 6,
+    "сайт компании": 2
+   },
+   "top10_business_sites": [
+    "makhall.ru",
+    "banket.mushmula.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "samara.so-svoim.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 2,
+     "domain": "samara.gorko.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 3,
+     "domain": "makhall.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 4,
+     "domain": "samara.gorko.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 5,
+     "domain": "samara.goodnight.show",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 6,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 7,
+     "domain": "samara.goodnight.show",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 8,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 9,
+     "domain": "m.avito.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 10,
+     "domain": "banket.mushmula.ru",
+     "type": "сайт компании"
+    }
+   ]
+  },
+  {
+   "query": "где отметить день рождения в самаре",
+   "exact": 94,
+   "status": "ok",
+   "depth_checked": 49,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 1,
+    "2ГИС": 1,
+    "агрегатор": 7,
+    "медиа/соцсети": 1
+   },
+   "top10_business_sites": [],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "samara.birthday-place.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 2,
+     "domain": "samara.gorko.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 3,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 4,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 5,
+     "domain": "kp.ru",
+     "type": "медиа/соцсети"
+    },
+    {
+     "pos": 6,
+     "domain": "m.avito.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 7,
+     "domain": "restaurantguru.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 8,
+     "domain": "samara.moybanket.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 9,
+     "domain": "restoclub.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 10,
+     "domain": "zoon.ru",
+     "type": "агрегатор"
+    }
+   ]
+  },
+  {
+   "query": "поминальные обеды самара",
+   "exact": 21,
+   "status": "ok",
+   "depth_checked": 49,
+   "vkus-com.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusnayakompania.ru": {
+    "pos": null,
+    "url": null
+   },
+   "vkusdostavka.shop": {
+    "pos": null,
+    "url": null
+   },
+   "top10_mix": {
+    "Яндекс": 2,
+    "2ГИС": 1,
+    "агрегатор": 3,
+    "сайт компании": 4
+   },
+   "top10_business_sites": [
+    "kulinar-63.ru",
+    "makhall.ru",
+    "bistrobed.ru",
+    "obed63.ru"
+   ],
+   "top10": [
+    {
+     "pos": 1,
+     "domain": "2gis.ru",
+     "type": "2ГИС"
+    },
+    {
+     "pos": 2,
+     "domain": "yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 3,
+     "domain": "kulinar-63.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 4,
+     "domain": "makhall.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 5,
+     "domain": "m.avito.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 6,
+     "domain": "bistrobed.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 7,
+     "domain": "obed63.ru",
+     "type": "сайт компании"
+    },
+    {
+     "pos": 8,
+     "domain": "sam.caterme.ru",
+     "type": "агрегатор"
+    },
+    {
+     "pos": 9,
+     "domain": "uslugi.yandex.ru",
+     "type": "Яндекс"
+    },
+    {
+     "pos": 10,
+     "domain": "stolpamyati.ru",
+     "type": "агрегатор"
+    }
+   ]
+  }
+ ],
+ "pages": [
+  {
+   "path": "/",
+   "status": "есть",
+   "title": "Вкусная компания — кафе, ресторан и кондитерская в Самаре",
+   "h1": "Кафе, ресторан и кондитерская в Самаре (без изменений)",
+   "description": "Кафе на Садовой, ресторан на Советской Армии, торты на заказ за 48 часов, доставка по Самаре, кейтеринг и банкеты. Телефон +7 987 955-25-65.",
+   "keys": [
+    "вкусная компания самара",
+    "вкусная компания",
+    "ресторан вкусная компания в самаре",
+    "вкусная компания самара официальный сайт",
+    "кондитерская самара",
+    "кафе кондитерская самара"
+   ],
+   "notes": "Title и description оставить (это текущие значения из админки). Главная сейчас собирает все запросы, включая кейтеринг (34–49 место): нужны текстовые ссылки с главной на /catering/, /catalog/, /cakes/, /desserts/ с анкорами «кейтеринг в Самаре», «доставка еды», «торты на заказ», «корпусные десерты»."
+  },
+  {
+   "path": "/catalog/",
+   "status": "есть",
+   "title": "Доставка еды в Самаре — каталог и цены | Вкусная компания",
+   "h1": "Доставка еды по Самаре (сейчас «Доставка и самовывоз»)",
+   "description": "Завтраки, супы, горячее, паста, выпечка и торты «Вкусной компании» с доставкой по Самаре и Новокуйбышевску или самовывозом. Оплата онлайн на сайте.",
+   "keys": [
+    "доставка еды в самаре",
+    "доставка еды самара",
+    "доставка еды в самаре на дом",
+    "доставка готовой еды в самаре",
+    "заказать еду самара",
+    "заказать еду в самаре с доставкой",
+    "доставка обедов самара",
+    "готовые обеды с доставкой самара",
+    "доставка еды новокуйбышевск",
+    "доставка еды из ресторана самара"
+   ],
+   "notes": "Title оставить. В H1 нужен запрос: «Доставка еды по Самаре», «и самовывоз» перенести в подзаголовок. Под H1 — 2–3 предложения о зонах, минимальном заказе и бесплатной доставке от 7 000 ₽ в ближних зонах, со ссылкой на /docs/delivery/. Блок или H2 «Обед в офис» (раздел «Горячее» + «Супы» + «Салаты») для «доставка обедов». Нынешний description (137 знаков) короче нормы, предложен новый."
+  },
+  {
+   "path": "/catering/",
+   "status": "есть",
+   "title": "Кейтеринг и банкеты в Самаре — Вкусная компания",
+   "h1": "Кейтеринг и банкеты в Самаре (сейчас «Вы можете доверить нам свой праздник на 100 %»)",
+   "description": "Банкеты в наших залах до 140 гостей, фуршеты, кофе-брейки и доставка боксов по Самаре и области. Банкет от 3 500 ₽ на гостя. Оставьте заявку — перезвоним.",
+   "keys": [
+    "кейтеринг самара",
+    "кейтеринг",
+    "кейтеринг самара заказать с доставкой",
+    "кейтеринг самара заказать",
+    "услуги кейтеринга",
+    "выездное обслуживание",
+    "выездной банкет",
+    "кейтеринг на свадьбу",
+    "вкусная компания кейтеринг"
+   ],
+   "notes": "Title и description из админки оставить. H1 сейчас слоган без запроса: поставить «Кейтеринг и банкеты в Самаре», слоган оставить подзаголовком (поле hero_title в админке). В Яндексе по XML-срезу site: страница в индексе, но в живой выдаче по «кейтеринг самара» стоит главная (37), а не /catering/. Нужны внутренние ссылки на неё."
+  },
+  {
+   "path": "/catering/services/",
+   "status": "есть",
+   "title": "Кейтеринг в Самаре: форматы и цены — Вкусная компания",
+   "h1": "Форматы и цены кейтеринга (сейчас «Форматы и цены»)",
+   "description": "Доставка боксов от 1 250 ₽, фуршет, кофе-брейк, праздники и корпоративы в Самаре: что входит в каждый формат, сколько гостей и как заказать.",
+   "keys": [
+    "кейтеринг цена",
+    "кейтеринг на человека",
+    "кейтеринг в самаре цены и отзывы",
+    "фуршет бокс самара",
+    "бокс кейтеринг",
+    "кофе брейк",
+    "организация кофе брейка",
+    "кофе брейк заказать"
+   ],
+   "notes": "Description из админки оставить (140 знаков). В title добавить «в Самаре». Кофе-брейк не выносить на отдельную страницу: в Самаре по нему почти нет запросов (точная частота «кофе брейк самара» 0, «кофе брейк» 25 по всему региону)."
+  },
+  {
+   "path": "/catering/faq/",
+   "status": "есть",
+   "title": "Банкеты и кейтеринг: вопросы и ответы — Вкусная компания",
+   "h1": "Вопросы о кейтеринге и банкетах (сейчас «Вопросы и ответы»)",
+   "description": "Сколько стоит банкет на гостя, что входит в обслуживание, как забронировать дату и провести дегустацию: ответы менеджеров кейтеринга «Вкусной компании».",
+   "keys": [
+    "сколько стоит банкет",
+    "банкет цена",
+    "кейтеринг на человека",
+    "кейтеринг меню",
+    "меню на банкет"
+   ],
+   "notes": "Страница для длинных информационных вопросов, ключи с нулевой точной частотой здесь уместны как формулировки вопросов. Разметка FAQPage уже есть в коде (src/lib/catering-seo.ts), проверить её в Вебмастере."
+  },
+  {
+   "path": "/cakes/",
+   "status": "новая",
+   "title": "Торты на заказ в Самаре — Вкусная компания",
+   "h1": "Торты на заказ в Самаре",
+   "description": "Праздничные, детские и свадебные торты на заказ от кондитерской «Вкусная компания» в Самаре. Готовим за 48 часов, свадебный — за 5 дней. Есть торты в наличии.",
+   "keys": [
+    "торт на заказ самара",
+    "торт на заказ",
+    "заказать торт в самаре",
+    "заказать торт в самаре на день рождения",
+    "свадебные торты в самаре",
+    "свадебный торт",
+    "торт свадебный цена самара",
+    "купить торт в самаре",
+    "торты самара",
+    "где купить торт в самаре",
+    "торт детский",
+    "торт на заказ цена"
+   ],
+   "notes": "Блоки: «Праздничные» (13 тортов из раздела каталога), «Детские», «Свадебные» (H2 «Свадебные торты в Самаре»), «Торты в наличии — купить сегодня» (14 позиций), «Как заказать: срок, вес, начинки, цена». По каталогу праздничные торты от 3 500 ₽ за 1 кг, заказ за 48 часов; торты в наличии от 1 450 ₽. Выдача по «торт на заказ самара» — сайты кондитерских (sbkk.ru, tortelia.ru, tortoff.net) и flowwow/Авито: нужна страница с витриной работ, ценой от и сроком. Отдельные /cakes/wedding/ и /cakes/kids/ — когда будет 8–10 своих работ в каждой группе. Бенто — только если кондитерская их делает (в ассортименте нет), спрос высокий: «бенто торт самара» точная 126."
+  },
+  {
+   "path": "/desserts/",
+   "status": "новая",
+   "title": "Корпусные десерты и пирожные в Самаре — Вкусная компания",
+   "h1": "Корпусные десерты и пирожные",
+   "description": "Корпусные десерты, пирожные, эклеры, макаронс и трюфели из собственного цеха «Вкусной компании». Купить в кафе в Самаре или заказать доставку на дом.",
+   "keys": [
+    "корпусные десерты самара",
+    "корпусные десерты самара где купить",
+    "корпусные десерты самара купить",
+    "корпусные пирожные самара",
+    "десерты самара",
+    "корпусные десерты купить",
+    "конфеты ручной работы самара",
+    "эклеры самара",
+    "пирожные самара",
+    "макаронс купить"
+   ],
+   "notes": "Самый частотный запрос ядра: «корпусные десерты самара», точная 661. В топ-10 из сайтов кондитерских только praha-cafe.ru (2 место), остальное — Яндекс, 2ГИС, flowwow, Авито. Ассортимент подходит: по описаниям в каталоге «Клюква», «Мохито», «Манго-малина», «Облачко «Фисташка-малина»» — порционные муссовые десерты с велюром, то есть корпусные; слоёные медовые и «Молочная девочка» тоже. Цены в каталоге от 365 ₽. Это лучшая возможность в ядре. «Ручной работы» про трюфели писать, только если владелец подтвердит. Блок «Где купить»: обе точки с часами и ссылка в каталог (раздел «Пирожные», «Наборы»)."
+  },
+  {
+   "path": "/breakfasts/",
+   "status": "новая",
+   "title": "Завтраки в Самаре с 8:00 — Вкусная компания",
+   "h1": "Завтраки в Самаре",
+   "description": "Завтраки в Самаре: на Садовой с 8:00 по будням, на Советской Армии с 9:00 и весь день. Сырники, драники, блины, бриошь с лососем. Есть доставка завтраков.",
+   "keys": [
+    "завтраки в самаре",
+    "где позавтракать в самаре",
+    "лучшие завтраки в самаре",
+    "где вкусно позавтракать в самаре",
+    "вкусные завтраки в самаре",
+    "ранние завтраки в самаре",
+    "где можно позавтракать в самаре",
+    "бизнес завтрак самара",
+    "завтрак доставка самара"
+   ],
+   "notes": "Топ-10 целиком из каталогов и карт (Яндекс, Яндекс Еда, restaurantguru, tripadvisor, 2ГИС, restoclub, afisha, kakest.me): ни одного сайта кафе. Главная уже 25-я. Страница нужна, но основной трафик даст попадание в подборки restoclub/afisha/kakest и карточки на Картах. Меню завтраков — 13 блюд из раздела каталога «Завтраки», часы обеих точек."
+  },
+  {
+   "path": "/business-lunch/",
+   "status": "новая, при условии",
+   "title": "Бизнес-ланч на Советской Армии в Самаре — Вкусная компания",
+   "h1": "Бизнес-ланч на Советской Армии",
+   "description": "Бизнес-ланч в ресторане «Вкусная компания» на Советской Армии, 177 в Самаре: состав, цена и часы подачи. Обед в офис можно заказать с доставкой на сайте.",
+   "keys": [
+    "бизнес ланч самара",
+    "бизнес ланч самара рестораны",
+    "бизнес ланч",
+    "бизнес ланч самара доставка"
+   ],
+   "notes": "Делать, только если у ресторана есть постоянный ланч с ценой и часами. В текстах сайта он упомянут («бизнес-ланчи»), но цены и состава нигде нет. Спрос: «бизнес ланч самара» точная 112. Выдача — каталоги (lunch-park, restoclub, zoon) и сайты ресторанов (perchini.ru, maximilians.ru)."
+  },
+  {
+   "path": "/catering/banquet/",
+   "status": "новая",
+   "title": "Банкетный зал в Самаре — Вкусная компания",
+   "h1": "Банкетный зал в Самаре",
+   "description": "Банкеты в залах «Вкусной компании» в Самаре: свадьбы, юбилеи, выпускные и семейные праздники до 140 гостей. От 3 500 ₽ на гостя, торт с той же кухни.",
+   "keys": [
+    "банкетный зал самара",
+    "банкет самара",
+    "банкетные залы самара для свадьбы",
+    "кафе в самаре для свадьбы",
+    "рестораны в самаре для свадьбы",
+    "банкетный зал самара на 30 человек",
+    "банкетный зал самара на 20 человек",
+    "где отметить юбилей в самаре",
+    "аренда банкетного зала самара",
+    "кафе для банкета самара"
+   ],
+   "notes": "Отдельно от общей /catering/: по «банкетный зал самара» и «банкет самара» в топе залы (dvaperca.ru — три места) и каталоги (gorko, moybanket, so-svoim, wed-expert). Нужны фото каждого зала, вместимость, цена от, меню банкета (PDF «Банкетное меню» уже в индексе, его стоит перенести в HTML). Расхождение: в описании ресторана «зал на 100 гостей», в кейтеринге «до 140 гостей», уточнить у владельца. Блоки H2: «Свадьба», «Юбилей», «Выпускной», «Новый год». Плюс карточки на gorko.ru и moybanket.ru."
+  },
+  {
+   "path": "/catering/corporate/",
+   "status": "новая (срочно, сезон)",
+   "title": "Новогодний корпоратив в Самаре — Вкусная компания",
+   "h1": "Корпоративы и новогодние банкеты",
+   "description": "Новогодние корпоративы в Самаре: банкет в нашем зале или выездной фуршет в офис. Меню от 3 500 ₽ на гостя, работаем с юрлицами и ЭДО, документы сразу.",
+   "keys": [
+    "новогодний корпоратив в самаре",
+    "новогодний корпоратив 2027 самара",
+    "новогодние корпоративы 2026 самара",
+    "корпоратив самара",
+    "где отметить корпоратив в самаре",
+    "где отметить новогодний корпоратив в самаре",
+    "где провести корпоратив в самаре",
+    "новогодний корпоратив самара рестораны",
+    "корпоратив на новый год самара",
+    "ресторан для корпоратива самара"
+   ],
+   "notes": "Сезонный кластер: пик спроса в ноябре и декабре, страница должна быть в индексе к началу ноября. В текст — обе формы года («Новый год 2027», «декабрь 2026»), в title год не ставить, чтобы не переписывать каждый год. Цена «от 3 500 ₽ на гостя» — из формата «Корпоративные мероприятия» в админке."
+  },
+  {
+   "path": "/catering/buffet/",
+   "status": "новая",
+   "title": "Фуршет в Самаре с доставкой — Вкусная компания",
+   "h1": "Фуршет в Самаре",
+   "description": "Фуршет в Самаре под ключ: закуски, канапе, сервировка, персонал и уборка. Фуршет-боксы с доставкой от 1 250 ₽, выездной фуршет — от 50 000 ₽ за заказ.",
+   "keys": [
+    "фуршет самара",
+    "фуршет",
+    "фуршет самара доставка",
+    "фуршет бокс самара",
+    "фуршет на заказ",
+    "заказать фуршет",
+    "канапе для фуршета заказать"
+   ],
+   "notes": "Выдача по «фуршет самара» — сайты кейтеринга (ucatering, praha-cafe, furshet-samara, probrunch), агрегаторов мало: отдельная посадочная реальна. Сейчас фуршет — якорь на /catering/services/. Цены — из форматов «Фуршет» и «Доставка боксов» в админке."
+  },
+  {
+   "path": "/catering/birthday/",
+   "status": "новая",
+   "title": "День рождения в ресторане в Самаре — Вкусная компания",
+   "h1": "День рождения в ресторане",
+   "description": "Где отметить день рождения в Самаре: банкет в ресторане на Советской Армии или в кафе на Садовой, детские сеты, торт на заказ с нашей кухни за 48 часов.",
+   "keys": [
+    "где отметить день рождения в самаре",
+    "где отметить день рождения в самаре взрослому",
+    "кафе в самаре для день рождения",
+    "отметить день рождения в самаре взрослому",
+    "где можно отметить день рождения в самаре",
+    "где отметить день рождения ребенка самара",
+    "отметить детский день рождения в самаре"
+   ],
+   "notes": "Топ-10 — только каталоги площадок (birthday-place, gorko, moybanket, restoclub, zoon, kp.ru), сайтов ресторанов нет. Страница нужна для связки «зал + торт», но быстрый трафик даст карточка на samara.birthday-place.ru и gorko.ru. Детские запросы — вторичные, площадки с аниматорами сильнее."
+  },
+  {
+   "path": "/catering/memorial/",
+   "status": "новая, только после подтверждения владельцем",
+   "title": "Поминальные обеды в Самаре — Вкусная компания",
+   "h1": "Поминальные обеды",
+   "description": "Поминальные обеды в Самаре в зале ресторана «Вкусная компания» на Советской Армии, 177: меню на гостя, выпечка с нашей кухни, спокойное тактичное обслуживание.",
+   "keys": [
+    "поминальные обеды самара",
+    "поминки в самаре кафе",
+    "поминальные кафе самара",
+    "поминки в самаре",
+    "поминальный обед меню"
+   ],
+   "notes": "Уместно ли: спрос есть («поминальные обеды самара» точная 21, вместе с хвостами около 50 в месяц), в топ-10 четыре сайта кафе и столовых (kulinar-63, makhall, bistrobed, obed63), то есть ресторан с залом и своей выпечкой туда проходит. Но на сайте и в админке такой услуги нет. Делать только если владелец её даёт; на главную и в меню не выносить, ссылка из /catering/banquet/ и /catering/faq/; тон нейтральный, без «праздничной» лексики и фото с застолий."
+  },
+  {
+   "path": "/sadovaya/",
+   "status": "новая",
+   "title": "Кафе-кондитерская на Садовой, 212Б — Вкусная компания",
+   "h1": "Кафе-кондитерская на Садовой, 212Б",
+   "description": "Кафе-кондитерская «Вкусная компания» на Садовой, 212Б в Самаре: завтраки с 8:00, супы и паста, витрина тортов и пирожных. Меню, фото зала, часы и отзывы.",
+   "keys": [
+    "вкусная компания садовая ул 212б",
+    "вкусная компания садовая ул 212б фото",
+    "вкусная компания садовая ул 212б меню",
+    "вкусная компания садовая ул 212б отзывы",
+    "вкусная компания самара садовая",
+    "кафе на садовой"
+   ],
+   "notes": "Запросы приходят из подсказок Яндекс Карт (адрес + фото/меню/отзывы): страница с галереей точки (она уже есть в админке), меню, часами, телефоном +7 987 955-25-65, кнопкой маршрута и ссылкой на отзывы в Картах."
+  },
+  {
+   "path": "/sovetskoy-armii/",
+   "status": "новая",
+   "title": "Ресторан на Советской Армии, 177 — Вкусная компания",
+   "h1": "Ресторан на Советской Армии, 177",
+   "description": "Ресторан «Вкусная компания» на Советской Армии, 177 в Самаре: зал на 100 гостей, кухня до 22:30, завтраки весь день, банкеты. Меню, фото, отзывы и маршрут.",
+   "keys": [
+    "вкусная компания самара советская армия",
+    "вкусная компания ул советской армии 177 отзывы",
+    "вкусная компания ул советской армии 177 фото",
+    "вкусная компания ул советской армии 177",
+    "вкусная компания ул советской армии 177 меню",
+    "кафе на советской армии в самаре",
+    "ресторан на советской армии самара"
+   ],
+   "notes": "«вкусная компания самара советская армия» — точная 80, второй брендовый запрос после «вкусная компания самара». Телефон точки +7 937 999-66-33. На той же улице кондитерская «Прага» (praha-cafe.ru) — в тексте и title обязательно бренд."
+  },
+  {
+   "path": "/menu/",
+   "status": "новая",
+   "title": "Меню кафе и ресторана в Самаре — Вкусная компания",
+   "h1": "Меню «Вкусной компании»",
+   "description": "Меню кафе на Садовой, ресторана на Советской Армии и кондитерской «Вкусная компания» в Самаре: завтраки, горячее, десерты и торты с ценами. Доставка на сайте.",
+   "keys": [
+    "вкусная компания самара меню",
+    "вкусная компания меню",
+    "вкусная компания садовая ул 212б меню",
+    "вкусная компания самара советская армия меню"
+   ],
+   "notes": "По «вкусная компания самара меню» первым стоит старый магазин vkusdostavka.shop, новый сайт второй. Меню сейчас только в PDF: Яндекс индексирует PDF, в том числе файл с заголовком «Menu restaurant (sample)». Это похоже на заглушку, её надо заменить или закрыть от индексации. HTML-меню (можно собрать из каталога и PDF) заберёт эти запросы."
+  }
+ ]
+}

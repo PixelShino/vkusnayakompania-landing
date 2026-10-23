@@ -18,7 +18,7 @@
 import { menusFor } from '../lib/select';
 import Icon from './Icon.astro';
 import { typo, type Content, type Direction } from '../lib/content';
-import { orderLinkFor } from '../lib/nav.ts';
+import { CATERING, LANDINGS, orderLinkFor } from '../lib/nav.ts';
 
 interface Props {
   content: Content;
@@ -80,6 +80,17 @@ const label = (menu: (typeof menus)[number], alone: boolean) =>
         Заказать доставку
       </a>
     </div>
+    {/* text anchors of the SEO core pages (24.10.2026): the menu online, breakfasts,
+        cakes, desserts, catering — the words search engines are asked with
+        текстовые анкоры страниц семантического ядра (24.10.2026): меню онлайн,
+        завтраки, торты, десерты, кейтеринг — слова, которыми спрашивают поиск */}
+    <p class="mn__links">
+      <a href={LANDINGS.menu.href}>Меню с ценами онлайн</a>
+      <a href={LANDINGS.breakfasts.href}>Завтраки в Самаре</a>
+      <a href={LANDINGS.cakes.href}>Торты на заказ</a>
+      <a href={LANDINGS.desserts.href}>Корпусные десерты</a>
+      <a href={CATERING}>Кейтеринг в Самаре</a>
+    </p>
   </div>
 
   <div class="mn__sheet">
@@ -120,6 +131,32 @@ const label = (menu: (typeof menus)[number], alone: boolean) =>
 </section>
 
 <style>
+  /* text links under the button: small, underlined, wrap in a row
+     текстовые ссылки под кнопкой: мелкие, подчёркнутые, в строку с переносом */
+  .mn__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: 14px 0 0;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  /* the side is olive with cream text: the links are cream too, a shade quieter
+     боковина оливковая с кремовым текстом: ссылки тоже кремовые, чуть тише */
+  .mn__links a {
+    color: var(--bg);
+    opacity: 0.82;
+    text-decoration: underline;
+    text-decoration-color: rgb(255 250 237 / 0.45);
+    text-underline-offset: 3px;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .mn__links a:hover {
+      opacity: 1;
+      text-decoration-color: currentColor;
+    }
+  }
+
   /* Two halves edge to edge. `--edge` is the distance from the section's edge
      to the page container: each half pads by it so the copy sits on the grid.
      `cqw` — the section is the container, so the unit is its own width and not

@@ -36,7 +36,11 @@ export const navFor = (content: Content, base = '') => [
   // кейтеринг и банкеты живут на этом сайте: страница и две вложенные
   { label: 'Кейтеринг', href: CATERING },
   { label: 'О нас', href: `${base}#about` },
-  { label: 'Меню', href: `${base}#menu` },
+  // the menu is a page of its own since 24.10.2026 (the SEO core); the home
+  // section with the PDF menus stays reachable by scroll
+  // с 24.10.2026 меню — своя страница (семантическое ядро); секция главной с
+  // PDF-меню остаётся, до неё доходят прокруткой
+  { label: 'Меню', href: LANDINGS.menu.href },
   { label: 'Контакты', href: `${base}#contacts` },
 ];
 
@@ -73,4 +77,40 @@ export const footerGroupsFor = ({ settings }: Content) => ({
     { label: 'Telegram', href: settings.telegram },
     { label: 'Max', href: settings.max },
   ]),
+});
+
+/**
+ * Landing pages of the SEO core (23.10.2026, `docs/seo-core-2026-10-23.md`):
+ * the footer's second column and the anchors other pages link with. Static
+ * routes, so the list is kept by hand next to the pages; the venue pages are
+ * drawn only for venues the content has.
+ * Посадочные страницы семантического ядра (23.10.2026,
+ * `docs/seo-core-2026-10-23.md`): вторая колонка подвала и анкоры, которыми
+ * ссылаются остальные страницы. Маршруты статические, поэтому список ведётся
+ * вручную рядом со страницами; страницы точек рисуются только для точек,
+ * которые есть в контенте.
+ */
+export const LANDINGS = {
+  cakes: { label: 'Торты на заказ', href: `${BASE}cakes/` },
+  desserts: { label: 'Корпусные десерты и пирожные', href: `${BASE}desserts/` },
+  breakfasts: { label: 'Завтраки', href: `${BASE}breakfasts/` },
+  menu: { label: 'Меню', href: `${BASE}menu/` },
+  sadovaya: { label: 'Кафе на Садовой, 212Б', href: `${BASE}sadovaya/` },
+  sovetskoyArmii: { label: 'Ресторан на Советской Армии, 177', href: `${BASE}sovetskoy-armii/` },
+  corporate: { label: 'Корпоративы', href: `${CATERING}corporate/` },
+  banquet: { label: 'Банкетный зал', href: `${CATERING}banquet/` },
+  buffet: { label: 'Фуршет', href: `${CATERING}buffet/` },
+  birthday: { label: 'День рождения', href: `${CATERING}birthday/` },
+} as const;
+
+/** Подвал: «Кафе и меню» и «Праздники» — посадочные по кластерам ядра. */
+export const landingGroupsFor = ({ places }: Content) => ({
+  food: filled([
+    LANDINGS.breakfasts,
+    LANDINGS.cakes,
+    LANDINGS.desserts,
+    ...(places.some((p) => p.n === '1') ? [LANDINGS.sadovaya] : []),
+    ...(places.some((p) => p.n === '2') ? [LANDINGS.sovetskoyArmii] : []),
+  ]),
+  events: filled([LANDINGS.corporate, LANDINGS.banquet, LANDINGS.buffet, LANDINGS.birthday]),
 });
