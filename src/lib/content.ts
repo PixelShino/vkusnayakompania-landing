@@ -135,6 +135,8 @@ export type Settings = {
   yandex_reviews?: number;
   yandex_highlights: { label: string; percent: number }[];
   metrika_id?: string;
+  // Yandex Webmaster ownership code for <meta name="yandex-verification"> / код подтверждения Яндекс Вебмастера
+  yandex_verification?: string | null;
 };
 
 export type Home = {

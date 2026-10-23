@@ -230,14 +230,25 @@ const jsonLd = {
     <meta name="generator" content={Astro.generator} />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />
 
+    {/* Yandex Webmaster: the site's ownership code from the admin («Код Яндекс Вебмастера»)
+        Яндекс Вебмастер: код подтверждения сайта из админки */}
+    {settings.yandex_verification && <meta name="yandex-verification" content={settings.yandex_verification} />}
+    {/* Yandex Metrika as the owner set it up (23.10.2026): session replay, click map,
+        link tracking, e-commerce through `dataLayer`; the number comes from the admin
+        Яндекс Метрика в настройке владельца (23.10.2026): вебвизор, карта кликов,
+        внешние ссылки, электронная торговля через `dataLayer`; номер — из админки */}
     {
       settings.metrika_id && (
-        <script is:inline define:vars={{ metrikaId: settings.metrika_id }}>
-          {`(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-          m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
-          (window,document,'script','https://mc.yandex.ru/metrika/tag.js','ym');
-          ym(Number(metrikaId),'init',{clickmap:true,trackLinks:true,accurateTrackBounce:true});`}
-        </script>
+        <>
+          <script is:inline define:vars={{ metrikaId: settings.metrika_id }}>
+            {`(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return;}}
+            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+            (window,document,'script','https://mc.yandex.ru/metrika/tag.js?id='+metrikaId,'ym');
+            ym(Number(metrikaId),'init',{ssr:true,webvisor:true,clickmap:true,ecommerce:'dataLayer',referrer:document.referrer,url:location.href,accurateTrackBounce:true,trackLinks:true});`}
+          </script>
+          <noscript><div><img src={`https://mc.yandex.ru/watch/${settings.metrika_id}`} style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+        </>
       )
     }
     {/* page-specific head: the catalog adds its ItemList of dishes
