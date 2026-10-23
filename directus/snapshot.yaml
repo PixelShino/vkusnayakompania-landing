@@ -12664,7 +12664,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 31
+      sort: 35
       special: null
       translations:
         - language: ru-RU
@@ -12706,7 +12706,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 29
+      sort: 33
       special: null
       translations:
         - language: ru-RU
@@ -12748,7 +12748,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 30
+      sort: 34
       special: null
       translations:
         - language: ru-RU
@@ -12790,7 +12790,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 32
+      sort: 36
       special:
         - date-updated
       translations: null
@@ -12881,7 +12881,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 27
+      sort: 29
       special: null
       translations:
         - language: ru-RU
@@ -12923,7 +12923,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 28
+      sort: 32
       special: null
       translations:
         - language: ru-RU
@@ -12967,7 +12967,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 29
+      sort: 33
       special: null
       translations:
         - language: ru-RU
@@ -13009,7 +13009,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 30
+      sort: 34
       special: null
       translations:
         - language: ru-RU
@@ -13054,7 +13054,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 46
+      sort: 50
       special: null
       translations:
         - language: ru-RU
@@ -13405,7 +13405,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 28
+      sort: 30
       special:
         - cast-json
       translations: null
@@ -13737,6 +13737,90 @@ fields:
       data_type: character varying
       default_value: null
       max_length: 20
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: status_log
+    type: text
+    meta:
+      collection: orders
+      conditions: null
+      display: null
+      display_options: null
+      field: status_log
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: 'Кто и когда менял статус: из админки или кнопкой в Telegram'
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 28
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Журнал статусов
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: status_log
+      table: orders
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: telegram_meta
+    type: json
+    meta:
+      collection: orders
+      conditions: null
+      display: null
+      display_options: null
+      field: telegram_meta
+      group: null
+      hidden: true
+      interface: input-code
+      note: null
+      options:
+        language: JSON
+      readonly: true
+      required: false
+      searchable: true
+      sort: 31
+      special:
+        - cast-json
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: telegram_meta
+      table: orders
+      data_type: json
+      default_value: null
+      max_length: null
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
