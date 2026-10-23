@@ -1,0 +1,101 @@
+---
+/**
+ * Where to hold it: the two halls side by side, each with its own frame, the
+ * address in caps antiqua, the kind, the phone and the hours, a route button
+ * and the card on Yandex Maps. The overview's «Приезжайте к нам» with the
+ * photo the guest needs to choose a room; no capacity per hall — the admin
+ * gives none.
+ * Где провести: два зала рядом, у каждого свой кадр, адрес прописной
+ * антиквой, тип, телефон и часы, кнопка маршрута и карточка на Яндекс Картах.
+ * «Приезжайте к нам» обзора с фото, по которому гость выбирает зал;
+ * вместимости по залам нет — админка её не даёт.
+ */
+import Photo from '../../Photo.astro';
+import Icon from '../../Icon.astro';
+import { hoursRows, yandexOrgUrl, yandexRouteUrl } from '../../../data/site.ts';
+import { typo, type Place, type Shot } from '../../../lib/content.ts';
+
+interface Props {
+  title: string;
+  lead?: string;
+  halls: { place: Place; shot?: Shot }[];
+}
+
+const { title, lead, halls } = Astro.props;
+---
+
+{
+  halls.length > 0 && (
+    <section class="cg-sec lp-halls" id="halls" aria-labelledby="halls-title">
+      <div class="container">
+        <div class="head" data-reveal>
+          <span class="mark" aria-hidden="true" />
+          <h2 class="display-caps" id="halls-title">
+            {typo(title)}
+          </h2>
+          {lead && <p class="lead">{typo(lead)}</p>}
+        </div>
+        <div class="visit lp-halls__row">
+          {halls.map(({ place, shot }, i) => (
+            <article class="visit__place lp-hall" data-reveal>
+              <div class="lp-hall__frame">
+                {shot && !shot.image.placeholder ? (
+                  <Photo
+                    photo={shot.image}
+                    ratio="4 / 3"
+                    radius="var(--r-sq)"
+                    sizes="(min-width: 1200px) 612px, (min-width: 768px) 46vw, 100vw"
+                    class="lp-hall__photo"
+                  />
+                ) : (
+                  <div class:list={['stub', 'lp-hall__stub', i % 2 === 0 && 'stub--ink']}>
+                    <span class="stub__title">{place.name}</span>
+                    <span class="stub__meta">фото скоро появится</span>
+                  </div>
+                )}
+              </div>
+              <h3 class="visit__name display display-caps">{place.name}</h3>
+              <p class="visit__kind">{place.kind}</p>
+              <dl class="visit__facts">
+                <div>
+                  <dt class="label">
+                    <Icon name="phone" />
+                    Телефон
+                  </dt>
+                  <dd>
+                    <a class="visit__tel display tnum" href={place.phoneHref}>
+                      {place.phone}
+                    </a>
+                  </dd>
+                </div>
+                <div>
+                  <dt class="label">
+                    <Icon name="clock" />
+                    Часы
+                  </dt>
+                  <dd>
+                    {hoursRows(place.schedule).map((row) => (
+                      <span class="visit__hours">
+                        <span>{row.days}</span>
+                        <span class="tnum">{row.hours}</span>
+                      </span>
+                    ))}
+                  </dd>
+                </div>
+              </dl>
+              <div class="visit__actions">
+                <a class="btn btn--secondary btn--md" href={yandexRouteUrl(place)} target="_blank" rel="noopener">
+                  <Icon name="pin" />
+                  Построить маршрут
+                </a>
+                <a class="tlink tlink--go tlink--out" href={yandexOrgUrl(place.yandex_org)} target="_blank" rel="noopener">
+                  <span>На Яндекс Картах</span>
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}

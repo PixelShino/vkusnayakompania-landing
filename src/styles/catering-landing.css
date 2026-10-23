@@ -1,0 +1,141 @@
+/* Catering landing pages: /catering/corporate/, /catering/banquet/,
+   /catering/buffet/, /catering/birthday/. They speak the section's sheet
+   (`catering.css`: the first screen, the ink strip of figures, the price-list
+   rows, the steps, the rail, the form, the accordion); this file only adds
+   what a landing has and the overview does not — the season line, the halls
+   with their frames and the ledger of links to the rest of the section.
+   Посадочные страницы кейтеринга: /catering/corporate/, /catering/banquet/,
+   /catering/buffet/, /catering/birthday/. Они говорят языком раздела
+   (`catering.css`: первый экран, чернильная полоса цифр, строки прейскуранта,
+   шаги, лента, форма, аккордеон); этот файл добавляет только то, что есть у
+   посадочной и нет у обзора, — сезонную строку, залы с кадрами и реестр
+   ссылок на остальной раздел. */
+
+/* ── первый экран ─────────────────────────────────────────────────────────── */
+
+/* the H1 carries the search phrase and runs longer than the overview's slogan:
+   a little narrower, so caps antiqua breaks into two even lines, not 3 + 1
+   H1 несёт запрос и длиннее слогана обзора: чуть уже, чтобы прописная антиква
+   ломалась на две ровные строки, а не 3 + 1 */
+.lp-hero__title {
+  max-width: 17ch;
+}
+
+.lp-hero__lead {
+  max-width: 50ch;
+}
+
+/* the season is a signal, not a sticker: one line in terracotta under the
+   lead, the calendar beside it
+   сезон — сигнал, а не наклейка: одна строка терракотой под вводом, рядом
+   календарь */
+.lp-season {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 16px;
+  max-width: 46ch;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--terracotta-text);
+  text-wrap: pretty;
+}
+
+.lp-season .ico {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  color: var(--terracotta);
+}
+
+/* ── лента фото ───────────────────────────────────────────────────────────── */
+
+/* on the overview the rail follows a paper section and borrows its bottom
+   padding; here it follows the ink steps and needs its own
+   на обзоре лента идёт за бумажной секцией и пользуется её нижним отступом;
+   здесь она идёт за чернильными шагами, и отступ нужен свой */
+.lp .cg-steps + .cg-gallery {
+  padding-top: var(--sec-pad);
+}
+
+/* ── залы ─────────────────────────────────────────────────────────────────── */
+
+.lp-hall__frame {
+  margin-bottom: 18px;
+}
+
+.lp-hall__stub {
+  aspect-ratio: 4 / 3;
+}
+
+/* the frame is the hall: on a phone it runs to both screen edges like the
+   first screen's photo
+   кадр и есть зал: на телефоне он до обоих краёв экрана, как фото первого
+   экрана */
+@media (max-width: 767px) {
+  .lp-hall__frame {
+    margin-inline: calc(var(--pad) * -1);
+  }
+
+  .lp-hall__frame .media {
+    --radius: 0;
+  }
+
+  .lp-hall__stub {
+    border-radius: 0;
+  }
+
+  /* the frame opens the hall: the hairline above it would cut the photo off
+     its address
+     кадр открывает зал: волосяная линия над ним отрезала бы фото от адреса */
+  .lp-halls .visit__place {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .lp-halls .visit__place + .visit__place {
+    margin-top: 12px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .lp-hall__frame .media img {
+    transition: scale 0.6s var(--ease-out);
+  }
+
+  .lp-hall:hover .lp-hall__frame .media img {
+    scale: 1.02;
+  }
+}
+
+/* ── ещё о праздниках ─────────────────────────────────────────────────────── */
+
+.lp-related__in {
+  max-width: calc(980px + var(--pad) * 2);
+}
+
+/* two columns from a tablet on: seven links set in three columns left the
+   last one alone in its row; the bottom hairline closes the last row only
+   две колонки с планшета: семь ссылок в три колонки оставляли последнюю
+   одну в ряду; нижняя волосяная линия закрывает только последний ряд */
+@media (min-width: 768px) {
+  .lp-related__list ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 40px;
+  }
+
+  .lp-related__list li:nth-last-child(-n + 3) {
+    border-bottom: 0;
+  }
+
+  .lp-related__list li:last-child,
+  .lp-related__list li:nth-last-child(2):nth-child(odd) {
+    border-bottom: 1px solid var(--line-4);
+  }
+
+  .lp-related__list li:nth-child(odd):last-child {
+    grid-column: 1 / -1;
+  }
+}

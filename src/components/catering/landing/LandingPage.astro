@@ -1,0 +1,253 @@
+---
+/**
+ * A catering landing page for one cluster of the semantic core (the record in
+ * `src/data/landings-catering.ts`): the first screen with the H1 and a lead
+ * that answers at once, the ink strip of figures, the page's formats as the
+ * price-list rows, the halls, the four steps, the photos, the request form
+ * with the page's format picked, its questions and the links to the rest of
+ * the section. Every figure and every answer comes from the admin
+ * («Кейтеринг и банкеты»); without the section in the admin the page builds
+ * and stays out of search, like the overview.
+ * Посадочная страница кейтеринга под один кластер семантического ядра
+ * (запись в `src/data/landings-catering.ts`): первый экран с H1 и вводом,
+ * который сразу отвечает, чернильная полоса цифр, форматы страницы строками
+ * прейскуранта, залы, четыре шага, фото, форма заявки с выбранным форматом
+ * страницы, её вопросы и ссылки на остальной раздел. Каждая цифра и каждый
+ * ответ — из админки («Кейтеринг и банкеты»); без раздела в админке страница
+ * собирается и не идёт в поиск, как обзор.
+ */
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../Header.astro';
+import Footer from '../../Footer.astro';
+import FormatRows from '../FormatRows.astro';
+import Steps from '../Steps.astro';
+import PhotoRail from '../PhotoRail.astro';
+import RequestSection from '../RequestSection.astro';
+import QuestionList from '../QuestionList.astro';
+import LandingTop from './LandingTop.astro';
+import LandingHero from './LandingHero.astro';
+import Halls from './Halls.astro';
+import Related from './Related.astro';
+import { BASE } from '../../../lib/base.ts';
+import { CATERING } from '../../../lib/nav.ts';
+import { getContent, typo } from '../../../lib/content.ts';
+import { priceLine } from '../../../lib/catering.ts';
+import { cateringJsonLd } from '../../../lib/catering-seo.ts';
+import { breadcrumbId, type PageSchema } from '../../../lib/seo.ts';
+import { shareImage } from '../../../lib/share-image.ts';
+import { plural } from '../../../data/site.ts';
+import {
+  LANDINGS,
+  landingBySlug,
+  landingDescription,
+  landingFacts,
+  landingFormats,
+  landingLead,
+  landingPath,
+  landingPick,
+  landingQuestions,
+  landingSeason,
+  landingShots,
+  unproven,
+  type LandingSlug,
+} from '../../../data/landings-catering.ts';
+import '../../../styles/catering.css';
+import '../../../styles/catering-landing.css';
+
+interface Props {
+  slug: LandingSlug;
+}
+
+const landing = landingBySlug(Astro.props.slug);
+const content = await getContent();
+const { catering } = content;
+
+const formats = landingFormats(landing, content);
+const pick = landingPick(landing, content);
+const questions = landingQuestions(landing, content);
+const facts = landingFacts(landing, content);
+const shots = landingShots(landing, content);
+const description = landingDescription(landing, content);
+const lead = landingLead(landing, content);
+const season = landingSeason(landing, content.today);
+
+// a claim of the texts the admin no longer backs: the build says so
+// утверждение текстов, которое админка больше не подтверждает: сборка об этом говорит
+const missing = unproven(landing, content);
+if (missing.length) {
+  console.warn(
+    `[catering/${landing.slug}] в данных кейтеринга больше нет: ${missing.join(', ')} — проверьте тексты в src/data/landings-catering.ts`,
+  );
+}
+
+const site = Astro.site ?? new URL('https://vkus-com.ru');
+const path = landingPath(landing);
+const url = new URL(path, site).href;
+const heroUrl = await shareImage(shots.hero, site);
+const jsonLd = cateringJsonLd(content, site, 'landing', heroUrl, {
+  path,
+  crumb: landing.crumb,
+  service: landing.service,
+  description,
+  formats,
+  questions,
+  faqName: landing.faqTitle,
+});
+// the layout builds the page node: it points at this page's crumbs and service
+// узел страницы строит раскладка: он ссылается на крошки и услугу этой страницы
+const schema: PageSchema = {
+  fields: {
+    breadcrumb: { '@id': breadcrumbId(url) },
+    ...(formats.length > 0 && { about: { '@id': `${url}#service` } }),
+  },
+};
+
+const others = LANDINGS.filter((item) => item.slug !== landing.slug);
+const priceOf = (slug: LandingSlug) => {
+  const main = landingPick(landingBySlug(slug), content);
+  return main ? priceLine(main) : undefined;
+};
+const links = [
+  ...others.map((item) => ({ href: landingPath(item), name: item.h1, note: priceOf(item.slug) })),
+  { href: CATERING, name: 'Кейтеринг и банкеты', note: 'обзор раздела' },
+  {
+    href: `${CATERING}services/`,
+    name: 'Все форматы и цены',
+    note: catering.formats.length
+      ? `${catering.formats.length} ${plural(catering.formats.length, 'формат', 'формата', 'форматов')}`
+      : undefined,
+  },
+  {
+    href: `${CATERING}faq/`,
+    name: 'Вопросы и ответы',
+    note: catering.questions.length
+      ? `${catering.questions.length} ${plural(catering.questions.length, 'ответ', 'ответа', 'ответов')}`
+      : undefined,
+  },
+  { href: `${BASE}cakes/`, name: 'Торты на заказ', note: 'с той же кухни' },
+];
+---
+
+<BaseLayout
+  content={content}
+  title={landing.title}
+  description={description}
+  noindex={!catering.ready || formats.length === 0}
+  landing={false}
+  ogImage={shots.hero ?? catering.page?.heroImage}
+  stickyAction={{ label: 'Оставить заявку', href: '#request' }}
+  schema={schema}
+  keywords={landing.keywords.map((k) => k.phrase)}
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} is:inline />
+  <Header content={content} over={false} />
+
+  <main id="main" class:list={['cg', 'lp', `lp--${landing.slug}`]} tabindex="-1">
+    <LandingTop crumb={landing.crumb} />
+
+    <LandingHero
+      content={content}
+      h1={landing.h1}
+      lead={lead}
+      season={season}
+      photo={shots.hero}
+      pick={pick?.id}
+      stub={landing.crumb}
+    />
+
+    {
+      facts.length > 0 && (
+        <section class="strip-ink cg-facts" aria-label="Коротко в цифрах">
+          <ul class="container cg-facts__row" role="list">
+            {facts.map((fact) => (
+              <li class="cg-fact">
+                <span class="cg-fact__value display tnum">{fact.value}</span>
+                <span class="cg-fact__label">{fact.label}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      formats.length > 0 && (
+        <section class="cg-sec strip-paper cg-formats" id="formats" aria-labelledby="formats-title">
+          <div class="container">
+            <div class="head" data-reveal>
+              <span class="mark" aria-hidden="true" />
+              <h2 class="display-caps" id="formats-title">
+                {typo(landing.formatsTitle)}
+              </h2>
+              <p class="lead">{typo(landing.formatsLead)}</p>
+            </div>
+            <FormatRows formats={formats} />
+            <p class="cg-formats__more">
+              <a class="tlink tlink--go" href={`${CATERING}services/`}>
+                <span>Все форматы и цены</span>
+              </a>
+            </p>
+          </div>
+        </section>
+      )
+    }
+
+    {landing.halls && <Halls title={landing.halls.title} lead={landing.halls.lead} halls={shots.halls} />}
+
+    <Steps content={content} />
+    <PhotoRail shots={shots.rail} title={landing.photosTitle} />
+    <RequestSection content={content} />
+
+    {
+      questions.length > 0 && (
+        <section class="cg-sec cg-faq" id="faq" aria-labelledby="faq-title">
+          <div class="container cg-faq__in">
+            <div class="head" data-reveal>
+              <span class="mark" aria-hidden="true" />
+              <h2 class="display-caps" id="faq-title">
+                {landing.faqTitle}
+              </h2>
+            </div>
+            <QuestionList questions={questions} />
+            {catering.questions.length > questions.length && (
+              <p class="cg-faq__more">
+                <a class="btn btn--secondary btn--md" href={`${CATERING}faq/`}>
+                  Все вопросы — {catering.questions.length}
+                </a>
+              </p>
+            )}
+          </div>
+        </section>
+      )
+    }
+
+    <Related links={links} />
+  </main>
+
+  <Footer content={content} base={BASE} />
+
+  <script>
+    import '../../../scripts/catering';
+  </script>
+  {
+    /* the form picks the page's format by itself unless the guest already chose
+       one (the draft or `?format=`): the request then reaches the admin with the
+       format the guest came for
+       форма сама выбирает формат страницы, если гость ещё не выбрал свой
+       (черновик или `?format=`): заявка тогда приходит в админку с форматом,
+       ради которого гость пришёл */
+  }
+  {
+    pick && (
+      <script is:inline define:vars={{ slug: pick.slug }}>
+        document.addEventListener('DOMContentLoaded', function () {
+          var form = document.getElementById('request-form');
+          if (!form || new URLSearchParams(location.search).get('format')) return;
+          var none = form.querySelector('input[name="format"][value=""]');
+          var mine = form.querySelector('input[name="format"][data-format-slug="' + slug + '"]');
+          if (none && none.checked && mine) mine.checked = true;
+        });
+      </script>
+    )
+  }
+</BaseLayout>

@@ -1,0 +1,38 @@
+---
+/**
+ * «Ещё о праздниках»: the other landing pages with the price of their main
+ * format, the section's three pages and the cakes — a ledger of links with
+ * the figure on the right, the section's table of contents (`.cg-index`).
+ * «Ещё о праздниках»: остальные посадочные с ценой главного формата, три
+ * страницы раздела и торты — реестр ссылок с цифрой справа, как оглавление
+ * раздела (`.cg-index`).
+ */
+interface Props {
+  links: { href: string; name: string; note?: string }[];
+}
+
+const { links } = Astro.props;
+---
+
+<section class="cg-sec strip-paper lp-related" id="more" aria-labelledby="more-title">
+  <div class="container lp-related__in">
+    <div class="head" data-reveal>
+      <span class="mark" aria-hidden="true"></span>
+      <h2 class="display-caps" id="more-title">Ещё о праздниках</h2>
+    </div>
+    <nav class="cg-index cg-index--topics lp-related__list" aria-labelledby="more-title">
+      <ol role="list">
+        {
+          links.map((link) => (
+            <li>
+              <a href={link.href}>
+                <span class="cg-index__name">{link.name}</span>
+                {link.note && <span class="cg-index__price tnum">{link.note}</span>}
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+  </div>
+</section>

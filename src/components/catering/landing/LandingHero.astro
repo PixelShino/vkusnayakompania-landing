@@ -1,0 +1,86 @@
+---
+/**
+ * The first screen of a landing: the one H1 with the search phrase, the lead
+ * that answers at once (the price «от», where, how many guests), a season
+ * line while it holds, the request and the phone, the manager's hours; the
+ * frame on the right (on a phone it runs to both screen edges under the
+ * text). The overview's first screen, one level down.
+ * Первый экран посадочной: единственный H1 с запросом, ввод, который сразу
+ * отвечает (цена «от», где, сколько гостей), сезонная строка, пока она в
+ * силе, заявка и телефон, часы менеджера; кадр справа (на телефоне — до обоих
+ * краёв экрана под текстом). Первый экран обзора уровнем ниже.
+ */
+import Photo from '../../Photo.astro';
+import Icon from '../../Icon.astro';
+import { typo, type Content, type Img } from '../../../lib/content.ts';
+
+interface Props {
+  content: Content;
+  h1: string;
+  lead: string;
+  season?: string;
+  photo?: Img;
+  /** id формата, который «Оставить заявку» выберет в форме */
+  pick?: number;
+  /** подпись заглушки без фото */
+  stub: string;
+}
+
+const { content, h1, lead, season, photo, pick, stub } = Astro.props;
+const { settings, catering } = content;
+const hours = catering.page?.hoursNote;
+---
+
+<section class="cg-hero lp-hero" id="top" aria-labelledby="lp-title">
+  <div class="container cg-hero__grid">
+    <div class="cg-hero__text" data-reveal>
+      <span class="mark cg-mark" aria-hidden="true"></span>
+      <h1 class="display-caps cg-hero__title lp-hero__title" id="lp-title">{h1}</h1>
+      <p class="lead cg-hero__lead lp-hero__lead">{typo(lead)}</p>
+      {
+        season && (
+          <p class="lp-season">
+            <Icon name="calendar" />
+            <span>{typo(season)}</span>
+          </p>
+        )
+      }
+      <div class="cg-hero__cta">
+        <a class="btn btn--primary" href="#request" data-pick-format={pick}>Оставить заявку</a>
+        <a class="btn btn--secondary" href={settings.phoneHref}>
+          <Icon name="phone" class="ico--tilt" />
+          <span class="tnum">{settings.phone}</span>
+        </a>
+      </div>
+      {
+        hours && (
+          <p class="cg-hero__note">
+            <Icon name="clock" />
+            Менеджер на связи {hours}
+          </p>
+        )
+      }
+    </div>
+    <div class="cg-hero__frame" data-reveal="self">
+      {
+        photo && !photo.placeholder ? (
+          <Photo
+            photo={photo}
+            ratio="4 / 3"
+            ratioMd="1 / 1"
+            radius="var(--r-sq)"
+            sizes="(min-width: 1200px) 600px, (min-width: 768px) 46vw, 100vw"
+            eager
+            priority="high"
+            class="cg-hero__photo"
+          />
+        ) : (
+          <div class="stub stub--ink cg-hero__stub">
+            <span class="stub__title">{stub}</span>
+            <span class="stub__meta">фото скоро появится</span>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>

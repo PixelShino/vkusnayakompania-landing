@@ -1,0 +1,43 @@
+---
+/**
+ * The top of a catering landing page: the crumbs «Главная / Кейтеринг /
+ * Корпоративы» and the section's three tabs, none of them current — the page
+ * is one level below them. The same look as `CateringTop` of the section.
+ * Верх посадочной страницы кейтеринга: крошки «Главная / Кейтеринг /
+ * Корпоративы» и три вкладки раздела, ни одна не текущая — страница на уровень
+ * ниже них. Тот же вид, что у `CateringTop` раздела.
+ */
+import { BASE } from '../../../lib/base.ts';
+import { CATERING } from '../../../lib/nav.ts';
+
+interface Props {
+  crumb: string;
+}
+
+const { crumb } = Astro.props;
+
+const TABS = [
+  { label: 'Обзор', href: CATERING },
+  { label: 'Форматы и цены', href: `${CATERING}services/` },
+  { label: 'Вопросы', href: `${CATERING}faq/` },
+];
+---
+
+<div class="container cg-top">
+  <nav class="crumbs" aria-label="Вы здесь">
+    <a href={BASE}>Главная</a>
+    <span aria-hidden="true">/</span>
+    <a href={CATERING}>Кейтеринг</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">{crumb}</span>
+  </nav>
+  <nav class="tabs cg-tabs" aria-label="Разделы кейтеринга">
+    {
+      TABS.map((tab) => (
+        <a class="tab" href={tab.href}>
+          {tab.label}
+        </a>
+      ))
+    }
+  </nav>
+</div>
