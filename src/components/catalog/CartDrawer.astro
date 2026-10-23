@@ -17,6 +17,7 @@ import Icon from '../Icon.astro';
 import CartAccount from '../account/CartAccount.astro';
 import PayChoice from './PayChoice.astro';
 import PayStep from './PayStep.astro';
+import HelpLine from './HelpLine.astro';
 import { hoursRows } from '../../data/site.ts';
 import type { Content } from '../../lib/content.ts';
 import { DOC, docHref } from '../../lib/pages.ts';
@@ -351,6 +352,9 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
             </p>
           )
         }
+        {/* stuck at the last step: a call or a message, quieter than the button
+            застрял на последнем шаге: звонок или сообщение, тише кнопки */}
+        <HelpLine settings={settings} />
       </footer>
     </form>
 
@@ -370,6 +374,11 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
           Перезвоним на <b class="tnum" data-done-phone></b>, чтобы подтвердить состав, сумму, адрес и время.
           <span data-done-after>Оплату обсудим там же.</span>
         </p>
+        {/* the phone and the messengers right under «we will call you»: the old
+            «Не хотите ждать — позвоните сами» at the bottom said the same number
+            телефон и мессенджеры сразу под «перезвоним»: прежняя строка внизу
+            «Не хотите ждать — позвоните сами» повторяла тот же номер */}
+        <HelpLine settings={settings} class="done__help" />
         {/* the address and the time as they left — what the call will confirm
             адрес и время в том виде, в каком ушли, — то, что подтвердит звонок */}
         <dl class="done__info">
@@ -391,10 +400,6 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
           <b class="tnum" data-done-total></b>
         </p>
         <CartAccount content={Astro.props.content} part="done" />
-        <p class="done__call">
-          Не хотите ждать — позвоните сами:
-          <a class="tnum" href={settings.phoneHref}>{settings.phone}</a>
-        </p>
       </div>
       <footer class="drawer__foot">
         <button type="button" class="btn btn--primary btn--block" data-close>Вернуться в каталог</button>

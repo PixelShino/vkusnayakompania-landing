@@ -1,0 +1,43 @@
+---
+/**
+ * One quiet line for a guest who is stuck between the cart and the paid
+ * order: call, or write in Telegram / Max (owner's decision 23.10.2026).
+ * Printed under the checkout button and under the text of «Заказ принят» and
+ * «Оплата». A messenger whose link opens no chat (the `https://max.ru/`
+ * placeholder, an empty field) is left out, see `contact-links.ts`. On the
+ * payment step the question follows `data-state`: after «paid» nothing is
+ * failing, so it asks about the order instead (`payment.css`).
+ * Одна спокойная строка для гостя, у которого что-то не получается между
+ * корзиной и оплаченным заказом: позвонить или написать в Telegram / Max
+ * (решение владельца 23.10.2026). Стоит под кнопкой оформления и под текстом
+ * «Заказ принят» и «Оплата». Мессенджер, чья ссылка не открывает чат (заглушка
+ * `https://max.ru/`, пустое поле), пропускается, см. `contact-links.ts`. На шаге
+ * оплаты вопрос следует за `data-state`: после «оплачен» ничего не ломается,
+ * и строка спрашивает о заказе (`payment.css`).
+ */
+import type { Settings } from '../../lib/content.ts';
+import { chatLinks } from '../../lib/contact-links.ts';
+
+interface Props {
+  settings: Pick<Settings, 'phone' | 'phoneHref' | 'telegram' | 'max'>;
+  /** шаг оплаты: второй вопрос для состояния «оплачен» */
+  paid?: boolean;
+  class?: string;
+}
+
+const { settings, paid = false, class: className } = Astro.props;
+// «Telegram / Max» do not break apart; a screen reader hears two links, not «slash»
+// «Telegram / Max» не разрываются; скринридер слышит две ссылки, а не «косую черту»
+const chats = chatLinks(settings);
+---
+
+<p class:list={['help-line', className]}>
+  <span class="help-line__ask">Что-то не&nbsp;получается?</span>
+  {paid && <span class="help-line__ask help-line__ask--paid">Вопросы по&nbsp;заказу?</span>}
+  Позвоните <a class="tnum" href={settings.phoneHref}>{settings.phone}</a>
+  {
+    chats.length > 0 && (
+      <>или напишите в&nbsp;{chats.map((chat, i) => <>{i > 0 && <>&nbsp;<span aria-hidden="true">/</span>&nbsp;</>}<a href={chat.href} target="_blank" rel="noopener">{chat.label}</a></>)}</>
+    )
+  }
+</p>

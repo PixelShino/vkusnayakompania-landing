@@ -1796,7 +1796,8 @@ html:has(.dlg[open]) {
   color: var(--text-4);
 }
 
-.sum__legal a {
+.sum__legal a,
+.help-line a {
   color: var(--text-3);
   text-decoration: underline;
   text-decoration-color: var(--line-4);
@@ -1804,9 +1805,55 @@ html:has(.dlg[open]) {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .sum__legal a:hover {
+  .sum__legal a:hover,
+  .help-line a:hover {
     color: var(--terracotta-text);
   }
+}
+
+/* Where to turn when something does not work (owner, 23.10.2026): one quiet
+   line in the size and ink of the legal line, not a banner; the phone keeps
+   its digits together, «в Telegram / Max» does not break apart (HelpLine.astro).
+   Куда обратиться, если что-то не получается (владелец, 23.10.2026): одна
+   спокойная строка размером и цветом юрстроки, не плашка; телефон не рвётся,
+   «в Telegram / Max» не разваливается (HelpLine.astro). */
+.help-line {
+  margin-top: 9px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--text-4);
+}
+
+/* two paragraphs of small print, not one block of four lines
+   два абзаца мелкого шрифта, а не один блок из четырёх строк */
+.sum__legal + .help-line {
+  margin-top: 8px;
+}
+
+.help-line a {
+  white-space: nowrap;
+}
+
+/* touch: the links grow to a 20 px target and the lines move apart by as much,
+   so the phone on one line and Telegram on the next never share a tap
+   тач: ссылки растут до цели 20 px, строки расходятся ровно настолько же —
+   телефон на одной строке и Telegram на следующей не делят одно касание */
+@media (pointer: coarse) {
+  .help-line {
+    line-height: 1.75;
+  }
+
+  .help-line a {
+    padding-block: 3px;
+  }
+}
+
+/* the second question belongs to the payment step only (payment.css)
+   второй вопрос — только для шага оплаты (payment.css) */
+.help-line__ask--paid {
+  display: none;
 }
 
 .drawer__clear {
@@ -2738,6 +2785,13 @@ html:has(.dlg[open]) {
   white-space: nowrap;
 }
 
+/* the help line under the text of «Заказ принят» and «Оплата»
+   строка помощи под текстом «Заказ принят» и «Оплата» */
+.done__help {
+  max-width: 44ch;
+  margin-top: 10px;
+}
+
 /* where and when the order goes: a quiet pair of facts above the bill, no rules
    of its own — the bill under it already draws them
    куда и когда: тихая пара фактов над счётом без своих линеек — их уже рисует
@@ -2817,18 +2871,6 @@ html:has(.dlg[open]) {
   padding-top: 10px;
   font-size: 15px;
   font-weight: 600;
-}
-
-.done__call {
-  margin-top: 18px;
-  font-size: 14px;
-  color: var(--text-3);
-}
-
-.done__call a {
-  font-weight: 600;
-  color: var(--text);
-  white-space: nowrap;
 }
 
 /* ── нижняя полоса корзины (телефон) ─────────────────────────────────────── */

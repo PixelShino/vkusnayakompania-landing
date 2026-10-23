@@ -115,6 +115,22 @@
   display: none;
 }
 
+/* the help line under the hairline keeps the distance it has under the text
+   строка помощи под полосой держит тот же отступ, что под текстом */
+.pay-step__progress:not([hidden]) + .done__help {
+  margin-top: 14px;
+}
+
+/* paid: nothing is failing any more — the line asks about the order
+   оплачен: ничего уже не ломается — строка спрашивает о заказе */
+.pay-step[data-state='paid'] .help-line__ask {
+  display: none;
+}
+
+.pay-step[data-state='paid'] .help-line__ask.help-line__ask--paid {
+  display: inline;
+}
+
 @keyframes pay-wait {
   from {
     translate: -100% 0;

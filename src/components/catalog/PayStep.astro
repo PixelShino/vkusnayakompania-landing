@@ -12,6 +12,7 @@
  * не теряется: он сохранён до банка.
  */
 import Icon from '../Icon.astro';
+import HelpLine from './HelpLine.astro';
 import type { Content } from '../../lib/content.ts';
 import '../../styles/payment.css';
 
@@ -34,14 +35,15 @@ const api = directus ? `${directus}/pay` : '';
     </p>
     <p class="done__text pay-step__lead" data-pay-lead></p>
     <span class="pay-step__progress" data-pay-progress aria-hidden="true"></span>
+    {/* in every state, waiting for the bank and the way back from it too; the
+        question changes with `data-state` (payment.css)
+        в любом состоянии, и пока ждём банк, и после возврата из него; вопрос
+        меняется вместе с `data-state` (payment.css) */}
+    <HelpLine settings={settings} paid class="done__help" />
     <ul class="done__lines" role="list" data-pay-lines></ul>
     <p class="done__total" data-pay-sum>
       <span data-pay-sum-label>К оплате</span>
       <b class="tnum" data-pay-total></b>
-    </p>
-    <p class="done__call">
-      Вопросы по заказу:
-      <a class="tnum" href={settings.phoneHref}>{settings.phone}</a>
     </p>
   </div>
   <footer class="drawer__foot pay-step__foot">
