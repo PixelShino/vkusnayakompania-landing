@@ -56,6 +56,11 @@ export type Order = {
   fulfillment: 'delivery' | 'pickup';
   place: number | null;
   address: string | null;
+  /** квартира, подъезд, этаж, домофон — с 23.10.2026; у старых заказов их нет */
+  address_flat?: string | null;
+  address_entrance?: string | null;
+  address_floor?: string | null;
+  address_intercom?: string | null;
   desired_time: string | null;
   items: OrderItem[] | null;
   total: number;

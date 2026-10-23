@@ -8,6 +8,7 @@
  */
 import assert from 'node:assert/strict';
 import * as d from './delivery.ts';
+import { addressLine, aptPart, buildOrder, splitDetails, validate, type CheckoutForm } from './order.ts';
 
 const NB = ' ';
 const near: d.Zone = { id: 492128, name: 'Рядом с нами — Советский, Промышленный, Октябрьский', price: 400, free_from: 7000, min_order: 1000 };
@@ -142,5 +143,55 @@ assert.equal(d.stateFromQuote('Ленина 1', { found: false, outside: false }
 assert.deepEqual(d.stateFromQuote('Тольятти', { found: false, outside: true }), { kind: 'unknown', address: 'Тольятти', why: 'outside' });
 
 assert.equal(d.CART_NOTE, `Доставка считается по адресу при оформлении, бесплатно от 7${NB}000${NB}₽`);
+
+// ── адрес по пунктам: улица и дом отдельно от квартиры, подъезда, этажа, домофона ──
+assert.equal(d.hasAptWords('Самара, проспект Карла Маркса 165Б, кв 12'), true, 'квартира в строке улицы — подсказка про поля ниже');
+assert.equal(d.hasAptWords('Советской Армии, 177, подъезд 2'), true);
+assert.equal(d.hasAptWords('Советской Армии, 177'), false);
+assert.equal(d.hasAptWords('Квартальная, 5'), false, '«кв» внутри названия улицы — не квартира');
+
+assert.equal(aptPart('flat', ' кв. 12 '), '12', 'подпись поля, набранная по привычке, не повторяется');
+assert.equal(aptPart('flat', 'офис 305'), 'офис 305', 'офис остаётся офисом');
+assert.equal(aptPart('entrance', '2 подъезд'), '2');
+assert.equal(aptPart('floor', '5-й этаж'), '5');
+assert.equal(aptPart('intercom', 'код домофона 12К'), '12К');
+assert.equal(aptPart('flat', '   '), null, 'пустое — null');
+assert.equal(aptPart('entrance', '1234567890123'), '1234567890', 'не длиннее предела поля');
+
+const line = { address: 'улица Советской Армии, 177', address_flat: '12', address_entrance: '2', address_floor: '5', address_intercom: '12К' };
+assert.equal(addressLine(line), `улица Советской Армии, 177, кв.${NB}12, подъезд${NB}2, этаж${NB}5, домофон${NB}12К`);
+assert.equal(addressLine({ address: 'улица Советской Армии, 177', address_flat: 'офис 3' }), 'улица Советской Армии, 177, офис 3');
+assert.equal(addressLine({ address: 'Садовая, 212Б', address_flat: null }), 'Садовая, 212Б', 'частный дом — только улица и дом');
+
+// старый черновик с одной строкой «Квартира, подъезд, этаж»
+assert.deepEqual(splitDetails('кв. 5, подъезд 2, этаж 3, домофон 5К'), { flat: '5', entrance: '2', floor: '3', intercom: '5К', rest: '' });
+assert.deepEqual(splitDetails('кв 45 3 подъезд 7 этаж'), { flat: '45', entrance: '3', floor: '7', intercom: '', rest: '' });
+assert.deepEqual(splitDetails('кв 5 подъезд 2 этаж 3'), { flat: '5', entrance: '2', floor: '3', intercom: '', rest: '' });
+assert.deepEqual(splitDetails('12'), { flat: '12', entrance: '', floor: '', intercom: '', rest: '' }, 'голое число — квартира');
+assert.deepEqual(splitDetails('клиники мед, у входа справа'), { flat: '', entrance: '', floor: '', intercom: '', rest: 'клиники мед, у входа справа' }, 'слова — в комментарий');
+
+// заказ: четыре поля уходят отдельно, у самовывоза — null, старого `address_details` нет
+const checkout: CheckoutForm = {
+  name: 'Анна',
+  phone: '9879552565',
+  fulfillment: 'delivery',
+  address: 'улица Советской Армии, 177',
+  flat: 'кв 12',
+  entrance: '2',
+  floor: '',
+  intercom: '12К',
+  when: 'asap',
+  consent: true,
+};
+const sent = buildOrder({ v: 1, lines: [] }, new Map(), checkout, '2310-1000');
+assert.deepEqual(
+  [sent.address, sent.address_flat, sent.address_entrance, sent.address_floor, sent.address_intercom],
+  ['улица Советской Армии, 177', '12', '2', null, '12К'],
+);
+assert.ok(!('address_details' in sent), 'address_details сайт больше не шлёт');
+const taken = buildOrder({ v: 1, lines: [] }, new Map(), { ...checkout, fulfillment: 'pickup', place: 1 }, '2310-1001');
+assert.deepEqual([taken.address, taken.address_flat, taken.address_entrance, taken.address_floor, taken.address_intercom], [null, null, null, null, null]);
+assert.equal(validate({ ...checkout, address: '' }).address, 'Укажите улицу и дом, куда привезти');
+assert.equal(validate({ ...checkout, flat: '', entrance: '', floor: '', intercom: '' }).address, undefined, 'квартира и остальное — необязательны');
 
 console.log('delivery-client: ok');

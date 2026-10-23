@@ -33,7 +33,7 @@ import {
 } from '../lib/account';
 import { addDays, daysBetween, dayOf, points, type Program } from '../lib/loyalty';
 import { CART_KEY, parseCart } from '../lib/cart';
-import { CHECKOUT_KEY, maskPhone } from '../lib/order';
+import { CHECKOUT_KEY, addressLine, maskPhone } from '../lib/order';
 import { clearSession, loadSession, onSessionChange, storage, touchSession } from './account-session';
 import { mountLogin } from './account-login';
 import repeatIcon from '../assets/icons/repeat.svg?raw';
@@ -258,7 +258,7 @@ if (node) {
     const how =
       order.fulfillment === 'pickup'
         ? `самовывоз${order.place && data.places[order.place] ? `, ${data.places[order.place]}` : ''}`
-        : `доставка${order.address ? `, ${order.address}` : ''}`;
+        : `доставка${order.address ? `, ${addressLine(order)}` : ''}`;
     const paid = paidOf(order);
     const sums = [
       `<div><dt>Сумма</dt><dd class="tnum">${rub(order.total)}</dd></div>`,

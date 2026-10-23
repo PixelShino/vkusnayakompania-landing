@@ -9,8 +9,10 @@
  */
 import assert from 'node:assert/strict';
 import {
+  addressLine,
   deliver,
   demoModel,
+  emailText,
   fillTemplate,
   mailState,
   normalizeSettings,
@@ -101,6 +103,120 @@ assert.ok(tg.includes(`<a href="${URL}">Открыть в админке</a>`));
 const huge = telegramText(orderModel({ ...order, comment: 'очень длинно '.repeat(800) }, { adminUrl: URL }));
 assert.ok(huge.length <= 4096, `длина ${huge.length}`);
 assert.ok(huge.endsWith('</a>'), 'ссылка в админку не отрезана');
+
+// ── the address by parts / адрес по пунктам ──────────────────────────────────
+{
+  const parts = { address: 'Советской Армии, 177', address_flat: '12', address_entrance: '2', address_floor: '5', address_intercom: '12К' };
+  const line = 'Советской Армии, 177, кв. 12, подъезд 2, этаж 5, домофон 12К';
+  assert.equal(addressLine(parts), line);
+  const pm = orderModel({ ...order, ...parts, address_details: null, delivery_zone: 'Рядом с нами' }, { adminUrl: URL });
+  assert.equal(pm.facts[0], `Доставка: ${line} · зона «Рядом с нами»`);
+  assert.ok(telegramText(pm).includes(line), 'адрес по пунктам в Telegram');
+  assert.ok(emailText(pm).includes(line), 'адрес по пунктам в письме');
+  // empty parts are skipped / пустые пункты пропускаются
+  assert.equal(addressLine({ address: 'Ленина, 1', address_flat: '', address_entrance: null, address_floor: ' 3 ' }), 'Ленина, 1, этаж 3');
+  // a part typed with its own word is not prefixed twice / пункт со своим словом второй раз не подписывается
+  assert.equal(
+    addressLine({ address: 'Ленина, 1', address_flat: 'офис 305', address_entrance: 'подъезд 3', address_intercom: 'код 45#' }),
+    'Ленина, 1, офис 305, подъезд 3, код 45#',
+  );
+  assert.equal(addressLine({ address: 'Ленина, 1', address_floor: '5 этаж', address_intercom: 'нет домофона' }), 'Ленина, 1, 5 этаж, нет домофона');
+  // an order made before the parts: the one line is appended / заказ до пунктов: старая строка дописывается
+  assert.equal(addressLine({ address: 'ул. Ленина, 1', address_details: 'кв. 5, домофон 5' }), 'ул. Ленина, 1, кв. 5, домофон 5');
+  assert.equal(orderModel({ ...order, address: null, address_details: null }).facts[0], 'Доставка: адрес не указан');
+  assert.equal(orderModel({ ...order, ...parts, fulfillment: 'pickup' }, { place: 'Садовая' }).facts[0], 'Самовывоз: Садовая');
+}
+
+// ── order-guard: the parts reach the order and the manager / пункты доходят до заказа и менеджера ──
+{
+  // a knex in miniature: where / whereIn / first / pluck / select over plain rows
+  // knex в миниатюре: where / whereIn / first / pluck / select по простым строкам
+  const fakeDb = (tables) => (name) => {
+    let list = [...(tables[name] ?? [])];
+    const query = {
+      where(match) {
+        list = list.filter((row) => Object.entries(match).every(([key, value]) => row[key] === value));
+        return query;
+      },
+      whereIn(column, values) {
+        list = list.filter((row) => values.includes(row[column]));
+        return query;
+      },
+      select: async () => list,
+      first: async () => list[0],
+      pluck: async (column) => list.map((row) => row[column]),
+    };
+    return query;
+  };
+  const sent = [];
+  class NotificationsService {
+    async createOne(data) {
+      sent.push(data);
+    }
+  }
+  const quiet = { warn: () => {}, error: () => {}, info: () => {} };
+  const filters = {};
+  const actions = {};
+  const guard = await import('../directus/extensions/order-guard/index.js');
+  guard.default(
+    { filter: (event, fn) => (filters[event] = fn), action: (event, fn) => (actions[event] = fn) },
+    { services: { NotificationsService }, logger: quiet },
+  );
+  const database = fakeDb({
+    products: [{ id: 5, title: 'Морс', price: 150, weight: null, variants: [], fillings: [], available: true, status: 'published' }],
+    orders: [],
+    places: [{ id: 1 }],
+    directus_roles: [{ id: 'r1', name: 'Administrator' }],
+    directus_users: [{ id: 'u1', role: 'r1', status: 'active' }],
+  });
+  // no `delivery_zones` in the schema: no geocoder, the delivery is priced on the call
+  // в схеме нет `delivery_zones`: без геокодера, доставку назовут при звонке
+  const schema = { collections: { orders: {} } };
+  let ip = 0;
+  const send = (extra) =>
+    filters['orders.items.create'](
+      { customer_name: 'Анна', phone: '8 987 955 25 65', consent: true, fulfillment: 'delivery', items: [{ product: 5, qty: 1 }], ...extra },
+      {},
+      { accountability: { user: null, ip: `10.0.9.${(ip += 1)}` }, database, schema },
+    );
+  // an empty part is not sent to the database at all: the column stays null
+  // пустой пункт в базу не передаётся вовсе: колонка остаётся null
+  const pick = (row) =>
+    [row.address, row.address_flat, row.address_entrance, row.address_floor, row.address_intercom, row.address_details].map((v) => v ?? null);
+
+  const full = await send({ address: ' Советской Армии, 177 ', address_flat: ' 12 ', address_entrance: 2, address_floor: '5', address_intercom: '12К' });
+  assert.deepEqual(pick(full), ['Советской Армии, 177', '12', '2', '5', '12К', null], 'пункты адреса в заказе, число принято строкой');
+  const long = await send({
+    address: 'Советской Армии, 177',
+    address_flat: 'офис 305, вход со двора, налево',
+    address_entrance: 'подъезд номер 22',
+    address_floor: '5\n  этаж',
+    address_intercom: '1'.repeat(40),
+    address_details: 'x'.repeat(200),
+  });
+  assert.deepEqual(
+    pick(long),
+    ['Советской Армии, 177', 'офис 305, вход со дв', 'подъезд но', '5 этаж', '1'.repeat(20), 'x'.repeat(120)],
+    'длиннее предела — обрезано: 20, 10, 10, 20 и 120 знаков',
+  );
+  const blank = await send({ address: 'Советской Армии, 177', address_flat: '  ', address_entrance: '', address_floor: null, address_intercom: { x: 1 } });
+  assert.deepEqual(pick(blank).slice(1), [null, null, null, null, null], 'пусто и не строка — null');
+  const old = await send({ address: 'ул. Ленина, 1', address_details: ' кв. 5, домофон 5 ' });
+  assert.deepEqual(pick(old), ['ул. Ленина, 1', null, null, null, null, 'кв. 5, домофон 5'], 'старый формат принимается');
+  const pickup = await send({ fulfillment: 'pickup', place: 1, address: 'Советской Армии, 177', address_flat: '12', address_details: 'кв. 5' });
+  assert.deepEqual(pick(pickup), [null, null, null, null, null, null], 'самовывоз — адресных полей нет');
+  assert.ok(!('address_flat' in pickup) && !('address_flat' in old), 'пустой пункт не попадает в запись — старой странице не нужны новые права');
+
+  for (const [key, row] of [[1, full], [2, old], [3, pickup]])
+    await actions['orders.items.create']({ key, payload: { ...row, number: `2310-000${key}` } }, { database, schema: {} });
+  assert.equal(sent.length, 3);
+  assert.ok(
+    sent[0].message.includes('Доставка: Советской Армии, 177, кв. 12, подъезд 2, этаж 5, домофон 12К · стоимость назвать при звонке.'),
+    sent[0].message,
+  );
+  assert.ok(sent[1].message.includes('Доставка: ул. Ленина, 1, кв. 5, домофон 5 · '), sent[1].message);
+  assert.ok(sent[2].message.includes('Самовывоз. Когда:'), sent[2].message);
+}
 
 // ── mail state / состояние почты ─────────────────────────────────────────────
 assert.equal(mailState({}).ok, false);

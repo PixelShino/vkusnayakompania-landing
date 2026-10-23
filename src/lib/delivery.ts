@@ -68,6 +68,14 @@ export const canSuggest = (query: string) => String(query ?? '').trim().length >
 export const canQuote = (address: string) => String(address ?? '').trim().length >= 5;
 /** в запросе есть цифра — вероятно, номер дома уже набран */
 export const hasHouse = (query: string) => /\d/.test(String(query ?? ''));
+/**
+ * The flat, the entrance or the floor typed into «street and house» — the
+ * map does not find such a line, and they have their own fields below it.
+ * Квартира, подъезд или этаж, набранные в «Улицу и дом», — такую строку карта
+ * не находит, а для них есть свои поля ниже.
+ */
+export const hasAptWords = (query: string) =>
+  /(?<![\p{L}])(?:кв\.?|квартира|офис|подъезд|этаж|домофон)(?![\p{L}])/iu.test(String(query ?? ''));
 
 // ── answers of the API / ответы API ──────────────────────────────────────────
 

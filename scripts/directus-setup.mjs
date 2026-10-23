@@ -43,6 +43,8 @@ const CONTENT = [
 const ORDERS = 'orders';
 const ORDER_FIELDS_PUBLIC = [
   'number', 'customer_name', 'phone', 'fulfillment', 'place', 'address', 'address_details',
+  // the address by parts (since 23.10.2026) / адрес по пунктам (с 23.10.2026)
+  'address_flat', 'address_entrance', 'address_floor', 'address_intercom',
   'desired_time', 'comment', 'items', 'total', 'consent',
   // set by the `order-guard` hook, which runs before permissions are checked
   // ставит хук `order-guard`, он работает до проверки прав
@@ -61,6 +63,46 @@ const REQUEST_FIELDS_PUBLIC = [
   // ставит хук `request-guard`, он работает до проверки прав
   'number', 'status', 'source', 'manager_note',
 ];
+// The address by parts (since 23.10.2026): the street and the house stay in
+// `address` (several lines in the admin, so a long one reads on a phone), the
+// flat, the entrance, the floor and the intercom code go in their own fields
+// right under it, two to a row; the old one-line `address_details` follows them
+// and shows only when filled — on the orders made before the parts.
+// Адрес по пунктам (с 23.10.2026): улица и дом остаются в `address` (в админке
+// в несколько строк, чтобы длинный адрес читался с телефона), квартира,
+// подъезд, этаж и код домофона — в своих полях сразу под ним, по два в ряд;
+// старое однострочное `address_details` идёт после них и видно только
+// заполненным — у заказов, сделанных до пунктов.
+const tr = (text) => [{ language: 'ru-RU', translation: text }];
+const PICKUP_HIDES = { name: 'Самовывоз', rule: { fulfillment: { _eq: 'pickup' } }, hidden: true };
+const addressPart = (field, name, max) => ({
+  field,
+  type: 'string',
+  schema: { max_length: max },
+  meta: {
+    interface: 'input',
+    options: { trim: true },
+    width: 'half',
+    conditions: [PICKUP_HIDES],
+    translations: tr(name),
+  },
+});
+const ADDRESS_PARTS = [
+  addressPart('address_flat', 'Квартира / офис', 20),
+  addressPart('address_entrance', 'Подъезд', 10),
+  addressPart('address_floor', 'Этаж', 10),
+  addressPart('address_intercom', 'Код домофона', 20),
+];
+// what the two old fields should look like / как должны выглядеть два старых поля
+const ADDRESS_META = {
+  address: { interface: 'input-multiline', options: { trim: true } },
+  address_details: {
+    translations: tr('Квартира, подъезд, этаж (старое поле)'),
+    note: 'Заказы до 23.10.2026: квартира, подъезд и этаж одной строкой',
+    conditions: [PICKUP_HIDES, { name: 'Пусто', rule: { address_details: { _null: true } }, hidden: true }],
+  },
+};
+
 // editors may only update these / редактор только меняет, не создаёт и не удаляет
 const SINGLE = ['settings', 'home', 'places', 'directions', 'catering_page'];
 const ALL = ['create', 'read', 'update', 'delete'];
@@ -114,6 +156,44 @@ const dirMissing = dirUpdate?.fields?.includes('*')
 if (dirUpdate && dirMissing.length) {
   await api('PATCH', `/permissions/${dirUpdate.id}`, { fields: [...(dirUpdate.fields ?? []), ...dirMissing] });
   console.log(`= permissions Редактор: directions update + ${dirMissing.join(', ')}`);
+}
+
+// 2a. the address by parts: new fields right after the address (the fields
+//     below it move down to make room, only when the fields are new), the old
+//     two brought to the look above
+//     адрес по пунктам: новые поля сразу после адреса (поля ниже сдвигаются,
+//     освобождая место, — только когда поля новые), два старых приводятся к
+//     виду выше
+{
+  const orderFields = await api('GET', `/fields/${ORDERS}`);
+  const names = ADDRESS_PARTS.map((f) => f.field);
+  const missing = ADDRESS_PARTS.filter((f) => !orderFields.some((o) => o.field === f.field));
+  const after = orderFields.find((o) => o.field === 'address')?.meta?.sort;
+  if (missing.length && Number.isFinite(after)) {
+    const moved = orderFields
+      .filter((o) => !names.includes(o.field) && Number.isFinite(o.meta?.sort) && o.meta.sort > after)
+      .map((o) => ({ field: o.field, meta: { sort: o.meta.sort + ADDRESS_PARTS.length } }));
+    if (moved.length) await api('PATCH', `/fields/${ORDERS}`, moved);
+  }
+  for (const field of missing) {
+    const sort = Number.isFinite(after) ? after + 1 + names.indexOf(field.field) : null;
+    await api('POST', `/fields/${ORDERS}`, { ...field, meta: { ...field.meta, sort } });
+    console.log(`+ field ${ORDERS}.${field.field}`);
+  }
+  // key order aside: the database may hand the JSON back with its keys sorted
+  // без учёта порядка ключей: база может вернуть JSON с отсортированными ключами
+  const stable = (value) =>
+    JSON.stringify(value ?? null, (_, v) =>
+      v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b))) : v,
+    );
+  const same = (a, b) => stable(a) === stable(b);
+  for (const [field, meta] of Object.entries(ADDRESS_META)) {
+    const have = orderFields.find((o) => o.field === field);
+    if (have && Object.entries(meta).some(([key, value]) => !same(have.meta?.[key], value))) {
+      await api('PATCH', `/fields/${ORDERS}/${field}`, { meta });
+      console.log(`= field ${ORDERS}.${field}: адрес по пунктам`);
+    }
+  }
 }
 
 // 3. builder: read-only policy (plus its own build status), role, user with a static token

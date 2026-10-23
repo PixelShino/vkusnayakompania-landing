@@ -12368,10 +12368,10 @@ fields:
       field: address
       group: null
       hidden: false
-      interface: input
+      interface: input-multiline
       note: null
       options:
-        iconLeft: home
+        trim: true
       readonly: false
       required: false
       searchable: true
@@ -12411,22 +12411,27 @@ fields:
           rule:
             fulfillment:
               _eq: pickup
+        - hidden: true
+          name: Пусто
+          rule:
+            address_details:
+              _null: true
       display: null
       display_options: null
       field: address_details
       group: null
       hidden: false
       interface: input
-      note: null
+      note: 'Заказы до 23.10.2026: квартира, подъезд и этаж одной строкой'
       options: null
       readonly: false
       required: false
       searchable: true
-      sort: 12
+      sort: 16
       special: null
       translations:
         - language: ru-RU
-          translation: Квартира, подъезд, этаж
+          translation: Квартира, подъезд, этаж (старое поле)
       validation: null
       validation_message: null
       width: full
@@ -12471,7 +12476,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 15
+      sort: 19
       special:
         - m2o
       translations:
@@ -12569,7 +12574,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 16
+      sort: 20
       special:
         - cast-json
       translations:
@@ -12614,7 +12619,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 17
+      sort: 21
       special: null
       translations:
         - language: ru-RU
@@ -12657,7 +12662,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 27
+      sort: 31
       special: null
       translations:
         - language: ru-RU
@@ -12699,7 +12704,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 25
+      sort: 29
       special: null
       translations:
         - language: ru-RU
@@ -12741,7 +12746,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 26
+      sort: 30
       special: null
       translations:
         - language: ru-RU
@@ -12783,7 +12788,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 28
+      sort: 32
       special:
         - date-updated
       translations: null
@@ -12831,7 +12836,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 22
+      sort: 26
       special:
         - m2o
       translations:
@@ -12874,7 +12879,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 23
+      sort: 27
       special: null
       translations:
         - language: ru-RU
@@ -12916,7 +12921,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 24
+      sort: 28
       special: null
       translations:
         - language: ru-RU
@@ -12960,7 +12965,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 25
+      sort: 29
       special: null
       translations:
         - language: ru-RU
@@ -13002,7 +13007,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 26
+      sort: 30
       special: null
       translations:
         - language: ru-RU
@@ -13047,7 +13052,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 42
+      sort: 46
       special: null
       translations:
         - language: ru-RU
@@ -13127,7 +13132,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 18
+      sort: 22
       special: null
       translations:
         - language: ru-RU
@@ -13186,7 +13191,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 19
+      sort: 23
       special: null
       translations:
         - language: ru-RU
@@ -13229,7 +13234,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 20
+      sort: 24
       special: null
       translations:
         - language: ru-RU
@@ -13271,7 +13276,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 21
+      sort: 25
       special: null
       translations:
         - language: ru-RU
@@ -13313,7 +13318,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 22
+      sort: 26
       special: null
       translations:
         - language: ru-RU
@@ -13355,7 +13360,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 23
+      sort: 27
       special: null
       translations:
         - language: ru-RU
@@ -13398,7 +13403,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 24
+      sort: 28
       special:
         - cast-json
       translations: null
@@ -13479,7 +13484,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 13
+      sort: 17
       special: null
       translations:
         - language: ru-RU
@@ -13524,7 +13529,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 14
+      sort: 18
       special: null
       translations:
         - language: ru-RU
@@ -13540,6 +13545,198 @@ fields:
       max_length: null
       numeric_precision: 32
       numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: address_flat
+    type: string
+    meta:
+      collection: orders
+      conditions:
+        - hidden: true
+          name: Самовывоз
+          rule:
+            fulfillment:
+              _eq: pickup
+      display: null
+      display_options: null
+      field: address_flat
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 12
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Квартира / офис
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: address_flat
+      table: orders
+      data_type: character varying
+      default_value: null
+      max_length: 20
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: address_entrance
+    type: string
+    meta:
+      collection: orders
+      conditions:
+        - hidden: true
+          name: Самовывоз
+          rule:
+            fulfillment:
+              _eq: pickup
+      display: null
+      display_options: null
+      field: address_entrance
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 13
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Подъезд
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: address_entrance
+      table: orders
+      data_type: character varying
+      default_value: null
+      max_length: 10
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: address_floor
+    type: string
+    meta:
+      collection: orders
+      conditions:
+        - hidden: true
+          name: Самовывоз
+          rule:
+            fulfillment:
+              _eq: pickup
+      display: null
+      display_options: null
+      field: address_floor
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 14
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Этаж
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: address_floor
+      table: orders
+      data_type: character varying
+      default_value: null
+      max_length: 10
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
+    field: address_intercom
+    type: string
+    meta:
+      collection: orders
+      conditions:
+        - hidden: true
+          name: Самовывоз
+          rule:
+            fulfillment:
+              _eq: pickup
+      display: null
+      display_options: null
+      field: address_intercom
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 15
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Код домофона
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: address_intercom
+      table: orders
+      data_type: character varying
+      default_value: null
+      max_length: 20
+      numeric_precision: null
+      numeric_scale: null
       is_nullable: true
       is_unique: false
       is_indexed: false

@@ -19,8 +19,13 @@ export type CheckoutForm = {
   fulfillment: Fulfillment;
   /** id точки самовывоза */
   place?: number | null;
+  /** улица и дом — то, что ищется на карте */
   address?: string;
-  details?: string;
+  /** квартира или офис, подъезд, этаж, код домофона — для курьера, все необязательны */
+  flat?: string;
+  entrance?: string;
+  floor?: string;
+  intercom?: string;
   when: 'asap' | 'later';
   /** YYYY-MM-DD */
   date?: string;
@@ -48,7 +53,10 @@ export type OrderPayload = {
   fulfillment: Fulfillment;
   place: number | null;
   address: string | null;
-  address_details: string | null;
+  address_flat: string | null;
+  address_entrance: string | null;
+  address_floor: string | null;
+  address_intercom: string | null;
   desired_time: string;
   comment: string | null;
   items: OrderLine[];
@@ -136,11 +144,145 @@ export const validate = (form: CheckoutForm): Errors => {
   if (!form.phone.replace(/\D/g, '')) errors.phone = 'Нужен телефон: по нему подтвердим заказ';
   else if (!normalizePhone(form.phone)) errors.phone = 'Проверьте номер: 10 цифр после +7';
   if (form.fulfillment === 'delivery' && (form.address ?? '').trim().length < 5)
-    errors.address = 'Улица и дом, куда привезти';
+    errors.address = 'Укажите улицу и дом, куда привезти';
   if (form.fulfillment === 'pickup' && !form.place) errors.place = 'Выберите, откуда заберёте';
   if (form.when === 'later' && !(form.date && form.time)) errors.time = 'Выберите день и время';
-  if (!form.consent) errors.consent = 'Без согласия мы не сможем перезвонить';
+  if (!form.consent) errors.consent = 'Поставьте галочку выше — без согласия заказ не отправить';
   return errors;
+};
+
+// ── the flat, the entrance, the floor, the intercom / квартира, подъезд, этаж, домофон ──
+
+export type AptKey = 'flat' | 'entrance' | 'floor' | 'intercom';
+
+/** Длина каждого поля — та же, что у `maxlength` в форме и у сервера. */
+export const APT_MAX: Record<AptKey, number> = { flat: 20, entrance: 10, floor: 10, intercom: 20 };
+
+// The word a guest types out of habit in a field that already says it:
+// «кв. 12» in «Квартира / офис», «2 подъезд» in «Подъезд». Without it the
+// manager reads one way of writing for every order, and «кв. кв. 12» never
+// appears in the address line. An office keeps its word: it is not a flat.
+// Слово, которое гость пишет по привычке в поле, где оно уже написано:
+// «кв. 12» в «Квартира / офис», «2 подъезд» в «Подъезде». Без него менеджер
+// читает каждый заказ в одной записи, а «кв. кв. 12» не появляется в строке
+// адреса. Офис своё слово сохраняет: это не квартира.
+const WORD_START = '(?<![\\p{L}\\d])';
+const WORD_END = '(?![\\p{L}])';
+const APT_WORD: Record<AptKey, RegExp> = {
+  flat: new RegExp(`^${WORD_START}(?:кв\\.?|квартира)${WORD_END}\\s*(?:№\\s*)?`, 'iu'),
+  entrance: new RegExp(`^${WORD_START}(?:подъезд|под\\.|п\\.)${WORD_END}\\s*(?:№\\s*)?|(?:-?й)?\\s*(?<![\\p{L}])подъезд${WORD_END}\\.?$`, 'iu'),
+  floor: new RegExp(`^${WORD_START}(?:этаж|эт\\.?)${WORD_END}\\s*|(?:-?й)?\\s*(?<![\\p{L}])(?:этаж|эт\\.?)${WORD_END}$`, 'iu'),
+  intercom: new RegExp(`^${WORD_START}(?:код\\s+домофона|домофон|код|д/ф)${WORD_END}\\s*[:№]?\\s*`, 'iu'),
+};
+
+/** Значение поля для заказа: без повтора подписи поля, не длиннее предела, пустое — `null`. */
+export const aptPart = (key: AptKey, value: string | undefined | null) =>
+  String(value ?? '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(APT_WORD[key], '')
+    .trim()
+    .slice(0, APT_MAX[key]) || null;
+
+type AddressParts = {
+  address: string | null;
+  address_flat?: string | null;
+  address_entrance?: string | null;
+  address_floor?: string | null;
+  address_intercom?: string | null;
+};
+
+/**
+ * One line for the eyes, the same on «order accepted» and in the account:
+ * «улица Советской Армии, 177, кв. 12, подъезд 2, этаж 5, домофон 12К».
+ * A flat that starts with a word («офис 3», «пом. 2») stays as typed, the same
+ * rule as the manager's notification (`directus/extensions/notify/lib.js`).
+ * Одна строка для глаз, одна и та же на «Заказ принят» и в кабинете:
+ * «улица Советской Армии, 177, кв. 12, подъезд 2, этаж 5, домофон 12К».
+ * Квартира, начатая словом («офис 3», «пом. 2»), остаётся как набрана — то же
+ * правило, что в уведомлении менеджеру (`directus/extensions/notify/lib.js`).
+ */
+export const addressLine = (order: AddressParts) => {
+  const flat = aptPart('flat', order.address_flat);
+  const entrance = aptPart('entrance', order.address_entrance);
+  const floor = aptPart('floor', order.address_floor);
+  const intercom = aptPart('intercom', order.address_intercom);
+  return [
+    (order.address ?? '').trim(),
+    flat && (/^\p{L}/u.test(flat) ? flat : `кв. ${flat}`),
+    entrance && `подъезд ${entrance}`,
+    floor && `этаж ${floor}`,
+    intercom && `домофон ${intercom}`,
+  ]
+    .filter(Boolean)
+    .join(', ');
+};
+
+const APT_KIND: [AptKey, RegExp][] = [
+  ['flat', /^(?:кв\.?|квартира|оф\.?|офис)$/iu],
+  ['entrance', /^(?:подъезд|под\.|п\.)$/iu],
+  ['floor', /^(?:этаж|эт\.?)$/iu],
+  ['intercom', /^(?:домофон|код|д\/ф)$/iu],
+];
+const kindOf = (word: string | undefined) => (word ? APT_KIND.find(([, label]) => label.test(word))?.[0] : undefined);
+/** «12», «12А», «5-й», «45#» — значение, а не слово */
+const valueOf = (word: string | undefined) => (word && /^-?\d[\p{L}\d#*/-]*$/u.test(word) ? word.replace(/-?й$/u, '') : '');
+
+/**
+ * A draft from before 23.10.2026 kept one line «Квартира, подъезд, этаж».
+ * Its labelled pieces — «кв. 12», «2 подъезд», «этаж 5», «домофон 12К», with
+ * commas or without — go to their fields, a bare number is the flat, and the
+ * words that fit no field go to `rest` for the comment: the guest loses
+ * nothing he once typed.
+ * Черновик до 23.10.2026 хранил одну строку «Квартира, подъезд, этаж». Её
+ * подписанные куски — «кв. 12», «2 подъезд», «этаж 5», «домофон 12К», через
+ * запятую или без — уходят в свои поля, голое число — квартира, а слова, не
+ * подошедшие ни к одному полю, — в `rest` для комментария: гость не теряет
+ * ничего из когда-то набранного.
+ */
+export const splitDetails = (details: string) => {
+  const out: Record<AptKey, string> & { rest: string } = { flat: '', entrance: '', floor: '', intercom: '', rest: '' };
+  const rest: string[] = [];
+  const put = (key: AptKey, value: string) => {
+    if (out[key] || !value || value.length > APT_MAX[key]) return false;
+    out[key] = value;
+    return true;
+  };
+  for (const piece of String(details ?? '').split(/[,;]+/)) {
+    const words = piece
+      .replace(/код\s+домофона/giu, 'домофон')
+      .replace(/[:№]/g, ' ')
+      // «кв12», «5эт» — label and number apart / подпись и число порознь
+      .replace(/(?<![\p{L}])(кв\.?|эт\.?)(?=\d)/giu, '$1 ')
+      .replace(/(\d)(?=(?:эт|этаж|подъезд)(?![\p{L}]))/giu, '$1 ')
+      .split(/\s+/)
+      .filter(Boolean);
+    const left: string[] = [];
+    // a label takes the number after it («подъезд 2»), a number takes the label
+    // after it («2 подъезд»); left to right, so «кв 45 3 подъезд» is two pairs
+    // подпись берёт число после себя («подъезд 2»), число — подпись после себя
+    // («2 подъезд»); слева направо, поэтому «кв 45 3 подъезд» — две пары
+    for (let i = 0; i < words.length; i += 1) {
+      const [word, next] = [words[i], words[i + 1]];
+      const kind = kindOf(word);
+      if (kind && valueOf(next) && put(kind, kind === 'flat' && /^оф/iu.test(word) ? `${word} ${next}` : valueOf(next))) {
+        i += 1;
+        continue;
+      }
+      const after = kindOf(next);
+      if (!kind && after && valueOf(word) && put(after, after === 'flat' && /^оф/iu.test(next) ? `${next} ${word}` : valueOf(word))) {
+        i += 1;
+        continue;
+      }
+      left.push(word);
+    }
+    if (left.length) rest.push(left.join(' '));
+  }
+  // an unlabelled number is the flat («12», «12А»); words go to the comment
+  // число без подписи — квартира («12», «12А»); слова — в комментарий
+  if (rest.length && /^\d[\p{L}\d/-]{0,5}$/u.test(rest[0]) && put('flat', rest[0])) rest.shift();
+  out.rest = rest.join(', ');
+  return out;
 };
 
 const DAY = 86_400_000;
@@ -213,7 +355,10 @@ export const buildOrder = (cart: Cart, index: CartIndex, form: CheckoutForm, num
     fulfillment: form.fulfillment,
     place: delivery ? null : (form.place ?? null),
     address: delivery ? (form.address ?? '').trim() : null,
-    address_details: delivery ? (form.details ?? '').trim() || null : null,
+    address_flat: delivery ? aptPart('flat', form.flat) : null,
+    address_entrance: delivery ? aptPart('entrance', form.entrance) : null,
+    address_floor: delivery ? aptPart('floor', form.floor) : null,
+    address_intercom: delivery ? aptPart('intercom', form.intercom) : null,
     desired_time: desiredTime(form),
     comment: (form.comment ?? '').trim() || null,
     items: lines

@@ -28,11 +28,13 @@ import {
 } from '../lib/cart';
 import {
   CHECKOUT_KEY,
+  addressLine,
   buildOrder,
   daysFrom,
   bindPhoneMask,
   orderNumber,
   slotsFor,
+  splitDetails,
   validate,
   type CheckoutForm,
   type Errors,
@@ -49,6 +51,7 @@ import {
   canQuote,
   canSuggest,
   deliveryCost,
+  hasAptWords,
   hasHouse,
   minOrderText,
   normalizeAddress,
@@ -500,7 +503,10 @@ if (dataNode && drawer && dishDialog) {
     fulfillment: radio('fulfillment') === 'pickup' ? 'pickup' : 'delivery',
     place: Number(radio('place')) || null,
     address: field('address')?.value ?? '',
-    details: field('details')?.value ?? '',
+    flat: field('flat')?.value ?? '',
+    entrance: field('entrance')?.value ?? '',
+    floor: field('floor')?.value ?? '',
+    intercom: field('intercom')?.value ?? '',
     when: radio('when') === 'later' ? 'later' : 'asap',
     date: field<HTMLSelectElement>('date')?.value,
     time: field<HTMLSelectElement>('time')?.value,
@@ -586,7 +592,12 @@ if (dataNode && drawer && dishDialog) {
     // минимум зоны не добран: кнопка говорит, что закрыта, строка под счётом — почему
     const blocked = blocksOrder(delivery, dishes);
     const button = $('[data-submit]', form);
-    if (blocked) button?.setAttribute('aria-disabled', 'true');
+    // without the consent tick the button looks closed too; the click still
+    // runs validation, which names the tick and lights it up
+    // без галочки согласия кнопка тоже выглядит закрытой; клик всё равно
+    // запускает проверку, которая называет галочку и подсвечивает её
+    const consented = field('consent')?.checked ?? false;
+    if (blocked || !consented) button?.setAttribute('aria-disabled', 'true');
     else button?.removeAttribute('aria-disabled');
     const note = $('[data-bill-note]', form);
     if (note) {
@@ -762,7 +773,12 @@ if (dataNode && drawer && dishDialog) {
   const showHint = (text: string) => {
     if (addressHint && addressHint.textContent !== text) addressHint.textContent = text;
   };
-  const HINT = 'Подскажем дом и посчитаем доставку';
+  const HINT = 'Выберите дом из списка — так мы точно посчитаем доставку';
+  // the whole address in one line («…, 165Б, кв 12, подъезд 2») is what the map
+  // could not find: the hint points to the fields made for the rest
+  // весь адрес одной строкой («…, 165Б, кв 12, подъезд 2») карта и не находила:
+  // подсказка показывает на поля, сделанные для остального
+  const hintFor = (value: string) => (hasAptWords(value) ? 'Квартиру, подъезд и этаж — в полях ниже, здесь только улица и дом' : HINT);
 
   const suggest = async (query: string) => {
     if (!addressInput) return;
@@ -773,7 +789,7 @@ if (dataNode && drawer && dishDialog) {
       openList(items);
       // only houses are offered: a street without a number gets a nudge, not silence
       // предлагаются только дома: улица без номера получает подсказку, а не тишину
-      showHint(!items.length && !hasHouse(query) ? 'Допишите номер дома — подскажем адрес' : HINT);
+      showHint(!items.length && !hasHouse(query) ? 'Допишите номер дома — подскажем адрес' : hintFor(query));
       if (items.length) announce(`${items.length} ${items.length === 1 ? 'подсказка' : items.length < 5 ? 'подсказки' : 'подсказок'} адреса, выбор — стрелками`);
     };
     if (cached) return apply(cached);
@@ -824,7 +840,7 @@ if (dataNode && drawer && dishDialog) {
     addressInput.addEventListener('input', () => {
       const value = addressInput.value;
       pickedKey = '';
-      showHint(HINT);
+      showHint(hintFor(value));
       // what was counted belongs to the old address: back to «by the address» until the new one is known
       // посчитанное относится к старому адресу: снова «по адресу», пока не известен новый
       if (delivery.kind !== 'pickup' && delivery.kind !== 'empty' && normalizeAddress(delivery.address) !== normalizeAddress(value)) {
@@ -948,19 +964,49 @@ if (dataNode && drawer && dishDialog) {
 
   // the contact part of the form is remembered for the next order on this device
   // контактная часть формы запоминается для следующего заказа на этом устройстве
-  const DRAFT_FIELDS = ['name', 'phone', 'address', 'details'] as const;
+  const DRAFT_FIELDS = ['name', 'phone', 'address', 'flat', 'entrance', 'floor', 'intercom'] as const;
+  // words of an old draft that fit no field wait in the comment, and in the
+  // draft too, until the order leaves or the guest erases them
+  // слова старого черновика, не подошедшие ни к одному полю, ждут в комментарии
+  // и в черновике, пока заказ не уйдёт или гость их не сотрёт
+  let legacyRest = '';
   const saveDraft = () => {
     const data = read();
+    if (legacyRest && !(data.comment ?? '').includes(legacyRest)) legacyRest = '';
     store.set(
       CHECKOUT_KEY,
-      JSON.stringify({ name: data.name, phone: data.phone, address: data.address, details: data.details, fulfillment: data.fulfillment, place: data.place }),
+      JSON.stringify({
+        name: data.name,
+        phone: data.phone,
+        address: data.address,
+        flat: data.flat,
+        entrance: data.entrance,
+        floor: data.floor,
+        intercom: data.intercom,
+        fulfillment: data.fulfillment,
+        place: data.place,
+        ...(legacyRest && { details: legacyRest }),
+      }),
     );
   };
   try {
     const draft = JSON.parse(store.get(CHECKOUT_KEY) ?? '{}');
+    // a draft from before the separate fields kept «Квартира, подъезд, этаж» in
+    // one line: its pieces go to the fields still empty, the words that fit
+    // none — to the comment; the draft is rewritten at once in the new shape
+    // черновик до отдельных полей хранил «Квартира, подъезд, этаж» одной строкой:
+    // её куски уходят в ещё пустые поля, слова, не подошедшие ни к одному, — в
+    // комментарий; черновик сразу переписывается в новом виде
+    const legacy = typeof draft.details === 'string' && draft.details.trim() ? splitDetails(draft.details) : null;
+    if (legacy) for (const key of ['flat', 'entrance', 'floor', 'intercom'] as const) if (!draft[key] && legacy[key]) draft[key] = legacy[key];
     for (const key of DRAFT_FIELDS) {
       const input = field(key);
       if (input && typeof draft[key] === 'string') input.value = draft[key];
+    }
+    const comment = field<HTMLTextAreaElement>('comment');
+    if (legacy?.rest && comment && !comment.value.trim()) {
+      comment.value = legacy.rest;
+      legacyRest = legacy.rest;
     }
     if (draft.fulfillment === 'pickup') {
       const pickup = form.querySelector<HTMLInputElement>('input[name="fulfillment"][value="pickup"]');
@@ -970,6 +1016,7 @@ if (dataNode && drawer && dishDialog) {
       const place = form.querySelector<HTMLInputElement>(`input[name="place"][value="${Number(draft.place)}"]`);
       if (place) place.checked = true;
     }
+    if (legacy) saveDraft();
   } catch {
     /* a broken draft is just no draft / битый черновик — просто без черновика */
   }
@@ -997,6 +1044,15 @@ if (dataNode && drawer && dishDialog) {
         else target.removeAttribute('aria-invalid');
       }
     }
+    // the consent row gets a frame and a nudge while it is the thing missing
+    // строка согласия получает рамку и толчок, пока не хватает именно её
+    const consentRow = $('[data-consent]', form);
+    if (consentRow) {
+      const wanted = Boolean(errors.consent);
+      if (wanted && !consentRow.classList.contains('is-attention')) {
+        consentRow.classList.add('is-attention');
+      } else if (!wanted) consentRow.classList.remove('is-attention');
+    }
   };
 
   const phone = field('phone');
@@ -1010,6 +1066,7 @@ if (dataNode && drawer && dishDialog) {
   form.addEventListener('change', (event) => {
     const target = event.target as HTMLInputElement;
     if (target.name === 'date') fillTimes();
+    if (target.name === 'consent') paintBill();
     togglePart();
     if (tried) showErrors(validate(read()));
     saveDraft();
@@ -1070,6 +1127,18 @@ if (dataNode && drawer && dishDialog) {
         .join('') + extras.join('');
     const after = $('[data-done-after]', drawer);
     if (after) after.textContent = bill.cost === null ? 'Стоимость доставки назовём там же.' : 'Оплату обсудим там же.';
+    // where and when, as they left: the guest checks them before the call, the manager says the same
+    // куда и когда — как ушло: гость сверяет до звонка, менеджер назовёт то же
+    const where = $('[data-done-where]', drawer);
+    if (where) {
+      const pickup = sent.fulfillment === 'pickup';
+      const place = form.querySelector<HTMLInputElement>('input[name="place"]:checked')?.closest('.place-opt')?.querySelector('.place-opt__name')?.textContent?.trim();
+      // «Куда», not «Доставка»: the bill right under it has its own «Доставка» row
+      // «Куда», а не «Доставка»: у счёта прямо под ним своя строка «Доставка»
+      $('[data-done-where-label]', drawer)!.textContent = pickup ? 'Откуда' : 'Куда';
+      where.textContent = pickup ? (place ?? '') : addressLine(sent);
+      $('[data-done-when]', drawer)!.textContent = sent.desired_time;
+    }
     cartAccount?.done(bill.points);
     cart = empty();
     store.set(CART_KEY, JSON.stringify(cart));
@@ -1095,6 +1164,19 @@ if (dataNode && drawer && dishDialog) {
         first === 'place'
           ? form.querySelector<HTMLInputElement>('input[name="place"]')
           : field<HTMLElement>(ERROR_FIELD[first]);
+      if (first === 'consent') {
+        // the only thing missing is the tick: bring it to the middle of the screen and nudge again
+        // не хватает только галочки: вывести её в середину экрана и толкнуть ещё раз
+        const row = $('[data-consent]', form);
+        row?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        if (row) {
+          row.classList.remove('is-attention');
+          void row.offsetWidth;
+          row.classList.add('is-attention');
+        }
+        target?.focus({ preventScroll: true });
+        return;
+      }
       target?.focus();
       return;
     }

@@ -2384,6 +2384,73 @@ html:has(.dlg[open]) {
   color: var(--terracotta-text);
 }
 
+/* ── для курьера: квартира, подъезд, этаж, домофон ── */
+
+/* Four short fields under one legend: 2 × 2 on the phone, one row in the
+   440 px drawer. In the row each column is as wide as its label plus an equal
+   share of what is left (the floor never under 56 px), so «Квартира / офис»
+   keeps one line even beside a 17 px scrollbar; the subgrid holds the four
+   inputs on one line when a label does wrap at a larger text size.
+   Четыре коротких поля под одной подписью: 2 × 2 на телефоне, один ряд в
+   корзине 440 px. В ряду каждая колонка шириной в свою подпись плюс равная
+   доля остатка (этаж не уже 56 px), поэтому «Квартира / офис» остаётся в одну
+   строку даже рядом с полосой прокрутки 17 px; подсетка держит четыре поля на
+   одной линии, если подпись всё же переносится при крупном шрифте. */
+.apt {
+  min-width: 0;
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
+}
+
+.apt__legend {
+  margin-bottom: 10px;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.apt__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 10px;
+}
+
+.apt__field {
+  display: grid;
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+  row-gap: 5px;
+  margin-bottom: 0;
+}
+
+.apt__field label {
+  align-self: end;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text-3);
+}
+
+/* the column is sized by the label, not by the input's own 20-character width
+   колонку задаёт подпись, а не собственная ширина поля в 20 знаков */
+.apt__field input {
+  width: 0;
+  min-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .apt__grid {
+    grid-template-columns: auto auto minmax(56px, auto) auto;
+    column-gap: 10px;
+  }
+
+  .apt__field input {
+    padding-inline: 12px;
+  }
+}
+
 .seg {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2504,6 +2571,53 @@ html:has(.dlg[open]) {
   accent-color: var(--olive);
 }
 
+/* the tick is what is missing: a terracotta frame around the row and a short nudge
+   не хватает именно галочки: терракотовая рамка вокруг строки и короткий толчок */
+.consent.is-attention {
+  padding: 10px 12px;
+  margin-inline: -12px;
+  border: 1.5px solid var(--terracotta);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--terracotta) 9%, transparent);
+  color: var(--text);
+  animation: consent-nudge 0.5s ease;
+}
+
+.consent.is-attention input {
+  outline: 2px solid var(--terracotta);
+  outline-offset: 2px;
+}
+
+.consent.is-attention + .field__err {
+  margin-left: 0;
+  font-weight: 600;
+}
+
+@keyframes consent-nudge {
+  0%,
+  100% {
+    translate: 0;
+  }
+  20% {
+    translate: -4px;
+  }
+  40% {
+    translate: 4px;
+  }
+  60% {
+    translate: -3px;
+  }
+  80% {
+    translate: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .consent.is-attention {
+    animation: none;
+  }
+}
+
 .consent a {
   color: var(--text);
   text-underline-offset: 3px;
@@ -2622,6 +2736,42 @@ html:has(.dlg[open]) {
 .done__text b {
   color: var(--text);
   white-space: nowrap;
+}
+
+/* where and when the order goes: a quiet pair of facts above the bill, no rules
+   of its own — the bill under it already draws them
+   куда и когда: тихая пара фактов над счётом без своих линеек — их уже рисует
+   счёт под ней */
+.done__info {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  margin: 20px 0 0;
+  text-align: left;
+}
+
+.done__info > div {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.done__info dt {
+  padding-top: 3px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+
+.done__info dd {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--text);
+  text-wrap: pretty;
 }
 
 .done__lines {

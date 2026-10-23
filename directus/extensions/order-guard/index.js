@@ -31,16 +31,34 @@
  * не принимается, а «К оплате» = блюда − скидка − баллы + доставка получает
  * каждый заказ.
  *
+ * The address by parts (since 23.10.2026): `address` is the street and the
+ * house — the only part the zone is looked up by — and the flat, the entrance,
+ * the floor and the intercom code come in `address_flat`, `address_entrance`,
+ * `address_floor`, `address_intercom`; the old one-line `address_details` is
+ * still taken from an older page.
+ * Адрес по пунктам (с 23.10.2026): `address` — улица и дом, только по ним ищется
+ * зона, — а квартира, подъезд, этаж и код домофона приходят в `address_flat`,
+ * `address_entrance`, `address_floor`, `address_intercom`; старое однострочное
+ * `address_details` от старой страницы по-прежнему принимается.
+ *
  * No build step: this file is the extension. / Без сборки: этот файл и есть расширение.
  */
 import { deliveryCost, minOrderError, normalizeAddress, quote, toZones } from '../delivery/geo.js';
 import { geocoder } from '../delivery/photon.js';
+import { ADDRESS_PARTS, addressLine } from '../notify/lib.js';
 
 const LIMITS = {
   lines: 40,
   qty: 50,
   name: 80,
   address: 200,
+  // the address by parts (since 23.10.2026) / адрес по пунктам (с 23.10.2026)
+  address_flat: 20,
+  address_entrance: 10,
+  address_floor: 10,
+  address_intercom: 20,
+  // the old one-line «кв., подъезд, этаж»: older pages may still send it
+  // старая строка «кв., подъезд, этаж»: её ещё может прислать старая страница
   details: 120,
   when: 80,
   comment: 1000,
@@ -86,6 +104,16 @@ export const weightText = (value) =>
     .trim();
 
 const text = (value, max) => (typeof value === 'string' ? value.trim().slice(0, max) : '');
+// a short part of the address: a number is taken as typed, spaces and line
+// breaks fold into one space
+// короткий пункт адреса: число принимается как набрано, пробелы и переводы
+// строк сворачиваются в один пробел
+const part = (value, max) =>
+  (typeof value === 'number' && Number.isFinite(value) ? String(value) : typeof value === 'string' ? value : '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, max)
+    .trim();
 const rub = (n) => `${new Intl.NumberFormat('ru-RU').format(n)} ₽`;
 
 /** «8 (987) 955 25 65» → «+7 987 955-25-65»; null — не российский мобильный/городской */
@@ -310,6 +338,18 @@ export default ({ filter, action }, { services, logger, emitter = null, database
       fulfillment,
       place,
       address: fulfillment === 'delivery' ? address : null,
+      // the flat, the entrance, the floor, the intercom — only the filled ones:
+      // an empty part stays the column's null, so an order from a page without
+      // the parts goes through even before `pnpm setup` gave the public role
+      // the new fields; pickup — none
+      // квартира, подъезд, этаж, домофон — только заполненные: пустой пункт
+      // остаётся null колонки, поэтому заказ со страницы без пунктов проходит
+      // и до того, как `pnpm setup` дал публичной роли новые поля; у самовывоза — ничего
+      ...Object.fromEntries(
+        fulfillment === 'delivery'
+          ? ADDRESS_PARTS.map(({ field }) => [field, part(payload[field], LIMITS[field])]).filter(([, value]) => value)
+          : [],
+      ),
       address_details: fulfillment === 'delivery' ? text(payload.address_details, LIMITS.details) || null : null,
       desired_time: text(payload.desired_time, LIMITS.when) || 'Как можно скорее',
       comment: text(payload.comment, LIMITS.comment) || null,
@@ -356,10 +396,11 @@ export default ({ filter, action }, { services, logger, emitter = null, database
       // an order entered by an editor carries no delivery fields: its line stays as it was
       // у заказа, который вбил редактор, полей доставки нет: его строка остаётся как была
       const priced = 'delivery_cost' in payload || payload.source === 'site';
+      // «Доставка: Советской Армии, 177, кв. 12, подъезд 2, этаж 5, домофон 12К · зона …»
       const how =
         payload.fulfillment === 'pickup'
           ? 'Самовывоз'
-          : `Доставка: ${payload.address ?? ''}${payload.address_details ? `, ${payload.address_details}` : ''}${
+          : `Доставка: ${addressLine(payload) || 'адрес не указан'}${
               priced ? ` · ${deliveryText({ zone: payload.delivery_zone, cost: payload.delivery_cost, freeFrom })}` : ''
             }`;
       const toPay = payload.to_pay ?? payload.total ?? 0;

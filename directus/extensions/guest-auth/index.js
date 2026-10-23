@@ -58,6 +58,7 @@ const PROFILE_FIELDS = [
 ];
 const ORDER_FIELDS = [
   'id', 'number', 'status', 'date_created', 'fulfillment', 'place', 'address', 'desired_time',
+  'address_flat', 'address_entrance', 'address_floor', 'address_intercom', 'delivery_zone', 'delivery_cost',
   'items', 'total', 'bonus_spent', 'discount', 'to_pay', 'bonus_earned',
 ];
 const TX_FIELDS = ['id', 'type', 'amount', 'date_created', 'expires_at', 'comment', 'order.number'];

@@ -114,6 +114,42 @@ export const mailState = (env = {}) => {
 // ── what is being reported / о чём сообщаем ──────────────────────────────────
 
 /**
+ * The address by parts (since 23.10.2026): the street and the house in
+ * `address` — the only part the geocoder sees — and the flat, the entrance,
+ * the floor and the intercom code in their own fields. A part typed with its
+ * own word («офис 5», «подъезд 2») is not prefixed twice.
+ * Адрес по пунктам (с 23.10.2026): улица и дом в `address` — только их видит
+ * геокодер, — квартира, подъезд, этаж и код домофона в своих полях. Пункт,
+ * набранный со своим словом («офис 5», «подъезд 2»), второй раз не подписывается.
+ */
+export const ADDRESS_PARTS = [
+  // a flat is «кв. 12»; «офис 5», «кв 12», «пом. 3» stay as typed
+  // квартира — «кв. 12»; «офис 5», «кв 12», «пом. 3» остаются как набраны
+  { field: 'address_flat', word: 'кв.', own: /^\p{L}/u },
+  // «подъезд 2», «5 этаж», «код 45#» already carry their word
+  // «подъезд 2», «5 этаж», «код 45#» уже несут своё слово
+  { field: 'address_entrance', word: 'подъезд', own: /подъезд|под\./iu },
+  { field: 'address_floor', word: 'этаж', own: /этаж/iu },
+  { field: 'address_intercom', word: 'домофон', own: /домофон|код/iu },
+];
+
+/**
+ * «Советской Армии, 177, кв. 12, подъезд 2, этаж 5, домофон 12К»: the street
+ * and the house, the parts that are filled, then the old one-line
+ * `address_details` of the orders made before the parts. Empty — ''.
+ * Улица и дом, заполненные пункты, затем старое однострочное `address_details`
+ * заказов, сделанных до пунктов. Пусто — ''.
+ */
+export const addressLine = (order = {}) => {
+  const clean = (value) => (typeof value === 'string' || typeof value === 'number' ? String(value).replace(/\s+/g, ' ').trim() : '');
+  const parts = ADDRESS_PARTS.map(({ field, word, own }) => {
+    const value = clean(order[field]);
+    return value && (own.test(value) ? value : `${word} ${value}`);
+  });
+  return [clean(order.address), ...parts, clean(order.address_details)].filter(Boolean).join(', ');
+};
+
+/**
  * One shape for an order, a request and a status change, so that every
  * channel renders the same facts. `rows` are database rows, `names` the related
  * titles (`place`, `format`), `adminUrl` the card in the admin.
@@ -126,7 +162,7 @@ export const orderModel = (order, { place = null, adminUrl = null } = {}) => {
   const how =
     order.fulfillment === 'pickup'
       ? `Самовывоз${place ? `: ${place}` : ''}`
-      : `Доставка: ${[order.address, order.address_details].filter(Boolean).join(', ') || 'адрес не указан'}${order.delivery_zone ? ` · зона «${order.delivery_zone}»` : ''}`;
+      : `Доставка: ${addressLine(order) || 'адрес не указан'}${order.delivery_zone ? ` · зона «${order.delivery_zone}»` : ''}`;
   return {
     kind: 'order',
     collection: 'orders',

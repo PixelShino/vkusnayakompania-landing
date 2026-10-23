@@ -153,19 +153,19 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
                 `GET /delivery/suggest` под полем, расчёт зоны под ними. Без
                 скрипта — обычное поле, как было. */}
             <div class="field field--address">
-              <label for="co-address">Адрес</label>
+              <label for="co-address">Улица и дом</label>
               <div class="combo" data-combo>
                 <input
                   id="co-address"
                   name="address"
                   autocomplete="street-address"
-                  placeholder="Улица и дом"
+                  placeholder="Например: Советской Армии, 177"
                   maxlength="200"
                   aria-describedby="co-address-hint co-address-dlv co-address-err"
                 />
                 <ul class="combo__list" id="co-address-list" role="listbox" aria-label="Подсказки адреса" data-combo-list hidden></ul>
               </div>
-              <p class="field__hint" id="co-address-hint" data-address-hint>Подскажем дом и посчитаем доставку</p>
+              <p class="field__hint" id="co-address-hint" data-address-hint>Выберите дом из списка — так мы точно посчитаем доставку</p>
               <p class="field__err" id="co-address-err" data-err="address" hidden></p>
               <div class="dlv" id="co-address-dlv" data-dlv hidden>
                 <p class="dlv__line" data-dlv-line>
@@ -187,10 +187,35 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
                 </div>
               </div>
             </div>
-            <div class="field">
-              <label for="co-details">Квартира, подъезд, этаж <span class="field__opt">необязательно</span></label>
-              <input id="co-details" name="details" maxlength="120" autocomplete="address-line2" />
-            </div>
+            {/* What the courier needs at the door, each in its own field: the
+                manager reads «кв. 12, подъезд 2» instead of one line, and the
+                street above stays a line the map can find. A private house
+                leaves them empty — one «необязательно» for the four.
+                Что нужно курьеру у двери, каждое в своём поле: менеджер читает
+                «кв. 12, подъезд 2», а не одну строку, а улица выше остаётся
+                строкой, которую находит карта. Частный дом оставляет их пустыми —
+                одно «необязательно» на все четыре. */}
+            <fieldset class="apt">
+              <legend class="apt__legend">Для курьера <span class="field__opt">необязательно</span></legend>
+              <div class="apt__grid">
+                <div class="field apt__field">
+                  <label for="co-flat">Квартира / офис</label>
+                  <input id="co-flat" name="flat" maxlength="20" autocomplete="address-line2" />
+                </div>
+                <div class="field apt__field">
+                  <label for="co-entrance">Подъезд</label>
+                  <input id="co-entrance" name="entrance" maxlength="10" inputmode="numeric" autocomplete="off" />
+                </div>
+                <div class="field apt__field">
+                  <label for="co-floor">Этаж</label>
+                  <input id="co-floor" name="floor" maxlength="10" inputmode="numeric" autocomplete="off" />
+                </div>
+                <div class="field apt__field">
+                  <label for="co-intercom">Код домофона</label>
+                  <input id="co-intercom" name="intercom" maxlength="20" autocomplete="off" spellcheck="false" />
+                </div>
+              </div>
+            </fieldset>
           </div>
 
           <div class="fs__part" data-for="pickup" hidden>
@@ -246,7 +271,7 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
             name="comment"
             rows="3"
             maxlength="1000"
-            placeholder="Например: домофон не работает, позвоните за 10 минут"></textarea>
+            placeholder="Например: позвоните за 10 минут, оставьте у двери"></textarea>
         </div>
 
         {/* a field people never see: a form-filling bot fills it and is turned away
@@ -256,7 +281,7 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
           <input id="co-company" name="company" tabindex="-1" autocomplete="off" />
         </div>
 
-        <label class="consent">
+        <label class="consent" data-consent>
           <input type="checkbox" name="consent" aria-describedby="co-consent-err" />
           <span>
             Согласен на обработку персональных данных для оформления заказа
@@ -343,6 +368,18 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
           Перезвоним на <b class="tnum" data-done-phone></b>, чтобы подтвердить состав, сумму, адрес и время.
           <span data-done-after>Оплату обсудим там же.</span>
         </p>
+        {/* the address and the time as they left — what the call will confirm
+            адрес и время в том виде, в каком ушли, — то, что подтвердит звонок */}
+        <dl class="done__info">
+          <div>
+            <dt data-done-where-label>Куда</dt>
+            <dd data-done-where></dd>
+          </div>
+          <div>
+            <dt>Когда</dt>
+            <dd data-done-when></dd>
+          </div>
+        </dl>
         <ul class="done__lines" role="list" data-done-lines></ul>
         <p class="done__total">
           <span>К оплате</span>
