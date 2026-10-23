@@ -1,0 +1,35 @@
+---
+/**
+ * One ink strip with one thing to do: «Заказать доставку» between the shelves,
+ * «Свадебные торты» with the request. The mark, the heading in caps antiqua,
+ * a line or two from the content and the actions (slot) on the central axis —
+ * the strip breaks the run of cream shelves and ends with an action.
+ * Одна чернильная полоса с одним делом: «Заказать доставку» между полками,
+ * «Свадебные торты» с заявкой. Марка, заголовок прописной антиквой, строка-две
+ * из контента и действия (слот) по центральной оси — полоса рвёт череду
+ * кремовых полок и заканчивается действием.
+ */
+import { typo } from '../../lib/content.ts';
+
+interface Props {
+  id: string;
+  title: string;
+  text?: string;
+  /** мелкая строка под текстом: вес и срок свадебного торта */
+  note?: string;
+}
+
+const { id, title, text, note } = Astro.props;
+---
+
+<section class="strip-ink ld-ink" id={id} aria-labelledby={`h-${id}`}>
+  <div class="container ld-ink__in" data-reveal>
+    <span class="mark ld-ink__mark" aria-hidden="true"></span>
+    <h2 class="display-caps ld-ink__title" id={`h-${id}`}>{title}</h2>
+    {text && <p class="ld-ink__text">{typo(text)}</p>}
+    {note && <p class="tag ld-ink__note tnum">{note}</p>}
+    <div class="ld-ink__actions">
+      <slot />
+    </div>
+  </div>
+</section>

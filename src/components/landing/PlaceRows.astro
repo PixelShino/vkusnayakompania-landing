@@ -1,0 +1,100 @@
+---
+/**
+ * «Где купить», «Где забрать», «Где позавтракать»: both venues as the site's
+ * contacts ledger on a paper strip — the address in caps antiqua (a link to
+ * the venue's own page), the kind and the status counted in Samara time, the
+ * page's note for this venue («Завтраки весь день»), then the phone and the
+ * hours under small caps labels and a framed route button with the card on
+ * Yandex Maps.
+ * «Где купить», «Где забрать», «Где позавтракать»: обе точки реестром
+ * контактов сайта на бумажной полосе — адрес прописной антиквой (ссылка на
+ * страницу точки), тип и статус по времени Самары, пометка страницы для этой
+ * точки («Завтраки весь день»), затем телефон и часы под мелкими прописными
+ * подписями и кнопка маршрута в рамке с карточкой в Яндекс Картах.
+ */
+import Icon from '../Icon.astro';
+import OpenStatus from '../OpenStatus.astro';
+import { BASE } from '../../lib/base.ts';
+import { typo, type Place } from '../../lib/content.ts';
+import { hoursRows, yandexOrgUrl, yandexRouteUrl } from '../../data/site.ts';
+import { keepRanges, placePath } from '../../data/landings-shop.ts';
+import yandexPin from '../../assets/icons/yandex-maps.svg?raw';
+
+interface Props {
+  places: Place[];
+  id: string;
+  title: string;
+  lead?: string;
+  /** строка о точке именно для этой страницы: id точки → текст */
+  notes?: Record<number, string | undefined>;
+}
+
+const { places, id, title, lead, notes = {} } = Astro.props;
+---
+
+<section class="ld-band strip-paper ld-places" id={id} aria-labelledby={`h-${id}`}>
+  <div class="container">
+    <div class="head" data-reveal>
+      <span class="mark" aria-hidden="true"></span>
+      <h2 class="display-caps" id={`h-${id}`}>{title}</h2>
+      {lead && <p class="lead">{typo(lead)}</p>}
+    </div>
+    <div class="ld-places__list">
+      {
+        places.map((place) => {
+          const path = placePath(place);
+          const note = notes[place.id];
+          return (
+            <article class="ld-place" data-reveal>
+              <h3 class="ld-place__name display display-caps">
+                {path ? <a href={`${BASE}${path.slice(1)}`}>{place.name}</a> : place.name}
+              </h3>
+              <p class="ld-place__kind">
+                {place.kind}
+                <span aria-hidden="true"> · </span>
+                <OpenStatus schedule={place.schedule} class="ld-place__status" />
+              </p>
+              {note && <p class="ld-place__note">{keepRanges(typo(note))}</p>}
+              <dl class="ld-place__facts">
+                <div>
+                  <dt class="label">
+                    <Icon name="phone" />
+                    Телефон
+                  </dt>
+                  <dd>
+                    <a class="ld-place__tel tnum" href={place.phoneHref}>
+                      {place.phone}
+                    </a>
+                  </dd>
+                </div>
+                <div>
+                  <dt class="label">
+                    <Icon name="clock" />
+                    Часы
+                  </dt>
+                  <dd>
+                    {hoursRows(place.schedule).map((row) => (
+                      <span class="ld-place__hours">
+                        <span>{row.days}</span>
+                        <span class="tnum">{row.hours}</span>
+                      </span>
+                    ))}
+                  </dd>
+                </div>
+              </dl>
+              <div class="ld-place__actions">
+                <a class="btn btn--secondary btn--md ld-route" href={yandexRouteUrl(place)} target="_blank" rel="noopener">
+                  <span class="ld-route__ya" aria-hidden="true" set:html={yandexPin} />
+                  Построить маршрут
+                </a>
+                <a class="tlink tlink--go tlink--out" href={yandexOrgUrl(place.yandex_org)} target="_blank" rel="noopener">
+                  <span>На Яндекс Картах</span>
+                </a>
+              </div>
+            </article>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>

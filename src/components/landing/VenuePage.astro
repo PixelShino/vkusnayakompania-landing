@@ -1,0 +1,119 @@
+---
+/**
+ * The page of one venue (`/sadovaya/`, `/sovetskoy-armii/`) — what the
+ * suggestions of Yandex Maps send people for: «… 212б фото», «… меню»,
+ * «… отзывы». The hall first (its first shot beside the H1, the rest as the
+ * gallery strip), then the facts — address with the route, phone, hours by
+ * days with today's status, the score and reviews on Yandex Maps; the
+ * sections of the site that belong to the venue; the questions; the map with
+ * both venues (the owner wants the two pins seen at once). In the markup the
+ * page is about the venue's own node of the layout's graph (`#place-N`).
+ * Страница одной точки (`/sadovaya/`, `/sovetskoy-armii/`) — то, за чем
+ * приходят из подсказок Яндекс Карт: «… 212б фото», «… меню», «… отзывы».
+ * Сначала зал (первый кадр рядом с H1, остальные — лентой галереи), затем
+ * факты — адрес с маршрутом, телефон, часы по дням со статусом на сегодня,
+ * оценка и отзывы в Яндекс Картах; разделы сайта, которые относятся к точке;
+ * вопросы; карта с обеими точками (владелец хочет видеть две метки сразу). В
+ * разметке страница — о собственном узле точки из графа раскладки
+ * (`#place-N`).
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../Header.astro';
+import Footer from '../Footer.astro';
+import Gallery from '../Gallery.astro';
+import YandexMap from '../YandexMap.astro';
+import LandingTop from './LandingTop.astro';
+import PlaceFacts from './PlaceFacts.astro';
+import FaqBand from './FaqBand.astro';
+import RelatedLinks from './RelatedLinks.astro';
+import { pageSchema, urlsOf, warnMissing } from './schema.ts';
+import { BASE } from '../../lib/base.ts';
+import { getContent } from '../../lib/content.ts';
+import { placeId } from '../../lib/seo.ts';
+import { faqLd, faqOf, introOf, landingOf, placeOf, relatedOf, seoOf, type PlaceKey } from '../../data/landings-shop.ts';
+import '../../styles/landing.css';
+
+interface Props {
+  venue: PlaceKey;
+}
+
+const content = await getContent();
+const page = landingOf(Astro.props.venue);
+const place = placeOf(Astro.props.venue, content);
+const seo = seoOf(page, content);
+warnMissing(page, seo.missing);
+if (!place) console.warn(`${page.path}: точки нет в «Точках» — страница закрыта от поиска`);
+
+const urls = urlsOf(Astro.site, page.path);
+const faq = place ? faqOf(Astro.props.venue, content) : [];
+const jsonLd = faq.length ? { '@context': 'https://schema.org', '@graph': [faqLd(urls.url, faq)] } : null;
+const schema = pageSchema(page, urls, place ? { about: { '@id': placeId(urls.site.origin, place.n) } } : {});
+
+// the hall: the first real shot beside the H1; two or more left — a strip, one left — beside it too
+// зал: первый настоящий кадр рядом с H1; осталось два и больше — лента, один — тоже рядом
+const shots = place?.gallery.filter((shot) => !shot.image.placeholder) ?? [];
+const rest = shots.slice(1);
+const strip = rest.length >= 2;
+// the gallery reads venues and directions from the content: only this venue, without the first shot
+// галерея читает точки и направления из контента: только эта точка, без первого кадра
+const galleryContent = place && strip ? { ...content, places: [{ ...place, gallery: rest }], directions: [] } : null;
+---
+
+<BaseLayout
+  content={content}
+  title={seo.title}
+  keywords={page.keywords}
+  description={seo.description}
+  noindex={!place}
+  landing={false}
+  ogImage={shots[0]?.image}
+  schema={schema}
+>
+  {jsonLd && <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} is:inline />}
+  <Header content={content} over={false} />
+
+  <main id="main" class="ld ld--venue" tabindex="-1">
+    <LandingTop
+      crumb={page.crumb}
+      title={seo.h1}
+      lead={introOf(Astro.props.venue, content)}
+      photo={shots[0]?.image}
+      photo2={strip ? undefined : rest[0]?.image}
+    >
+      {
+        place ? (
+          <>
+            <button type="button" class="btn btn--primary" data-book={`Бронь стола: ${place.street}`}>
+              Забронировать стол
+            </button>
+            <a class="btn btn--secondary" href={`${BASE}menu/`}>
+              Смотреть меню
+            </a>
+          </>
+        ) : (
+          <a class="btn btn--primary" href={BASE}>
+            На главную
+          </a>
+        )
+      }
+    </LandingTop>
+
+    {place && <PlaceFacts place={place} />}
+
+    {galleryContent && <Gallery content={galleryContent} />}
+
+    <RelatedLinks links={relatedOf(Astro.props.venue)} title="Что здесь есть" />
+
+    <FaqBand items={faq} title={place ? `Вопросы о ${page.key === 'sadovaya' ? 'кафе' : 'ресторане'}` : undefined} />
+
+    {
+      place && (
+        <section class="ld-map" aria-label="Обе точки на карте">
+          <YandexMap content={content} />
+        </section>
+      )
+    }
+  </main>
+
+  <Footer content={content} base={BASE} />
+</BaseLayout>

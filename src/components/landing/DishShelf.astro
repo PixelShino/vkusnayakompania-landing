@@ -1,0 +1,49 @@
+---
+/**
+ * A shelf of dishes: the heading in caps antiqua on the left with the count,
+ * one line from the content under it and «Все в каталоге» to the very section
+ * of the catalog; then the grid — two columns on the phone, three from 768,
+ * four from 1200.
+ * Полка блюд: заголовок прописной антиквой слева со счётчиком, под ним строка
+ * из контента и «Все в каталоге» — в тот самый раздел каталога; ниже сетка —
+ * две колонки на телефоне, три с 768, четыре с 1200.
+ */
+import DishTile from './DishTile.astro';
+import { BASE } from '../../lib/base.ts';
+import { positions } from '../../lib/catalog.ts';
+import { typo } from '../../lib/content.ts';
+import type { Shelf } from '../../data/landings-shop.ts';
+
+interface Props {
+  shelf: Shelf;
+  /** сколько первых плиток грузить сразу (первая полка страницы) */
+  eager?: number;
+}
+
+const { shelf, eager = 0 } = Astro.props;
+const href = `${BASE}catalog/#${shelf.section.slug}`;
+---
+
+<section class="ld-shelf" id={shelf.id} aria-labelledby={`h-${shelf.id}`}>
+  <div class="container">
+    <header class="ld-shelf__head" data-reveal>
+      <div class="ld-shelf__name">
+        <h2 class="display-caps ld-shelf__title" id={`h-${shelf.id}`}>{shelf.title}</h2>
+        <span class="tag ld-shelf__n">{positions(shelf.products.length)}</span>
+      </div>
+      {shelf.lead && <p class="ld-shelf__lead">{typo(shelf.lead)}</p>}
+      <a class="tlink tlink--go ld-shelf__all" href={href}>
+        <span>{`«${shelf.section.title}» в каталоге`}</span>
+      </a>
+    </header>
+    <ul class="ld-grid" role="list">
+      {
+        shelf.products.map((product, i) => (
+          <li>
+            <DishTile product={product} eager={i < eager} />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

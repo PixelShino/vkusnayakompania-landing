@@ -1,0 +1,125 @@
+---
+/**
+ * The first screen of a search landing: crumbs, the mark at the left edge,
+ * the H1 in caps antiqua, the lead from the content and the page's actions
+ * (default slot). Beside it — what the page is about: three dishes from the
+ * catalog as a print (one large, two small; a row of three on the phone) or a
+ * shot of the venue's hall. Left-aligned like the catalog: these pages work,
+ * they are not the home page's poster.
+ * Первый экран посадочной страницы: крошки, марка у левого края, H1 прописной
+ * антиквой, вводный текст из контента и действия страницы (слот). Рядом — о
+ * чём страница: три блюда из каталога оттиском (одно крупно, два мельче; на
+ * телефоне — три в ряд) или кадр зала точки. Выровнено влево, как каталог:
+ * эти страницы рабочие, а не афиша главной.
+ */
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import Photo from '../Photo.astro';
+import { BASE } from '../../lib/base.ts';
+import { photoWidths, type Product } from '../../lib/catalog.ts';
+import { typo, type Img } from '../../lib/content.ts';
+import { keepRanges } from '../../data/landings-shop.ts';
+
+interface Props {
+  /** промежуточные крошки между «Главной» и страницей */
+  crumbs?: { name: string; href: string }[];
+  /** последняя крошка — сама страница */
+  crumb: string;
+  title: string;
+  lead?: string;
+  /** до трёх блюд с фото — оттиск справа */
+  dishes?: Product[];
+  /** кадр зала — вместо блюд */
+  photo?: Img;
+  /** второй кадр зала, если галерее не набирается ленты */
+  photo2?: Img;
+}
+
+const { crumbs = [], crumb, title, lead, dishes = [], photo, photo2 } = Astro.props;
+const prints = dishes.filter((dish) => dish.photo && !dish.photo.placeholder).slice(0, 3);
+const media = photo ? 'room' : prints.length === 3 ? 'dishes' : null;
+// the large print takes half the row from 768, the small ones a quarter
+// крупный оттиск занимает половину ряда с 768, мелкие — четверть
+const SIZES = ['(min-width: 1200px) 300px, (min-width: 768px) 180px, 31vw', '(min-width: 1200px) 190px, (min-width: 768px) 115px, 31vw'];
+---
+
+<section class="container ld-top" aria-labelledby="ld-title">
+  <nav class="ld-crumbs" aria-label="Вы здесь">
+    <a href={BASE}>Главная</a>
+    {
+      crumbs.map((item) => (
+        <>
+          <span aria-hidden="true">/</span>
+          <a href={item.href}>{item.name}</a>
+        </>
+      ))
+    }
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">{crumb}</span>
+  </nav>
+
+  <div class:list={['ld-top__grid', media && `ld-top__grid--${media}`]}>
+    <div class="ld-top__text" data-reveal>
+      <span class="mark ld-mark" aria-hidden="true"></span>
+      <h1 class="display-caps ld-top__title" id="ld-title" tabindex="-1">{title}</h1>
+      {lead && <p class="lead ld-top__lead">{keepRanges(typo(lead))}</p>}
+      <div class="ld-top__actions">
+        <slot />
+      </div>
+    </div>
+
+    {
+      media === 'dishes' && (
+        <div class="ld-prints">
+          {prints.map((dish, i) => {
+            const shot = dish.photo!;
+            const width = Math.min(shot.width, 720);
+            return (
+              <figure class:list={['ld-print', i === 0 && 'ld-print--lead']}>
+                <Image
+                  src={shot.src as ImageMetadata}
+                  alt={shot.alt}
+                  width={width}
+                  height={Math.round((shot.height * width) / shot.width)}
+                  widths={photoWidths(shot.width)}
+                  sizes={SIZES[i === 0 ? 0 : 1]}
+                  format="webp"
+                  quality={76}
+                  loading="eager"
+                  decoding="async"
+                  fetchpriority={i === 0 ? 'high' : 'low'}
+                />
+              </figure>
+            );
+          })}
+        </div>
+      )
+    }
+    {
+      media === 'room' && photo && (
+        <div class:list={['ld-room', photo2 && 'ld-room--pair']}>
+          {/* one shot — a landscape frame; two — a pair of portrait frames, the second stepped down
+              один кадр — горизонтальная рамка; два — пара вертикальных, второй ступенью ниже */}
+          <Photo
+            photo={photo}
+            ratio={photo2 ? '3 / 4' : '4 / 3'}
+            ratioMd={photo2 ? '3 / 4' : '5 / 4'}
+            radius="var(--r-sq)"
+            sizes={photo2 ? '(min-width: 1200px) 290px, (min-width: 768px) 22vw, 50vw' : '(min-width: 1200px) 620px, (min-width: 768px) 46vw, 100vw'}
+            eager
+            class="ld-room__main"
+          />
+          {photo2 && (
+            <Photo
+              photo={photo2}
+              ratio="3 / 4"
+              radius="var(--r-sq)"
+              sizes="(min-width: 1200px) 290px, (min-width: 768px) 22vw, 50vw"
+              class="ld-room__second"
+            />
+          )}
+        </div>
+      )
+    }
+  </div>
+</section>

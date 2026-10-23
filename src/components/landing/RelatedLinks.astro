@@ -1,0 +1,41 @@
+---
+/**
+ * «Ещё у нас»: the neighbouring pages as a register of rows — the name in
+ * antiqua, one line of what is there, the terracotta arrow; the whole row is
+ * the link. Paper, not ink: the footer under it is ink already.
+ * «Ещё у нас»: соседние страницы реестром строк — название антиквой, строка о
+ * том, что там, терракотовая стрелка; вся строка — ссылка. Бумага, а не
+ * чернила: подвал под ней уже чернильный.
+ */
+import { BASE } from '../../lib/base.ts';
+import type { ShopLink } from '../../data/landings-shop.ts';
+
+interface Props {
+  links: ShopLink[];
+  title?: string;
+}
+
+const { links, title = 'Ещё у нас' } = Astro.props;
+---
+
+<nav class="ld-band ld-more" aria-labelledby="h-more">
+  <div class="container">
+    <div class="head" data-reveal>
+      <span class="mark" aria-hidden="true"></span>
+      <h2 class="display-caps" id="h-more">{title}</h2>
+    </div>
+    <ul class="ld-more__list" role="list">
+      {
+        links.map((link) => (
+          <li>
+            <a class="ld-more__row" href={`${BASE}${link.href.slice(1)}`}>
+              <span class="ld-more__name display">{link.title}</span>
+              <span class="ld-more__text">{link.text}</span>
+              <span class="ld-more__go" aria-hidden="true" />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</nav>

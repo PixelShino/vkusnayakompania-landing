@@ -1,0 +1,75 @@
+---
+/**
+ * Questions of a landing on an ink strip: native `<details>`, the answer in
+ * the HTML from the start (for search, for answer engines, without scripts),
+ * Ctrl+F opens a folded one by itself. The first answer is open. The same
+ * words go to `FAQPage`, so the page and the markup never disagree.
+ * Вопросы посадочной страницы на чернильной полосе: нативный `<details>`,
+ * ответ в HTML с самого начала (для поиска, для ответов нейросетей, без
+ * скриптов), Ctrl+F сам раскрывает свёрнутый. Первый ответ открыт. Те же
+ * слова идут в `FAQPage` — страница и разметка не расходятся.
+ */
+import { BASE } from '../../lib/base.ts';
+import { typo } from '../../lib/content.ts';
+import { keepRanges, type ShopFaq } from '../../data/landings-shop.ts';
+
+interface Props {
+  items: ShopFaq[];
+  title?: string;
+}
+
+const { items, title = 'Вопросы и ответы' } = Astro.props;
+// a phone number never breaks across lines: «+7 937 999-» / «66-33» reads as two numbers
+// телефон не рвётся между строками: «+7 937 999-» / «66-33» читается как два номера
+const PHONE = /(\+7[\d\s()-]{9,16}\d)/;
+const parts = (text: string) => keepRanges(typo(text)).split(PHONE);
+---
+
+{
+  items.length > 0 && (
+    <section class="strip-ink ld-faq" id="faq" aria-labelledby="h-faq">
+      <div class="container ld-faq__in">
+        <header class="ld-faq__head" data-reveal>
+          <span class="mark ld-faq__mark" aria-hidden="true" />
+          <h2 class="display-caps ld-faq__title" id="h-faq">
+            {title}
+          </h2>
+        </header>
+        <div class="ld-faq__list">
+          {items.map((item, i) => (
+            <details class="ld-faq__item" id={`faq-${item.id}`} open={i === 0}>
+              <summary class="ld-faq__sum">
+                <h3 class="ld-faq__q">{typo(item.q)}</h3>
+                <span class="ld-faq__icon" aria-hidden="true" />
+              </summary>
+              <div class="ld-faq__a">
+                <p>{parts(item.a).map((part, i) => (i % 2 ? <span class="nowrap">{part}</span> : part))}</p>
+                {item.link && (
+                  <p>
+                    <a href={`${BASE}${item.link.href.slice(1)}`}>{item.link.label}</a>
+                  </p>
+                )}
+              </div>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<script>
+  // a link to one answer (`#faq-srok`) opens it; Chrome does it by itself, Safari and Firefox do not
+  // ссылка на один ответ (`#faq-srok`) раскрывает его; Chrome делает это сам, Safari и Firefox — нет
+  const openTarget = () => {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!id.startsWith('faq-')) return;
+    const item = document.getElementById(id);
+    if (item instanceof HTMLDetailsElement && !item.open) {
+      item.open = true;
+      item.scrollIntoView({ block: 'start' });
+    }
+  };
+  openTarget();
+  window.addEventListener('hashchange', openTarget);
+</script>

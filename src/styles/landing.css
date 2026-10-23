@@ -1,0 +1,1467 @@
+/* Посадочные страницы магазина и точек: /cakes/, /desserts/, /breakfasts/,
+   /menu/, /sadovaya/, /sovetskoy-armii/. Один файл на все шесть — у них одна
+   обвязка (`src/components/landing/`): первый экран с крошками, полки блюд,
+   чернильная полоса с действием, «Где купить», вопросы, «Ещё у нас».
+   Search landings of the shop and the venues. One sheet for all six: they
+   share one frame (`src/components/landing/`).
+   Словарь тот же, что у главной и каталога (`docs/DESIGN.md`): бумага и
+   чернила полосами, Prata прописными, марка над заголовками, волосяные линии
+   вместо рамок, квадратные оттиски 3 px; терракота — сигнал, олива — действие.
+   Брейкпоинты только 768 и 1200. Классы с префиксом `ld-`: эти страницы
+   не тянут стили каталога и кейтеринга, а имена не должны с ними спорить. */
+
+/* ── страница ─────────────────────────────────────────────────────────────── */
+
+.ld {
+  /* the shelves' headings land under the sticky header, not behind it
+     заголовки полок встают под липкую шапку, а не за неё */
+  --ld-gap-shelf: 36px;
+}
+
+.ld-band {
+  padding-block: var(--sec-pad);
+}
+
+.ld :where(h1, h2):focus {
+  outline: none;
+}
+
+/* ── первый экран ─────────────────────────────────────────────────────────── */
+
+.ld-top {
+  padding-block: 18px 30px;
+}
+
+.ld-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+
+/* цель нажатия 44 px при строке 15: паддинг растит зону, не сдвигая строку
+   a 44 px target on a 15 px line: the padding grows the area, not the line */
+.ld-crumbs a {
+  margin-block: -14px;
+  padding-block: 14px;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--line-4);
+  text-underline-offset: 3px;
+  transition: color 0.16s ease;
+}
+
+.ld-crumbs [aria-current] {
+  color: var(--text-2);
+}
+
+.ld-top__grid {
+  display: grid;
+  gap: 24px;
+  margin-top: 20px;
+}
+
+/* the mark at the left edge: the page is a working one, aligned with its shelves
+   марка у левого края: страница рабочая, выровнена со своими полками */
+.ld-mark {
+  margin-inline: 0;
+}
+
+.ld-top__title {
+  margin-top: 14px;
+  font-size: clamp(30px, 8.4vw, 40px);
+  text-wrap: balance;
+}
+
+.ld-top__lead {
+  margin-top: 12px;
+  max-width: 56ch;
+}
+
+.ld-top__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  margin-top: 22px;
+}
+
+.ld-top__actions:empty {
+  display: none;
+}
+
+/* on the phone the buttons take the row: two stamps of different widths read ragged
+   на телефоне кнопки во всю строку: два оттиска разной ширины читаются рвано */
+@media (max-width: 767px) {
+  .ld-top__actions .btn {
+    flex: 1 1 100%;
+  }
+}
+
+/* the print: three dishes in a row on the phone, one large and two small from 768
+   оттиск: три блюда в ряд на телефоне, одно крупно и два мельче с 768 */
+.ld-prints {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ld-print {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--r-sq);
+  background: var(--surface);
+}
+
+.ld-print img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mix-blend-mode: multiply;
+  scale: 1.02;
+}
+
+/* the hall: the shot to the screen's edges on the phone, like the catering's first screen
+   зал: кадр до краёв экрана на телефоне, как первый экран кейтеринга */
+.ld-room {
+  display: grid;
+  gap: 8px;
+  margin-inline: calc(var(--pad) * -1);
+}
+
+.ld-room .media {
+  border-radius: 0;
+}
+
+.ld-room--pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 768px) {
+  .ld-top {
+    padding-block: 26px 44px;
+  }
+
+  .ld-top__title {
+    font-size: clamp(40px, 5.2vw, 52px);
+  }
+
+  .ld-top__grid--dishes {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    align-items: center;
+    gap: 40px;
+  }
+
+  .ld-top__grid--room {
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+    align-items: center;
+    gap: 40px;
+  }
+
+  .ld-prints {
+    grid-template-columns: minmax(0, 1.618fr) minmax(0, 1fr);
+    /* the rows are the two small squares; the large one fills them both
+       without adding its own height
+       ряды задают два малых квадрата; крупный заполняет оба, не добавляя своей высоты */
+    grid-template-rows: auto auto;
+    gap: 10px;
+  }
+
+  .ld-print--lead {
+    grid-row: 1 / span 2;
+    aspect-ratio: auto;
+  }
+
+  .ld-print--lead img {
+    position: absolute;
+    inset: 0;
+  }
+
+  .ld-room {
+    margin-inline: 0;
+  }
+
+  .ld-room .media {
+    border-radius: var(--r-sq);
+  }
+
+  .ld-room--pair {
+    gap: 10px;
+    align-items: start;
+  }
+
+  .ld-room--pair .ld-room__second {
+    margin-top: 48px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .ld-top {
+    padding-block: 30px 40px;
+  }
+
+  .ld-top__grid--dishes,
+  .ld-top__grid--room {
+    gap: 72px;
+  }
+
+  .ld-prints {
+    gap: 12px;
+  }
+
+  .ld-room--pair {
+    gap: 12px;
+  }
+}
+
+/* ── полка блюд ───────────────────────────────────────────────────────────── */
+
+.ld-shelf {
+  padding-block: var(--ld-gap-shelf) 8px;
+}
+
+.ld-shelf + .ld-shelf {
+  padding-top: calc(var(--ld-gap-shelf) + 4px);
+}
+
+/* the last shelf before a strip leaves the strip's own breath
+   последняя полка перед полосой оставляет полосе её собственный воздух */
+.ld-shelf:has(+ :not(.ld-shelf)) {
+  padding-bottom: var(--sec-pad);
+}
+
+.ld-shelf__head {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.ld-shelf__name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+}
+
+.ld-shelf__title {
+  font-size: clamp(24px, 6.6vw, 28px);
+}
+
+.ld-shelf__lead {
+  max-width: 62ch;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
+.ld-shelf__all {
+  justify-self: start;
+}
+
+.ld-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px var(--gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ld-grid > li {
+  display: flex;
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .ld {
+    --ld-gap-shelf: 48px;
+  }
+
+  .ld-shelf__head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    column-gap: 32px;
+  }
+
+  .ld-shelf__name,
+  .ld-shelf__lead {
+    grid-column: 1;
+  }
+
+  .ld-shelf__all {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: end;
+  }
+
+  .ld-shelf__title {
+    font-size: 32px;
+  }
+
+  .ld-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 40px 20px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .ld {
+    --ld-gap-shelf: 60px;
+  }
+
+  .ld-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 44px 24px;
+  }
+}
+
+/* ── карточка блюда ───────────────────────────────────────────────────────── */
+
+/* The catalog's card without the cart: the whole tile is one link (the
+   title's, stretched over the tile), the frame prints the shop's white on
+   the paper.
+   Карточка каталога без корзины: вся плитка — одна ссылка (ссылка названия,
+   растянутая на плитку), кадр печатает белый фон магазина на бумаге. */
+.ld-dish {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+}
+
+.ld-dish__frame {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--r-sq);
+  background: var(--surface);
+}
+
+.ld-dish__frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mix-blend-mode: multiply;
+  /* на волос крупнее рамки: у части студийных кадров по краю тёмная полоска
+     a hair larger than the frame: some studio shots carry a dark line on the edge */
+  scale: 1.02;
+  transition: scale 620ms var(--ease-out);
+}
+
+.ld-dish__stub {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  height: 100%;
+  background-color: var(--surface-warm);
+  background-image: var(--hatch);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+
+.ld-dish__stub .ico {
+  width: 34px;
+  height: 34px;
+  color: var(--text-5);
+}
+
+.ld-dish__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding-top: 12px;
+}
+
+.ld-dish__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin-bottom: 5px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+
+.ld-dish__flag {
+  color: var(--terracotta-text);
+}
+
+.ld-dish__flag--out {
+  color: var(--text);
+}
+
+.ld-dish__title {
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.3;
+  text-wrap: pretty;
+}
+
+.ld-dish__title a {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.16s ease;
+}
+
+/* the title's link covers the whole tile: one stop for the keyboard, the whole card for the finger
+   ссылка названия накрывает всю плитку: одна остановка для клавиатуры, вся карточка для пальца */
+.ld-dish__title a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.ld-dish__title a:focus-visible {
+  outline: none;
+}
+
+.ld-dish__title a:focus-visible::after {
+  outline: 2px solid var(--terracotta);
+  outline-offset: 4px;
+  border-radius: var(--r-sq);
+}
+
+.ld-dish__desc {
+  display: none;
+}
+
+.ld-dish__buy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 10px;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.ld-dish__price {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.ld-dish__old {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-4);
+}
+
+/* «Заказать» is a word of the link, not a button: caps in terracotta with the site's arrow
+   «Заказать» — слово ссылки, а не кнопка: прописные терракотой со стрелкой сайта */
+.ld-dish__go {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--terracotta-text);
+}
+
+.ld-dish__go::after {
+  content: '';
+  width: 15px;
+  height: 15px;
+  background-color: currentColor;
+  -webkit-mask: var(--go-glyph) center / 100% no-repeat;
+  mask: var(--go-glyph) center / 100% no-repeat;
+  transition: translate 240ms var(--ease-out);
+}
+
+.ld-dish--out .ld-dish__frame img {
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+.ld-dish--out .ld-dish__title a,
+.ld-dish--out .ld-dish__price {
+  color: var(--text-4);
+}
+
+@media (min-width: 768px) {
+  .ld-dish__title {
+    font-size: 15.5px;
+  }
+
+  .ld-dish__desc {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    margin-top: 6px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--text-3);
+  }
+
+  .ld-dish__buy {
+    padding-top: 14px;
+  }
+
+  .ld-dish__price {
+    font-size: 16.5px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ld-dish:hover .ld-dish__frame img {
+    scale: 1.06;
+  }
+
+  .ld-dish:hover .ld-dish__title a {
+    color: var(--terracotta-text);
+  }
+
+  .ld-dish:hover .ld-dish__go::after {
+    translate: 3px 0;
+  }
+
+  .ld-crumbs a:hover {
+    color: var(--terracotta-text);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ld-dish__frame img,
+  .ld-dish__go::after {
+    transition: none;
+  }
+}
+
+/* ── чернильная полоса с действием ────────────────────────────────────────── */
+
+.ld-ink {
+  padding-block: var(--sec-pad);
+  text-align: center;
+}
+
+.ld-ink__in {
+  display: grid;
+  justify-items: center;
+}
+
+.ld-ink__mark {
+  color: var(--terracotta-on-ink);
+}
+
+.ld-ink__title {
+  max-width: 22ch;
+  margin-top: 18px;
+  font-size: var(--fs-h2);
+}
+
+.ld-ink__text {
+  max-width: 50ch;
+  margin-top: 12px;
+  font-size: var(--fs-lead);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.ld-ink__note {
+  margin-top: 14px;
+}
+
+.ld-ink__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 12px;
+  margin-top: 24px;
+}
+
+/* ── шаги «Как заказать» ──────────────────────────────────────────────────── */
+
+.ld-steps__list {
+  display: grid;
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.ld-step {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  column-gap: 14px;
+  row-gap: 4px;
+  padding-block: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.ld-step__n {
+  grid-row: 1 / span 2;
+  font-size: 30px;
+  line-height: 1;
+  color: var(--terracotta);
+}
+
+.ld-step__title {
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.ld-step__text {
+  font-size: var(--fs-body);
+  line-height: 1.55;
+  color: var(--text-2);
+  text-wrap: pretty;
+}
+
+.ld-steps__actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.ld-steps__actions:empty {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .ld-steps__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 32px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .ld-steps__list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    column-gap: 0;
+    margin-top: 36px;
+    border-top: 0;
+  }
+
+  .ld-step {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    row-gap: 10px;
+    padding: 22px 28px 26px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .ld-step + .ld-step {
+    border-left: 1px solid var(--line);
+  }
+
+  .ld-step:first-child {
+    padding-left: 0;
+  }
+
+  .ld-step__n {
+    grid-row: auto;
+    font-size: 40px;
+  }
+}
+
+/* ── точки: «Где купить», «Где забрать», «Где позавтракать» ───────────────── */
+
+.ld-places__list {
+  display: grid;
+  gap: 26px;
+  margin-top: 28px;
+}
+
+.ld-place {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.ld-place + .ld-place {
+  padding-top: 26px;
+  border-top: 1px solid var(--line-4);
+}
+
+.ld-place__name {
+  font-size: clamp(22px, 5.6vw, 26px);
+  line-height: 1.15;
+}
+
+.ld-place__name a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--line-4);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+  transition:
+    color 0.16s ease,
+    text-decoration-color 0.16s ease;
+}
+
+.ld-place__kind {
+  margin-top: 8px;
+  font-size: calc(var(--fs-body) - 0.5px);
+  color: var(--text-3);
+}
+
+.ld-place__note {
+  margin-top: 10px;
+  max-width: 44ch;
+  font-size: var(--fs-body);
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--olive-dark);
+}
+
+.ld-place__facts {
+  display: grid;
+  gap: 14px 24px;
+  width: 100%;
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.ld-place__facts .label,
+.ld-facts .label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ld-place__facts .label .ico,
+.ld-facts .label .ico {
+  width: 13px;
+  height: 13px;
+  opacity: 0.66;
+}
+
+.ld-place__facts dd {
+  margin: 6px 0 0;
+}
+
+/* a 44 px target on a 24 px line: the padding grows the area, not the line
+   цель 44 px при строке 24: паддинг растит зону, а не строку */
+.ld-place__tel {
+  display: inline-block;
+  margin-block: -10px;
+  padding-block: 10px;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.ld-place__hours,
+.ld-facts__hours {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 230px;
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+.ld-place__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 22px;
+  /* both venues end on one line from 768: the actions sit at the card's foot
+     с 768 обе точки заканчиваются на одной линии: действия стоят у низа карточки */
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+.ld-route {
+  border-color: var(--line-4);
+}
+
+/* the Yandex Maps pin: the one coloured glyph of a button, in a cream circle
+   пин Яндекс Карт: единственный цветной знак на кнопке, в кремовом кружке */
+.ld-route__ya,
+.ld-facts__ya {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin-left: -8px;
+  border-radius: var(--r-pill);
+  background: var(--bg);
+}
+
+.ld-route__ya svg,
+.ld-facts__ya svg {
+  width: 15px;
+  height: 15px;
+}
+
+@media (min-width: 768px) {
+  .ld-places__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+    margin-top: 36px;
+  }
+
+  .ld-place {
+    padding-right: 40px;
+  }
+
+  .ld-place + .ld-place {
+    padding-top: 0;
+    padding-right: 0;
+    padding-left: 40px;
+    border-top: 0;
+    border-left: 1px solid var(--line-4);
+  }
+
+  .ld-place__facts {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ld-place__name a:hover {
+    color: var(--terracotta-text);
+    text-decoration-color: currentColor;
+  }
+
+  .ld-place__tel:hover {
+    color: var(--terracotta-text);
+  }
+}
+
+/* ── факты точки под первым экраном ───────────────────────────────────────── */
+
+.ld-facts {
+  padding-bottom: 8px;
+}
+
+.ld-facts__list {
+  display: grid;
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+
+.ld-facts__item {
+  display: grid;
+  gap: 8px;
+  padding-block: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.ld-facts__item dd {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  margin: 0;
+}
+
+.ld-facts__value {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.ld-facts__tel {
+  font-size: 18px;
+}
+
+.ld-facts__status {
+  font-size: var(--fs-body);
+}
+
+.ld-facts__ya {
+  width: 16px;
+  height: 16px;
+  margin-left: 0;
+  background: none;
+}
+
+.ld-facts__ya svg {
+  width: 13px;
+  height: 13px;
+}
+
+.ld-facts .tlink {
+  margin-block: -8px;
+}
+
+@media (min-width: 768px) {
+  .ld-facts__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ld-facts__item:nth-child(odd) {
+    padding-right: 28px;
+  }
+
+  .ld-facts__item:nth-child(even) {
+    padding-left: 28px;
+    border-left: 1px solid var(--line);
+  }
+}
+
+@media (min-width: 1200px) {
+  .ld-facts__list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .ld-facts__item {
+    align-content: start;
+    padding: 20px 28px 22px;
+  }
+
+  .ld-facts__item:nth-child(n) {
+    border-left: 1px solid var(--line);
+  }
+
+  .ld-facts__item:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .ld-facts__item:last-child {
+    padding-right: 0;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ld-facts__tel:hover {
+    color: var(--terracotta-text);
+  }
+}
+
+/* ── вопросы ──────────────────────────────────────────────────────────────── */
+
+/* the catering accordion turned for ink, the same as the catalog's delivery questions
+   аккордеон кейтеринга, повёрнутый под чернила, — как вопросы о доставке в каталоге */
+.ld-faq {
+  --ld-faq-line: rgb(247 241 226 / 0.16);
+  --ld-faq-ring: rgb(247 241 226 / 0.34);
+  padding-block: var(--sec-pad);
+}
+
+.ld-faq__in {
+  display: grid;
+  gap: 22px;
+}
+
+.ld-faq__mark {
+  margin-inline: 0;
+  color: var(--terracotta-on-ink);
+}
+
+.ld-faq__title {
+  margin-top: 14px;
+  font-size: clamp(26px, 6.6vw, 34px);
+}
+
+.ld-faq a {
+  color: var(--on-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: rgb(247 241 226 / 0.5);
+  transition:
+    color 0.16s ease,
+    text-decoration-color 0.16s ease;
+}
+
+.ld-faq :where(a, summary):focus-visible {
+  outline: 2px solid var(--terracotta-on-ink);
+  outline-offset: 3px;
+}
+
+.ld-faq__list {
+  border-bottom: 1px solid var(--ld-faq-line);
+}
+
+.ld-faq__item {
+  border-top: 1px solid var(--ld-faq-line);
+  scroll-margin-top: calc(var(--header-h) + 16px);
+}
+
+.ld-faq__sum {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 16px;
+  min-height: 56px;
+  padding: 14px 0;
+  list-style: none;
+  cursor: pointer;
+  border-radius: var(--r-sq);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ld-faq__sum::-webkit-details-marker {
+  display: none;
+}
+
+.ld-faq__q {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: normal;
+  line-height: 1.4;
+  color: var(--on-ink);
+  transition: color 0.16s ease;
+}
+
+.ld-faq__icon {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-pill);
+  box-shadow: inset 0 0 0 1px var(--ld-faq-ring);
+  color: var(--on-ink);
+  transition:
+    background-color 0.16s ease,
+    box-shadow 0.16s ease,
+    color 0.16s ease;
+}
+
+.ld-faq__icon::before,
+.ld-faq__icon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 11px;
+  height: 1.5px;
+  margin: -0.75px 0 0 -5.5px;
+  border-radius: 1px;
+  background: currentColor;
+  transition: rotate 0.24s var(--ease-out);
+}
+
+.ld-faq__icon::after {
+  rotate: 90deg;
+}
+
+.ld-faq__item[open] .ld-faq__icon {
+  background: var(--on-ink);
+  box-shadow: none;
+  color: var(--ink);
+}
+
+.ld-faq__item[open] .ld-faq__icon::after {
+  rotate: 0deg;
+}
+
+.ld-faq__sum:active .ld-faq__icon {
+  scale: 0.96;
+}
+
+.ld-faq__a {
+  padding-bottom: 20px;
+}
+
+.ld-faq__a p {
+  max-width: 64ch;
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: var(--on-ink-2);
+}
+
+.ld-faq__a > * + * {
+  margin-top: 10px;
+}
+
+.ld-faq__a a {
+  display: inline-block;
+  margin-block: -12px;
+  padding-block: 12px;
+}
+
+.ld-faq__a .nowrap {
+  white-space: nowrap;
+}
+
+.ld-faq__item[open] > .ld-faq__a {
+  animation: ld-faq-in 0.26s var(--ease-out) both;
+}
+
+@keyframes ld-faq-in {
+  from {
+    opacity: 0;
+    translate: 0 -4px;
+  }
+}
+
+@media (min-width: 768px) {
+  .ld-faq__in {
+    gap: 28px;
+  }
+
+  .ld-faq__q {
+    font-size: 17px;
+  }
+
+  .ld-faq__a {
+    padding-right: 44px;
+  }
+}
+
+/* desktop: the heading stays on the left while the questions run on the right
+   десктоп: заголовок держится слева, вопросы идут справа */
+@media (min-width: 1200px) {
+  .ld-faq__in {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    gap: 56px;
+    align-items: start;
+  }
+
+  .ld-faq__head {
+    position: sticky;
+    top: calc(var(--header-h) + 28px);
+  }
+
+  .ld-faq__title {
+    font-size: 38px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ld-faq a:hover {
+    color: var(--terracotta-on-ink);
+    text-decoration-color: currentColor;
+  }
+
+  .ld-faq__sum:hover .ld-faq__q {
+    color: var(--terracotta-on-ink);
+  }
+
+  .ld-faq__sum:hover .ld-faq__icon {
+    box-shadow: inset 0 0 0 1px var(--on-ink);
+  }
+
+  .ld-faq__item[open] .ld-faq__sum:hover .ld-faq__icon {
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ld-faq__item[open] > .ld-faq__a {
+    animation: none;
+  }
+}
+
+/* ── «Ещё у нас» ──────────────────────────────────────────────────────────── */
+
+.ld-more__list {
+  display: grid;
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.ld-more__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 24px;
+  align-items: center;
+  column-gap: 16px;
+  row-gap: 4px;
+  min-height: 64px;
+  padding-block: 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.ld-more__name {
+  font-size: 22px;
+  line-height: 1.15;
+  transition: color 0.16s ease;
+}
+
+.ld-more__text {
+  grid-column: 1;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--text-3);
+}
+
+.ld-more__go {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  width: 22px;
+  height: 22px;
+  background-color: var(--terracotta);
+  -webkit-mask: var(--go-glyph) center / 100% no-repeat;
+  mask: var(--go-glyph) center / 100% no-repeat;
+  transition: translate 240ms var(--ease-out);
+}
+
+.ld-more__row:focus-visible {
+  outline: 2px solid var(--terracotta);
+  outline-offset: 2px;
+}
+
+@media (min-width: 768px) {
+  .ld-more__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 40px;
+    margin-top: 36px;
+    border-top: 0;
+  }
+
+  .ld-more__list > li {
+    border-top: 1px solid var(--line);
+  }
+
+  .ld-more__name {
+    font-size: 24px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .ld-more__list {
+    column-gap: 56px;
+  }
+
+  .ld-more__row {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr) 24px;
+    min-height: 76px;
+  }
+
+  .ld-more__text {
+    grid-column: 2;
+  }
+
+  .ld-more__go {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .ld-more__name {
+    font-size: 26px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ld-more__row:hover .ld-more__name {
+    color: var(--terracotta-text);
+  }
+
+  .ld-more__row:hover .ld-more__go {
+    translate: 4px 0;
+  }
+}
+
+/* ── меню ─────────────────────────────────────────────────────────────────── */
+
+/* the index of sections: words with counts under a hairline, wrapping, not a scroller
+   оглавление разделов: слова со счётчиками под волосяной линией, с переносом, без прокрутки */
+.ld-index ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 4px;
+  margin: 0;
+  padding: 10px 0 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.ld-index a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-height: 44px;
+  padding: 12px 10px 10px 0;
+  margin-right: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--line-4);
+  text-underline-offset: 5px;
+  transition: color 0.16s ease;
+}
+
+.ld-index__n {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-4);
+  text-decoration: none;
+}
+
+.ld-menu {
+  padding-bottom: var(--sec-pad);
+}
+
+.ld-menu__sec {
+  padding-top: var(--ld-gap-shelf);
+  scroll-margin-top: 8px;
+}
+
+.ld-menu__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--text);
+}
+
+.ld-menu__title {
+  font-size: clamp(24px, 6.6vw, 28px);
+}
+
+.ld-menu__order {
+  margin-left: auto;
+}
+
+.ld-menu__rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* a printed price list: the dish and the price on one line, weight and one
+   line of description under the dish, a hairline between rows
+   печатный прейскурант: блюдо и цена в одну строку, вес и строка описания под
+   блюдом, волосяная линия между строками */
+.ld-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 16px;
+  row-gap: 3px;
+  padding-block: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.ld-row__name {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.ld-row__name a {
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.16s ease;
+}
+
+/* the dish's link covers its row: the price and the weight are a target too
+   ссылка блюда накрывает строку: цена и вес — тоже цель нажатия */
+.ld-row__name a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.ld-row__name a:focus-visible {
+  outline: none;
+}
+
+.ld-row__name a:focus-visible::after {
+  outline: 2px solid var(--terracotta);
+  outline-offset: 2px;
+  border-radius: var(--r-sq);
+}
+
+.ld-row__price {
+  display: inline-flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.ld-row__price s {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-4);
+}
+
+.ld-row__meta {
+  grid-column: 1 / -1;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-3);
+}
+
+/* weight and description run as one line of text, the weight a step darker
+   вес и описание идут одной строкой текста, вес на тон темнее */
+.ld-row__meta > .tnum,
+.ld-row__out {
+  margin-right: 8px;
+  font-weight: 600;
+  color: var(--text-4);
+}
+
+.ld-row__out {
+  color: var(--terracotta-text);
+}
+
+.ld-row--out .ld-row__name a,
+.ld-row--out .ld-row__price {
+  color: var(--text-4);
+}
+
+@media (min-width: 768px) {
+  .ld-menu__title {
+    font-size: 32px;
+  }
+
+  .ld-row__name,
+  .ld-row__price {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .ld-menu__rows {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 56px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ld-row__name a:hover,
+  .ld-index a:hover {
+    color: var(--terracotta-text);
+  }
+}
+
+/* ── карта на странице точки ──────────────────────────────────────────────── */
+
+.ld-map .map-block {
+  margin: 0;
+}

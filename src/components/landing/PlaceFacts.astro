@@ -1,0 +1,81 @@
+---
+/**
+ * The facts of one venue under its first screen, a ledger of four columns
+ * from 1200 (two on a tablet, one on the phone): the address with the route,
+ * the phone, the hours by days with today's status, the card on Yandex Maps
+ * with the venue's score and its reviews. Labels in small caps with a glyph,
+ * values in tabular figures — the same ledger as the contacts on the home page.
+ * Факты одной точки под её первым экраном — реестр в четыре колонки с 1200
+ * (две на планшете, одна на телефоне): адрес с маршрутом, телефон, часы по
+ * дням со статусом на сегодня, карточка в Яндекс Картах с оценкой точки и
+ * отзывами. Подписи мелкими прописными со знаком, значения табличными
+ * цифрами — тот же реестр, что контакты на главной.
+ */
+import Icon from '../Icon.astro';
+import OpenStatus from '../OpenStatus.astro';
+import { BRAND, hoursRows, yandexOrgUrl, yandexRouteUrl } from '../../data/site.ts';
+import type { Place } from '../../lib/content.ts';
+import yandexPin from '../../assets/icons/yandex-maps.svg?raw';
+
+interface Props {
+  place: Place;
+}
+
+const { place } = Astro.props;
+const card = yandexOrgUrl(place.yandex_org);
+---
+
+<section class="container ld-facts" aria-label={`${place.name}: адрес, телефон и часы`}>
+  <dl class="ld-facts__list">
+    <div class="ld-facts__item">
+      <dt class="label">
+        <Icon name="pin" />
+        Адрес
+      </dt>
+      <dd>
+        <span class="ld-facts__value">{BRAND.city}, {place.name}</span>
+        <a class="tlink tlink--go tlink--out" href={yandexRouteUrl(place)} target="_blank" rel="noopener">
+          <span>Построить маршрут</span>
+        </a>
+      </dd>
+    </div>
+    <div class="ld-facts__item">
+      <dt class="label">
+        <Icon name="phone" />
+        Телефон
+      </dt>
+      <dd>
+        <a class="ld-facts__value ld-facts__tel tnum" href={place.phoneHref}>{place.phone}</a>
+        <OpenStatus schedule={place.schedule} class="ld-facts__status" />
+      </dd>
+    </div>
+    <div class="ld-facts__item">
+      <dt class="label">
+        <Icon name="clock" />
+        Часы
+      </dt>
+      <dd>
+        {
+          hoursRows(place.schedule).map((row) => (
+            <span class="ld-facts__hours">
+              <span>{row.days}</span>
+              <span class="tnum">{row.hours}</span>
+            </span>
+          ))
+        }
+      </dd>
+    </div>
+    <div class="ld-facts__item">
+      <dt class="label">
+        <span class="ld-facts__ya" aria-hidden="true" set:html={yandexPin} />
+        Яндекс Карты
+      </dt>
+      <dd>
+        {place.rating && <span class="ld-facts__value tnum">{`Оценка ${place.rating}`}</span>}
+        <a class="tlink tlink--go tlink--out" href={`${card}reviews/`} target="_blank" rel="noopener">
+          <span>Отзывы на Яндекс Картах</span>
+        </a>
+      </dd>
+    </div>
+  </dl>
+</section>

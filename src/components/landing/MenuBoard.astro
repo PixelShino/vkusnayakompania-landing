@@ -1,0 +1,65 @@
+---
+/**
+ * The HTML menu: every section of the catalog as a printed price list — the
+ * section in caps antiqua with its count and «Заказать» into the catalog,
+ * then rows: the dish (a link to its window in the catalog), weight or sizes
+ * and one line of description under it, the price flush right in tabular
+ * figures. One column on the phone, two from 1200. No photos: the page is the
+ * menu someone reads before coming, it should be light.
+ * HTML-меню: каждый раздел каталога печатным прейскурантом — раздел прописной
+ * антиквой со счётчиком и «Заказать» в каталог, ниже строки: блюдо (ссылка на
+ * его окно в каталоге), вес или размеры и строка описания под ним, цена по
+ * правому краю табличными цифрами. Одна колонка на телефоне, две с 1200. Без
+ * фото: эту страницу читают перед походом, она должна быть лёгкой.
+ */
+import { BASE } from '../../lib/base.ts';
+import { positions, rub, type CatalogCategory } from '../../lib/catalog.ts';
+import { menuLine } from '../../data/landings-shop.ts';
+
+interface Props {
+  categories: CatalogCategory[];
+}
+
+const { categories } = Astro.props;
+---
+
+<div class="container ld-menu">
+  {
+    categories.map((category) => (
+      <section class="ld-menu__sec" id={category.slug} aria-labelledby={`h-${category.slug}`}>
+        <header class="ld-menu__head">
+          <h2 class="display-caps ld-menu__title" id={`h-${category.slug}`}>
+            {category.title}
+          </h2>
+          <span class="tag ld-menu__n">{positions(category.products.length)}</span>
+          <a class="tlink tlink--go ld-menu__order" href={`${BASE}catalog/#${category.slug}`}>
+            <span>Заказать</span>
+          </a>
+        </header>
+        <ul class="ld-menu__rows" role="list">
+          {category.products.map((product) => {
+            const line = menuLine(product);
+            return (
+              <li class:list={['ld-row', { 'ld-row--out': !product.available }]}>
+                <span class="ld-row__name">
+                  <a href={`${BASE}catalog/#p-${product.slug}`}>{product.title}</a>
+                </span>
+                <span class="ld-row__price tnum">
+                  {product.oldPrice && <s aria-label={`Без скидки ${rub(product.oldPrice)}`}>{rub(product.oldPrice)}</s>}
+                  {line.price}
+                </span>
+                {(line.size || line.text || !product.available) && (
+                  <span class="ld-row__meta">
+                    {!product.available && <span class="ld-row__out">нет в наличии</span>}
+                    {line.size && <span class="tnum">{line.size}</span>}
+                    {line.text && <span>{line.text}</span>}
+                  </span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    ))
+  }
+</div>

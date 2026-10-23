@@ -1,0 +1,86 @@
+---
+/**
+ * A dish on a search landing: the catalog card without the cart. The photo is
+ * printed on the paper the same way (multiply on `--surface`) and cut into
+ * the same widths, so the build encodes it once for both pages. The whole
+ * tile is one link — the title's — to the dish window in the catalog
+ * (`/catalog/#p-<slug>`), where the size, the filling and the cart are.
+ * Блюдо на посадочной странице: карточка каталога без корзины. Фото так же
+ * отпечатано на бумаге (multiply на `--surface`) и режется в те же ширины,
+ * поэтому сборка кодирует его один раз на обе страницы. Вся плитка — одна
+ * ссылка (ссылка названия) на окно блюда в каталоге (`/catalog/#p-<slug>`),
+ * где размер, начинка и корзина.
+ */
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import Icon from '../Icon.astro';
+import { BASE } from '../../lib/base.ts';
+import { BADGE_LABEL, photoWidths, priceLabel, rub, sizeLabel, type Product } from '../../lib/catalog.ts';
+
+interface Props {
+  product: Product;
+  /** первые плитки страницы грузятся сразу, остальные — по прокрутке */
+  eager?: boolean;
+}
+
+const { product, eager = false } = Astro.props;
+const { photo } = product;
+const href = `${BASE}catalog/#p-${product.slug}`;
+const size = sizeLabel(product);
+const widths = photo ? photoWidths(photo.width) : [];
+// four columns from 1200 (no side column here, unlike the catalog), three from 768
+// четыре колонки с 1200 (боковой колонки, как в каталоге, тут нет), три с 768
+const SIZES = '(min-width: 1200px) 310px, (min-width: 768px) 30vw, 46vw';
+---
+
+<article class:list={['ld-dish', { 'ld-dish--out': !product.available }]}>
+  <div class="ld-dish__frame">
+    {
+      photo && !photo.placeholder ? (
+        <Image
+          src={photo.src as ImageMetadata}
+          alt={photo.alt}
+          width={Math.min(photo.width, 720)}
+          height={Math.round((photo.height * Math.min(photo.width, 720)) / photo.width)}
+          widths={widths}
+          sizes={SIZES}
+          format="webp"
+          quality={76}
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
+          fetchpriority={eager ? 'high' : 'auto'}
+        />
+      ) : (
+        <span class="ld-dish__stub">
+          <Icon name="cloche" />
+          <span>Фото скоро</span>
+        </span>
+      )
+    }
+  </div>
+
+  <div class="ld-dish__body">
+    {
+      (product.badges.length > 0 || size || !product.available) && (
+        <p class="ld-dish__meta">
+          {!product.available && <span class="ld-dish__flag ld-dish__flag--out">Нет в наличии</span>}
+          {product.badges.map((badge) => (
+            <span class="ld-dish__flag">{BADGE_LABEL[badge]}</span>
+          ))}
+          {size && <span class="tnum">{size}</span>}
+        </p>
+      )
+    }
+    <h3 class="ld-dish__title">
+      <a href={href}>{product.title}</a>
+    </h3>
+    {product.description && <p class="ld-dish__desc">{product.description}</p>}
+    <p class="ld-dish__buy">
+      <span class="ld-dish__price tnum">
+        {product.oldPrice && <s class="ld-dish__old" aria-label={`Без скидки ${rub(product.oldPrice)}`}>{rub(product.oldPrice)}</s>}
+        {priceLabel(product)}
+      </span>
+      {product.available && <span class="ld-dish__go" aria-hidden="true">Заказать</span>}
+    </p>
+  </div>
+</article>

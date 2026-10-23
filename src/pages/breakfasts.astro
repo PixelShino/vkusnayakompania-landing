@@ -1,0 +1,104 @@
+---
+/**
+ * «Завтраки в Самаре»: where and from what time — both venues with their
+ * opening hours and their own words about breakfasts («Завтраки с восьми
+ * утра», «Завтраки весь день») — then the breakfast section of the catalog.
+ * The search asks «где позавтракать», so the venues come before the dishes.
+ * Texts and numbers come from `src/data/landings-shop.ts`.
+ * «Завтраки в Самаре»: где и с какого часа — обе точки с часами открытия и
+ * своими словами о завтраках («Завтраки с восьми утра», «Завтраки весь
+ * день»), — затем раздел завтраков каталога. Поиск спрашивает «где
+ * позавтракать», поэтому точки идут раньше блюд. Тексты и числа — из
+ * `src/data/landings-shop.ts`.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import LandingTop from '../components/landing/LandingTop.astro';
+import DishShelf from '../components/landing/DishShelf.astro';
+import PlaceRows from '../components/landing/PlaceRows.astro';
+import FaqBand from '../components/landing/FaqBand.astro';
+import RelatedLinks from '../components/landing/RelatedLinks.astro';
+import { dishImages, pageSchema, urlsOf, warnMissing } from '../components/landing/schema.ts';
+import { BASE } from '../lib/base.ts';
+import { getContent } from '../lib/content.ts';
+import {
+  breakfastNote,
+  faqLd,
+  faqOf,
+  introOf,
+  itemListLd,
+  landingOf,
+  printsOf,
+  opensText,
+  relatedOf,
+  seoOf,
+  shelvesOf,
+} from '../data/landings-shop.ts';
+import '../styles/landing.css';
+
+const content = await getContent();
+const page = landingOf('breakfasts');
+const seo = seoOf(page, content);
+warnMissing(page, seo.missing);
+
+const shelves = shelvesOf('breakfasts', content);
+const faq = faqOf('breakfasts', content);
+const urls = urlsOf(Astro.site, page.path);
+const images = await dishImages(
+  shelves.flatMap((shelf) => shelf.products),
+  urls.url,
+);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    ...(shelves.length ? [itemListLd(urls.url, urls.catalog, seo.h1, shelves, images)] : []),
+    ...(faq.length ? [faqLd(urls.url, faq)] : []),
+  ],
+};
+const schema = pageSchema(page, urls, shelves.length ? { mainEntity: { '@id': `${urls.url}#list` } } : {});
+const order = shelves[0] ? `${BASE}catalog/#${shelves[0].section.slug}` : `${BASE}catalog/`;
+// the print: three breakfasts spread over the section, hits first
+// оттиск: три завтрака вразброс по разделу, сначала хиты
+const prints = printsOf(shelves.map((shelf) => shelf.products));
+
+// the venue's own words about breakfasts and the hour it opens
+// свои слова точки о завтраках и час открытия
+const notes = Object.fromEntries(
+  content.places.map((place) => {
+    const note = breakfastNote(place, content);
+    return [place.id, `${note ? `${note}. ` : ''}Открыто: ${opensText(place)}.`];
+  }),
+);
+---
+
+<BaseLayout
+  content={content}
+  title={seo.title}
+  keywords={page.keywords}
+  description={seo.description}
+  noindex={shelves.length === 0}
+  landing={false}
+  ogImage={prints[0]?.photo}
+  schema={schema}
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} is:inline />
+  <Header content={content} over={false} />
+
+  <main id="main" class="ld" tabindex="-1">
+    <LandingTop crumb={page.crumb} title={seo.h1} lead={introOf('breakfasts', content)} dishes={prints}>
+      <button type="button" class="btn btn--primary" data-book="Бронь стола">Забронировать стол</button>
+      <a class="btn btn--secondary" href={order}>Заказать доставку</a>
+    </LandingTop>
+
+    <PlaceRows places={content.places} id="gde-pozavtrakat" title="Где позавтракать" notes={notes} />
+
+    {shelves.map((shelf, i) => <DishShelf shelf={shelf} eager={i === 0 ? 4 : 0} />)}
+
+    <FaqBand items={faq} title="Вопросы о завтраках" />
+
+    <RelatedLinks links={relatedOf('breakfasts')} />
+  </main>
+
+  <Footer content={content} base={BASE} />
+</BaseLayout>

@@ -1,0 +1,118 @@
+---
+/**
+ * «Меню «Вкусной компании»»: the whole catalog as an HTML menu, so the search
+ * for «вкусная компания меню» lands on a page instead of a PDF. An index of
+ * the sections with their counts under the H1, then every section as a price
+ * list; each dish opens its window in the catalog. The menu is one for both
+ * venues: there is no venue switch, only where it can be picked up. A real
+ * PDF menu of a venue, once the owner uploads one, is linked under the H1.
+ * Texts and numbers come from `src/data/landings-shop.ts`.
+ * «Меню «Вкусной компании»»: весь каталог HTML-меню, чтобы запрос «вкусная
+ * компания меню» приводил на страницу, а не в PDF. Под H1 — оглавление
+ * разделов со счётчиками, затем каждый раздел прейскурантом; каждое блюдо
+ * открывает своё окно в каталоге. Меню общее для обеих точек: переключателя
+ * точки нет, есть только пометка, где забрать. Настоящее PDF-меню точки, когда
+ * владелица его загрузит, ставится ссылкой под H1. Тексты и числа — из
+ * `src/data/landings-shop.ts`.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import LandingTop from '../components/landing/LandingTop.astro';
+import MenuBoard from '../components/landing/MenuBoard.astro';
+import PlaceRows from '../components/landing/PlaceRows.astro';
+import FaqBand from '../components/landing/FaqBand.astro';
+import RelatedLinks from '../components/landing/RelatedLinks.astro';
+import { pageSchema, urlsOf, warnMissing } from '../components/landing/schema.ts';
+import { BASE } from '../lib/base.ts';
+import { getContent } from '../lib/content.ts';
+import { menusOf } from '../lib/seo.ts';
+import { faqLd, faqOf, introOf, landingOf, menuLd, printsOf, relatedOf, seoOf } from '../data/landings-shop.ts';
+import '../styles/landing.css';
+
+const content = await getContent();
+const page = landingOf('menu');
+const seo = seoOf(page, content);
+warnMissing(page, seo.missing);
+
+const { catalog, places } = content;
+const empty = catalog.count === 0;
+const faq = empty ? [] : faqOf('menu', content);
+const urls = urlsOf(Astro.site, page.path);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [...(empty ? [] : [menuLd(urls.url, urls.catalog, content)]), ...(faq.length ? [faqLd(urls.url, faq)] : [])],
+};
+const schema = pageSchema(page, urls, empty ? {} : { mainEntity: { '@id': `${urls.url}#menu` } });
+// real PDF menus of the venues (a placeholder opens a blank sheet and is not linked)
+// настоящие PDF-меню точек (заглушка открывает пустой лист — на неё не ссылаемся)
+const files = places.flatMap((place) => menusOf(content, place));
+// the print: a breakfast, a hot dish and a cake — the range of the menu at a glance
+// оттиск: завтрак, горячее и торт — размах меню одним взглядом
+const pick = ['zavtraki', 'goryachee', 'prazdnichnye-torty']
+  .map((slug) => catalog.categories.find((category) => category.slug === slug))
+  .filter((category) => category !== undefined);
+const prints = printsOf((pick.length === 3 ? pick : catalog.categories).map((category) => category.products));
+---
+
+<BaseLayout
+  content={content}
+  title={seo.title}
+  keywords={page.keywords}
+  description={seo.description}
+  noindex={empty}
+  landing={false}
+  ogImage={prints[0]?.photo}
+  schema={schema}
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} is:inline />
+  <Header content={content} over={false} />
+
+  <main id="main" class="ld" tabindex="-1">
+    <LandingTop crumb={page.crumb} title={seo.h1} lead={introOf('menu', content)} dishes={prints}>
+      <a class="btn btn--primary" href={`${BASE}catalog/`}>Заказать доставку</a>
+      <a class="tlink tlink--go" href="#gde"><span>Кафе и ресторан</span></a>
+      {
+        files.map((menu) => (
+          <a class="tlink tlink--go tlink--out" href={menu.file.href} target="_blank" rel="noopener">
+            <span>{menu.title} (PDF)</span>
+          </a>
+        ))
+      }
+    </LandingTop>
+
+    {
+      !empty && (
+        <nav class="container ld-index" aria-label="Разделы меню">
+          <ul role="list">
+            {catalog.categories.map((category) => (
+              <li>
+                <a href={`#${category.slug}`}>
+                  <span>{category.title}</span>
+                  <span class="ld-index__n tnum" aria-hidden="true">
+                    {category.products.length}
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )
+    }
+
+    {!empty && <MenuBoard categories={catalog.categories} />}
+
+    <PlaceRows
+      places={places}
+      id="gde"
+      title="Кафе и ресторан"
+      lead="Блюда этого меню — из каталога: заказ можно забрать в любой из точек или получить с доставкой по Самаре."
+    />
+
+    <FaqBand items={faq} title="Вопросы о меню" />
+
+    <RelatedLinks links={relatedOf('menu')} />
+  </main>
+
+  <Footer content={content} base={BASE} />
+</BaseLayout>

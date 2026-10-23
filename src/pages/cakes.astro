@@ -1,0 +1,130 @@
+---
+/**
+ * «Торты на заказ в Самаре»: the search landing of the festive cakes. The
+ * shelves are the catalog's own sections — the festive cakes (the kids' ones
+ * apart, by the word «детский» in the name) and the cakes in stock; the
+ * wedding cake is the one from the cakes showcase of the home page. Every
+ * card leads to its window in the catalog, where the size, the filling and
+ * the cart are. Texts and numbers come from `src/data/landings-shop.ts`.
+ * «Торты на заказ в Самаре»: посадочная страница праздничных тортов. Полки —
+ * собственные разделы каталога: праздничные торты (детские отдельно, по слову
+ * «детский» в названии) и торты в наличии; свадебный торт — из витрины тортов
+ * главной. Каждая карточка ведёт в своё окно в каталоге, где размер, начинка и
+ * корзина. Тексты и числа — из `src/data/landings-shop.ts`.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import LandingTop from '../components/landing/LandingTop.astro';
+import DishShelf from '../components/landing/DishShelf.astro';
+import InkBand from '../components/landing/InkBand.astro';
+import HowSteps from '../components/landing/HowSteps.astro';
+import PlaceRows from '../components/landing/PlaceRows.astro';
+import FaqBand from '../components/landing/FaqBand.astro';
+import RelatedLinks from '../components/landing/RelatedLinks.astro';
+import { dishImages, pageSchema, urlsOf, warnMissing } from '../components/landing/schema.ts';
+import { BASE } from '../lib/base.ts';
+import { getContent } from '../lib/content.ts';
+import {
+  cakeSteps,
+  faqLd,
+  faqOf,
+  introOf,
+  itemListLd,
+  landingOf,
+  printsOf,
+  relatedOf,
+  seoOf,
+  shelvesOf,
+  weddingCake,
+} from '../data/landings-shop.ts';
+import '../styles/landing.css';
+
+const content = await getContent();
+const page = landingOf('cakes');
+const seo = seoOf(page, content);
+warnMissing(page, seo.missing);
+
+const shelves = shelvesOf('cakes', content);
+const festive = shelves.find((shelf) => shelf.id === 'prazdnichnye') ?? shelves[0];
+const wedding = weddingCake(content);
+const faq = faqOf('cakes', content);
+const urls = urlsOf(Astro.site, page.path);
+
+// the print beside the H1: one cake from each shelf, hits first
+// оттиск рядом с H1: по торту с каждой полки, сначала хиты
+const prints = printsOf(shelves.map((shelf) => shelf.products));
+const images = await dishImages(
+  shelves.flatMap((shelf) => shelf.products),
+  urls.url,
+);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    ...(shelves.length ? [itemListLd(urls.url, urls.catalog, seo.h1, shelves, images)] : []),
+    ...(faq.length ? [faqLd(urls.url, faq)] : []),
+  ],
+};
+const schema = pageSchema(page, urls, shelves.length ? { mainEntity: { '@id': `${urls.url}#list` } } : {});
+const order = festive ? `${BASE}catalog/#${festive.section.slug}` : `${BASE}catalog/`;
+const note = 'Пришлите картинку, посчитаем в тот же день';
+---
+
+<BaseLayout
+  content={content}
+  title={seo.title}
+  keywords={page.keywords}
+  description={seo.description}
+  noindex={shelves.length === 0}
+  landing={false}
+  ogImage={prints[0]?.photo}
+  schema={schema}
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} is:inline />
+  <Header content={content} over={false} />
+
+  <main id="main" class="ld" tabindex="-1">
+    <LandingTop crumb={page.crumb} title={seo.h1} lead={introOf('cakes', content)} dishes={prints}>
+      <a class="btn btn--primary" href={order}>Заказать доставку</a>
+      <button type="button" class="btn btn--secondary" data-book="Торт на заказ" data-book-note={note}>
+        Торт на заказ
+      </button>
+    </LandingTop>
+
+    {shelves.filter((shelf) => shelf.id !== 'v-nalichii').map((shelf, i) => <DishShelf shelf={shelf} eager={i === 0 ? 4 : 0} />)}
+
+    {
+      wedding && (
+        <InkBand
+          id="svadebnye"
+          title="Свадебные торты"
+          text="Ярусный торт к свадьбе считаем отдельно: пришлите картинку или идею в мессенджер — посчитаем в тот же день."
+          note={[wedding.title, wedding.note].filter(Boolean).join(' · ')}
+        >
+          <button type="button" class="btn btn--light" data-book="Свадебный торт" data-book-note={note}>
+            Торт на заказ
+          </button>
+        </InkBand>
+      )
+    }
+
+    {shelves.filter((shelf) => shelf.id === 'v-nalichii').map((shelf) => <DishShelf shelf={shelf} />)}
+
+    <HowSteps id="kak-zakazat" title="Как заказать торт" steps={cakeSteps(content)}>
+      <a class="btn btn--primary" href={order}>Заказать доставку</a>
+    </HowSteps>
+
+    <FaqBand items={faq} title="Вопросы о тортах" />
+
+    <PlaceRows
+      places={content.places}
+      id="samovyvoz"
+      title="Где забрать торт"
+      lead="Самовывоз из обеих точек — выберите адрес при оформлении заказа."
+    />
+
+    <RelatedLinks links={relatedOf('cakes')} />
+  </main>
+
+  <Footer content={content} base={BASE} />
+</BaseLayout>

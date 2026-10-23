@@ -1,0 +1,50 @@
+---
+/**
+ * «Как заказать»: three or four steps on a paper strip, each a number in
+ * terracotta antiqua over a short title and one line from the content. A row
+ * from 768, a column on the phone, hairlines between — no boxes.
+ * «Как заказать»: три-четыре шага на бумажной полосе — номер терракотовой
+ * антиквой, короткий заголовок и строка из контента. В ряд с 768, столбиком на
+ * телефоне, между ними волосяные линии — без рамок.
+ */
+import { typo } from '../../lib/content.ts';
+
+interface Props {
+  id: string;
+  title: string;
+  lead?: string;
+  steps: { title: string; text: string }[];
+}
+
+const { id, title, lead, steps } = Astro.props;
+---
+
+{
+  steps.length > 0 && (
+    <section class="ld-band strip-paper ld-steps" id={id} aria-labelledby={`h-${id}`}>
+      <div class="container">
+        <div class="head" data-reveal>
+          <span class="mark" aria-hidden="true" />
+          <h2 class="display-caps" id={`h-${id}`}>
+            {title}
+          </h2>
+          {lead && <p class="lead">{typo(lead)}</p>}
+        </div>
+        <ol class="ld-steps__list" role="list" data-reveal="grid">
+          {steps.map((step, i) => (
+            <li class="ld-step">
+              <span class="ld-step__n display tnum" aria-hidden="true">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <h3 class="ld-step__title">{step.title}</h3>
+              <p class="ld-step__text">{typo(step.text)}</p>
+            </li>
+          ))}
+        </ol>
+        <div class="ld-steps__actions">
+          <slot />
+        </div>
+      </div>
+    </section>
+  )
+}
