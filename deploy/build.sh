@@ -134,6 +134,9 @@ build() {
   mkdir -p "$RELEASES"
   cp -r dist "$RELEASES/$stamp"
   ln -sfn "$RELEASES/$stamp" "$ROOT/current.tmp" && mv -T "$ROOT/current.tmp" "$ROOT/current"
+  # IndexNow: Yandex learns which pages changed in this release; the key file is already live
+  # IndexNow: Яндекс узнаёт, какие страницы изменились в этом релизе; файл ключа уже на сайте
+  node scripts/indexnow.mjs "$RELEASES/$stamp" "${SITE:-https://vkus-com.ru}" --state "$ROOT/indexnow-state.json" >>"$LOG" 2>&1 || true
   # keep the last five releases / оставляем пять последних релизов
   ls -1dt "$RELEASES"/* | tail -n +6 | xargs -r rm -rf
   # what is saved but not on the site (drafts) and what is still a placeholder;

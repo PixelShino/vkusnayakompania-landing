@@ -1,4 +1,67 @@
+# Вкусная компания — кафе, ресторан и кондитерская в Самаре.
+# Описание сайта для языковых моделей: https://vkus-com.ru/llms.txt
+# Полная версия (каталог, кейтеринг, документы): https://vkus-com.ru/llms-full.txt
+
+# Личный кабинет гостя — персональные данные, в поиск не попадает (страница ещё и noindex).
+# У каждого робота ниже своя группа: робот читает только самую точную группу,
+# поэтому запрет кабинета повторён в каждой.
+
 User-agent: *
 Allow: /
+Disallow: /account/
+
+User-agent: YandexBot
+Allow: /
+Disallow: /account/
+# метки рекламы и переходов — одна и та же страница; Яндекс читает Clean-param в любой группе
+Clean-param: utm_source&utm_medium&utm_campaign&utm_content&utm_term&yclid&ysclid&gclid&fbclid
+
+User-agent: YandexAdditional
+Allow: /
+Disallow: /account/
+
+User-agent: GPTBot
+Allow: /
+Disallow: /account/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /account/
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /account/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /account/
+
+User-agent: Claude-Web
+Allow: /
+Disallow: /account/
+
+User-agent: anthropic-ai
+Allow: /
+Disallow: /account/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /account/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /account/
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /account/
+
+User-agent: CCBot
+Allow: /
+Disallow: /account/
+
+User-agent: Amazonbot
+Allow: /
+Disallow: /account/
 
 Sitemap: https://vkus-com.ru/sitemap-index.xml
