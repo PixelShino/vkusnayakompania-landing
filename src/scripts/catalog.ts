@@ -36,6 +36,7 @@ import {
   slotsFor,
   splitDetails,
   validate,
+  type AptKey,
   type CheckoutForm,
   type Errors,
 } from '../lib/order';
@@ -74,6 +75,10 @@ import plusIcon from '../assets/icons/plus.svg?raw';
 import trashIcon from '../assets/icons/trash.svg?raw';
 import clocheIcon from '../assets/icons/cloche.svg?raw';
 import pinIcon from '../assets/icons/pin.svg?raw';
+
+/** Поля для курьера рядом с улицей: квартира, подъезд, этаж, домофон. */
+const APT_KEYS = ['flat', 'entrance', 'floor', 'intercom'] as const satisfies readonly AptKey[];
+type AptParts = Partial<Record<AptKey, string>>;
 
 type Dish = CartProduct & {
   category: string;
@@ -497,6 +502,10 @@ if (dataNode && drawer && dishDialog) {
   const field = <T extends HTMLElement = HTMLInputElement>(name: string) => form.elements.namedItem(name) as T | null;
   const radio = (name: string) => (form.querySelector<HTMLInputElement>(`input[name="${name}"]:checked`)?.value ?? '');
 
+  // only the order's own fields: the account's ones in the same form
+  // (`saved_address`, `save_address`, `save_label*`) never reach the order or the draft
+  // только поля самого заказа: поля кабинета в той же форме
+  // (`saved_address`, `save_address`, `save_label*`) не попадают ни в заказ, ни в черновик
   const read = (): CheckoutForm => ({
     name: field('name')?.value ?? '',
     phone: field('phone')?.value ?? '',
@@ -813,18 +822,42 @@ if (dataNode && drawer && dishDialog) {
     }
   };
 
-  const pick = (i: number) => {
-    const item = options[i];
-    if (!item || !addressInput) return;
-    const value = addressOf(item);
+  /**
+   * Put an address into the delivery fields and count it: a house from the
+   * suggestions, a saved address from the account with its courier fields
+   * (`parts`), or nothing for «Новый адрес». `picked` — the guest has seen
+   * this address already, it needs no «на карте» line.
+   * Поставить адрес в поля доставки и посчитать: дом из подсказок,
+   * сохранённый адрес из кабинета вместе с полями для курьера (`parts`) или
+   * пустоту для «Нового адреса». `picked` — гость этот адрес уже видел,
+   * строка «на карте» для него не нужна.
+   */
+  const applyAddress = (value: string, parts?: AptParts, picked = true) => {
+    if (!addressInput) return;
     addressInput.value = value;
+    if (parts)
+      for (const key of APT_KEYS) {
+        const input = field(key);
+        if (input) input.value = parts[key] ?? '';
+      }
     window.clearTimeout(quoteTimer);
     window.clearTimeout(suggestTimer);
     suggestCtl?.abort();
     closeList();
+    showHint(hintFor(value));
     saveDraft();
-    if (tried) showErrors(validate(read()));
-    void quote(value, true);
+    // an emptied address is not an error yet: the guest is about to type it
+    // очищенный адрес — ещё не ошибка: гость сейчас его наберёт
+    if (tried && value) showErrors(validate(read()));
+    void quote(value, picked);
+    // the saved-address chips follow the fields however they were filled
+    // чипы сохранённых адресов следуют за полями, как бы их ни заполнили
+    cartAccount?.addressChanged();
+  };
+
+  const pick = (i: number) => {
+    const item = options[i];
+    if (item) applyAddress(addressOf(item));
   };
 
   if (suggesting && addressInput && comboList) {
@@ -1021,7 +1054,16 @@ if (dataNode && drawer && dishDialog) {
     /* a broken draft is just no draft / битый черновик — просто без черновика */
   }
   togglePart();
-  cartAccount = mountCartAccount({ drawer, form, total: () => priced(cart, index).total, goto, announce, onChange: () => paintBill() });
+  cartAccount = mountCartAccount({
+    drawer,
+    form,
+    total: () => priced(cart, index).total,
+    goto,
+    announce,
+    onChange: () => paintBill(),
+    setAddress: (fields) => applyAddress(fields.address, fields),
+    clearAddress: () => applyAddress('', { flat: '', entrance: '', floor: '', intercom: '' }, false),
+  });
 
   const ERROR_FIELD: Record<keyof Errors, string> = {
     name: 'name',
@@ -1139,7 +1181,9 @@ if (dataNode && drawer && dishDialog) {
       where.textContent = pickup ? (place ?? '') : addressLine(sent);
       $('[data-done-when]', drawer)!.textContent = sent.desired_time;
     }
-    cartAccount?.done(bill.points);
+    // the account gets the order as it left: the points it took, the address it went to
+    // кабинет получает заказ, как он ушёл: списанные баллы и адрес, куда он едет
+    cartAccount?.done(bill.points, sent);
     cart = empty();
     store.set(CART_KEY, JSON.stringify(cart));
     const comment = field<HTMLTextAreaElement>('comment');

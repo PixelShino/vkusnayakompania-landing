@@ -7,8 +7,11 @@
  * discount). The footer's bill gets the rows of what is taken off (the bill
  * itself — dishes, delivery, to pay — is `catalog.ts`'s, told by `onChange`);
  * the order leaves with the guest's token and `bonus_spent`, and `order-guard`
- * with the `loyalty` hook check it all again. `catalog.ts` calls in at five
- * points: the drawer step, the cart total, the order, a refused token, the receipt.
+ * with the `loyalty` hook check it all again. The saved addresses ride along:
+ * chips above the street fill it in one tap, a new address can be saved to
+ * the account after the order. `catalog.ts` calls in at six points: the
+ * drawer step, the cart total, the address fields, the order, a refused
+ * token, the receipt.
  * «Вкусные баллы» в выдвижной корзине. Не вошёл — приглашение и «Войти по
  * номеру», которое открывает вход шагом корзины; вошёл — имя и телефон
  * встают в форму, баланс подтягивается, ползунок и поле «Списать баллы»
@@ -16,10 +19,25 @@
  * заказа после скидки именинника). В счёт подвала встают строки того, что
  * вычтено (сам счёт — блюда, доставка, к оплате — ведёт `catalog.ts`, ему
  * сообщает `onChange`); заказ уходит с токеном гостя и `bonus_spent`, а
- * `order-guard` с хуком `loyalty` всё это проверяют ещё раз. `catalog.ts`
- * обращается сюда в пяти местах: шаг корзины, сумма, заказ, отвергнутый токен, итог.
+ * `order-guard` с хуком `loyalty` всё это проверяют ещё раз. Рядом —
+ * сохранённые адреса: чипы над улицей ставят её одним касанием, новый адрес
+ * после заказа можно сохранить в кабинет. `catalog.ts` обращается сюда в
+ * шести местах: шаг корзины, сумма, поля адреса, заказ, отвергнутый токен, итог.
  */
-import { accountApi, displayName, isSignedOut, summarize, type Me } from '../lib/account';
+import { ApiError, accountApi, displayName, isSignedOut, summarize, type Me } from '../lib/account';
+import { toCheckoutFields, type SavedAddress } from '../lib/addresses';
+import {
+  NEW_ADDRESS,
+  OWN_LABEL,
+  addressToSave,
+  chipFor,
+  chipLine,
+  labelChoice,
+  labelToSave,
+  saveOffer,
+  type CheckoutAddress,
+  type SentAddress,
+} from '../lib/cart-addresses';
 import { accrualFor, birthdayDiscountFor, dayOf, maxSpend, points, type Program } from '../lib/loyalty';
 import { rub } from '../lib/catalog';
 import { maskPhone } from '../lib/order';
@@ -28,6 +46,9 @@ import { mountLogin } from './account-login';
 
 type Step = 'cart' | 'checkout' | 'login' | 'done';
 
+/** Адресные поля формы корзины: улица и дом, затем поля для курьера. */
+const ADDRESS_FIELDS = ['address', 'flat', 'entrance', 'floor', 'intercom'] as const;
+
 export const mountCartAccount = ({
   drawer,
   form,
@@ -35,6 +56,8 @@ export const mountCartAccount = ({
   goto,
   announce,
   onChange,
+  setAddress,
+  clearAddress,
 }: {
   drawer: HTMLElement;
   form: HTMLFormElement;
@@ -44,6 +67,10 @@ export const mountCartAccount = ({
   announce: (text: string) => void;
   /** скидка или баллы поменялись: корзина пересчитывает «К оплате» */
   onChange?: () => void;
+  /** выбран сохранённый адрес: поставить улицу и поля для курьера, посчитать доставку */
+  setAddress?: (fields: CheckoutAddress) => void;
+  /** «Новый адрес»: очистить улицу и поля для курьера */
+  clearAddress?: () => void;
 }) => {
   const box = drawer.querySelector<HTMLElement>('[data-cart-account]');
   if (!box) return null;
@@ -66,6 +93,37 @@ export const mountCartAccount = ({
   let spend = 0;
   let loading: Promise<void> | null = null;
 
+  // ── saved addresses / сохранённые адреса ──
+  const addrs = $('[data-ca-addrs]');
+  const addrsList = $('[data-ca-addrs-list]');
+  const newChip = addrsList?.querySelector('input[name="saved_address"]')?.closest('label') ?? null;
+  const save = $('[data-ca-save]');
+  const saveRow = $('[data-ca-save-row]');
+  const saveCheck = $<HTMLInputElement>('[data-ca-save-check]');
+  const saveLabels = $('[data-ca-save-labels]');
+  const saveChips = saveLabels ? $('[role="radiogroup"]', saveLabels) : null;
+  const ownBox = $('[data-ca-save-own]');
+  const ownInput = $<HTMLInputElement>('#ca-save-own');
+  const saveLimit = $('[data-ca-save-limit]');
+  const field = (name: string) => form.elements.namedItem(name) as HTMLInputElement | null;
+
+  // the list of the guest whose token `savedFor` is; an older server sends none — then nothing is offered
+  // список гостя с токеном `savedFor`; старый сервер его не присылает — тогда ничего не предлагается
+  let saved: SavedAddress[] = [];
+  let savedFor: string | null = null;
+  // the server has no place for addresses yet (503 ADDRESSES_OFF): stop offering to save
+  // у сервера ещё нет места для адресов (503 ADDRESSES_OFF): больше не предлагать сохранить
+  let saveOff = false;
+  // «Новый адрес» asked for; the guest chose or typed an address (the first saved one stays out then); a label chosen
+  // попросили «Новый адрес»; гость выбрал или набрал адрес (первый сохранённый тогда не подставляется); выбрана метка
+  let wantsNew = false;
+  let addressTouched = false;
+  let labelTouched = false;
+  // a tap on a chip moves on to the field; the arrows stay in the chips
+  // касание чипа ведёт дальше в поле; стрелки остаются в чипах
+  let pointer = false;
+  let drawn = '';
+
   const state = () => {
     if (!me) return null;
     const sum = summarize(me, fallback);
@@ -81,10 +139,96 @@ export const mountCartAccount = ({
     return { sum, program, amount, discount, max };
   };
 
+  const fieldsNow = (): CheckoutAddress => {
+    const value = (name: (typeof ADDRESS_FIELDS)[number]) => field(name)?.value ?? '';
+    return { address: value('address'), flat: value('flat'), entrance: value('entrance'), floor: value('floor'), intercom: value('intercom') };
+  };
+
+  /** Чипы сохранённых адресов перед «Новым адресом» — заново, только когда список поменялся. */
+  const drawChips = (list: SavedAddress[]) => {
+    const key = JSON.stringify(list.map((a) => [a.id, a.label, a.address, a.flat]));
+    if (!addrsList || !newChip || key === drawn) return;
+    drawn = key;
+    for (const old of addrsList.querySelectorAll('[data-ca-addr]')) old.remove();
+    const nodes = list.map((a) => {
+      const chip = document.createElement('label');
+      chip.className = 'ca-addr';
+      chip.dataset.caAddr = a.id;
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'saved_address';
+      input.value = a.id;
+      const name = document.createElement('span');
+      name.className = 'ca-addr__name';
+      name.textContent = a.label;
+      const line = document.createElement('small');
+      line.className = 'ca-addr__line';
+      line.textContent = chipLine(a);
+      chip.append(input, name, line);
+      return chip;
+    });
+    newChip.before(...nodes);
+  };
+
+  /** Чипы меток: занятые «Дом» и «Работа» уходят; выбор по умолчанию — пока гость не выбрал сам. */
+  const drawLabels = (list: SavedAddress[]) => {
+    if (!saveLabels) return;
+    const choice = labelChoice(list);
+    for (const chip of saveLabels.querySelectorAll<HTMLElement>('[data-ca-preset]')) chip.hidden = !choice.presets.includes(chip.dataset.caPreset ?? '');
+    // no preset left: «Своя» alone is no choice — its field speaks for itself
+    // заготовок не осталось: одна «Своя» — не выбор, говорит её поле
+    if (saveChips) saveChips.hidden = !choice.presets.length;
+    if (labelTouched) return;
+    for (const input of saveLabels.querySelectorAll<HTMLInputElement>('input[name="save_label"]')) input.checked = input.value === choice.chosen;
+    if (ownInput) ownInput.value = choice.own;
+    if (ownBox) ownBox.hidden = choice.chosen !== OWN_LABEL;
+  };
+
+  // signed out or another guest: nothing of the previous one stays on the screen
+  // вышли или вошёл другой гость: ничего от прежнего не остаётся на экране
+  const forget = () => {
+    saved = [];
+    savedFor = null;
+    wantsNew = false;
+    addressTouched = false;
+    labelTouched = false;
+    if (saveCheck) saveCheck.checked = false;
+  };
+
+  /**
+   * The chips and the save block follow the fields: the chip of the saved
+   * address they are (or «Новый адрес»), the tick only for an address not
+   * saved yet, the limit line when five are saved.
+   * Чипы и блок сохранения следуют за полями: чип того сохранённого адреса,
+   * которому они соответствуют (или «Новый адрес»), галочка — только для
+   * ещё не сохранённого, строка о пределе — когда сохранено пять.
+   */
+  const paintAddresses = () => {
+    if (!token) forget();
+    const on = Boolean(token) && savedFor === token;
+    const list = on ? saved : [];
+    const fields = fieldsNow();
+    if (addrs && addrsList) {
+      addrs.hidden = !list.length;
+      drawChips(list);
+      const chip = list.length ? chipFor(list, fields, wantsNew) : null;
+      for (const input of addrsList.querySelectorAll<HTMLInputElement>('input[name="saved_address"]')) input.checked = input.value === chip;
+    }
+    if (save) {
+      const offer = on && !saveOff ? saveOffer(list, fields) : 'none';
+      save.hidden = offer === 'none';
+      if (saveRow) saveRow.hidden = offer !== 'offer';
+      if (saveLimit) saveLimit.hidden = offer !== 'limit';
+      if (saveLabels) saveLabels.hidden = offer !== 'offer' || !saveCheck?.checked;
+      if (offer === 'offer') drawLabels(list);
+    }
+  };
+
   // the drawer's bill follows every repaint: the points and the discount are in its «К оплате»
   // счёт корзины следует за каждой перерисовкой: баллы и скидка входят в его «К оплате»
   const paint = () => {
     paintBox();
+    paintAddresses();
     onChange?.();
   };
 
@@ -159,8 +303,10 @@ export const mountCartAccount = ({
     }
   };
 
-  // the name and the phone of the guest go where they are empty — what was typed stays
-  // имя и телефон гостя встают туда, где пусто, — набранное остаётся
+  // the name and the phone of the guest go where they are empty — what was typed stays;
+  // the first saved address goes to an empty delivery address — a draft or the guest's own choice comes first
+  // имя и телефон гостя встают туда, где пусто, — набранное остаётся; первый сохранённый
+  // адрес встаёт в пустой адрес доставки — черновик или выбор самого гостя важнее
   const prefill = () => {
     if (!me) return;
     const name = form.elements.namedItem('name') as HTMLInputElement | null;
@@ -168,6 +314,13 @@ export const mountCartAccount = ({
     const full = displayName(me.profile);
     if (name && !name.value.trim() && full) name.value = full;
     if (phone && phone.value.replace(/\D/g, '').length <= 1) phone.value = maskPhone(me.profile.phone);
+
+    const list = me.profile.addresses;
+    saved = Array.isArray(list) ? list : [];
+    savedFor = Array.isArray(list) ? token : null;
+    const delivery = form.querySelector<HTMLInputElement>('input[name="fulfillment"]:checked')?.value !== 'pickup';
+    const empty = Object.values(fieldsNow()).every((value) => !value.trim());
+    if (saved[0] && delivery && empty && !addressTouched) setAddress?.(toCheckoutFields(saved[0]));
   };
 
   const load = () => {
@@ -224,6 +377,50 @@ export const mountCartAccount = ({
     announce('Вы вышли из кабинета. Заказ можно отправить и без входа.');
   });
 
+  // a saved address chosen: the street and the courier fields in one tap, the delivery counted;
+  // «Новый адрес»: the fields emptied, a tap goes on to the street
+  // выбран сохранённый адрес: улица и поля для курьера одним касанием, доставка посчитана;
+  // «Новый адрес»: поля очищены, касание ведёт дальше, в улицу
+  for (const group of [addrsList, saveLabels]) {
+    group?.addEventListener('pointerdown', () => (pointer = true));
+    group?.addEventListener('keydown', () => (pointer = false));
+  }
+  addrsList?.addEventListener('change', (event) => {
+    const input = event.target as HTMLInputElement;
+    if (input.name !== 'saved_address') return;
+    addressTouched = true;
+    if (input.value === NEW_ADDRESS) {
+      wantsNew = true;
+      clearAddress?.();
+      paintAddresses();
+      if (pointer) field('address')?.focus();
+      return;
+    }
+    const chosen = saved.find((a) => a.id === input.value);
+    if (!chosen) return;
+    wantsNew = false;
+    setAddress?.(toCheckoutFields(chosen));
+    paintAddresses();
+  });
+  // typed by hand: the chips and the save block follow
+  // набрано руками: чипы и блок сохранения следуют за полями
+  form.addEventListener('input', (event) => {
+    const name = (event.target as HTMLInputElement).name;
+    if (name === 'save_label_own') labelTouched = true;
+    if (!(ADDRESS_FIELDS as readonly string[]).includes(name)) return;
+    addressTouched = true;
+    paintAddresses();
+  });
+  saveCheck?.addEventListener('change', () => paintAddresses());
+  saveLabels?.addEventListener('change', (event) => {
+    const input = event.target as HTMLInputElement;
+    if (input.name !== 'save_label') return;
+    labelTouched = true;
+    const own = input.value === OWN_LABEL;
+    if (ownBox) ownBox.hidden = !own;
+    if (own && pointer) ownInput?.focus();
+  });
+
   const loginForm = drawer.querySelector<HTMLFormElement>('[data-step="login"] [data-login]');
   const draftPhone = () => (form.elements.namedItem('phone') as HTMLInputElement | null)?.value || loadSession().session?.phone || null;
   const loginApi = loginForm
@@ -260,6 +457,8 @@ export const mountCartAccount = ({
       if (!token || !me) return { discount: 0, points: 0 };
       return { discount: state()?.discount ?? 0, points: spend };
     },
+    /** адрес в полях поменялся не руками (подсказка дома, сохранённый адрес): чипы следуют */
+    addressChanged: () => paintAddresses(),
     /** сервер отверг токен: выйти и сказать об этом */
     signedOut: () => {
       clearSession();
@@ -270,10 +469,44 @@ export const mountCartAccount = ({
     /**
      * «Заказ принят»: what will be earned. What was taken off and what is to pay
      * stand in the screen's own rows (`catalog.ts`), next to the delivery.
+     * The address goes to the account when the guest ticked it — without
+     * waiting: the order is accepted whatever the answer; on success a line
+     * under «Куда» says so, a refusal (no place for addresses yet, five
+     * saved, no network) leaves the screen as it is.
      * «Заказ принят»: что начислим. Что списано и сколько к оплате — в строках
-     * самого экрана (`catalog.ts`), рядом с доставкой.
+     * самого экрана (`catalog.ts`), рядом с доставкой. Адрес уходит в
+     * кабинет, если гость поставил галочку, — без ожидания: заказ принят при
+     * любом ответе; при успехе об этом говорит строка под «Куда», отказ (места
+     * для адресов ещё нет, сохранено пять, нет сети) экран не трогает.
      */
-    done: (spent: number) => {
+    done: (spent: number, sent?: SentAddress) => {
+      const savedLine = $('[data-ca-addr-done]');
+      if (savedLine) savedLine.hidden = true;
+      if (token && savedFor === token && sent && saveCheck?.checked && !saveOff) {
+        const chosen = saveLabels?.querySelector<HTMLInputElement>('input[name="save_label"]:checked')?.value ?? labelChoice(saved).chosen;
+        const input = addressToSave(labelToSave(chosen, ownInput?.value ?? '', saved), sent, saved);
+        const was = token;
+        if (input)
+          void api
+            .addAddress(was, input)
+            .then(({ addresses }) => {
+              if (token !== was) return;
+              saved = addresses;
+              savedFor = was;
+              if (saveCheck) saveCheck.checked = false;
+              labelTouched = false;
+              paintAddresses();
+              if (!savedLine) return;
+              $('[data-ca-addr-done-text]', savedLine)!.textContent = `Сохранили в кабинете как «${input.label}»`;
+              savedLine.hidden = false;
+            })
+            .catch((error) => {
+              if (error instanceof ApiError && error.code === 'ADDRESSES_OFF') {
+                saveOff = true;
+                paintAddresses();
+              }
+            });
+      }
       const line = $('[data-ca-done]');
       if (!line) return;
       const s = state();

@@ -4,28 +4,36 @@
  * checkout (signed in — who and how many points, the slider «Списать баллы»;
  * signed out — «Войти по номеру, чтобы копить баллы»), in the footer's bill
  * (points, birthday discount; what will be earned under it), as a step of its
- * own (the sign-in without leaving the cart) and on «Заказ принят». The
- * drawer places each `part` where it belongs; `src/scripts/account-cart.ts`
- * drives them. Without the account (no `PUBLIC_DIRECTUS_URL`, the programme
- * switched off) nothing is drawn and the cart is the plain one.
+ * own (the sign-in without leaving the cart) and on «Заказ принят». Around
+ * the delivery address: the saved addresses as chips above the street and
+ * «Сохранить адрес в кабинете» under the courier fields (and on «Заказ
+ * принят» the line that it was saved). The drawer places each `part` where
+ * it belongs; `src/scripts/account-cart.ts` drives them. Without the account
+ * (no `PUBLIC_DIRECTUS_URL`, the programme switched off) nothing is drawn
+ * and the cart is the plain one.
  * «Вкусные баллы» в выдвижной корзине, в четырёх её местах: вверху
  * оформления (вошёл — кто и сколько баллов, ползунок «Списать баллы»; не
  * вошёл — «Войти по номеру, чтобы копить баллы»), в счёте подвала (баллы,
  * скидка именинника; под счётом — что начислим), отдельным шагом (вход, не
- * выходя из корзины) и на «Заказ принят». Корзина ставит каждую `part` на
- * своё место; ведёт их `src/scripts/account-cart.ts`. Без кабинета (нет
+ * выходя из корзины) и на «Заказ принят». Вокруг адреса доставки:
+ * сохранённые адреса чипами над улицей и «Сохранить адрес в кабинете» под
+ * полями для курьера (и на «Заказ принят» — строка, что адрес сохранён).
+ * Корзина ставит каждую `part` на своё место; ведёт их
+ * `src/scripts/account-cart.ts`. Без кабинета (нет
  * `PUBLIC_DIRECTUS_URL`, программа выключена) ничего не рисуется — корзина
  * обычная.
  */
 import Icon from '../Icon.astro';
 import LoginForm from './LoginForm.astro';
 import { points } from '../../lib/loyalty.ts';
+import { LABEL_PRESETS, LIMIT_MESSAGE } from '../../lib/addresses.ts';
+import { NEW_ADDRESS, OWN_LABEL } from '../../lib/cart-addresses.ts';
 import type { Content } from '../../lib/content.ts';
 import '../../styles/cart-account.css';
 
 interface Props {
   content: Content;
-  part: 'checkout' | 'summary' | 'earn' | 'login' | 'done';
+  part: 'checkout' | 'addresses' | 'save-address' | 'summary' | 'earn' | 'login' | 'done' | 'done-address';
 }
 
 const { content, part } = Astro.props;
@@ -107,6 +115,69 @@ const low = loyalty.tiers[0]?.percent ?? 0;
 }
 
 {
+  /* the saved addresses above the street: one tap fills the street and the
+     courier fields and counts the delivery; «Новый адрес» empties them. The
+     chips are drawn by the script once `/me` has come (nothing is saved —
+     nothing is shown); native radios with one name walk with the arrows.
+     сохранённые адреса над улицей: одно касание ставит улицу и поля для
+     курьера и считает доставку; «Новый адрес» их очищает. Чипы рисует
+     скрипт, когда пришёл `/me` (ничего не сохранено — ничего не видно);
+     нативные радио с одним именем ходят стрелками. */
+  on && part === 'addresses' && (
+    <div class="ca-addrs" data-ca-addrs hidden>
+      <p class="ca-addrs__title" id="ca-addrs-title">Сохранённые адреса</p>
+      <div class="ca-addrs__list" role="radiogroup" aria-labelledby="ca-addrs-title" data-ca-addrs-list>
+        <label class="ca-addr ca-addr--new">
+          <input type="radio" name="saved_address" value={NEW_ADDRESS} />
+          <span class="ca-addr__name">
+            <Icon name="plus" />
+            Новый адрес
+          </span>
+        </label>
+      </div>
+    </div>
+  )
+}
+
+{
+  /* under the courier fields, for an address that is not saved yet: the tick,
+     then the label chips; five saved — the line where to make room
+     под полями для курьера, для ещё не сохранённого адреса: галочка, под ней
+     чипы меток; сохранено пять — строка, где освободить место */
+  on && part === 'save-address' && (
+    <div class="ca-save" data-ca-save hidden>
+      <label class="ca-save__check" data-ca-save-row>
+        <input type="checkbox" name="save_address" data-ca-save-check />
+        <span>Сохранить адрес в кабинете</span>
+      </label>
+      <div class="ca-save__labels" data-ca-save-labels hidden>
+        <p class="ca-save__caption" id="ca-save-caption">Как назвать</p>
+        <div class="ca-save__chips" role="radiogroup" aria-labelledby="ca-save-caption">
+          {LABEL_PRESETS.map((preset) => (
+            <label class="ca-chip" data-ca-preset={preset}>
+              <input type="radio" name="save_label" value={preset} />
+              <span>{preset}</span>
+            </label>
+          ))}
+          <label class="ca-chip">
+            <input type="radio" name="save_label" value={OWN_LABEL} />
+            <span>Своя</span>
+          </label>
+        </div>
+        <div class="field ca-save__own" data-ca-save-own hidden>
+          <label class="sr-only" for="ca-save-own">Своё название адреса</label>
+          <input id="ca-save-own" name="save_label_own" maxlength="24" autocomplete="off" placeholder="Например: Дача, Мама" />
+        </div>
+      </div>
+      <p class="ca-save__limit" data-ca-save-limit hidden>
+        <Icon name="info" />
+        <span>{LIMIT_MESSAGE}</span>
+      </p>
+    </div>
+  )
+}
+
+{
   /* the rows of the bill the points and the birthday take off; the bill
      itself (dishes, delivery, to pay) is the drawer's
      строки счёта, которые снимают баллы и скидка именинника; сам счёт
@@ -139,6 +210,17 @@ const low = loyalty.tiers[0]?.percent ?? 0;
         <LoginForm id="cart-login" settings={settings} submitLabel="Войти и вернуться к заказу" />
       </div>
     </section>
+  )
+}
+
+{
+  /* «Заказ принят», under «Куда»: the address went to the account
+     «Заказ принят», под «Куда»: адрес ушёл в кабинет */
+  on && part === 'done-address' && (
+    <span class="done__saved" data-ca-addr-done hidden>
+      <Icon name="check" />
+      <span data-ca-addr-done-text></span>
+    </span>
   )
 }
 

@@ -146,6 +146,7 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
           </div>
 
           <div class="fs__part" data-for="delivery">
+            <CartAccount content={Astro.props.content} part="addresses" />
             {/* The address is a combobox once the script finds the API: houses
                 from `GET /delivery/suggest` under the field, the zone quote under
                 them. Without the script it is the plain field it always was.
@@ -216,6 +217,7 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
                 </div>
               </div>
             </fieldset>
+            <CartAccount content={Astro.props.content} part="save-address" />
           </div>
 
           <div class="fs__part" data-for="pickup" hidden>
@@ -373,7 +375,10 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
         <dl class="done__info">
           <div>
             <dt data-done-where-label>Куда</dt>
-            <dd data-done-where></dd>
+            <dd>
+              <span data-done-where></span>
+              <CartAccount content={Astro.props.content} part="done-address" />
+            </dd>
           </div>
           <div>
             <dt>Когда</dt>

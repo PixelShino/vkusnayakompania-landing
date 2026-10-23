@@ -220,3 +220,291 @@
 .done__pts[hidden] {
   display: none;
 }
+
+/* ── сохранённые адреса над улицей ───────────────────────────────────────── */
+
+/* Chips in two columns, not a ribbon to swipe: the owner turned the swiped
+   ribbon down in the catalog (12.10.2026), and five addresses plus «Новый
+   адрес» still fit three rows. A chip is the catering form's chip grown to
+   two lines — the label and the street, chosen = ink, like the segments
+   above it.
+   Чипы в две колонки, а не лента под свайп: ленту владелец забраковал в
+   каталоге (12.10.2026), а пять адресов и «Новый адрес» всё равно встают в
+   три ряда. Чип — тот же, что в форме кейтеринга, только в две строки: метка
+   и улица; выбранный — чернилами, как сегменты над ним. */
+.ca-addrs {
+  margin-bottom: 16px;
+}
+
+.ca-addrs[hidden] {
+  display: none;
+}
+
+.ca-addrs__title {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.ca-addrs__list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ca-addr {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: var(--r-sq);
+  box-shadow: inset 0 0 0 1px var(--line-4);
+  cursor: pointer;
+  transition-property: background-color, box-shadow;
+  transition-duration: 0.16s;
+}
+
+.ca-addr input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.ca-addr__name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+  overflow-wrap: anywhere;
+  transition: color 0.16s;
+}
+
+/* two lines at most: the street and the flat, «…» after that
+   не больше двух строк: улица и квартира, дальше «…» */
+.ca-addr__line {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  /* the size of the catering tiles' second line (`.tile__meta`): «Советской Армии, 177,» keeps one line in a 173 px chip
+     размер второй строки плиток кейтеринга (`.tile__meta`): «Советской Армии, 177,» держится одной строкой в чипе 173 px */
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-4);
+  transition: color 0.16s;
+}
+
+/* alone in its row (an even number saved) «Новый адрес» takes the whole row
+   instead of leaving a hole beside it
+   один в ряду (сохранено чётное число) «Новый адрес» занимает весь ряд, а не
+   оставляет дыру рядом с собой */
+.ca-addr--new:nth-child(odd):last-child {
+  grid-column: 1 / -1;
+}
+
+.ca-addr--new .ca-addr__name {
+  color: var(--text-2);
+}
+
+.ca-addr--new .ico {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+.ca-addr:has(input:checked) {
+  background: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+.ca-addr:has(input:checked) .ca-addr__name {
+  color: var(--on-ink);
+}
+
+.ca-addr:has(input:checked) .ca-addr__line {
+  color: var(--on-ink-2);
+}
+
+.ca-addr:has(input:focus-visible) {
+  outline: 2px solid var(--terracotta);
+  outline-offset: 2px;
+}
+
+/* ── «Сохранить адрес в кабинете» под полями для курьера ─────────────────── */
+
+/* The rhythm under the courier fields stays 34 px to «Когда» whatever is
+   open: the tick's 44 px row carries its own air, the open labels add 8 px.
+   Ритм под полями для курьера — те же 34 px до «Когда», что бы ни было
+   открыто: строка галочки в 44 px несёт свой воздух, открытые метки
+   добавляют 8 px. */
+.ca-save {
+  margin: -2px 0 6px;
+}
+
+.ca-save[hidden],
+.ca-save [hidden] {
+  display: none;
+}
+
+.ca-save__check {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.ca-save__check input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--olive);
+  cursor: pointer;
+}
+
+.ca-save__check input:focus-visible {
+  outline: 2px solid var(--terracotta);
+  outline-offset: 2px;
+}
+
+/* the labels hang under the tick's text, not under the box
+   метки висят под текстом галочки, а не под квадратиком */
+.ca-save__labels {
+  padding: 2px 0 8px 30px;
+}
+
+.ca-save__caption {
+  margin-bottom: 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-3);
+}
+
+.ca-save__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* the catering form's chip (catering.css `.chip`): 44 px, chosen = ink
+   чип формы кейтеринга (catering.css `.chip`): 44 px, выбранный — чернилами */
+.ca-chip {
+  position: relative;
+}
+
+.ca-chip[hidden] {
+  display: none;
+}
+
+.ca-chip input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.ca-chip span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--r-sq);
+  box-shadow: inset 0 0 0 1px var(--line-4);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-2);
+  transition-property: background-color, color, box-shadow;
+  transition-duration: 0.16s;
+}
+
+.ca-chip input:checked + span {
+  background: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+  color: var(--on-ink);
+}
+
+.ca-chip input:focus-visible + span {
+  outline: 2px solid var(--terracotta);
+  outline-offset: 2px;
+}
+
+.ca-save .ca-save__own {
+  margin: 10px 0 0;
+}
+
+.ca-save .ca-save__chips[hidden] + .ca-save__own {
+  margin-top: 0;
+}
+
+.ca-save__limit {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding-block: 4px 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-3);
+}
+
+.ca-save__limit .ico {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 0.5px;
+  color: var(--text-5);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ca-addr:hover:not(:has(input:checked)) {
+    box-shadow: inset 0 0 0 1px var(--text-4);
+  }
+
+  .ca-chip:hover input:not(:checked) + span {
+    box-shadow: inset 0 0 0 1px var(--text-4);
+    color: var(--text);
+  }
+}
+
+/* «Заказ принят»: under «Куда» — the address is in the account now
+   «Заказ принят»: под «Куда» — адрес теперь в кабинете */
+.done__saved {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--olive-dark);
+}
+
+.done__saved[hidden] {
+  display: none;
+}
+
+.done__saved .ico {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
