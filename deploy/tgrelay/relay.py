@@ -8,9 +8,12 @@ Telegram не отвечает, запрос ждёт в очереди SQLite �
 Как: POST /bot<токен>/<метод> с тем же телом, что и у Bot API. Если Telegram
 ответил за SYNC_WAIT секунд — ответ отдаётся как есть (код и JSON). Иначе
 202 {"ok": true, "queued": true, "job": id}, доставка продолжится в фоне
-(повторы по расписанию, до GIVE_UP_HOURS). GET-методы (getMe …) проксируются
-без очереди. GET /health — состояние очереди. Токены в лог не пишутся.
-Только стандартная библиотека.
+(повторы по расписанию, до GIVE_UP_HOURS). Методы из PASSTHROUGH (getUpdates,
+answerCallbackQuery) идут в Telegram сразу, без очереди: ответ отдаётся как есть,
+нет связи — 502, и клиент решает сам. GET-методы (getMe …) проксируются без
+очереди вместе со строкой запроса. GET /bot<токен>/jobs/<id> — состояние задания
+и ответ Telegram (там message_id); задание отдаётся только своему токену. GET /health — состояние очереди. Токены в лог не
+пишутся. Только стандартная библиотека.
 """
 import json
 import os
@@ -29,7 +32,11 @@ SYNC_WAIT = float(os.environ.get('TGRELAY_SYNC_WAIT', '6'))
 TIMEOUT = float(os.environ.get('TGRELAY_TIMEOUT', '15'))
 GIVE_UP_HOURS = float(os.environ.get('TGRELAY_GIVE_UP_HOURS', '48'))
 KEEP_DAYS = 7
-BACKOFF = [10, 30, 120, 300, 900, 1800, 3600]  # секунды между повторами
+# секунды между повторами; TGRELAY_BACKOFF="1,2" — для проверки
+BACKOFF = [float(s) for s in (os.environ.get('TGRELAY_BACKOFF') or '10,30,120,300,900,1800,3600').split(',')]
+PASSTHROUGH = {'getUpdates', 'answerCallbackQuery'}  # без очереди: ответ нужен сейчас или никогда
+NOT_FOUND = b'{"ok":false,"description":"not found"}'
+NO_CONN = json.dumps({'ok': False, 'description': 'relay: no connection to Telegram'}).encode()
 
 _lock = threading.Lock()
 _wake = threading.Event()
@@ -52,18 +59,29 @@ def db():
     return conn
 
 
-def upstream(token, method, body, ctype):
-    """Один запрос к Telegram. Возвращает (код, тело-байты); сетевая ошибка → (0, текст)."""
-    req = urllib.request.Request(f'{UPSTREAM}/bot{token}/{method}', data=body, method='POST' if body is not None else 'GET')
+def upstream(token, method, body, ctype, timeout=None, query=''):
+    """Один запрос к Telegram. Возвращает (код, тело-байты); сетевая ошибка → (0, текст).
+
+    query — строка запроса вместе с «?», timeout — свой для долгого опроса."""
+    req = urllib.request.Request(f'{UPSTREAM}/bot{token}/{method}{query}', data=body, method='POST' if body is not None else 'GET')
     if ctype:
         req.add_header('Content-Type', ctype)
     try:
-        with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+        with urllib.request.urlopen(req, timeout=timeout or TIMEOUT) as resp:
             return resp.status, resp.read()
     except urllib.error.HTTPError as e:
         return e.code, e.read()
     except Exception as e:  # noqa: BLE001 — любая сетевая беда = повтор
         return 0, str(e).encode()
+
+
+def poll_timeout(body):
+    """Таймаут к Telegram для getUpdates: timeout из JSON-тела + 10 с, но не больше 60."""
+    try:
+        t = float(json.loads(body or b'{}').get('timeout') or 0)
+    except Exception:  # noqa: BLE001 — не JSON, не объект, не число
+        t = 0.0
+    return min(60.0, max(t, 0.0) + 10)
 
 
 def final(code, body):
@@ -91,7 +109,7 @@ def worker():
             code, out = upstream(token, method, body, ctype)
             attempts += 1
             if final(code, out):
-                conn.execute('update jobs set status=?, attempts=?, last_code=?, last_body=?, done_at=? where id=?', ('done' if code < 300 else 'rejected', attempts, code, out[:2000].decode('utf-8', 'replace'), time.time(), jid))
+                conn.execute('update jobs set status=?, attempts=?, last_code=?, last_body=?, done_at=? where id=?', ('done' if code < 300 else 'rejected', attempts, code, out.decode('utf-8', 'replace'), time.time(), jid))
                 log(f'job {jid} {method}: {code} после {attempts} попыт.')
             elif time.time() - created > GIVE_UP_HOURS * 3600:
                 conn.execute('update jobs set status=?, attempts=?, last_code=?, last_body=?, done_at=? where id=?', ('failed', attempts, code, out[:500].decode('utf-8', 'replace'), time.time(), jid))
@@ -101,8 +119,9 @@ def worker():
                 conn.execute('update jobs set attempts=?, next_at=?, last_code=?, last_body=? where id=?', (attempts, time.time() + wait, code, out[:500].decode('utf-8', 'replace'), jid))
                 log(f'job {jid} {method}: код {code}, повтор через {int(wait)} с (попытка {attempts})')
             with _lock:
-                _results[jid] = (code, out)
                 ev = _done_events.get(jid)
+                if ev:  # результат нужен только тому, кто ещё ждёт
+                    _results[jid] = (code, out)
             if ev:
                 ev.set()
         # уборка
@@ -124,32 +143,68 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def _route(self):
-        parts = self.path.split('?')[0].strip('/').split('/')
+        """/bot<токен>/<метод>?… → (токен, метод, «?…» или '')."""
+        path, sep, query = self.path.partition('?')
+        parts = path.strip('/').split('/')
         if len(parts) >= 2 and parts[0].startswith('bot'):
-            return parts[0][3:], '/'.join(parts[1:])
-        return None, None
+            return parts[0][3:], '/'.join(parts[1:]), sep + query
+        return None, None, ''
+
+    def _job(self, token, jid):
+        """GET /bot<токен>/jobs/<id>: состояние задания и разобранный ответ Telegram (null, если не JSON).
+        Чужой токен видит 404: номера заданий идут подряд, а в ответах — тексты заказов."""
+        try:
+            jid = int(jid)
+        except ValueError:
+            jid = 0
+        row = None
+        if 0 < jid < 2 ** 63:
+            conn = db()
+            row = conn.execute('select id, status, attempts, last_code, last_body from jobs where id=? and token=?', (jid, token)).fetchone()
+            conn.close()
+        if not row:
+            return self._send(404, NOT_FOUND)
+        try:
+            result = json.loads(row[4]) if row[4] else None
+        except ValueError:
+            result = None
+        return self._send(200, json.dumps({'id': row[0], 'status': row[1], 'attempts': row[2], 'last_code': row[3], 'result': result}).encode())
+
+    def _passthrough(self, token, method, query, body, ctype):
+        """Сразу в Telegram, без очереди: код и тело как есть, нет связи → 502."""
+        timeout = poll_timeout(body) if method == 'getUpdates' else TIMEOUT
+        code, out = upstream(token, method, body, ctype, timeout=timeout, query=query)
+        if not code:
+            log(f'{method}: нет связи с Telegram')
+            return self._send(502, NO_CONN)
+        return self._send(code, out)
 
     def do_GET(self):
-        if self.path == '/health':
+        path = self.path.split('?')[0]
+        if path == '/health':
             conn = db()
             pending = conn.execute("select count(*) from jobs where status='pending'").fetchone()[0]
             failed = conn.execute("select count(*) from jobs where status='failed'").fetchone()[0]
             last = conn.execute("select max(done_at) from jobs where status='done'").fetchone()[0]
             conn.close()
             return self._send(200, json.dumps({'ok': True, 'pending': pending, 'failed': failed, 'last_ok': last, 'upstream': UPSTREAM}).encode())
-        token, method = self._route()
+        token, method, query = self._route()
         if not token:
-            return self._send(404, b'{"ok":false,"description":"not found"}')
-        code, out = upstream(token, method, None, None)
-        return self._send(code or 502, out if code else json.dumps({'ok': False, 'description': 'relay: no connection to Telegram'}).encode())
+            return self._send(404, NOT_FOUND)
+        if method.startswith('jobs/'):
+            return self._job(token, method[len('jobs/'):])
+        code, out = upstream(token, method, None, None, query=query)
+        return self._send(code or 502, out if code else NO_CONN)
 
     def do_POST(self):
-        token, method = self._route()
+        token, method, query = self._route()
         if not token:
-            return self._send(404, b'{"ok":false,"description":"not found"}')
+            return self._send(404, NOT_FOUND)
         length = int(self.headers.get('Content-Length') or 0)
         body = self.rfile.read(length) if length else b''
         ctype = self.headers.get('Content-Type') or 'application/json'
+        if method in PASSTHROUGH:
+            return self._passthrough(token, method, query, body, ctype)
         conn = db()
         cur = conn.execute('insert into jobs (created, token, method, body, ctype, attempts, next_at, status) values (?,?,?,?,?,0,?,?)', (time.time(), token, method, body, ctype, time.time(), 'pending'))
         jid = cur.lastrowid
