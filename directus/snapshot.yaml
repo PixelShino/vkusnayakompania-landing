@@ -10728,6 +10728,8 @@ fields:
             value: failed
           - text: Не отправлено
             value: skipped
+          - text: В очереди ретранслятора
+            value: queued
       readonly: true
       required: false
       searchable: true

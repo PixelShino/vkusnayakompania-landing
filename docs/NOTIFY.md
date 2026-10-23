@@ -161,12 +161,45 @@ curl -s -X POST https://admin.vkus-com.ru/notify/test \
   в поля «Состояние почты» и `email_ready`.
 - Telegram: `sendMessage` Bot API, таймаут 10 с. Сетевой сбой, ответ 5xx или
   429 повторяются ещё два раза (через 2 и 5 с), ответ 4xx сразу считается
-  ошибкой настроек.
+  ошибкой настроек. С 23.10.2026 запросы идут сначала в ретранслятор
+  (`TELEGRAM_API_BASE`, см. ниже), а напрямую в Telegram — только если
+  ретранслятор недоступен; ответ ретранслятора «взял в очередь» пишется в
+  журнал как «В очереди ретранслятора» (`queued`), карточка показывает
+  «Telegram ⏳ в очереди».
 - Права (`scripts/setup/notify.mjs`, вызывается из `pnpm setup`): редактор
   читает и правит «Оповещения» без поля токена и читает журнал. Пишет в журнал
   только расширение.
 - Проверка без сети и без Directus: `node scripts/notify.check.mjs` (входит
   в `pnpm test`). Telegram там подменён поддельным `fetch`.
+
+## Ретранслятор на seochron (с 23.10.2026)
+
+С сервера Selectel в России `api.telegram.org` недоступен: адрес из DNS
+(`149.154.166.110`) не отвечает, из остальных отвечает один
+(`149.154.167.220`, закреплён в `docker-compose.yml` через `extra_hosts` как
+запасной путь). Основной путь — ретранслятор с очередью за границей:
+
+| Где | Что | Как смотреть |
+|---|---|---|
+| seochron (`64.188.96.150`, Франкфурт) | `/opt/tgrelay/relay.py`, сервис `tgrelay` (пользователь `tgrelay`), слушает `127.0.0.1:8787`, очередь SQLite `/var/lib/tgrelay/queue.db` | `systemctl status tgrelay`, `journalctl -u tgrelay`, `curl 127.0.0.1:8787/health` |
+| seochron | пользователь `vkustunnel` только для туннеля: `authorized_keys` с `restrict,permitopen="127.0.0.1:8787"`, в `sshd` `Match User vkustunnel` без шелла | `/home/vkustunnel/.ssh/authorized_keys` |
+| vkus (прод) | `tg-tunnel.service` от `deploy`: `ssh -N -L 172.17.0.1:8787:127.0.0.1:8787 vkustunnel@64.188.96.150`, ключ `/srv/vkus/secrets/tg-tunnel/id_ed25519`, отпечаток seochron закреплён в `known_hosts` там же; `ufw allow from 172.16.0.0/12 to any port 8787` | `systemctl status tg-tunnel`, `curl 172.17.0.1:8787/health` |
+| vkus, `directus/.env` | `TELEGRAM_API_BASE=http://172.17.0.1:8787` (compose передаёт в контейнер) | `docker compose exec directus node -e "fetch('http://172.17.0.1:8787/health').then(r=>r.text()).then(console.log)"` |
+
+Протокол ретранслятора — тот же Bot API: `POST /bot<токен>/<метод>` с тем же
+телом. Если Telegram ответил за 6 с — ответ отдаётся как есть; иначе
+`202 {"ok":true,"queued":true,"job":N}`, и ретранслятор сам доставляет
+повторами (10 с, 30 с, 2, 5, 15, 30, 60 мин) до 48 часов, после чего
+запись в очереди помечается `failed`. `GET` (например `getMe`) проксируется
+без очереди. Токены в лог ретранслятора не пишутся. Если ретранслятор или
+туннель лежат (нет связи, 502–504), расширение в той же попытке идёт в
+Telegram напрямую через закреплённый адрес.
+
+Проверка без сообщений в рабочую группу: `curl 172.17.0.1:8787/health` на
+vkus (поле `last_ok` — время последней доставки), `GET …/bot<токен>/getMe`
+через ретранслятор. Исходник ретранслятора, установочный скрипт для seochron
+и unit туннеля для vkus лежат в `deploy/tgrelay/` (`relay.py`,
+`install-seochron.sh <публичный ключ туннеля>`, `tg-tunnel.service`).
 
 ## Выкатка на прод
 

@@ -23,6 +23,8 @@ import {
   statusModel,
   subjectFor,
   telegramText,
+  telegramBases,
+  TELEGRAM_API,
 } from '../directus/extensions/notify/lib.js';
 
 // a shape no scanner takes for a real bot token: GitHub flagged the previous one
@@ -275,6 +277,57 @@ const netDown = () => Object.assign(new TypeError('fetch failed'), { cause: { co
   assert.equal(r.status, 'sent');
   assert.equal(calls.length, 2);
 }
+// ── relay with a queue / ретранслятор с очередью ─────────────────────────────
+{
+  assert.deepEqual(telegramBases({}), [TELEGRAM_API], 'без переменной — напрямую');
+  assert.deepEqual(telegramBases({ TELEGRAM_API_BASE: 'http://172.17.0.1:8787/' }), ['http://172.17.0.1:8787', TELEGRAM_API], 'ретранслятор первым, Telegram запасным');
+  assert.deepEqual(telegramBases({ TELEGRAM_API_BASE: TELEGRAM_API }), [TELEGRAM_API]);
+  const RELAY = 'http://relay:8787';
+  const bases = [RELAY, TELEGRAM_API];
+  {
+    // the relay delivered at once: a normal «sent» / ретранслятор доставил сразу — обычное «отправлено»
+    const { impl, calls } = fakeFetch([{ status: 200, body: { ok: true } }]);
+    const r = await sendTelegram({ token: TOKEN, chatId: '1', text: 'x', fetchImpl: impl, sleep: noSleep, bases });
+    assert.deepEqual(r, { status: 'sent', attempts: 1, error: null });
+    assert.ok(calls[0].url.startsWith(`${RELAY}/bot`), 'ушло в ретранслятор');
+  }
+  {
+    // the relay took it into the queue: «queued», no retries here / взял в очередь — «в очереди», без повторов
+    const { impl, calls } = fakeFetch([{ status: 202, body: { ok: true, queued: true, job: 7 } }]);
+    const r = await sendTelegram({ token: TOKEN, chatId: '1', text: 'x', fetchImpl: impl, sleep: noSleep, bases });
+    assert.deepEqual(r, { status: 'queued', attempts: 1, error: null });
+    assert.equal(calls.length, 1);
+  }
+  {
+    // the relay is down: Telegram directly in the same attempt / ретранслятор лежит — сразу напрямую в Telegram
+    const { impl, calls } = fakeFetch([netDown(), { status: 200, body: { ok: true } }]);
+    const r = await sendTelegram({ token: TOKEN, chatId: '1', text: 'x', fetchImpl: impl, sleep: noSleep, bases });
+    assert.deepEqual(r, { status: 'sent', attempts: 1, error: null });
+    assert.ok(calls[1].url.startsWith(`${TELEGRAM_API}/bot`), 'запасной путь — Telegram');
+  }
+  {
+    // the tunnel answers 503 for a dead relay: also the direct path / туннель отвечает 503 за мёртвый ретранслятор — тоже напрямую
+    const { impl, calls } = fakeFetch([{ status: 503, body: {} }, { status: 200, body: { ok: true } }]);
+    const r = await sendTelegram({ token: TOKEN, chatId: '1', text: 'x', fetchImpl: impl, sleep: noSleep, bases });
+    assert.equal(r.status, 'sent');
+    assert.equal(calls.length, 2);
+  }
+  {
+    // both down twice, then Telegram answers: three attempts, six calls / оба лежат дважды, потом Telegram отвечает
+    const { impl, calls } = fakeFetch([netDown(), netDown(), netDown(), netDown(), netDown(), { status: 200, body: { ok: true } }]);
+    const r = await sendTelegram({ token: TOKEN, chatId: '1', text: 'x', fetchImpl: impl, sleep: noSleep, bases });
+    assert.deepEqual(r, { status: 'sent', attempts: 3, error: null });
+    assert.equal(calls.length, 6);
+  }
+  {
+    // Telegram's own 4xx through the relay is final / 4xx самого Telegram через ретранслятор — окончательно
+    const { impl, calls } = fakeFetch([{ status: 400, body: { ok: false, description: 'Bad Request: chat not found' } }]);
+    const r = await sendTelegram({ token: TOKEN, chatId: '1', text: 'x', fetchImpl: impl, sleep: noSleep, bases });
+    assert.equal(r.status, 'failed');
+    assert.equal(calls.length, 1);
+  }
+}
+
 assert.equal(scrub(`GET https://api.telegram.org/bot${TOKEN}/sendMessage`, []), 'GET https://api.telegram.org/bot***/sendMessage');
 assert.ok(!scrub(`token ${TOKEN} leaked`, [TOKEN]).includes(TOKEN));
 

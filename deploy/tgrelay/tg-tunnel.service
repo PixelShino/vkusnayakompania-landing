@@ -1,0 +1,22 @@
+[Unit]
+Description=SSH tunnel to the Telegram relay on seochron (172.17.0.1:8787 -> relay)
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+User=deploy
+ExecStart=/usr/bin/ssh -N \
+  -o BatchMode=yes \
+  -o ExitOnForwardFailure=yes \
+  -o ServerAliveInterval=30 \
+  -o ServerAliveCountMax=3 \
+  -o StrictHostKeyChecking=yes \
+  -o UserKnownHostsFile=/srv/vkus/secrets/tg-tunnel/known_hosts \
+  -i /srv/vkus/secrets/tg-tunnel/id_ed25519 \
+  -L 172.17.0.1:8787:127.0.0.1:8787 \
+  vkustunnel@64.188.96.150
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

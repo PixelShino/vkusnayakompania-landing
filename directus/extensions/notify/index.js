@@ -30,6 +30,7 @@ import {
   orderModel,
   requestModel,
   statusModel,
+  telegramBases,
 } from './lib.js';
 
 // orders and requests typed in by the staff are not announced: they already know
@@ -109,6 +110,7 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
         mail: mailState(env),
         sendMail: mailer(services, database, schema ?? (await getSchema())),
         secrets: secretsOf(env, settings),
+        bases: telegramBases(env),
       });
       await writeLog(database, event, model, key, results);
       // a status change keeps the first line: it answers «did the owner hear about the order»
@@ -183,6 +185,7 @@ const endpoint = (router, { services, env, logger, database, getSchema }) => {
         mail: mailState(env),
         sendMail: mailer(services, database, await getSchema()),
         secrets: secretsOf(env, settings),
+        bases: telegramBases(env),
       });
       await writeLog(database, 'test', model, undefined, results);
       logger.info(`notify: проверка — ${summary}`);

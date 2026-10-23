@@ -49,6 +49,8 @@ services:
     environment:
       SECRET: ${SECRET}
       PUBLIC_URL: ${PUBLIC_URL}
+      # Bot API через ретранслятор с очередью (SSH-туннель на seochron); пусто — напрямую
+      TELEGRAM_API_BASE: ${TELEGRAM_API_BASE:-}
 
       DB_CLIENT: pg
       DB_HOST: database

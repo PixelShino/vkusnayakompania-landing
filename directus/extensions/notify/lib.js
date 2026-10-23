@@ -375,6 +375,31 @@ const telegramReason = (status, description) => {
  * Одно сообщение в один чат. Сетевой сбой, 5xx и 429 повторяются (дважды);
  * 4xx — ошибка настроек, о ней сообщаем сразу.
  */
+export const TELEGRAM_API = 'https://api.telegram.org';
+
+/**
+ * Where Bot API requests go: the relay from `TELEGRAM_API_BASE` first (a queue
+ * outside Russia reachable over an SSH tunnel), then Telegram itself, when the
+ * relay is unreachable or answers like a dead relay (502/503/504).
+ * Куда идут запросы Bot API: сначала ретранслятор из `TELEGRAM_API_BASE`
+ * (очередь за границей, доступная по SSH-туннелю), потом сам Telegram — когда
+ * ретранслятор недоступен или отвечает как мёртвый (502/503/504).
+ */
+export const telegramBases = (env = {}) => {
+  const relay = String(env.TELEGRAM_API_BASE ?? '').trim().replace(/\/+$/, '');
+  return relay && relay !== TELEGRAM_API ? [relay, TELEGRAM_API] : [TELEGRAM_API];
+};
+
+/**
+ * One message to one chat. A network failure, a 5xx or a 429 is tried again
+ * (twice); a 4xx is a settings problem and is reported at once. A relay that
+ * took the message into its queue (202 `queued`) counts as «queued»: it will
+ * reach Telegram without us, so there is nothing to retry here.
+ * Одно сообщение в один чат. Сетевой сбой, 5xx и 429 повторяются (дважды);
+ * 4xx — ошибка настроек, о ней сообщается сразу. Ретранслятор, взявший
+ * сообщение в очередь (202 `queued`), — это «в очереди»: до Telegram оно дойдёт
+ * без нас, повторять здесь нечего.
+ */
 export const sendTelegram = async ({
   token,
   chatId,
@@ -382,27 +407,37 @@ export const sendTelegram = async ({
   fetchImpl = fetch,
   delays = TELEGRAM_RETRY_DELAYS,
   sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+  bases = [TELEGRAM_API],
 }) => {
   let attempts = 0;
   let reason = '';
   for (;;) {
     attempts += 1;
     let retry = false;
-    try {
-      const response = await fetchImpl(`https://api.telegram.org/bot${token}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML', disable_web_page_preview: true }),
-        signal: AbortSignal.timeout(10_000),
-      });
-      const answer = await response.json().catch(() => ({}));
-      if (response.ok && answer.ok !== false) return { status: 'sent', attempts, error: null };
-      reason = telegramReason(response.status, answer.description ?? '');
-      retry = response.status >= 500 || response.status === 429;
-    } catch (error) {
-      const cause = error?.cause?.code ?? error?.code ?? error?.name ?? '';
-      reason = `нет связи с Telegram${cause ? ` (${cause})` : ''}`;
-      retry = true;
+    for (const [i, base] of bases.entries()) {
+      const viaRelay = base !== TELEGRAM_API;
+      try {
+        const response = await fetchImpl(`${base}/bot${token}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML', disable_web_page_preview: true }),
+          signal: AbortSignal.timeout(viaRelay ? 12_000 : 10_000),
+        });
+        const answer = await response.json().catch(() => ({}));
+        if (response.status === 202 && answer.queued) return { status: 'queued', attempts, error: null };
+        if (response.ok && answer.ok !== false) return { status: 'sent', attempts, error: null };
+        reason = telegramReason(response.status, answer.description ?? '');
+        retry = response.status >= 500 || response.status === 429;
+        // a dead relay is not Telegram's verdict: the next base gets its turn
+        // мёртвый ретранслятор — не вердикт Telegram: очередь за следующим адресом
+        if (viaRelay && [502, 503, 504].includes(response.status) && i < bases.length - 1) continue;
+        break;
+      } catch (error) {
+        const cause = error?.cause?.code ?? error?.code ?? error?.name ?? '';
+        reason = `нет связи с ${viaRelay ? 'ретранслятором' : 'Telegram'}${cause ? ` (${cause})` : ''}`;
+        retry = true;
+        if (i < bases.length - 1) continue;
+      }
     }
     if (!retry || attempts > delays.length) return { status: 'failed', attempts, error: scrub(reason, [token]) };
     await sleep(delays[attempts - 1]);
@@ -425,7 +460,7 @@ const mailReason = (error) => {
  * строку для карточки. `sendMail(message)` и `fetchImpl` — настоящие отправщики
  * в Directus и подделки в проверке.
  */
-export const deliver = async ({ model, settings, mail, sendMail, fetchImpl, delays, sleep, now = new Date(), secrets = [] }) => {
+export const deliver = async ({ model, settings, mail, sendMail, fetchImpl, delays, sleep, now = new Date(), secrets = [], bases = [TELEGRAM_API] }) => {
   const results = [];
   const kind = model.kind;
 
@@ -467,7 +502,7 @@ export const deliver = async ({ model, settings, mail, sendMail, fetchImpl, dela
     // chats go one after another: a retry pause in one must not reorder the rest
     // чаты по очереди: пауза повтора в одном не должна путать остальные
     for (const chat of chats) {
-      const result = await sendTelegram({ token: settings.telegram_token, chatId: chat.id, text, fetchImpl, delays, sleep });
+      const result = await sendTelegram({ token: settings.telegram_token, chatId: chat.id, text, fetchImpl, delays, sleep, bases });
       results.push({ channel: 'telegram', recipient: chat.label ? `${chat.label} (${chat.id})` : chat.id, ...result });
     }
     telegramPart = partLine('Telegram', results.filter((r) => r.channel === 'telegram'), ['чат', 'чата', 'чатов']);
@@ -478,9 +513,11 @@ export const deliver = async ({ model, settings, mail, sendMail, fetchImpl, dela
 
 /** «почта ✓», «почта ✓ 2 адреса», «почта ✓ 1 из 2», «почта ✗ <причина>» */
 function partLine(name, rows, words) {
-  const sent = rows.filter((r) => r.status === 'sent').length;
-  if (sent === rows.length) return `${name} ✓${rows.length > 1 ? ` ${rows.length} ${plural(rows.length, words)}` : ''}`;
-  if (sent > 0) return `${name} ✓ ${sent} из ${rows.length}`;
+  const sent = rows.filter((r) => r.status === 'sent' || r.status === 'queued').length;
+  const queued = rows.filter((r) => r.status === 'queued').length;
+  const mark = queued ? '⏳ в очереди' : '✓';
+  if (sent === rows.length) return `${name} ${mark}${rows.length > 1 ? ` ${rows.length} ${plural(rows.length, words)}` : ''}`;
+  if (sent > 0) return `${name} ${mark} ${sent} из ${rows.length}`;
   return `${name} ✗ ${short(rows[0]?.error ?? 'не отправлено')}`;
 }
 
