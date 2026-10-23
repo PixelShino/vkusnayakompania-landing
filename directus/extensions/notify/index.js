@@ -6,6 +6,15 @@
  * sees at once whether the owner got it. Without SMTP the letter is «not sent:
  * SMTP is not configured» and the order is not touched; mail turns on with
  * EMAIL_TRANSPORT and its block in `directus/.env`.
+ *
+ * Since 23.10.2026 the order's Telegram message is alive: buttons under it move
+ * the order («В работу», «Выполнен», «Отменить» with a second step), a status
+ * change from anywhere — a button or the admin — rewrites that message with
+ * «▶️ В работе — Дмитрий, 12:40» instead of posting a new one, and a payment
+ * confirmed by the bank adds «💳 оплачен онлайн» and a short reply under the
+ * order. Presses are fetched by long polling (`getUpdates`) through the relay;
+ * `TELEGRAM_BUTTONS=off` turns the polling off (a second copy of Directus with
+ * the same bot would steal the presses).
  * Also `POST /notify/test` (administrators only): a demo order through the
  * same channels, to check the settings.
  *
@@ -16,6 +25,15 @@
  * видит, дошло ли до владелицы. Без SMTP письмо «не отправлено: SMTP не
  * настроен», заказ при этом не страдает; почта включается EMAIL_TRANSPORT и его
  * блоком в `directus/.env`.
+ *
+ * С 23.10.2026 сообщение заказа в Telegram живое: кнопки под ним переводят
+ * заказ («В работу», «Выполнен», «Отменить» со вторым шагом), смена статуса
+ * откуда угодно — кнопкой или из админки — переписывает это сообщение строкой
+ * «▶️ В работе — Дмитрий, 12:40», а не шлёт новое, а подтверждённая банком
+ * оплата добавляет «💳 оплачен онлайн» и короткий ответ под заказом. Нажатия
+ * забираются долгим опросом (`getUpdates`) через ретранслятор;
+ * `TELEGRAM_BUTTONS=off` выключает опрос (вторая копия Directus с тем же ботом
+ * отбирала бы нажатия).
  * И `POST /notify/test` (только администратор): пример заказа по тем же каналам
  * для проверки настроек.
  *
@@ -23,14 +41,29 @@
  * Бандл без сборки: этот файл — точка входа API, логика — в `lib.js`.
  */
 import {
+  TELEGRAM_API,
+  answerCallback,
+  decideCallback,
   deliver,
   demoModel,
+  editTelegram,
+  editTelegramKeyboard,
   mailState,
   normalizeSettings,
   orderModel,
+  paidModel,
+  parseCallback,
+  pollTelegram,
+  pressedBy,
+  relayJob,
   requestModel,
+  statusLogLine,
   statusModel,
   telegramBases,
+  telegramChats,
+  telegramKeyboard,
+  telegramMeta,
+  telegramText,
 } from './lib.js';
 
 // orders and requests typed in by the staff are not announced: they already know
@@ -38,6 +71,9 @@ import {
 const MANUAL_SOURCES = new Set(['phone', 'messenger']);
 const LOG_KEEP_DAYS = 180;
 const DAY = 86_400_000;
+// the history under the order does not grow forever / история под заказом не растёт бесконечно
+const HISTORY_KEEP = 20;
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const adminLink = (env, collection, key) => {
   const base = String(env.PUBLIC_URL ?? '').replace(/\/+$/, '');
@@ -53,9 +89,9 @@ const loadModel = async (database, env, collection, key) => {
   if (!row) return null;
   const adminUrl = adminLink(env, collection, key);
   const place = row.place ? (await database('places').where({ id: row.place }).first('name'))?.name : null;
-  if (collection === 'orders') return { row, model: orderModel(row, { place, adminUrl }) };
+  if (collection === 'orders') return { row, place, model: orderModel(row, { place, adminUrl }) };
   const format = row.format ? (await database('catering_formats').where({ id: row.format }).first('title'))?.title : null;
-  return { row, model: requestModel(row, { place, format, adminUrl }) };
+  return { row, place, model: requestModel(row, { place, format, adminUrl }) };
 };
 
 // one MailService per delivery: its constructor checks the SMTP connection
@@ -89,33 +125,65 @@ const writeLog = async (database, event, model, key, results) => {
   );
 };
 
+/** The order's Telegram memory written back. / Память заказа о Telegram, записанная обратно. */
+const saveMeta = (database, key, meta) =>
+  database('orders')
+    .where({ id: key })
+    .update({ telegram_meta: JSON.stringify({ messages: meta.messages, history: meta.history.slice(-HISTORY_KEEP) }) });
+
+/** The messages a delivery produced, remembered so they can be edited later. / Сообщения рассылки — чтобы потом их править. */
+const rememberSent = async (database, key, row, results) => {
+  const sent = results.filter((r) => r.channel === 'telegram' && (r.messageId || r.job));
+  if (!sent.length) return;
+  const meta = telegramMeta(row);
+  for (const r of sent) {
+    const found = meta.messages.find((m) => String(m.chat) === String(r.chat));
+    const entry = r.messageId ? { chat: String(r.chat), message_id: r.messageId } : { chat: String(r.chat), job: r.job };
+    if (found) Object.assign(found, entry);
+    else meta.messages.push(entry);
+  }
+  await saveMeta(database, key, meta);
+  row.telegram_meta = meta;
+};
+
 const hook = ({ action, init }, { services, env, logger, database: db, getSchema }) => {
   let pruned = 0;
+  // who pressed the button, waiting for the status action that the press causes
+  // кто нажал кнопку — ждёт действия смены статуса, которое это нажатие вызовет
+  const actors = new Map();
+  // one order's events run one after another: the message must exist before it is edited
+  // события одного заказа идут по очереди: сообщение должно появиться раньше, чем его правят
+  const chains = new Map();
+  const serial = (key, fn) => {
+    const prev = chains.get(key) ?? Promise.resolve();
+    const next = prev.then(fn, fn).finally(() => {
+      if (chains.get(key) === next) chains.delete(key);
+    });
+    chains.set(key, next);
+    return next;
+  };
 
-  const run = async (event, collection, key, { database = db, schema } = {}, status) => {
+  const senders = async (database, schema) => ({
+    mail: mailState(env),
+    sendMail: mailer(services, database, schema ?? (await getSchema())),
+    bases: telegramBases(env),
+  });
+
+  /** A new order or request: the message to every channel, as before. / Новый заказ или заявка: сообщение по всем каналам, как раньше. */
+  const announce = async (event, collection, key, { database = db, schema } = {}) => {
     try {
       const settings = await loadSettings(database);
-      if (status && !settings.status_changes) return;
       const loaded = await loadModel(database, env, collection, key);
       if (!loaded) return;
-      const { row } = loaded;
-      if (MANUAL_SOURCES.has(row.source) && !status) {
+      const { row, model } = loaded;
+      if (MANUAL_SOURCES.has(row.source)) {
         await database(collection).where({ id: key }).update({ notify_result: 'не рассылалось: заведено в админке вручную' });
         return;
       }
-      const model = status ? statusModel(loaded.model, status) : loaded.model;
-      const { results, summary } = await deliver({
-        model,
-        settings,
-        mail: mailState(env),
-        sendMail: mailer(services, database, schema ?? (await getSchema())),
-        secrets: secretsOf(env, settings),
-        bases: telegramBases(env),
-      });
+      const { results, summary } = await deliver({ model, settings, secrets: secretsOf(env, settings), ...(await senders(database, schema)) });
       await writeLog(database, event, model, key, results);
-      // a status change keeps the first line: it answers «did the owner hear about the order»
-      // смена статуса не перетирает строку: она отвечает на «узнала ли владелица о заказе»
-      if (!status) await database(collection).where({ id: key }).update({ notify_result: summary });
+      await database(collection).where({ id: key }).update({ notify_result: summary });
+      if (collection === 'orders') await rememberSent(database, key, row, results);
       const failed = results.filter((r) => r.status === 'failed');
       if (failed.length) logger.warn(`notify: ${event} ${key} — ${summary}`);
       else logger.info(`notify: ${event} ${key} — ${summary}`);
@@ -130,17 +198,235 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
     }
   };
 
+  /**
+   * The order's messages in Telegram rewritten for its current state. A
+   * message the relay still holds gets its id from the relay's ticket; one
+   * Telegram no longer finds is forgotten. Returns the chats that now show
+   * the fresh text.
+   * Сообщения заказа в Telegram, переписанные под его текущее состояние.
+   * Сообщение, которое ретранслятор ещё держит, получает id по талону; то,
+   * которого Telegram уже не находит, забывается. Возвращает чаты, где текст
+   * теперь свежий.
+   */
+  const refresh = async (database, settings, key, row, model, event) => {
+    const meta = telegramMeta(row);
+    const edited = new Set();
+    if (!meta.messages.length || !settings.telegram_enabled || !settings.telegram_token) return { edited, meta };
+    const bases = telegramBases(env);
+    const relay = bases[0] !== TELEGRAM_API ? bases[0] : null;
+    const text = telegramText(model);
+    const keyboard = model.keyboard ?? null;
+    const keep = [];
+    const results = [];
+    let changed = false;
+    for (const m of meta.messages) {
+      let messageId = m.message_id ?? null;
+      if (!messageId && m.job) {
+        const fate = await relayJob({ base: relay, token: settings.telegram_token, job: m.job });
+        if (fate?.lost) {
+          changed = true;
+          continue;
+        }
+        if (fate?.messageId) {
+          messageId = fate.messageId;
+          Object.assign(m, { message_id: messageId });
+          delete m.job;
+          changed = true;
+        }
+      }
+      if (!messageId) {
+        keep.push(m);
+        continue;
+      }
+      const r = await editTelegram({ token: settings.telegram_token, chatId: m.chat, messageId, text, keyboard, bases });
+      if (r.status === 'failed' && /message to edit not found|message can't be edited|MESSAGE_ID_INVALID/i.test(r.error ?? '')) {
+        changed = true;
+        continue;
+      }
+      keep.push(m);
+      if (r.status !== 'failed') edited.add(String(m.chat));
+      const chat = telegramChats(settings, 'order', true).find((c) => c.id === String(m.chat));
+      results.push({ channel: 'telegram', recipient: chat?.label ? `${chat.label} (${m.chat})` : String(m.chat), status: r.status, error: r.error, attempts: r.attempts });
+    }
+    if (changed || keep.length !== meta.messages.length) {
+      meta.messages = keep;
+      await saveMeta(database, key, meta);
+    }
+    await writeLog(database, event, model, key, results);
+    return { edited, meta };
+  };
+
+  /** Who changed the status, when it was not a button: the admin user, else the machine. / Кто сменил статус, если не кнопкой. */
+  const actorOf = async (database, key, accountability) => {
+    const pressed = actors.get(key);
+    if (pressed) {
+      actors.delete(key);
+      return pressed;
+    }
+    if (accountability?.user) {
+      const user = await database('directus_users').where({ id: accountability.user }).first('first_name', 'last_name', 'email');
+      const name = [user?.first_name, user?.last_name].filter(Boolean).join(' ').trim() || String(user?.email ?? '').split('@')[0] || 'сотрудник';
+      return { who: name, via: 'admin' };
+    }
+    return { who: 'автоматически', via: 'system' };
+  };
+
+  /** The status moved: the history, the message rewritten, the old-style notice where there is nothing to rewrite. / Статус сменился. */
+  const onStatus = async (collection, key, status, { database = db, schema, accountability } = {}) => {
+    try {
+      const settings = await loadSettings(database);
+      const event = collection === 'orders' ? 'order_status' : 'request_status';
+      if (collection !== 'orders') {
+        if (!settings.status_changes) return;
+        const loaded = await loadModel(database, env, collection, key);
+        if (!loaded) return;
+        const model = statusModel(loaded.model, status);
+        const { results } = await deliver({ model, settings, secrets: secretsOf(env, settings), ...(await senders(database, schema)) });
+        await writeLog(database, event, model, key, results);
+        return;
+      }
+      const actor = await actorOf(database, key, accountability);
+      const first = await database('orders').where({ id: key }).first();
+      if (!first) return;
+      const meta = telegramMeta(first);
+      const entry = { status, who: actor.who, via: actor.via, at: new Date().toISOString() };
+      meta.history.push(entry);
+      const line = statusLogLine(entry);
+      await database('orders')
+        .where({ id: key })
+        .update({
+          telegram_meta: JSON.stringify({ messages: meta.messages, history: meta.history.slice(-HISTORY_KEEP) }),
+          status_log: first.status_log ? `${first.status_log}\n${line}` : line,
+        });
+      const loaded = await loadModel(database, env, collection, key);
+      if (!loaded) return;
+      const { edited } = await refresh(database, settings, key, loaded.row, loaded.model, event);
+      logger.info(`notify: ${event} ${key} — «${status}» ${actor.who}${edited.size ? `, сообщение обновлено в ${edited.size} чат(ах)` : ''}`);
+      // the separate notice, as before the buttons: mail, and chats with no message to rewrite
+      // отдельное сообщение, как до кнопок: почта и чаты, где переписывать нечего
+      if (!settings.status_changes) return;
+      const model = statusModel(loaded.model, status);
+      const rest = { ...settings, telegram_chats: settings.telegram_chats.filter((c) => !edited.has(String(c?.chat_id ?? '').trim())) };
+      const { results } = await deliver({ model, settings: rest, secrets: secretsOf(env, settings), ...(await senders(database, schema)) });
+      await writeLog(database, event, model, key, results);
+    } catch (error) {
+      logger.warn(`notify: статус ${collection} ${key} — ${error.message}`);
+    }
+  };
+
+  /** The payment moved: the line in the message, and a reply when the bank confirmed. / Оплата сменилась: строка в сообщении и ответ, когда банк подтвердил. */
+  const onPayment = async (key, paymentStatus, { database = db, schema } = {}) => {
+    try {
+      const settings = await loadSettings(database);
+      const loaded = await loadModel(database, env, 'orders', key);
+      if (!loaded) return;
+      const { row, model } = loaded;
+      const { meta } = await refresh(database, settings, key, row, model, 'order_payment');
+      if (paymentStatus !== 'paid' || MANUAL_SOURCES.has(row.source)) return;
+      const replyTo = Object.fromEntries(meta.messages.filter((m) => m.message_id).map((m) => [String(m.chat), m.message_id]));
+      const paid = { ...paidModel(model, row), replyTo };
+      const { results } = await deliver({
+        model: paid,
+        settings: { ...settings, email_enabled: false },
+        secrets: secretsOf(env, settings),
+        ...(await senders(database, schema)),
+      });
+      await writeLog(database, 'order_paid', paid, key, results);
+      logger.info(`notify: заказ ${key} оплачен — ${results.map((r) => `${r.recipient}: ${r.status}`).join(', ') || 'Telegram не настроен'}`);
+    } catch (error) {
+      logger.warn(`notify: оплата заказа ${key} — ${error.message}`);
+    }
+  };
+
+  /** A button under an order was pressed. / Нажата кнопка под заказом. */
+  const onPress = async (query, settings) => {
+    const token = settings.telegram_token;
+    const bases = telegramBases(env);
+    const chat = String(query.message?.chat?.id ?? '');
+    const messageId = query.message?.message_id ?? null;
+    const answer = (text) => answerCallback({ token, callbackId: query.id, text, bases }).catch(() => {});
+    const redraw = (row, confirm = false) =>
+      messageId ? editTelegramKeyboard({ token, chatId: chat, messageId, keyboard: telegramKeyboard(row, { confirm }), bases }) : Promise.resolve();
+    const press = parseCallback(query.data);
+    if (!press) return answer('Эта кнопка больше не работает');
+    if (!telegramChats(settings, 'order', true).some((c) => c.id === chat)) return answer('Этот чат не подключён к заказам');
+    const row = await db('orders').where({ id: press.id }).first();
+    if (!row) return answer('Заказ не найден');
+    const verdict = decideCallback(row, press.what);
+    if (verdict.kind === 'toast') {
+      // stale buttons: show the real ones / устаревшие кнопки: показать настоящие
+      await answer(verdict.toast);
+      await redraw(row);
+      return;
+    }
+    if (verdict.kind === 'confirm' || verdict.kind === 'keep') {
+      await redraw(row, verdict.kind === 'confirm');
+      await answer(verdict.toast);
+      return;
+    }
+    // an order from before the buttons has no message on record: this one is it
+    // у заказа, сделанного до кнопок, сообщение не записано: вот оно
+    if (messageId) {
+      const meta = telegramMeta(row);
+      if (!meta.messages.some((m) => String(m.chat) === chat)) {
+        meta.messages.push({ chat, message_id: messageId });
+        await saveMeta(db, row.id, meta);
+      }
+    }
+    actors.set(row.id, { who: pressedBy(query.from), via: 'telegram' });
+    const items = new services.ItemsService('orders', { schema: await getSchema(), knex: db });
+    await items.updateOne(row.id, { status: verdict.status });
+    await answer(verdict.toast);
+    logger.info(`notify: заказ ${row.id} → «${verdict.status}» кнопкой, ${pressedBy(query.from)}`);
+  };
+
+  /** The long poll for presses, forever, quiet until something changes. / Долгий опрос нажатий, навсегда, молча, пока ничего не меняется. */
+  const pollForever = async () => {
+    let offset = null;
+    let lastError = '';
+    for (;;) {
+      try {
+        const settings = await loadSettings(db);
+        if (!settings.telegram_enabled || !settings.telegram_token || !settings.telegram_chats.length) {
+          await sleep(20_000);
+          continue;
+        }
+        const r = await pollTelegram({ token: settings.telegram_token, offset, bases: telegramBases(env) });
+        if (r.error) {
+          if (r.error !== lastError) logger.warn(`notify: опрос кнопок Telegram — ${r.error}`);
+          lastError = r.error;
+          // 409 — another copy polls the same bot: back off longer / 409 — тот же бот опрашивает кто-то ещё
+          await sleep(r.code === 409 ? 60_000 : 10_000);
+          continue;
+        }
+        if (lastError) logger.info('notify: опрос кнопок Telegram снова работает');
+        lastError = '';
+        for (const update of r.updates) {
+          if (!update.callback_query) continue;
+          await onPress(update.callback_query, settings).catch((error) => logger.warn(`notify: нажатие кнопки — ${error.message}`));
+        }
+        offset = r.offset;
+      } catch (error) {
+        logger.warn(`notify: опрос кнопок Telegram — ${error.message}`);
+        await sleep(10_000);
+      }
+    }
+  };
+
   // actions run after the row is committed and do not hold the guest's answer
   // действия идут после записи и не задерживают ответ гостю
-  action('orders.items.create', ({ key }, context) => run('order_new', 'orders', key, context));
-  action('catering_requests.items.create', ({ key }, context) => run('request_new', 'catering_requests', key, context));
-  for (const [collection, event] of [
-    ['orders', 'order_status'],
-    ['catering_requests', 'request_status'],
-  ]) {
+  action('orders.items.create', ({ key }, context) => serial(key, () => announce('order_new', 'orders', key, context)));
+  action('catering_requests.items.create', ({ key }, context) => announce('request_new', 'catering_requests', key, context));
+  for (const collection of ['orders', 'catering_requests']) {
     action(`${collection}.items.update`, ({ keys, payload }, context) => {
-      if (!payload || !('status' in payload)) return;
-      for (const key of keys ?? []) run(event, collection, key, context, payload.status);
+      if (!payload || typeof payload !== 'object') return;
+      for (const key of keys ?? []) {
+        if ('status' in payload) {
+          if (collection === 'orders') serial(key, () => onStatus(collection, key, payload.status, context));
+          else onStatus(collection, key, payload.status, context);
+        }
+        if (collection === 'orders' && 'payment_status' in payload) serial(key, () => onPayment(key, payload.payment_status, context));
+      }
     });
   }
 
@@ -157,6 +443,11 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
     } catch (error) {
       logger.warn(`notify: состояние почты не записано — ${error.message}`);
     }
+    if (String(env.TELEGRAM_BUTTONS ?? 'on').toLowerCase() === 'off') {
+      logger.info('notify: опрос кнопок Telegram выключен (TELEGRAM_BUTTONS=off)');
+      return;
+    }
+    pollForever();
   });
 };
 

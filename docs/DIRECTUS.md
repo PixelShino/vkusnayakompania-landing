@@ -322,8 +322,8 @@ command="cd /srv/vkus/site && git pull --ff-only && deploy/build.sh",restrict ss
 - **Токены**: сборщика — в `/srv/vkus/site/.env` и в переменных Vercel;
   секрет вебхука — в `/etc/default/webhook` и в Flow «Пересборка сайта».
   Отозвать токен сборщика: «Пользователи → Сборщик сайта → Token».
-- **Оповещения о заказах** (почта, Telegram через ретранслятор на seochron с 23.10.2026, журнал, `POST /notify/test`,
-  включение SMTP): [NOTIFY.md](NOTIFY.md).
+- **Оповещения о заказах** (почта, Telegram через ретранслятор на seochron с 23.10.2026, кнопки статуса под
+  заказом в чате и «Журнал статусов», журнал, `POST /notify/test`, включение SMTP): [NOTIFY.md](NOTIFY.md).
 
 ## Редактору: почему не вижу правку на сайте
 
