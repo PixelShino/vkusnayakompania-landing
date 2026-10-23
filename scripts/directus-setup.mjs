@@ -426,5 +426,6 @@ await (await import('./setup/delivery.mjs')).setup(api, { editorPolicy: policy.i
 
 await (await import('./setup/account.mjs')).setup(api, { findOne, ORDER_FIELDS_PUBLIC, publicPolicy: publicAccess.policy }); // личный кабинет и «Вкусные баллы»
 await (await import('./setup/pages.mjs')).setup(api, { editorPolicy: policy.id, builderPolicy: bpolicy.id }); // документы: оферта, политика, доставка, реквизиты
+await (await import('./setup/email.mjs')).setup(api); // только российская почта: подсказки полей и отчёт о чужих адресах
 
 console.log('setup: готово');

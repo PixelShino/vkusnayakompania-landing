@@ -38,7 +38,12 @@ import {
   telegramText,
   telegramBases,
   TELEGRAM_API,
+  NOT_RU_REASON,
+  senderWarning,
+  testAddressProblem,
 } from '../directus/extensions/notify/lib.js';
+import { RULES, emailProblem, payloadProblem, recipientProblems, recipientsError } from '../directus/extensions/email-guard/rules.js';
+import { RU_MAIL_ERROR, RU_MAIL_ERROR_ADMIN } from '../directus/extensions/email-guard/domains.js';
 
 // a shape no scanner takes for a real bot token: GitHub flagged the previous one
 // форма, которую сканер не примет за настоящий токен бота: прошлую GitHub пометил
@@ -238,6 +243,19 @@ assert.equal(mailState({}).ok, false);
 assert.equal(mailState({ EMAIL_TRANSPORT: 'sendmail' }).reason, 'SMTP не настроен');
 assert.equal(mailState({ EMAIL_TRANSPORT: 'smtp', EMAIL_SMTP_HOST: '' }).ok, false);
 assert.equal(mailState({ EMAIL_TRANSPORT: 'smtp', EMAIL_SMTP_HOST: 'smtp.yandex.ru', EMAIL_SMTP_PORT: 465 }).ok, true);
+// a sender off Russian mail is a warning next to the state, never a stop
+// отправитель не на российской почте — предупреждение к состоянию, а не запрет
+{
+  const foreign = mailState({ EMAIL_TRANSPORT: 'smtp', EMAIL_SMTP_HOST: 'x', EMAIL_FROM: 'a@gmail.com' });
+  assert.equal(foreign.ok, true, 'чужой отправитель почту не выключает');
+  assert.equal(foreign.warning, 'Отправитель EMAIL_FROM не на российской почте: gmail.com');
+  assert.equal(mailState({ EMAIL_TRANSPORT: 'smtp', EMAIL_SMTP_HOST: 'x', EMAIL_FROM: 'a@yandex.ru' }).warning, null);
+  assert.equal(mailState({ EMAIL_TRANSPORT: 'smtp', EMAIL_SMTP_HOST: 'x', EMAIL_FROM: 'noreply@vkus-com.ru' }).warning, null);
+  assert.equal(mailState({ EMAIL_TRANSPORT: 'smtp', EMAIL_SMTP_HOST: 'x' }).warning, null, 'без EMAIL_FROM молчим');
+  assert.equal(mailState({ EMAIL_FROM: 'x@outlook.com' }).warning, 'Отправитель EMAIL_FROM не на российской почте: outlook.com', 'и когда почта не настроена');
+  assert.equal(senderWarning('Вкусная компания <Zakaz@Mail.RU>'), null);
+  assert.equal(senderWarning('"Кухня" <k@icloud.com>'), 'Отправитель EMAIL_FROM не на российской почте: icloud.com');
+}
 
 // ── a fake Telegram / подделка Telegram ──────────────────────────────────────
 const fakeFetch = (answers) => {
@@ -412,6 +430,39 @@ assert.ok(!scrub(`token ${TOKEN} leaked`, [TOKEN]).includes(TOKEN));
   });
   assert.equal(summary, 'почта ✓ 1 из 2 · Telegram ✗ неверный токен бота · 12:05');
   assert.ok(results.every((r) => !String(r.error ?? '').includes(TOKEN)));
+}
+{
+  // Russian mail only: a well-formed gmail address is not sent to, mail.ru and vkus-com.ru are
+  // только российская почта: по правильному адресу на gmail не шлём, на mail.ru и vkus-com.ru — шлём
+  const mails = [];
+  const { results, summary } = await deliver({
+    model: om,
+    settings: { ...settings, telegram_enabled: false, email_recipients: [{ email: 'boss@gmail.com' }, { email: 'kitchen@mail.ru' }, { email: 'zakaz@vkus-com.ru' }] },
+    mail: { ok: true },
+    sendMail: async (m) => mails.push(m),
+    now: NOON,
+  });
+  assert.deepEqual(mails.map((m) => m.to), ['kitchen@mail.ru', 'zakaz@vkus-com.ru'], 'на gmail письмо даже не пытаемся отправить');
+  assert.deepEqual(
+    results.map((r) => [r.recipient, r.status, r.error, r.attempts]),
+    [
+      ['boss@gmail.com', 'failed', NOT_RU_REASON, 0],
+      ['kitchen@mail.ru', 'sent', null, 1],
+      ['zakaz@vkus-com.ru', 'sent', null, 1],
+    ],
+  );
+  assert.equal(NOT_RU_REASON, 'не российская почта — исправьте в «Оповещениях»');
+  assert.equal(summary, 'почта ✓ 2 из 3 · Telegram выключен · 12:05');
+  // the only address foreign: the card names the reason / единственный адрес чужой — карточка называет причину
+  const lone = await deliver({ model: om, settings: { ...settings, telegram_enabled: false, email_recipients: [{ email: 'a@gmail.com' }] }, mail: { ok: true }, sendMail: async () => assert.fail('не должно уйти'), now: NOON });
+  assert.equal(lone.summary, `почта ✗ ${NOT_RU_REASON} · Telegram выключен · 12:05`);
+  // a broken address keeps its own reason / кривой адрес — своя причина
+  const broken = await deliver({ model: om, settings: { ...settings, telegram_enabled: false, email_recipients: [{ email: 'a@mail' }] }, mail: { ok: true }, sendMail: async () => assert.fail('не должно уйти'), now: NOON });
+  assert.equal(broken.results[0].error, 'адрес с ошибкой');
+  // POST /notify/test { to }: the same rule / то же правило для адреса проверки
+  assert.equal(testAddressProblem('a@gmail.com'), `${RU_MAIL_ERROR_ADMIN}: a@gmail.com`);
+  assert.equal(testAddressProblem(' Test@Mail.ru '), null);
+  assert.equal(testAddressProblem('zakaz@vkus-com.ru'), null);
 }
 {
   // switched off and empty / выключено и пусто
@@ -622,4 +673,51 @@ assert.ok(!scrub(`token ${TOKEN} leaked`, [TOKEN]).includes(TOKEN));
   assert.equal(off.calls.length, 1);
 }
 
-console.log('оповещения: темы, тексты, повторы Telegram, кнопки и опрос нажатий, почта без SMTP — проверки прошли');
+// ── email-guard: Russian mail only / только российская почта ────────────────
+{
+  // one address: a guest — Russian services; the admin — also vkus-com.ru; empty — clearing, allowed
+  // один адрес: гость — российские службы; админка — ещё и vkus-com.ru; пусто — очистка, можно
+  assert.equal(emailProblem('anna@gmail.com'), RU_MAIL_ERROR);
+  assert.equal(emailProblem(' Anna@Mail.RU '), null);
+  assert.equal(emailProblem('anna@yandex.ru'), null);
+  assert.equal(emailProblem('anna@vk.com'), null);
+  assert.equal(emailProblem('zakaz@vkus-com.ru'), RU_MAIL_ERROR, 'гостю свой домен не предлагается');
+  assert.equal(emailProblem('zakaz@vkus-com.ru', { own: true }), null);
+  assert.equal(emailProblem('a@outlook.com', { own: true }), RU_MAIL_ERROR_ADMIN);
+  assert.equal(emailProblem('anna@mail.ru.evil.com'), RU_MAIL_ERROR, 'поддомен чужого сайта — не mail.ru');
+  assert.equal(emailProblem('anna@'), RU_MAIL_ERROR, 'кривой адрес — не российский');
+  for (const empty of [null, undefined, '', '   ']) assert.equal(emailProblem(empty), null);
+
+  // the alert recipients: one text per foreign address, an array or a JSON string alike
+  // получатели оповещений: по тексту на чужой адрес, массив и строка JSON одинаково
+  const list = [{ email: 'a@gmail.com', orders: true }, { email: 'b@mail.ru' }, { email: 'c@vkus-com.ru', label: 'Кухня' }, { email: 'A@gmail.com' }, { email: 'd@icloud.com' }, { email: '' }];
+  const want = [`${RU_MAIL_ERROR_ADMIN}: a@gmail.com`, `${RU_MAIL_ERROR_ADMIN}: d@icloud.com`];
+  assert.deepEqual(recipientProblems(list), want, 'дубль другим регистром — один раз, пустой — пропущен');
+  assert.deepEqual(recipientProblems(JSON.stringify(list)), want);
+  assert.deepEqual(recipientProblems([{ email: 'b@mail.ru' }, { email: 'c@vkus-com.ru' }]), []);
+  for (const empty of [null, undefined, '', '[]', []]) assert.deepEqual(recipientProblems(empty), []);
+  assert.equal(recipientProblems('не JSON').length, 1);
+  assert.equal(recipientsError(list), `${RU_MAIL_ERROR_ADMIN}: a@gmail.com, d@icloud.com`);
+  assert.equal(recipientsError([{ email: 'b@mail.ru' }]), null);
+
+  // the hook's rules: only the field in the payload is checked, a batch item by item
+  // правила хука: проверяется только поле из payload, пачка — по записи
+  const rule = (event) => RULES.find((r) => r.events.includes(event));
+  assert.deepEqual(RULES.flatMap((r) => r.events).sort(), [
+    'notify_settings.items.create', 'notify_settings.items.update', 'settings.items.create', 'settings.items.update', 'users.create', 'users.update',
+  ]);
+  assert.equal(payloadProblem(rule('users.update'), { recovery_email: 'x@gmail.com' }), RU_MAIL_ERROR);
+  assert.equal(payloadProblem(rule('users.update'), { recovery_email: 'x@mail.ru' }), null);
+  assert.equal(payloadProblem(rule('users.update'), { recovery_email: null }), null, 'очистка');
+  assert.equal(payloadProblem(rule('users.update'), { recovery_email: '' }), null, 'очистка');
+  assert.equal(payloadProblem(rule('users.update'), { first_name: 'Анна' }), null, 'поля нет — не трогаем');
+  assert.equal(payloadProblem(rule('users.create'), [{ recovery_email: 'x@mail.ru' }, { recovery_email: 'y@outlook.com' }]), RU_MAIL_ERROR);
+  assert.equal(payloadProblem(rule('notify_settings.items.update'), { email_recipients: [{ email: 'a@gmail.com' }] }), `${RU_MAIL_ERROR_ADMIN}: a@gmail.com`);
+  assert.equal(payloadProblem(rule('notify_settings.items.update'), { email_recipients: '[{"email":"zakaz@vkus-com.ru"}]' }), null);
+  assert.equal(payloadProblem(rule('notify_settings.items.update'), { telegram_enabled: true }), null);
+  assert.equal(payloadProblem(rule('settings.items.update'), { email: 'x@gmail.com' }), RU_MAIL_ERROR_ADMIN);
+  assert.equal(payloadProblem(rule('settings.items.update'), { email: 'info@vkus-com.ru' }), null);
+  assert.equal(payloadProblem(rule('settings.items.update'), { email: null }), null);
+}
+
+console.log('оповещения: темы, тексты, повторы Telegram, кнопки и опрос нажатий, почта без SMTP, только российская почта — проверки прошли');

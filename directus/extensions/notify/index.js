@@ -67,6 +67,7 @@ import {
   telegramKeyboard,
   telegramMeta,
   telegramText,
+  testAddressProblem,
 } from './lib.js';
 
 // orders and requests typed in by the staff are not announced: they already know
@@ -472,7 +473,10 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
   init('app.after', async () => {
     try {
       const mail = mailState(env);
-      const text = mail.ok ? `Включена: ${mail.label}, от ${env.EMAIL_FROM ?? '—'}` : `Письма не уходят: ${mail.reason}`;
+      // a foreign sender is said next to the state, the mail still goes
+      // чужой отправитель — приписка к состоянию, почта всё равно уходит
+      const text = `${mail.ok ? `Включена: ${mail.label}, от ${env.EMAIL_FROM ?? '—'}` : `Письма не уходят: ${mail.reason}`}${mail.warning ? ` · ${mail.warning}` : ''}`;
+      if (mail.warning) logger.warn(`notify: ${mail.warning}`);
       const state = { email_state: text, email_ready: mail.ok };
       const row = await db('notify_settings').first('id');
       if (row) await db('notify_settings').where({ id: row.id }).update(state);
@@ -490,7 +494,7 @@ const hook = ({ action, init }, { services, env, logger, database: db, getSchema
 
 const endpoint = (router, { services, env, logger, database, getSchema }) => {
   /**
-   * POST /notify/test { channel?: 'all' | 'email' | 'telegram', kind?: 'order' | 'request', to?: 'a@b.ru' }
+   * POST /notify/test { channel?: 'all' | 'email' | 'telegram', kind?: 'order' | 'request', to?: 'a@mail.ru' }
    * A demo order (or request) to every listed address and chat, ticks ignored.
    * Пример заказа (или заявки) на все адреса и в чаты из списка, галочки не учитываются.
    */
@@ -503,7 +507,13 @@ const endpoint = (router, { services, env, logger, database, getSchema }) => {
       const settings = await loadSettings(database);
       const channel = ['email', 'telegram'].includes(body.channel) ? body.channel : 'all';
       const kind = body.kind === 'request' ? 'request' : 'order';
-      if (typeof body.to === 'string' && body.to.trim()) settings.email_recipients = [{ email: body.to.trim() }];
+      if (typeof body.to === 'string' && body.to.trim()) {
+        // the test goes only where real alerts may go: Russian mail or vkus-com.ru
+        // проверка уходит только туда, куда могут уйти настоящие оповещения
+        const problem = testAddressProblem(body.to);
+        if (problem) return res.status(400).json({ errors: [{ message: problem, extensions: { code: 'INVALID_PAYLOAD', reason: problem } }] });
+        settings.email_recipients = [{ email: body.to.trim() }];
+      }
       if (channel === 'email') settings.telegram_enabled = false;
       if (channel === 'telegram') settings.email_enabled = false;
       const model = demoModel(kind, adminLink(env, 'notify_log'));

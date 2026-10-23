@@ -10,6 +10,7 @@
  * как её итог читается одной строкой в карточке заказа. `index.js` подаёт сюда
  * строки из базы и настоящие отправщики, `scripts/notify.check.mjs` — подделки.
  */
+import { RU_MAIL_ERROR_ADMIN, emailDomain, isRuEmail } from '../email-guard/domains.js';
 
 export const DEFAULTS = {
   email_enabled: true,
@@ -119,20 +120,38 @@ export const normalizeSettings = (row) => {
  * `sendmail`, а почтового сервера в контейнере нет: это «не настроено», а не
  * ошибка для повтора. Почта включается одной настройкой: EMAIL_TRANSPORT с её
  * блоком в `directus/.env`.
+ * `warning`: the sender (EMAIL_FROM) is not on Russian mail — said, not blocked.
+ * `warning`: отправитель (EMAIL_FROM) не на российской почте — сказать, не мешать.
  */
 export const mailState = (env = {}) => {
   const transport = String(env.EMAIL_TRANSPORT || 'sendmail').toLowerCase();
   const has = (key) => String(env[key] ?? '').trim() !== '';
+  const warning = senderWarning(env.EMAIL_FROM);
   if (transport === 'smtp')
     return has('EMAIL_SMTP_HOST')
-      ? { ok: true, transport, label: `SMTP ${env.EMAIL_SMTP_HOST}:${env.EMAIL_SMTP_PORT ?? 587}` }
-      : { ok: false, transport, reason: 'SMTP не настроен' };
+      ? { ok: true, transport, label: `SMTP ${env.EMAIL_SMTP_HOST}:${env.EMAIL_SMTP_PORT ?? 587}`, warning }
+      : { ok: false, transport, reason: 'SMTP не настроен', warning };
   if (transport === 'mailgun')
     return has('EMAIL_MAILGUN_API_KEY') && has('EMAIL_MAILGUN_DOMAIN')
-      ? { ok: true, transport, label: `Mailgun ${env.EMAIL_MAILGUN_DOMAIN}` }
-      : { ok: false, transport, reason: 'Mailgun не настроен' };
-  if (transport === 'ses') return { ok: true, transport, label: 'Amazon SES' };
-  return { ok: false, transport, reason: 'SMTP не настроен' };
+      ? { ok: true, transport, label: `Mailgun ${env.EMAIL_MAILGUN_DOMAIN}`, warning }
+      : { ok: false, transport, reason: 'Mailgun не настроен', warning };
+  if (transport === 'ses') return { ok: true, transport, label: 'Amazon SES', warning };
+  return { ok: false, transport, reason: 'SMTP не настроен', warning };
+};
+
+/**
+ * The sender is the owner's call, so a foreign one only warns, it never stops
+ * the mail: «Отправитель EMAIL_FROM не на российской почте: gmail.com». Takes
+ * «name@host» and «Имя <name@host>»; an unset sender says nothing.
+ * Отправитель — решение владельца, поэтому чужой только предупреждает и почту
+ * не останавливает. Понимает «name@host» и «Имя <name@host>»; пустой — молчит.
+ */
+export const senderWarning = (from) => {
+  const raw = String(from ?? '').trim();
+  if (!raw) return null;
+  const address = raw.match(/<([^<>]+)>/)?.[1]?.trim() ?? raw;
+  if (isRuEmail(address, { own: true })) return null;
+  return `Отправитель EMAIL_FROM не на российской почте: ${emailDomain(address) ?? address}`;
 };
 
 // ── what is being reported / о чём сообщаем ──────────────────────────────────
@@ -484,6 +503,15 @@ export const telegramText = (model) => {
 // ── who gets it / кому ───────────────────────────────────────────────────────
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// a well-formed address on a foreign service is not sent to: Russian mail or
+// vkus-com.ru only (the email-guard hook keeps new ones out; this catches the old)
+// по правильному адресу на чужой службе не шлём: только российская почта или
+// vkus-com.ru (хук email-guard не пускает новые, это ловит старые)
+export const NOT_RU_REASON = 'не российская почта — исправьте в «Оповещениях»';
+
+/** `POST /notify/test` with `to`: the refusal for an address the alerts would never use, or null. / Отказ для адреса проверки, который оповещения не примут, или null. */
+export const testAddressProblem = (to) => (isRuEmail(to, { own: true }) ? null : `${RU_MAIL_ERROR_ADMIN}: ${String(to ?? '').trim()}`);
+
 // a test goes to everyone listed, whatever the ticks say
 // проверка уходит всем из списка, что бы ни стояло в галочках
 const wants = (row, kind, everyone = false) => {
@@ -756,6 +784,10 @@ export const deliver = async ({ model, settings, mail, sendMail, fetchImpl, dela
     for (const to of emails) {
       if (!EMAIL_RE.test(to)) {
         results.push({ channel: 'email', recipient: to, status: 'failed', error: 'адрес с ошибкой', attempts: 0 });
+        continue;
+      }
+      if (!isRuEmail(to, { own: true })) {
+        results.push({ channel: 'email', recipient: to, status: 'failed', error: NOT_RU_REASON, attempts: 0 });
         continue;
       }
       try {
