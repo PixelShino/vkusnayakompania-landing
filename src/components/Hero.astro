@@ -8,6 +8,13 @@
  * скримом, в середине марка, прописная антиква, одна строка лида и две
  * кнопки, внизу полоса со статусом и телефоном обеих точек, а круглый стикер
  * про торт свисает через край в следующую секцию.
+ *
+ * Until the photo is decoded the screen stands on its own ink stage — the
+ * curtain's colour — with the text already in place; the frame, the scrim and
+ * the text plate fade in together once the picture is ready.
+ * Пока фото не раскодировано, экран стоит на своей чернильной сцене — цвете
+ * занавеса — с текстом на месте; кадр, скрим и подложка текста проявляются
+ * вместе, когда картинка готова.
  */
 import Photo from './Photo.astro';
 import Icon from './Icon.astro';
@@ -44,8 +51,28 @@ const stickerHref = cakes.length > 0 ? '#cakes' : catalogSectionHref(content, 'p
     radius="0"
     sizes={HERO_SIZES}
     eager
+    preview={false}
     class="hero__photo"
   />
+  {/* Right after the frame and inline, so it never waits for a bundle: a
+      cached photo is marked before the first paint and shows at once, a
+      loading one is marked when decoded. A broken file leaves the clean stage.
+      Сразу за кадром и инлайном, чтобы не ждать бандла: фото из кэша
+      отмечается до первой отрисовки и стоит сразу, грузящееся — когда
+      раскодировано. Битый файл оставляет чистую сцену. */}
+  <script is:inline>
+    (() => {
+      const hero = document.currentScript.parentNode;
+      const img = hero.querySelector('.hero__photo img');
+      if (!img) return;
+      const ready = () => img.complete && img.naturalWidth > 0;
+      const show = () => hero.classList.add('is-loaded');
+      const wait = () => (ready() ? show() : img.addEventListener('load', show, { once: true }));
+      if (ready()) show();
+      else if (img.decode) img.decode().then(show, wait);
+      else wait();
+    })();
+  </script>
   <div class="hero__scrim" aria-hidden="true"></div>
 
   <div class="hero__in">
@@ -176,25 +203,58 @@ const stickerHref = cakes.length > 0 ? '#cakes' : catalogSectionHref(content, 'p
     min-height: calc(100svh - var(--header-h));
     padding-top: 40px;
     color: var(--bg);
+    /* The stage under the frame: the curtain's flat ink, so the lift reveals
+       the same colour and cream holds 10.8:1 on it — the screen is finished
+       before the photo. Flat on purpose: a glow across the dozen 8-bit steps
+       between `--ink` and `--ink-2` bands on a phone screen.
+       Сцена под кадром: ровные чернила занавеса — подъём открывает тот же
+       цвет, крем на нём 10,8:1, экран закончен ещё до фото. Ровные нарочно:
+       свечение на дюжине 8-битных ступеней между `--ink` и `--ink-2`
+       полосит на экране телефона. */
+    background: var(--ink);
   }
 
   /* класс лежит на корне дочернего `Photo.astro` — нужен `:global` */
+  /* no preview and no plate under the frame (`preview={false}`): the stage
+     of `.hero` shows through until the picture is there
+     ни превью, ни плашки под кадром (`preview={false}`): до картинки
+     сквозь него видна сцена `.hero` */
   .hero > :global(.hero__photo) {
     position: absolute;
     inset: 0;
     height: 100%;
-    /* the blurred preview is framed like the img below: `object-position` */
-    /* размытое превью кадрируется как img ниже: `object-position` */
-    --pos: center 40%;
   }
 
   .hero > :global(.hero__photo img) {
     object-position: center 40%;
-    /* a slow settle from 1.06 to 1 on load: transform only, the frame keeps
-       its size for LCP; reduced motion collapses it to an instant
-       медленный сход с 1.06 к 1 на загрузке: только transform, кадр держит
-       размер для LCP; reduced motion сжимает его до мгновения */
+    /* a slow settle from 1.06 to 1 once the photo is in: transform only, the
+       frame keeps its size for LCP; reduced motion collapses it to an instant
+       медленный сход с 1.06 к 1, когда фото пришло: только transform, кадр
+       держит размер для LCP; reduced motion сжимает его до мгновения */
     animation: hero-settle 7s var(--ease-out) both;
+    /* a dissolve, not an entrance: plain `ease` keeps the first frames soft —
+       `--ease-out` put three quarters of the picture up in 80 ms, a flash
+       растворение, а не вход: обычный `ease` держит первые кадры мягкими —
+       `--ease-out` выставлял три четверти кадра за 80 мс, вспышкой */
+    transition: opacity 0.6s ease;
+  }
+
+  /* Waiting for the photo (JS only — `html.js`; without scripts the frame and
+     the scrim stand as they always did): no frame, no scrim, no text plate.
+     Over the bare stage they read as a grey blot and dirty shadows; the
+     settle holds at its first frame and starts with the fade.
+     Ждём фото (только с JS — `html.js`; без скриптов кадр и скрим стоят как
+     всегда): ни кадра, ни скрима, ни подложки текста. На голой сцене они
+     читались серым пятном и грязной тенью; сход стоит на первом кадре и
+     начинается вместе с проявлением. */
+  :global(.js) .hero:not(.is-loaded) > :global(.hero__photo img),
+  :global(.js) .hero:not(.is-loaded) .hero__scrim,
+  :global(.js) .hero:not(.is-loaded) .hero__in::before {
+    opacity: 0;
+  }
+
+  :global(.js) .hero:not(.is-loaded) > :global(.hero__photo img) {
+    animation-play-state: paused;
   }
 
   @keyframes hero-settle {
@@ -286,6 +346,7 @@ const stickerHref = cakes.length > 0 ? '#cakes' : catalogSectionHref(content, 'p
       ),
       linear-gradient(rgb(44 41 39 / 0.22), rgb(44 41 39 / 0.22));
     pointer-events: none;
+    transition: opacity 0.6s ease;
   }
 
   /* The frame is a stock stand-in until the client's photo arrives: the page
@@ -339,6 +400,7 @@ const stickerHref = cakes.length > 0 ? '#cakes' : catalogSectionHref(content, 'p
       rgb(44 41 39 / 0.62) calc(100% - 48px),
       rgb(44 41 39 / 0) 100%
     );
+    transition: opacity 0.6s ease;
   }
 
   .hero__mark {
@@ -353,15 +415,26 @@ const stickerHref = cakes.length > 0 ? '#cakes' : catalogSectionHref(content, 'p
      lines; 24 px keeps three
      пол 24 px: на 320 прописные 27 px рвали «И КОНДИТЕРСКАЯ» и давали четыре
      строки; 24 px держит три */
+  /* Measures in `em`, not `ch`: a `ch` is the width of «0» in the face that is
+     on screen, and in the Georgia/Arial stand-ins it is 0.5 em against 0.66 em
+     of Montserrat and 0.7 em of Prata — on the swap the block widened by
+     217 px at 1280 and the lines reflowed (CLS 0.04). `15.4em` is the old 22 ch of Prata (0.7 em),
+     the lead's pixels are its old 44 / 62 ch of Montserrat at 15 / 17 / 19 px.
+     Меры в `em`, а не `ch`: `ch` — ширина «0» в том начертании, что на экране,
+     а у замен Georgia/Arial она 0,5 em против 0,66 em Montserrat и 0,7 em
+     Prata — при подмене блок расширялся на 217 px на 1280 и строки
+     перетекали (CLS 0,04). `15.4em` —
+     прежние 22 ch Prata (0,7 em), пиксели лида — его прежние 44 / 62 ch
+     Montserrat на 15 / 17 / 19 px. */
   .hero__title {
-    max-width: 22ch;
+    max-width: 15.4em;
     margin-top: 22px;
     font-size: clamp(24px, 7.4vw, 34px);
     color: var(--bg);
   }
 
   .hero__lead {
-    max-width: 44ch;
+    max-width: 440px;
     margin-top: 16px;
     font-size: var(--fs-lead);
     line-height: 1.5;
@@ -669,6 +742,7 @@ const stickerHref = cakes.length > 0 ? '#cakes' : catalogSectionHref(content, 'p
     }
 
     .hero__lead {
+      max-width: 484px;
       margin-top: 20px;
     }
 
@@ -714,14 +788,14 @@ const stickerHref = cakes.length > 0 ? '#cakes' : catalogSectionHref(content, 'p
 
   @media (min-width: 1200px) {
     .hero__title {
-      max-width: 20ch;
+      max-width: 14em;
       font-size: clamp(50px, 4.1vw, 60px);
     }
 
     /* не больше двух строк: приём — одна-две строки под заголовком
        two lines at most: the device is one or two lines under the heading */
     .hero__lead {
-      max-width: 62ch;
+      max-width: 806px;
       margin-top: 24px;
     }
 

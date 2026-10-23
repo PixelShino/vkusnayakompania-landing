@@ -21,6 +21,15 @@ interface Props {
   eager?: boolean;
   /** приоритет загрузки: `low` — для кадра, который виден сразу, но не главный */
   priority?: 'high' | 'low';
+  /**
+   * `false` — the frame brings nothing of its own under the picture: no blurred
+   * preview, no plate. The parent paints the ground (the first screen keeps its
+   * ink stage while the photo loads).
+   * `false` — кадр ничего не кладёт под картинку: ни размытого превью, ни
+   * плашки. Подложку рисует родитель (первый экран держит чернильную сцену,
+   * пока грузится фото).
+   */
+  preview?: boolean;
   class?: string;
 }
 
@@ -32,6 +41,7 @@ const {
   sizes = '(min-width: 1200px) 320px, (min-width: 768px) 240px, 50vw',
   eager = false,
   priority = eager ? 'high' : 'low',
+  preview: withPreview = true,
   class: className = '',
 } = Astro.props;
 
@@ -43,12 +53,13 @@ const src = photo.src as ImageMetadata;
 // already in the HTML, so the first paint shows the photo, not the plate.
 // Размытое превью уходит фоном самой фигуры: оно уже в HTML, поэтому первая
 // отрисовка показывает кадр, а не плашку.
-const preview = await lqip(photo.src);
+const preview = withPreview ? await lqip(photo.src) : undefined;
+const ground = withPreview ? '' : 'background:none;';
 ---
 
 <figure
   class:list={['media', className]}
-  style={`--ratio:${ratio};${ratioMd ? `--ratio-md:${ratioMd};` : ''}${radius ? `--radius:${radius};` : ''}${preview ? `--lqip:url("${preview}");` : ''}`}
+  style={`--ratio:${ratio};${ratioMd ? `--ratio-md:${ratioMd};` : ''}${radius ? `--radius:${radius};` : ''}${preview ? `--lqip:url("${preview}");` : ''}${ground}`}
 >
   <Image
     src={src}
