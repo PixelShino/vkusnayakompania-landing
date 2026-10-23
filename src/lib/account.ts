@@ -268,8 +268,10 @@ export const summarize = (me: Me, fallback: Program) => {
   const soon = book.expiring.filter((lot) => daysBetween(me.today, lot.day) <= BURN_WARNING_DAYS);
   // points still to come: orders in work are paid in points when they are done
   // баллы в пути: заказы в работе принесут баллы, когда их выполнят
+  // an order paid partly with points earns nothing (23.10.2026)
+  // заказ, частично оплаченный баллами, баллов не приносит (23.10.2026)
   const pending = me.orders
-    .filter((order) => order.status === 'new' || order.status === 'in_work')
+    .filter((order) => (order.status === 'new' || order.status === 'in_work') && !(Number(order.bonus_spent ?? 0) > 0))
     .reduce((sum, order) => sum + Math.floor((paidOf(order) * level.tier.percent) / 100), 0);
   return {
     program,

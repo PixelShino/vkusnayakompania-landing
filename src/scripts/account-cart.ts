@@ -149,9 +149,13 @@ export const mountCartAccount = ({
       $('[data-ca-points-sum]')!.textContent = `−${rub(spend)}`;
     }
     if (earn) {
-      const coming = s.program.enabled ? accrualFor(pay, s.sum.level.tier.percent) : 0;
-      earn.hidden = coming <= 0;
-      earn.textContent = `Начислим ≈\u00a0${points(coming)} после выполнения заказа (${s.sum.level.tier.percent}\u00a0%, уровень ${s.sum.level.tier.name})`;
+      // points spent in this order close its accrual (23.10.2026)
+      // списанные в этом заказе баллы закрывают начисление (23.10.2026)
+      const coming = s.program.enabled && !spend ? accrualFor(pay, s.sum.level.tier.percent) : 0;
+      earn.hidden = coming <= 0 && !spend;
+      earn.textContent = spend
+        ? 'За заказ с оплатой баллами новые баллы не начисляются.'
+        : `Начислим ≈\u00a0${points(coming)} после выполнения заказа (${s.sum.level.tier.percent}\u00a0%, уровень ${s.sum.level.tier.name})`;
     }
   };
 
@@ -277,7 +281,7 @@ export const mountCartAccount = ({
       // points are earned on what the dishes cost in money, not on the delivery
       // баллы начисляются с того, что блюда стоят деньгами, а не с доставки
       const pay = s ? s.amount - discount - spent : 0;
-      const coming = s && s.program.enabled ? accrualFor(pay, s.sum.level.tier.percent) : 0;
+      const coming = s && s.program.enabled && !spent ? accrualFor(pay, s.sum.level.tier.percent) : 0;
       line.hidden = !coming;
       $('[data-ca-done-text]', line)!.textContent = coming ? `Начислим ≈\u00a0${points(coming)}, когда заказ будет выполнен.` : '';
       // a guest without a name in the profile keeps the one typed in the order

@@ -181,7 +181,10 @@ export const reconcileOrder = (order, applied, percent) => {
         : { type: 'spend', amount, comment: 'Оплата заказа баллами' },
     );
   }
-  if (order.status === 'done' && earned <= 0) {
+  // points spent on an order close its accrual: a paid-with-points order earns nothing (owner, 23.10.2026)
+  // списанные баллы закрывают начисление: заказ, частично оплаченный баллами, баллов не приносит (владелец, 23.10.2026)
+  const spentPoints = Math.max(0, Math.floor(order.bonus_spent ?? 0)) > 0;
+  if (order.status === 'done' && earned <= 0 && !spentPoints) {
     const paid = order.to_pay ?? order.total ?? 0;
     const amount = accrualFor(paid, percent) - earned;
     if (amount > 0) out.push({ type: 'accrual', amount, comment: `${percent}\u00a0% от ${new Intl.NumberFormat('ru-RU').format(paid)}\u00a0₽` });

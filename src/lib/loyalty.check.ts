@@ -143,20 +143,27 @@ const suite = (lib: typeof site, who: string) => {
   const applied: Applied[] = [{ type: 'spend', amount: -300 }];
   assert.deepEqual(reconcileOrder(order, applied, 5), [], who);
   assert.deepEqual(reconcileOrder({ ...order, status: 'in_work' }, applied, 5), [], who);
-  const done = reconcileOrder({ ...order, status: 'done' }, applied, 5);
-  assert.deepEqual(done.map((tx) => [tx.type, tx.amount]), [['accrual', 72]], who);
-  applied.push({ type: 'accrual', amount: 72 });
-  // повторное событие «выполнен» ничего не начисляет второй раз
+  // заказ со списанными баллами выполнен: начисления нет (правило владельца 23.10.2026)
+  assert.deepEqual(reconcileOrder({ ...order, status: 'done' }, applied, 5), [], who);
   assert.deepEqual(reconcileOrder({ ...order, status: 'done' }, applied, 7), [], who);
-  // отмена после выполнения: баллы возвращаются, начисление снимается
+  // отмена после выполнения: баллы возвращаются
   const cancel = reconcileOrder({ ...order, status: 'cancelled' }, applied, 5);
-  assert.deepEqual(cancel.map((tx) => [tx.type, tx.amount]), [['refund', 300], ['refund', -72]], who);
-  applied.push({ type: 'refund', amount: 300 }, { type: 'refund', amount: -72 });
+  assert.deepEqual(cancel.map((tx) => [tx.type, tx.amount]), [['refund', 300]], who);
+  applied.push({ type: 'refund', amount: 300 });
   assert.deepEqual(reconcileOrder({ ...order, status: 'cancelled' }, applied, 5), [], who);
-  // и обратно в «выполнен» — снова списание и начисление
+  // и обратно в «выполнен» — снова списание, начисления по-прежнему нет
   const back = reconcileOrder({ ...order, status: 'done' }, applied, 5);
-  assert.deepEqual(back.map((tx) => [tx.type, tx.amount]), [['spend', -300], ['accrual', 72]], who);
-  // заказ без баллов: только начисление; без `to_pay` (заказ по телефону) — от суммы
+  assert.deepEqual(back.map((tx) => [tx.type, tx.amount]), [['spend', -300]], who);
+  // старое начисление у заказа со списанием (до правила) при отмене снимается
+  const legacy: Applied[] = [{ type: 'spend', amount: -300 }, { type: 'accrual', amount: 72 }];
+  assert.deepEqual(reconcileOrder({ ...order, status: 'cancelled' }, legacy, 5).map((tx) => [tx.type, tx.amount]), [['refund', 300], ['refund', -72]], who);
+  // заказ без баллов: начисление при «выполнен», повторно — нет, отмена снимает
+  const clean = { status: 'done', bonus_spent: 0, total: 1750, to_pay: 1750 };
+  const got = reconcileOrder(clean, [], 5);
+  assert.deepEqual(got.map((tx) => [tx.type, tx.amount]), [['accrual', 87]], who);
+  assert.deepEqual(reconcileOrder(clean, [{ type: 'accrual', amount: 87 }], 7), [], who);
+  assert.deepEqual(reconcileOrder({ ...clean, status: 'cancelled' }, [{ type: 'accrual', amount: 87 }], 5).map((tx) => [tx.type, tx.amount]), [['refund', -87]], who);
+  // без `to_pay` (заказ по телефону) — от суммы
   assert.deepEqual(reconcileOrder({ status: 'done', total: 1000 }, [], 3).map((tx) => [tx.type, tx.amount]), [['accrual', 30]], who);
   assert.deepEqual(reconcileOrder({ status: 'new', total: 1000 }, [], 3), [], who);
 
