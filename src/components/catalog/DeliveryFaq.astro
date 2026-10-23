@@ -1,0 +1,79 @@
+---
+/**
+ * «Вопросы о доставке» between the catalog and «Не нашли нужное?»: an ink
+ * strip (cream catalog → ink → paper help → ink footer keeps the rule of no
+ * more than two light strips in a row). Each question is a native
+ * `<details>`: the answer is in the HTML from the start — for a search engine,
+ * an answer engine and a page without scripts alike — and Ctrl+F opens a
+ * folded one by itself. The first answer (zones and prices) is open: it is
+ * the question a guest asks before anything else. `#faq-<id>` opens its
+ * question, so a manager can send a link to one answer.
+ * «Вопросы о доставке» между каталогом и «Не нашли нужное?»: чернильная
+ * полоса (кремовый каталог → чернила → бумажная помощь → чернильный подвал —
+ * правило «не больше двух светлых подряд»). Каждый вопрос — нативный
+ * `<details>`: ответ в HTML с самого начала — для поисковика, для ответов
+ * нейросетей и для страницы без скриптов, — а Ctrl+F сам раскрывает
+ * свёрнутый. Первый ответ (зоны и цены) открыт: этот вопрос гость задаёт
+ * раньше всех. `#faq-<id>` открывает свой вопрос — менеджер может прислать
+ * ссылку на один ответ.
+ */
+import type { FaqItem } from '../../lib/delivery-faq.ts';
+import '../../styles/delivery-faq.css';
+
+interface Props {
+  items: FaqItem[];
+  /** страница «Доставка и оплата», если она есть */
+  deliveryHref?: string;
+}
+
+const { items, deliveryHref } = Astro.props;
+
+const esc = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+---
+
+{
+  items.length > 0 && (
+    <section class="strip-ink dfaq" id="faq" aria-labelledby="faq-title">
+      <div class="container dfaq__in">
+        <header class="dfaq__head" data-reveal>
+          <span class="mark dfaq__mark" aria-hidden="true" />
+          <h2 class="display-caps dfaq__title" id="faq-title">
+            Вопросы о&nbsp;доставке
+          </h2>
+          {deliveryHref && (
+            <p class="dfaq__lead">
+              Полные условия, отмена и возврат — на&nbsp;странице <a href={deliveryHref}>«Доставка и&nbsp;оплата»</a>.
+            </p>
+          )}
+        </header>
+        <div class="dfaq__list">
+          {items.map((item, i) => (
+            <details class="dfaq__item" id={`faq-${item.id}`} open={i === 0}>
+              <summary class="dfaq__sum">
+                <h3 class="dfaq__q">{item.q}</h3>
+                <span class="dfaq__icon" aria-hidden="true" />
+              </summary>
+              <div class="dfaq__a" set:html={item.aHtml ?? `<p>${esc(item.a)}</p>`} />
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<script>
+  // a link to one answer (`#faq-zones`) opens it; Chrome does it by itself, Safari and Firefox do not
+  // ссылка на один ответ (`#faq-zones`) раскрывает его; Chrome делает это сам, Safari и Firefox — нет
+  const openTarget = () => {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!id.startsWith('faq-')) return;
+    const item = document.getElementById(id);
+    if (item instanceof HTMLDetailsElement && !item.open) {
+      item.open = true;
+      item.scrollIntoView({ block: 'start' });
+    }
+  };
+  openTarget();
+  window.addEventListener('hashchange', openTarget);
+</script>

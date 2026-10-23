@@ -20,6 +20,7 @@ import Footer from '../../components/Footer.astro';
 import Icon from '../../components/Icon.astro';
 import DishCard from '../../components/catalog/DishCard.astro';
 import CatalogHelp from '../../components/catalog/CatalogHelp.astro';
+import DeliveryFaq from '../../components/catalog/DeliveryFaq.astro';
 import SectionTiles from '../../components/catalog/SectionTiles.astro';
 import SectionsSheet from '../../components/catalog/SectionsSheet.astro';
 import CartDrawer from '../../components/catalog/CartDrawer.astro';
@@ -29,6 +30,7 @@ import { BRAND } from '../../data/site.ts';
 import { getContent, typo } from '../../lib/content.ts';
 import { positions, rub } from '../../lib/catalog.ts';
 import { FREE_FROM } from '../../lib/delivery.ts';
+import { buildDeliveryFaq, faqJsonLd, loadZones } from '../../lib/delivery-faq.ts';
 import { DOC, docHref } from '../../lib/pages.ts';
 import '../../styles/catalog.css';
 
@@ -38,10 +40,17 @@ const empty = catalog.count === 0;
 // the conditions in full: zones, the minimum order, payment, returns
 // условия целиком: зоны, минимальный заказ, оплата, возврат
 const deliveryHref = docHref(content.pages, DOC.delivery);
+// «Вопросы о доставке»: the zones are the ones the cart quotes from; with an
+// empty catalog there is no cart to answer about
+// «Вопросы о доставке»: зоны — те же, по которым считает корзина; у пустого
+// каталога корзины нет, и отвечать не о чем
+const faq = empty ? [] : buildDeliveryFaq(content, { zones: await loadZones(), deliveryHref });
 
 const title = `Доставка еды в Самаре — каталог и цены | ${BRAND.name}`;
+// the SEO core (23.10.2026): the query, the city and Novokuybyshevsk, 147 chars
+// семантическое ядро (23.10.2026): запрос, город и Новокуйбышевск, 147 знаков
 const description =
-  'Завтраки, супы, паста, горячее, торты и пирожные с доставкой по Самаре или самовывозом. Соберите корзину — перезвоним и подтвердим заказ.';
+  'Завтраки, супы, горячее, паста, выпечка и торты «Вкусной компании» с доставкой по Самаре и Новокуйбышевску или самовывозом. Оплата онлайн на сайте.';
 
 const site = Astro.site ?? new URL('https://vkus-com.ru');
 const page = new URL(`${BASE}catalog/`, site);
@@ -115,6 +124,7 @@ const jsonLd = {
     ...(empty
       ? []
       : [{ '@type': 'ItemList', name: 'Каталог доставки', numberOfItems: catalog.count, itemListElement: itemList }]),
+    ...(faq.length ? [faqJsonLd(faq, page.href)] : []),
   ],
 };
 
@@ -149,6 +159,7 @@ let rendered = 0;
 ---
 
 <BaseLayout
+  keywords={['доставка еды в самаре', 'доставка еды самара', 'доставка еды в самаре на дом', 'доставка готовой еды в самаре', 'заказать еду самара', 'доставка обедов самара', 'вкусная компания доставка']}
   content={content}
   title={title}
   description={description}
@@ -168,13 +179,13 @@ let rendered = 0;
       </nav>
       <div class="cat-head__row" data-reveal>
         <span class="mark cat-head__mark" aria-hidden="true"></span>
-        <h1 class="display-caps cat-head__title" id="cat-title" tabindex="-1">Доставка и самовывоз</h1>
+        <h1 class="display-caps cat-head__title" id="cat-title" tabindex="-1">Доставка еды по Самаре</h1>
         <p class="lead cat-head__lead">
           {
             typo(
               empty
                 ? 'Каталог на сайте обновляется. Пока заказать можно по телефону.'
-                : 'Всё меню доставки — от завтраков до праздничных тортов. Соберите корзину, мы перезвоним и подтвердим состав, сумму и время.',
+                : 'Всё меню доставки по Самаре и самовывоз из двух наших кафе — от завтраков до праздничных тортов. Соберите корзину, мы перезвоним и подтвердим состав, сумму и время.',
             )
           }
         </p>
@@ -279,6 +290,7 @@ let rendered = 0;
       )
     }
 
+    <DeliveryFaq items={faq} deliveryHref={deliveryHref} />
     <CatalogHelp content={content} />
     {/* «наверх» appears once the first screen is gone: this mark is where it ends
         «наверх» появляется, когда первый экран ушёл: эта метка — его конец */}
