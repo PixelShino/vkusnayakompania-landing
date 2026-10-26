@@ -1,16 +1,16 @@
 {
-  "exportedAt": "2026-10-12T13:17:29.372Z",
+  "exportedAt": "2026-10-26T06:35:05.819Z",
   "settings": {
     "id": 1,
     "phone": "+7 987 955-25-65",
     "telegram": "https://t.me/vkusnayakompania",
-    "max": "https://max.ru/",
+    "max": "https://max.ru/join/veL0f8btfknvkM4tTNCYXGdp1q2nD9-9u3r7Fn6IRCc",
     "vk": "https://vk.ru/vkusnayakompania",
     "shop_url": null,
     "app_ios": null,
     "app_android": null,
-    "catering_url": null,
-    "catering_services_url": null,
+    "catering_url": "https://vkusnayakompania.ru/",
+    "catering_services_url": "https://vkusnayakompania.ru/services/",
     "shop_cakes_ready": null,
     "shop_cakes_custom": null,
     "shop_pastry": null,
@@ -45,8 +45,9 @@
         "percent": 68
       }
     ],
-    "metrika_id": null,
-    "yandex_verification": null,
+    "metrika_id": "113756891",
+    "email": null,
+    "yandex_verification": "351859c3a4c11084",
     "policy_file": null,
     "offer_file": null
   },
@@ -61,24 +62,34 @@
     "about_text": "Две точки в Самаре и всё, что вокруг них: кафе, ресторан, кондитерская, выездные праздники и банкеты.",
     "menu_text": "Меню в PDF, чтобы посмотреть заранее.",
     "cakes_title": "Торты на заказ",
-    "cakes_text": "Двенадцать моделей в постоянном меню, каждая за 48 часов. Цвет и надпись меняем под повод, остальное как на фото.",
+    "cakes_text": "Праздничные торты из каталога, каждый за 48 часов. Цвет и надпись меняем под повод, остальное как на фото.",
     "delivery_title": "Доставка и самовывоз",
     "delivery_text": "Завтраки, супы, паста, торты в наличии и пирожные с доставкой по Самаре или самовывозом.",
     "delivery_note": null,
     "contacts_note": "Отвечаем с 9:00 до 21:00, обычно за пару минут",
     "hero_image": {
-      "id": "21746dff-6fff-41c3-b1ab-0855c756220a",
+      "id": "58b64f99-fee7-482e-a9ba-d3844d365464",
       "filename_download": "hero-vitrina-wide.webp",
       "title": "Витрина кондитерской",
       "alt": "Витрина кондитерской «Вкусной компании»: рулеты в миндальных лепестках с клубникой, красные пирожные, круассаны",
       "width": 1536,
       "height": 1024,
       "type": "image/webp",
-      "created_on": "2026-09-23T10:16:07.966Z",
-      "uploaded_on": "2026-09-23T10:16:08.099Z"
+      "created_on": "2026-09-23T10:26:52.261Z",
+      "uploaded_on": "2026-09-23T10:26:52.279Z"
     },
     "og_image": null,
-    "app_screenshot": null
+    "app_screenshot": {
+      "id": "55945029-ca9f-4472-99cc-778f2f21a3e2",
+      "filename_download": "re.webp",
+      "title": "Экран приложения «Вкусная компания»",
+      "alt": "Экран приложения «Вкусная компания»",
+      "width": 920,
+      "height": 1993,
+      "type": "image/webp",
+      "created_on": "2026-09-23T10:26:52.320Z",
+      "uploaded_on": "2026-10-09T14:07:07.395Z"
+    }
   },
   "places": [
     {
@@ -135,15 +146,15 @@
           "sort": 1,
           "caption": "Зал",
           "directus_files_id": {
-            "id": "a47b144b-3350-473b-a258-7b7bc2367a2b",
-            "filename_download": "IMG_0141.JPG",
+            "id": "fe8978f1-6341-478e-90f1-de85b19e75e0",
+            "filename_download": "hall.jpg",
             "title": "Зал — Садовая",
             "alt": "Зал кафе на Садовой: высокие арочные окна, пальмы и столы под белыми скатертями",
             "width": 2400,
             "height": 1600,
             "type": "image/jpeg",
-            "created_on": "2026-09-24T18:17:56.474Z",
-            "uploaded_on": "2026-09-24T18:17:56.682Z"
+            "created_on": "2026-09-24T18:23:14.749Z",
+            "uploaded_on": "2026-10-09T14:06:00.724Z"
           }
         },
         {
@@ -151,15 +162,15 @@
           "sort": 2,
           "caption": "Диванная зона",
           "directus_files_id": {
-            "id": "971d9dbe-ef20-479f-ba61-ced88492d57d",
+            "id": "b4a6f9e2-d34f-4684-91d7-f9a2cd15fe42",
             "filename_download": "IMG_0140.JPG",
             "title": "Диванная зона — Садовая",
             "alt": "Кафе на Садовой: зелёные бархатные диваны, круглые столики и подвесные лампы",
             "width": 1080,
             "height": 723,
             "type": "image/jpeg",
-            "created_on": "2026-09-24T18:17:56.761Z",
-            "uploaded_on": "2026-09-24T18:17:56.777Z"
+            "created_on": "2026-09-24T18:23:15.323Z",
+            "uploaded_on": "2026-09-24T18:23:15.337Z"
           }
         }
       ]
@@ -210,23 +221,23 @@
       "lng": 50.202187,
       "yandex_org": "243452895564",
       "rating": "5,0",
-      "date_updated": null,
-      "phone": "+7 937 999-66-33",
+      "date_updated": "2026-10-19T12:08:00.100Z",
+      "phone": "+7 967 920-65-35",
       "gallery": [
         {
           "id": 5,
           "sort": 1,
           "caption": "Основной зал",
           "directus_files_id": {
-            "id": "b7d4b6dc-f327-458f-8342-7aa6314435a4",
+            "id": "c9daa973-02a4-4c07-9394-7c4319623a44",
             "filename_download": "zal-sovetskoy-osnovnoy.webp",
             "title": "Основной зал — Советской Армии",
             "alt": "Основной зал ресторана на Советской Армии: круглый стол и терракотовые кресла",
             "width": 1217,
             "height": 1826,
             "type": "image/webp",
-            "created_on": "2026-09-23T10:16:09.459Z",
-            "uploaded_on": "2026-09-23T10:16:09.519Z"
+            "created_on": "2026-09-23T10:26:52.694Z",
+            "uploaded_on": "2026-09-23T10:26:52.702Z"
           }
         },
         {
@@ -234,15 +245,15 @@
           "sort": 2,
           "caption": "Зал у стеллажа",
           "directus_files_id": {
-            "id": "fd94071d-fae5-4567-b150-dfe0b01680d4",
+            "id": "4fb30224-00b9-434d-bde4-b3c3649302f8",
             "filename_download": "zal-sovetskoy-stellazh.webp",
             "title": "Зал у стеллажа — Советской Армии",
             "alt": "Зал ресторана на Советской Армии: диван вдоль стены и стеллаж с неоном",
             "width": 1212,
             "height": 1831,
             "type": "image/webp",
-            "created_on": "2026-09-23T10:16:09.721Z",
-            "uploaded_on": "2026-09-23T10:16:09.754Z"
+            "created_on": "2026-09-23T10:26:52.756Z",
+            "uploaded_on": "2026-09-23T10:26:52.767Z"
           }
         },
         {
@@ -250,15 +261,15 @@
           "sort": 3,
           "caption": "Банкетная рассадка",
           "directus_files_id": {
-            "id": "e0cbedb8-5500-4f3d-884f-805365854f57",
+            "id": "667f4e12-0c36-45ca-8d3d-de76f8567a0f",
             "filename_download": "zal-sovetskoy-banket.webp",
             "title": "Банкетная рассадка — Советской Армии",
             "alt": "Зал ресторана на Советской Армии: банкетная рассадка, зелёные кресла и подвесные лампы",
             "width": 1024,
             "height": 1536,
             "type": "image/webp",
-            "created_on": "2026-09-23T10:16:09.881Z",
-            "uploaded_on": "2026-09-23T10:16:09.914Z"
+            "created_on": "2026-09-23T10:26:52.812Z",
+            "uploaded_on": "2026-09-23T10:26:52.822Z"
           }
         },
         {
@@ -266,15 +277,15 @@
           "sort": 4,
           "caption": "Столики у дивана",
           "directus_files_id": {
-            "id": "34c8093b-7931-452c-bf30-83066b439b12",
+            "id": "ea60639a-3f62-4878-a8f7-8d14c1945a12",
             "filename_download": "zal-sovetskoy-stoliki.webp",
             "title": "Столики у дивана — Советской Армии",
             "alt": "Столики вдоль дивана в ресторане на Советской Армии, цветы на столах",
             "width": 1206,
             "height": 1834,
             "type": "image/webp",
-            "created_on": "2026-09-23T10:16:10.031Z",
-            "uploaded_on": "2026-09-23T10:16:10.053Z"
+            "created_on": "2026-09-23T10:26:52.871Z",
+            "uploaded_on": "2026-09-23T10:26:52.879Z"
           }
         },
         {
@@ -282,15 +293,15 @@
           "sort": 5,
           "caption": "Витрина десертов и выпечки",
           "directus_files_id": {
-            "id": "823aa161-ca03-4807-a447-75d739586602",
+            "id": "9e78c101-f7ec-4f3e-b5be-37e25934453f",
             "filename_download": "IMG_5598.PNG",
             "title": "Витрина десертов и выпечки — Советской Армии",
             "alt": "Витрина ресторана на Советской Армии: эклеры с фисташкой и белой глазурью",
             "width": 1203,
             "height": 1826,
             "type": "image/png",
-            "created_on": "2026-09-24T18:17:56.965Z",
-            "uploaded_on": "2026-09-24T18:17:56.985Z"
+            "created_on": "2026-09-24T18:23:16.365Z",
+            "uploaded_on": "2026-09-24T18:23:16.393Z"
           }
         },
         {
@@ -298,15 +309,15 @@
           "sort": 6,
           "caption": "Барная зона",
           "directus_files_id": {
-            "id": "22889a51-ee30-4407-b7d4-2f3c9d69fe6f",
+            "id": "e1b45f50-47f5-4f1c-9096-7fdb4703c18a",
             "filename_download": "IMG_5597.PNG",
             "title": "Барная зона — Советской Армии",
             "alt": "Барная зона ресторана на Советской Армии: высокий стол, лампы на столе и подвесные светильники",
             "width": 1211,
             "height": 1823,
             "type": "image/png",
-            "created_on": "2026-09-24T18:17:57.039Z",
-            "uploaded_on": "2026-09-29T14:13:18.217Z"
+            "created_on": "2026-09-24T18:23:16.770Z",
+            "uploaded_on": "2026-09-24T18:23:16.779Z"
           }
         },
         {
@@ -314,15 +325,15 @@
           "sort": 7,
           "caption": "Зона для гостей",
           "directus_files_id": {
-            "id": "d252ba2b-665d-4163-b054-4dfa46c3536c",
+            "id": "62cf7972-cc48-49a9-aed1-6d7a4de9a307",
             "filename_download": "IMG_5596.PNG",
             "title": "Зона для гостей — Советской Армии",
             "alt": "Зона для гостей в ресторане на Советской Армии: столики вдоль дивана и белые цветы",
             "width": 1203,
             "height": 1798,
             "type": "image/png",
-            "created_on": "2026-09-24T18:17:57.100Z",
-            "uploaded_on": "2026-09-24T18:17:57.112Z"
+            "created_on": "2026-09-24T18:23:17.153Z",
+            "uploaded_on": "2026-09-24T18:23:17.165Z"
           }
         }
       ]
@@ -333,42 +344,42 @@
       "id": 2,
       "key": "restaurant",
       "title": "Ресторан на Советской Армии",
-      "text": "Зал на 100 гостей, кухня до 22:30. Завтраки весь день, бизнес-ланчи, семейные обеды и ужины; кондитерская витрина у входа и напитки с собой.",
+      "text": "Зал на 100+ гостей, кухня до 22:30. Завтраки весь день, бизнес-ланчи, семейные обеды и ужины; кондитерская витрина у входа и напитки с собой.",
       "place": 2,
       "sort": 1,
-      "date_updated": "2026-09-24T18:17:56.212Z",
+      "date_updated": "2026-10-26T06:29:08.053Z",
       "gallery": [],
       "photo": {
-        "id": "b7d4b6dc-f327-458f-8342-7aa6314435a4",
+        "id": "c9daa973-02a4-4c07-9394-7c4319623a44",
         "filename_download": "zal-sovetskoy-osnovnoy.webp",
         "title": "Основной зал — Советской Армии",
         "alt": "Основной зал ресторана на Советской Армии: круглый стол и терракотовые кресла",
         "width": 1217,
         "height": 1826,
         "type": "image/webp",
-        "created_on": "2026-09-23T10:16:09.459Z",
-        "uploaded_on": "2026-09-23T10:16:09.519Z"
+        "created_on": "2026-09-23T10:26:52.694Z",
+        "uploaded_on": "2026-09-23T10:26:52.702Z"
       }
     },
     {
       "id": 1,
       "key": "cafe",
       "title": "Кафе на Садовой",
-      "text": "Завтраки с восьми утра, супы и паста днём, витрина кондитерской весь день. Столики у окна, можно с ноутбуком.",
+      "text": "Кафе и кондитерская в одном зале: завтраки с 8:00, обеды, торты и пирожные с витрины. Открыто до 21:00, стол можно забронировать по телефону.",
       "place": 1,
       "sort": 2,
-      "date_updated": "2026-09-24T18:17:56.881Z",
+      "date_updated": "2026-10-26T06:29:07.982Z",
       "gallery": [],
       "photo": {
-        "id": "a47b144b-3350-473b-a258-7b7bc2367a2b",
-        "filename_download": "IMG_0141.JPG",
+        "id": "fe8978f1-6341-478e-90f1-de85b19e75e0",
+        "filename_download": "hall.jpg",
         "title": "Зал — Садовая",
         "alt": "Зал кафе на Садовой: высокие арочные окна, пальмы и столы под белыми скатертями",
         "width": 2400,
         "height": 1600,
         "type": "image/jpeg",
-        "created_on": "2026-09-24T18:17:56.474Z",
-        "uploaded_on": "2026-09-24T18:17:56.682Z"
+        "created_on": "2026-09-24T18:23:14.749Z",
+        "uploaded_on": "2026-10-09T14:06:00.724Z"
       }
     },
     {
@@ -381,15 +392,15 @@
       "date_updated": null,
       "gallery": [],
       "photo": {
-        "id": "8ae444a6-d7d1-4d21-9bd2-0d75752b07e2",
+        "id": "36d9fc13-de44-4c32-b84f-5aca380d96ce",
         "filename_download": "dir-confectionery.jpg",
         "title": "[заглушка] Витрина кондитерской",
         "alt": "Витрина кондитерской",
         "width": 1600,
         "height": 900,
         "type": "image/jpeg",
-        "created_on": "2026-09-23T10:16:10.661Z",
-        "uploaded_on": "2026-09-23T10:16:10.682Z"
+        "created_on": "2026-09-23T10:26:53.026Z",
+        "uploaded_on": "2026-09-23T10:26:53.034Z"
       }
     },
     {
@@ -399,18 +410,115 @@
       "text": "Фуршет, банкет или праздник под ключ: блюда, обслуживание, оформление и программа. Шесть лет и сотни мероприятий.",
       "place": null,
       "sort": 4,
-      "date_updated": "2026-10-09T11:30:49.955Z",
-      "gallery": [],
+      "date_updated": "2026-10-09T11:53:19.484Z",
+      "gallery": [
+        {
+          "id": 1,
+          "sort": 1,
+          "caption": "Бокс с закусками",
+          "directus_files_id": {
+            "id": "37f46274-5e35-4ef2-a299-02b1815e4341",
+            "filename_download": "IMG_0334.JPG",
+            "title": "Кейтеринг — IMG_0334",
+            "alt": "Бокс с закусками",
+            "width": 1440,
+            "height": 1800,
+            "type": "image/jpeg",
+            "created_on": "2026-10-09T11:13:45.897Z",
+            "uploaded_on": "2026-10-09T11:13:45.928Z"
+          }
+        },
+        {
+          "id": 2,
+          "sort": 2,
+          "caption": "Канапе в боксе",
+          "directus_files_id": {
+            "id": "869f487d-651d-4124-9e24-8aa521c726b3",
+            "filename_download": "IMG_0349.webp",
+            "title": "Кейтеринг — IMG_0349",
+            "alt": "Канапе в боксе",
+            "width": 1284,
+            "height": 1012,
+            "type": "image/webp",
+            "created_on": "2026-10-09T11:13:48.378Z",
+            "uploaded_on": "2026-10-09T11:13:49.729Z"
+          }
+        },
+        {
+          "id": 3,
+          "sort": 3,
+          "caption": "Сырная тарелка и закуски",
+          "directus_files_id": {
+            "id": "7b9d904a-64d0-42fc-b129-29aa81c8f6bb",
+            "filename_download": "IMG_0350.webp",
+            "title": "Кейтеринг — IMG_0350",
+            "alt": "Сырная тарелка и закуски",
+            "width": 1284,
+            "height": 1486,
+            "type": "image/webp",
+            "created_on": "2026-10-09T11:13:48.514Z",
+            "uploaded_on": "2026-10-09T11:13:50.732Z"
+          }
+        },
+        {
+          "id": 4,
+          "sort": 4,
+          "caption": "Профитроли с креветкой и лососем",
+          "directus_files_id": {
+            "id": "c6ce1525-b54c-472c-8474-a4a509ba50b2",
+            "filename_download": "IMG_0340.webp",
+            "title": "Кейтеринг — IMG_0340",
+            "alt": "Профитроли с креветкой и лососем",
+            "width": 1137,
+            "height": 1703,
+            "type": "image/webp",
+            "created_on": "2026-10-09T11:13:46.391Z",
+            "uploaded_on": "2026-10-09T11:13:48.049Z"
+          }
+        },
+        {
+          "id": 5,
+          "sort": 5,
+          "caption": "Шашлычки и картофель",
+          "directus_files_id": {
+            "id": "ba98836a-b92c-4efd-98bf-81f868fc054b",
+            "filename_download": "IMG_0339.webp",
+            "title": "Кейтеринг — IMG_0339",
+            "alt": "Шашлычки и картофель",
+            "width": 1135,
+            "height": 1665,
+            "type": "image/webp",
+            "created_on": "2026-10-09T11:13:46.319Z",
+            "uploaded_on": "2026-10-09T11:13:47.936Z"
+          }
+        },
+        {
+          "id": 6,
+          "sort": 6,
+          "caption": "Ассорти канапе",
+          "directus_files_id": {
+            "id": "0591ac78-6343-4ef1-931e-16c5b636a649",
+            "filename_download": "IMG_0357.JPG",
+            "title": "Кейтеринг — IMG_0357",
+            "alt": "Ассорти канапе",
+            "width": 960,
+            "height": 1280,
+            "type": "image/jpeg",
+            "created_on": "2026-10-09T11:13:50.171Z",
+            "uploaded_on": "2026-10-09T11:13:50.208Z"
+          }
+        }
+      ],
       "photo": {
-        "id": "dda2ea97-ba86-45e9-96f0-27da9c4636dc",
-        "filename_download": "dir-catering.jpg",
-        "title": "[заглушка] Фуршетный стол",
-        "alt": "Фуршетный стол",
-        "width": 1600,
-        "height": 900,
+        "id": "37f46274-5e35-4ef2-a299-02b1815e4341",
+        "filename_download": "IMG_0334.JPG",
+        "title": "Кейтеринг — IMG_0334",
+        "alt": "Бокс с закусками",
+        "width": 1440,
+        "height": 1800,
         "type": "image/jpeg",
-        "created_on": "2026-09-23T10:16:10.824Z",
-        "uploaded_on": "2026-09-23T10:16:10.847Z"
+        "created_on": "2026-10-09T11:13:45.897Z",
+        "uploaded_on": "2026-10-09T11:13:45.928Z"
       }
     },
     {
@@ -420,18 +528,99 @@
       "text": "Залы на обеих точках, своё меню под событие и торт с той же кухни. Дата, число гостей и повод — и мы посчитаем.",
       "place": null,
       "sort": 5,
-      "date_updated": null,
-      "gallery": [],
+      "date_updated": "2026-10-09T11:53:20.020Z",
+      "gallery": [
+        {
+          "id": 7,
+          "sort": 1,
+          "caption": "Банкетный стол на свежем воздухе",
+          "directus_files_id": {
+            "id": "350515fa-d080-4f39-a060-c249aa3141cf",
+            "filename_download": "IMG_0335.JPG",
+            "title": "Кейтеринг — IMG_0335",
+            "alt": "Банкетный стол на свежем воздухе",
+            "width": 1440,
+            "height": 1800,
+            "type": "image/jpeg",
+            "created_on": "2026-10-09T11:13:46.005Z",
+            "uploaded_on": "2026-10-09T11:13:46.026Z"
+          }
+        },
+        {
+          "id": 8,
+          "sort": 2,
+          "caption": "Сервировка в зале",
+          "directus_files_id": {
+            "id": "06dee330-2a17-4751-80a2-297d7265c17e",
+            "filename_download": "IMG_0341.webp",
+            "title": "Кейтеринг — IMG_0341",
+            "alt": "Сервировка в зале",
+            "width": 1248,
+            "height": 1842,
+            "type": "image/webp",
+            "created_on": "2026-10-09T11:13:46.526Z",
+            "uploaded_on": "2026-10-09T11:13:48.392Z"
+          }
+        },
+        {
+          "id": 9,
+          "sort": 3,
+          "caption": "Фуршетные закуски",
+          "directus_files_id": {
+            "id": "dcfa2df5-ab82-415f-8c2c-e7c0aea8d8ba",
+            "filename_download": "IMG_0345.webp",
+            "title": "Кейтеринг — IMG_0345",
+            "alt": "Фуршетные закуски",
+            "width": 1231,
+            "height": 1897,
+            "type": "image/webp",
+            "created_on": "2026-10-09T11:13:48.134Z",
+            "uploaded_on": "2026-10-09T11:13:50.126Z"
+          }
+        },
+        {
+          "id": 10,
+          "sort": 4,
+          "caption": "Сервировка с зелёной дорожкой",
+          "directus_files_id": {
+            "id": "216776fb-25bd-4181-a30b-5cc1114631be",
+            "filename_download": "IMG_0355.jpg",
+            "title": "Кейтеринг — IMG_0355",
+            "alt": "Сервировка с зелёной дорожкой",
+            "width": 1320,
+            "height": 2313,
+            "type": "image/jpeg",
+            "created_on": "2026-10-09T11:13:49.807Z",
+            "uploaded_on": "2026-10-09T11:13:50.310Z"
+          }
+        },
+        {
+          "id": 11,
+          "sort": 5,
+          "caption": "Выездной праздник",
+          "directus_files_id": {
+            "id": "d7fd568e-18a6-4c6a-9bfc-ce025bb75444",
+            "filename_download": "IMG_0333.JPG",
+            "title": "Кейтеринг — IMG_0333",
+            "alt": "Выездной праздник",
+            "width": 1440,
+            "height": 1793,
+            "type": "image/jpeg",
+            "created_on": "2026-10-09T11:13:45.787Z",
+            "uploaded_on": "2026-10-09T11:13:45.845Z"
+          }
+        }
+      ],
       "photo": {
-        "id": "c5c1f960-e0c4-4004-9729-d598cfe32518",
-        "filename_download": "dir-banquets.jpg",
-        "title": "[заглушка] Накрытый стол в зале",
-        "alt": "Накрытый стол в зале",
-        "width": 1600,
-        "height": 900,
+        "id": "350515fa-d080-4f39-a060-c249aa3141cf",
+        "filename_download": "IMG_0335.JPG",
+        "title": "Кейтеринг — IMG_0335",
+        "alt": "Банкетный стол на свежем воздухе",
+        "width": 1440,
+        "height": 1800,
         "type": "image/jpeg",
-        "created_on": "2026-09-23T10:16:11.006Z",
-        "uploaded_on": "2026-09-23T10:16:11.031Z"
+        "created_on": "2026-10-09T11:13:46.005Z",
+        "uploaded_on": "2026-10-09T11:13:46.026Z"
       }
     }
   ],
@@ -439,29 +628,41 @@
     {
       "id": 1,
       "status": "published",
-      "title": "Название события",
-      "date": "2026-09-26",
-      "time": "19:00:00",
-      "place": 2,
-      "text": "Текст-заглушка: здесь будет описание события — программа, время, условия. Заменяется в админке в разделе «Афиша».",
+      "title": "Корпоративы",
+      "date": null,
+      "time": null,
+      "place": null,
+      "text": "На Новый год",
       "link": null,
       "show_from": null,
       "show_until": null,
-      "date_updated": "2026-09-24T17:59:54.114Z",
+      "date_updated": "2026-09-24T18:05:30.932Z",
       "poster": {
-        "id": "1dcbebc9-39a8-4027-bbc9-f4f8fea26f1f",
-        "filename_download": "afisha-poster-placeholder.jpg",
-        "title": "[заглушка] Фото афиши",
+        "id": "5fa3ab2c-6f6b-45d7-a036-6092f8955c9d",
+        "filename_download": "re.webp",
+        "title": "Корпоративы на Новый год",
         "alt": "Фото афиши (заглушка)",
-        "width": 1000,
-        "height": 1500,
-        "type": "image/jpeg",
-        "created_on": "2026-09-23T10:16:13.346Z",
-        "uploaded_on": "2026-09-23T10:16:13.371Z"
+        "width": 941,
+        "height": 1672,
+        "type": "image/webp",
+        "created_on": "2026-09-23T10:26:53.895Z",
+        "uploaded_on": "2026-10-09T14:06:49.220Z"
       }
     }
   ],
   "promos": [
+    {
+      "id": 1,
+      "status": "published",
+      "title": "Скидка 20 % на первый бокс",
+      "text": "При заказе из приложения «Вкусная Компания».",
+      "place": null,
+      "show_from": null,
+      "show_until": null,
+      "sort": 1,
+      "date_updated": null,
+      "audience": "all"
+    },
     {
       "id": 2,
       "status": "published",
@@ -471,7 +672,8 @@
       "show_from": null,
       "show_until": null,
       "sort": 2,
-      "date_updated": null
+      "date_updated": null,
+      "audience": "all"
     },
     {
       "id": 3,
@@ -482,7 +684,8 @@
       "show_from": null,
       "show_until": null,
       "sort": 3,
-      "date_updated": null
+      "date_updated": null,
+      "audience": "all"
     },
     {
       "id": 4,
@@ -493,7 +696,8 @@
       "show_from": null,
       "show_until": null,
       "sort": 4,
-      "date_updated": null
+      "date_updated": null,
+      "audience": "all"
     }
   ],
   "menus": [
@@ -505,15 +709,15 @@
       "updated": "2026-09-01",
       "date_updated": null,
       "file": {
-        "id": "7d367ade-c513-401a-b64c-41af6e00766f",
-        "filename_download": "menu-cafe.pdf",
-        "title": "[заглушка] Меню кафе",
-        "alt": "Меню кафе",
-        "width": null,
-        "height": null,
+        "id": "23ed584d-334e-4340-82f4-24dbeccfa49a",
+        "filename_download": "menu-cafe-sadovaya.pdf",
+        "title": "Меню кафе — Садовая",
+        "alt": "Меню кафе на Садовой",
+        "width": 5031,
+        "height": 3579,
         "type": "application/pdf",
-        "created_on": "2026-09-23T10:16:13.872Z",
-        "uploaded_on": "2026-09-23T10:16:13.891Z"
+        "created_on": "2026-09-23T10:26:54.060Z",
+        "uploaded_on": "2026-10-01T05:54:05.782Z"
       }
     },
     {
@@ -521,18 +725,18 @@
       "status": "published",
       "direction": 2,
       "title": "Меню ресторана",
-      "updated": "2026-09-01",
-      "date_updated": null,
+      "updated": "2026-10-07",
+      "date_updated": "2026-10-09T11:14:25.404Z",
       "file": {
-        "id": "888afbe5-88e2-456c-acf8-a07bbc60d8c0",
+        "id": "7398c2a4-8a3c-4377-ba09-37aa9402734d",
         "filename_download": "menu-restaurant.pdf",
-        "title": "[заглушка] Меню ресторана",
-        "alt": "Меню ресторана",
+        "title": "Меню ресторана — Советской Армии",
+        "alt": "Меню ресторана на Советской Армии",
         "width": null,
         "height": null,
         "type": "application/pdf",
-        "created_on": "2026-09-23T10:16:14.023Z",
-        "uploaded_on": "2026-09-23T10:16:14.041Z"
+        "created_on": "2026-10-09T11:14:25.304Z",
+        "uploaded_on": "2026-10-09T11:14:25.324Z"
       }
     },
     {
@@ -543,15 +747,53 @@
       "updated": "2026-09-01",
       "date_updated": null,
       "file": {
-        "id": "3b720abd-7fa0-4b09-a6b7-8b514ac98fc2",
+        "id": "bb909852-617e-43d3-a717-556f7cea3c9b",
         "filename_download": "menu-confectionery.pdf",
         "title": "[заглушка] Меню кондитерской",
         "alt": "Меню кондитерской",
         "width": null,
         "height": null,
         "type": "application/pdf",
-        "created_on": "2026-09-23T10:16:14.191Z",
-        "uploaded_on": "2026-09-23T10:16:14.211Z"
+        "created_on": "2026-09-23T10:26:54.169Z",
+        "uploaded_on": "2026-09-23T10:26:54.174Z"
+      }
+    },
+    {
+      "id": 4,
+      "status": "published",
+      "direction": 1,
+      "title": "Барное меню",
+      "updated": "2026-09-30",
+      "date_updated": null,
+      "file": {
+        "id": "b0434a04-aef7-48d3-9c31-fb80c5efaf2d",
+        "filename_download": "bar-menu.pdf",
+        "title": "Барное меню — Садовая",
+        "alt": null,
+        "width": null,
+        "height": null,
+        "type": "application/pdf",
+        "created_on": "2026-09-30T20:53:19.142Z",
+        "uploaded_on": "2026-09-30T20:53:19.297Z"
+      }
+    },
+    {
+      "id": 5,
+      "status": "published",
+      "direction": 5,
+      "title": "Банкетное меню",
+      "updated": "2026-10-07",
+      "date_updated": null,
+      "file": {
+        "id": "47415662-c697-4b71-9bd7-288cbca5e387",
+        "filename_download": "titled.pdf",
+        "title": "Банкетное меню",
+        "alt": "Банкетное меню",
+        "width": null,
+        "height": null,
+        "type": "application/pdf",
+        "created_on": "2026-10-09T11:13:05.728Z",
+        "uploaded_on": "2026-10-09T14:06:48.395Z"
       }
     }
   ],
@@ -559,96 +801,96 @@
     {
       "id": 1,
       "status": "published",
-      "title": "Медовик",
-      "note": "1,5 кг · 48 часов",
+      "title": "Торт заказной",
+      "note": "От 2 кг · 48 часов",
       "sort": 1,
-      "date_updated": null,
+      "date_updated": "2026-09-29T12:24:18.936Z",
       "photo": {
-        "id": "ab5d2748-350c-4504-ab65-22b02bb2e480",
-        "filename_download": "cake-1.jpg",
-        "title": "[заглушка] Торт «Медовик»",
-        "alt": "Торт «Медовик» — фото появится позже",
-        "width": 1200,
-        "height": 1600,
-        "type": "image/jpeg",
-        "created_on": "2026-09-23T10:16:11.195Z",
-        "uploaded_on": "2026-09-23T10:16:11.216Z"
+        "id": "b847e704-f01c-4a89-83c8-69319c42c081",
+        "filename_download": "IMG_7614.png",
+        "title": "Торт от 2 кг",
+        "alt": "Торт от 2 кг",
+        "width": 1080,
+        "height": 1350,
+        "type": "image/png",
+        "created_on": "2026-09-23T10:26:53.202Z",
+        "uploaded_on": "2026-09-29T12:20:47.161Z"
       }
     },
     {
       "id": 2,
       "status": "published",
-      "title": "Наполеон",
-      "note": "2 кг · 48 часов",
+      "title": "Заказной 2х ярусный торт ",
+      "note": "От 4 кг · 48 часов",
       "sort": 2,
-      "date_updated": null,
+      "date_updated": "2026-09-29T12:31:43.919Z",
       "photo": {
-        "id": "65fecd53-4d91-4c83-b462-cde1048f97c2",
-        "filename_download": "cake-2.jpg",
-        "title": "[заглушка] Торт «Наполеон»",
+        "id": "adb43604-4a8e-4cc4-998e-2330e413aebe",
+        "filename_download": "re.webp",
+        "title": "Заказной 2х ярусный торт ",
         "alt": "Торт «Наполеон» — фото появится позже",
-        "width": 1200,
-        "height": 1600,
-        "type": "image/jpeg",
-        "created_on": "2026-09-23T10:16:11.364Z",
-        "uploaded_on": "2026-09-23T10:16:11.390Z"
+        "width": 1080,
+        "height": 1350,
+        "type": "image/webp",
+        "created_on": "2026-09-23T10:26:53.263Z",
+        "uploaded_on": "2026-10-09T14:06:55.159Z"
       }
     },
     {
       "id": 3,
       "status": "published",
-      "title": "Красный бархат",
-      "note": "2,5 кг · 48 часов",
+      "title": "Заказной 2х ярусный торт ",
+      "note": "От 4 кг · 48 часов",
       "sort": 3,
-      "date_updated": null,
+      "date_updated": "2026-09-29T12:40:11.717Z",
       "photo": {
-        "id": "f8586874-6095-4e7c-ae79-abed86314639",
-        "filename_download": "cake-3.jpg",
-        "title": "[заглушка] Торт «Красный бархат»",
+        "id": "e89ff6f6-1ac5-4c2e-a3d1-ba3562f53349",
+        "filename_download": "IMG_0151.jpeg",
+        "title": "Заказной 2х ярусный торт ",
         "alt": "Торт «Красный бархат» — фото появится позже",
-        "width": 1200,
-        "height": 1600,
+        "width": 712,
+        "height": 575,
         "type": "image/jpeg",
-        "created_on": "2026-09-23T10:16:11.553Z",
-        "uploaded_on": "2026-09-23T10:16:11.583Z"
+        "created_on": "2026-09-23T10:26:53.318Z",
+        "uploaded_on": "2026-09-29T12:39:17.457Z"
       }
     },
     {
       "id": 4,
       "status": "published",
-      "title": "Фисташка и малина",
-      "note": "2 кг · 48 часов",
+      "title": "Заказной 3х ярусный торт ",
+      "note": "6 кг · 48 часов",
       "sort": 4,
-      "date_updated": null,
+      "date_updated": "2026-09-29T12:44:12.565Z",
       "photo": {
-        "id": "7735baca-6151-47d9-837d-bde45343d1c5",
-        "filename_download": "cake-4.jpg",
-        "title": "[заглушка] Торт «Фисташка и малина»",
+        "id": "56f98ecc-3edd-46ec-bab3-0f3661757f0e",
+        "filename_download": "IMG_7626.jpeg",
+        "title": "Заказной 3х ярусный торт ",
         "alt": "Торт «Фисташка и малина» — фото появится позже",
-        "width": 1200,
-        "height": 1600,
+        "width": 960,
+        "height": 1280,
         "type": "image/jpeg",
-        "created_on": "2026-09-23T10:16:11.751Z",
-        "uploaded_on": "2026-09-23T10:16:11.779Z"
+        "created_on": "2026-09-23T10:26:53.376Z",
+        "uploaded_on": "2026-09-29T12:43:25.783Z"
       }
     },
     {
       "id": 5,
       "status": "published",
-      "title": "Морковный с чизкремом",
-      "note": "1,8 кг · 48 часов",
+      "title": "Заказной торт в форме сердца ",
+      "note": "1,5 кг · 48 часов",
       "sort": 5,
-      "date_updated": null,
+      "date_updated": "2026-10-09T12:47:31.439Z",
       "photo": {
-        "id": "dd7c04dd-2fe3-40f4-a1a3-f0b6fe781b7e",
-        "filename_download": "cake-5.jpg",
-        "title": "[заглушка] Торт «Морковный с чизкремом»",
+        "id": "d556beec-5e70-4022-8536-8bad807acbdd",
+        "filename_download": "IMG_7625.jpeg",
+        "title": "Заказной торт в форме сердца ",
         "alt": "Торт «Морковный с чизкремом» — фото появится позже",
-        "width": 1200,
-        "height": 1600,
+        "width": 960,
+        "height": 1280,
         "type": "image/jpeg",
-        "created_on": "2026-09-23T10:16:11.940Z",
-        "uploaded_on": "2026-09-23T10:16:11.970Z"
+        "created_on": "2026-09-23T10:26:53.431Z",
+        "uploaded_on": "2026-09-29T12:45:01.236Z"
       }
     },
     {
@@ -659,15 +901,15 @@
       "sort": 6,
       "date_updated": null,
       "photo": {
-        "id": "b257af68-702e-4f62-b2e9-d4057f667975",
-        "filename_download": "cake-6.jpg",
-        "title": "[заглушка] Торт «Сметанник»",
-        "alt": "Торт «Сметанник» — фото появится позже",
-        "width": 1200,
-        "height": 1600,
-        "type": "image/jpeg",
-        "created_on": "2026-09-23T10:16:12.144Z",
-        "uploaded_on": "2026-09-23T10:16:12.166Z"
+        "id": "87f4e01e-c001-4176-8c82-7880c54fe8b8",
+        "filename_download": "re.webp",
+        "title": "Торт «Сметанник»",
+        "alt": "Торт «Сметанник»",
+        "width": 1080,
+        "height": 1350,
+        "type": "image/webp",
+        "created_on": "2026-09-23T10:26:53.484Z",
+        "uploaded_on": "2026-10-09T14:07:01.221Z"
       }
     },
     {
@@ -678,15 +920,15 @@
       "sort": 7,
       "date_updated": null,
       "photo": {
-        "id": "d4597e78-3ffa-4109-8903-0fe3cd824b18",
-        "filename_download": "cake-7.jpg",
-        "title": "[заглушка] Торт «Шоколадный трюфель»",
-        "alt": "Торт «Шоколадный трюфель» — фото появится позже",
-        "width": 1200,
-        "height": 1600,
+        "id": "d52b7ed8-eebf-4bd8-9aa2-c1f2ef38ff86",
+        "filename_download": "IMG_7620.JPG",
+        "title": "Торт «Шоколадный трюфель»",
+        "alt": "Торт «Шоколадный трюфель»",
+        "width": 1920,
+        "height": 2560,
         "type": "image/jpeg",
-        "created_on": "2026-09-23T10:16:12.312Z",
-        "uploaded_on": "2026-09-23T10:16:12.333Z"
+        "created_on": "2026-09-23T10:26:53.539Z",
+        "uploaded_on": "2026-09-30T20:33:53.366Z"
       }
     },
     {
@@ -697,15 +939,15 @@
       "sort": 8,
       "date_updated": null,
       "photo": {
-        "id": "2695398b-cabe-4004-a798-5bd030c0cc16",
-        "filename_download": "cake-8.jpg",
-        "title": "[заглушка] Торт «Птичье молоко»",
-        "alt": "Торт «Птичье молоко» — фото появится позже",
-        "width": 1200,
-        "height": 1600,
+        "id": "2be81ca2-a394-4d9b-b40d-579198ddc107",
+        "filename_download": "IMG_7621.JPG",
+        "title": "Торт «Птичье молоко»",
+        "alt": "Торт «Птичье молоко»",
+        "width": 960,
+        "height": 1280,
         "type": "image/jpeg",
-        "created_on": "2026-09-23T10:16:12.487Z",
-        "uploaded_on": "2026-09-23T10:16:12.520Z"
+        "created_on": "2026-09-23T10:26:53.594Z",
+        "uploaded_on": "2026-09-30T20:33:54.565Z"
       }
     },
     {
@@ -716,15 +958,15 @@
       "sort": 9,
       "date_updated": null,
       "photo": {
-        "id": "6f56630e-56b1-4dbd-9437-b935871f9651",
-        "filename_download": "cake-9.jpg",
-        "title": "[заглушка] Торт «Чизкейк Нью-Йорк»",
-        "alt": "Торт «Чизкейк Нью-Йорк» — фото появится позже",
-        "width": 1200,
-        "height": 1600,
+        "id": "0fa50051-cd31-4981-b577-51f530af5b20",
+        "filename_download": "IMG_7622.JPG",
+        "title": "Торт «Чизкейк Нью-Йорк»",
+        "alt": "Торт «Чизкейк Нью-Йорк»",
+        "width": 960,
+        "height": 1280,
         "type": "image/jpeg",
-        "created_on": "2026-09-23T10:16:12.696Z",
-        "uploaded_on": "2026-09-23T10:16:12.718Z"
+        "created_on": "2026-09-23T10:26:53.656Z",
+        "uploaded_on": "2026-09-30T20:33:54.006Z"
       }
     },
     {
@@ -735,15 +977,15 @@
       "sort": 10,
       "date_updated": null,
       "photo": {
-        "id": "e0b3fcaa-2045-488f-8744-b7909adb8a76",
-        "filename_download": "cake-10.jpg",
-        "title": "[заглушка] Торт «Три шоколада»",
-        "alt": "Торт «Три шоколада» — фото появится позже",
-        "width": 1200,
-        "height": 1600,
+        "id": "f0908953-a951-428e-aa3e-6355867ddde3",
+        "filename_download": "IMG_7623.JPG",
+        "title": "Торт «Три шоколада»",
+        "alt": "Торт «Три шоколада»",
+        "width": 960,
+        "height": 1280,
         "type": "image/jpeg",
-        "created_on": "2026-09-23T10:16:12.862Z",
-        "uploaded_on": "2026-09-23T10:16:12.883Z"
+        "created_on": "2026-09-23T10:26:53.722Z",
+        "uploaded_on": "2026-09-30T20:33:54.356Z"
       }
     },
     {
@@ -754,15 +996,15 @@
       "sort": 11,
       "date_updated": null,
       "photo": {
-        "id": "480a33fb-a62c-4fc1-ae26-9bc44a54c500",
-        "filename_download": "cake-11.jpg",
-        "title": "[заглушка] Торт «Лимонный тарт»",
-        "alt": "Торт «Лимонный тарт» — фото появится позже",
-        "width": 1200,
-        "height": 1600,
+        "id": "ac03692c-7126-42e0-a51f-fcac4c74930b",
+        "filename_download": "IMG_7624.JPG",
+        "title": "Торт «Лимонный тарт»",
+        "alt": "Торт «Лимонный тарт»",
+        "width": 1920,
+        "height": 2560,
         "type": "image/jpeg",
-        "created_on": "2026-09-23T10:16:13.029Z",
-        "uploaded_on": "2026-09-23T10:16:13.058Z"
+        "created_on": "2026-09-23T10:26:53.780Z",
+        "uploaded_on": "2026-09-30T20:33:54.165Z"
       }
     },
     {
@@ -773,15 +1015,15 @@
       "sort": 12,
       "date_updated": null,
       "photo": {
-        "id": "2041e702-b49e-4224-a1ea-92f3c150fada",
+        "id": "f3f691b8-ddb2-4529-8c27-a1a39be21e8e",
         "filename_download": "cake-12.jpg",
         "title": "[заглушка] Торт «Свадебный, два яруса»",
         "alt": "Торт «Свадебный, два яруса» — фото появится позже",
         "width": 1200,
         "height": 1600,
         "type": "image/jpeg",
-        "created_on": "2026-09-23T10:16:13.190Z",
-        "uploaded_on": "2026-09-23T10:16:13.211Z"
+        "created_on": "2026-09-23T10:26:53.838Z",
+        "uploaded_on": "2026-09-23T10:26:53.845Z"
       }
     }
   ],
@@ -911,15 +1153,15 @@
         "hit"
       ],
       "photo": {
-        "id": "c12fa7f1-c4a8-4955-a0a7-ce62659af9c7",
+        "id": "991ff629-9db6-497d-b22e-877bcd9c5589",
         "filename_download": "81cded351954c0e47811c5e63a93e89f---jpg_original_919c8_convert.jpg",
         "title": "Завтрак с мясной колбаской",
         "alt": "Завтрак с мясной колбаской",
         "width": 400,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:11.075Z",
-        "uploaded_on": "2026-10-12T08:01:11.617Z"
+        "created_on": "2026-10-12T10:43:08.207Z",
+        "uploaded_on": "2026-10-12T10:43:08.230Z"
       }
     },
     {
@@ -941,15 +1183,15 @@
         "hit"
       ],
       "photo": {
-        "id": "7be14a0f-0231-410c-8aab-848305954c5b",
+        "id": "b89b18ef-826d-49b8-8051-be02584d716e",
         "filename_download": "fb86ad457a8b9b082e4010a923664155---png_original_919c8_convert.webp",
         "title": "Бриошь с лососем и яйцами пашот под муссом из пармезана и голландским соусом",
         "alt": "Бриошь с лососем и яйцами пашот под муссом из пармезана и голландским соусом",
         "width": 573,
         "height": 600,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:01:12.076Z",
-        "uploaded_on": "2026-10-12T08:01:12.689Z"
+        "created_on": "2026-10-12T10:43:09.272Z",
+        "uploaded_on": "2026-10-12T10:43:09.482Z"
       }
     },
     {
@@ -969,15 +1211,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "0f2f6354-cf00-4092-9572-6cd9d0b08794",
+        "id": "66f2ab50-b554-45ad-a811-88e04a224820",
         "filename_download": "bb87123806ae317abb44e4739a95334c---jpg_original_919c8_convert.jpg",
         "title": "Драники из кабачка с яйцом пашот и лососем",
         "alt": "Драники из кабачка с яйцом пашот и лососем",
         "width": 600,
         "height": 400,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:12.507Z",
-        "uploaded_on": "2026-10-12T08:01:12.542Z"
+        "created_on": "2026-10-12T10:43:10.429Z",
+        "uploaded_on": "2026-10-12T10:43:10.437Z"
       }
     },
     {
@@ -997,15 +1239,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "0978a3aa-9f47-409b-9270-7269e6aedf49",
+        "id": "12d4b8a4-9f42-4eee-b512-05ca729835e7",
         "filename_download": "36c04847c3b36e03aaa5abf96564b935---png_original_919c8_convert.webp",
         "title": "Сырники со сметаной и сезонным вареньем",
         "alt": "Сырники со сметаной и сезонным вареньем",
         "width": 600,
         "height": 554,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:01:12.787Z",
-        "uploaded_on": "2026-10-12T08:01:13.137Z"
+        "created_on": "2026-10-12T10:43:11.483Z",
+        "uploaded_on": "2026-10-12T10:43:11.597Z"
       }
     },
     {
@@ -1025,15 +1267,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "1cbb7e43-57df-4a2b-86a4-4e9bb3473083",
+        "id": "87d04dc1-f953-452a-bb17-8e7faa3fdb16",
         "filename_download": "7403f7a73df4432f28eff2d6283d0edb---png_original_919c8_convert.webp",
         "title": "Рисовая каша крем-брюле",
         "alt": "Рисовая каша крем-брюле",
         "width": 473,
         "height": 600,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:01:13.772Z",
-        "uploaded_on": "2026-10-12T08:01:14.932Z"
+        "created_on": "2026-10-12T10:43:12.531Z",
+        "uploaded_on": "2026-10-12T10:43:12.713Z"
       }
     },
     {
@@ -1053,15 +1295,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "dc95ba85-1370-4cc0-a0c0-3e316cbe5ba7",
+        "id": "58d6a930-8eed-4756-8cde-f3d9b35f4bbe",
         "filename_download": "51f770dfcce12a2d3912827e72e2d22b---png_original_919c8_convert.webp",
         "title": "Овсяная каша с клубникой",
         "alt": "Овсяная каша с клубникой",
         "width": 600,
         "height": 573,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:01:14.953Z",
-        "uploaded_on": "2026-10-12T08:01:15.472Z"
+        "created_on": "2026-10-12T10:43:13.581Z",
+        "uploaded_on": "2026-10-12T10:43:13.764Z"
       }
     },
     {
@@ -1081,15 +1323,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "a745a847-d44e-4780-be94-2f9c69f5f4b2",
+        "id": "ef18041a-0baa-4fc4-a73b-24a99585a6f4",
         "filename_download": "11c93377da23217a22913bcbf518b96f---png_original_919c8_convert.webp",
         "title": "Блины с лососем и сметаной",
         "alt": "Блины с лососем и сметаной",
         "width": 600,
         "height": 537,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:01:16.037Z",
-        "uploaded_on": "2026-10-12T08:01:17.182Z"
+        "created_on": "2026-10-12T10:43:14.627Z",
+        "uploaded_on": "2026-10-12T10:43:14.733Z"
       }
     },
     {
@@ -1109,15 +1351,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "35bb24f6-1ec2-43aa-8297-2a56e3fcc197",
+        "id": "3ffb0c3e-db58-4100-bba2-61ed75707cfc",
         "filename_download": "d54feb7b61144811d19add13f901f524---png_original_919c8_convert.webp",
         "title": "Завтрак по-домашнему",
         "alt": "Завтрак по-домашнему",
         "width": 566,
         "height": 600,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:01:17.272Z",
-        "uploaded_on": "2026-10-12T08:01:17.890Z"
+        "created_on": "2026-10-12T10:43:15.672Z",
+        "uploaded_on": "2026-10-12T10:43:15.907Z"
       }
     },
     {
@@ -1139,15 +1381,15 @@
         "hit"
       ],
       "photo": {
-        "id": "0c99e7f2-5bf5-4ad4-8b02-b6d2104c574b",
+        "id": "7c880138-6c98-43d1-9075-6589bb2ae367",
         "filename_download": "e27cb3b28e7a5e633fc533f5de6fa6e9---png_original_919c8_convert.webp",
         "title": "Средиземноморский завтрак",
         "alt": "Средиземноморский завтрак",
         "width": 475,
         "height": 600,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:01:18.513Z",
-        "uploaded_on": "2026-10-12T08:01:20.273Z"
+        "created_on": "2026-10-12T10:43:16.745Z",
+        "uploaded_on": "2026-10-12T10:43:16.958Z"
       }
     },
     {
@@ -1167,15 +1409,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "81fe2335-06aa-4097-8226-4e53a596aa2d",
+        "id": "66a095ff-c766-4aff-bd02-aa714fba6543",
         "filename_download": "b3caba8e6b3648a6e48ab04602d98a08---jpg_original_919c8_convert.jpg",
         "title": "Безглютеновые блины из шпината с лососем и сметаной",
         "alt": "Безглютеновые блины из шпината с лососем и сметаной",
         "width": 400,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:20.156Z",
-        "uploaded_on": "2026-10-12T08:01:20.285Z"
+        "created_on": "2026-10-12T10:43:17.801Z",
+        "uploaded_on": "2026-10-12T10:43:17.809Z"
       }
     },
     {
@@ -1183,7 +1425,7 @@
       "status": "published",
       "sort": 1011,
       "category": 1,
-      "title": "Омлет с вяленными томатами",
+      "title": "Омлет с вялеными томатами",
       "slug": "omlet-s-vyalennymi-tomatami",
       "description": null,
       "composition": null,
@@ -1197,15 +1439,15 @@
         "hit"
       ],
       "photo": {
-        "id": "8bafcfcb-f59c-45e1-8d41-7b612c566f00",
+        "id": "c17b3718-5385-434d-94ce-21de67017815",
         "filename_download": "5626d751bf6c39ddc7a9a01a1bac1228---jpg_original_919c8_convert.jpg",
         "title": "Омлет с вяленными томатами",
         "alt": "Омлет с вяленными томатами",
         "width": 400,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:21.204Z",
-        "uploaded_on": "2026-10-12T08:01:22.125Z"
+        "created_on": "2026-10-12T10:43:18.841Z",
+        "uploaded_on": "2026-10-12T10:43:18.852Z"
       }
     },
     {
@@ -1225,15 +1467,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "79e4c647-f71d-4403-b25f-b0ba47048f07",
+        "id": "5ce5f96e-ab3a-4e1c-93df-9792814ea0b4",
         "filename_download": "d8592ea3f222170aa2b0cf0df84d5196---jpeg_original_919c8_convert.jpeg",
         "title": "Блины с креветкой в сливочном соусе",
         "alt": "Блины с креветкой в сливочном соусе",
         "width": 452,
         "height": 375,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:22.340Z",
-        "uploaded_on": "2026-10-12T08:01:22.388Z"
+        "created_on": "2026-10-12T10:43:19.884Z",
+        "uploaded_on": "2026-10-12T10:43:19.890Z"
       }
     },
     {
@@ -1253,15 +1495,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "71136128-6e2d-4aad-a3ff-b344cccc6237",
+        "id": "dea75ee6-f413-44fb-aae6-6253ae40a0bb",
         "filename_download": "a0ad8e246768186f94e5d2940cf1277d---jpg_original_919c8_convert.jpg",
         "title": "Блины с вишней и шариком мороженого",
         "alt": "Блины с вишней и шариком мороженого",
         "width": 400,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:23.128Z",
-        "uploaded_on": "2026-10-12T08:01:23.775Z"
+        "created_on": "2026-10-12T10:43:20.939Z",
+        "uploaded_on": "2026-10-12T10:43:20.948Z"
       }
     },
     {
@@ -1281,15 +1523,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "a162eefe-52c4-4292-b649-478970c0136d",
+        "id": "f8f5c4de-ea5e-447d-a72d-9ae94bbf2cd1",
         "filename_download": "9ba7bb5091a6cbdc8a02ad6eae5e0867---png_original_919c8_convert.webp",
         "title": "Салат теплый с говядиной и овощами гриль под ореховым соусом",
         "alt": "Салат теплый с говядиной и овощами гриль под ореховым соусом",
         "width": 496,
         "height": 600,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:01:24.559Z",
-        "uploaded_on": "2026-10-12T08:01:27.561Z"
+        "created_on": "2026-10-12T10:43:21.964Z",
+        "uploaded_on": "2026-10-12T10:43:22.188Z"
       }
     },
     {
@@ -1309,15 +1551,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "a3a5d717-915a-4547-af60-32aa0d1cc470",
+        "id": "e23d3134-f272-401a-8996-0780a3e8d639",
         "filename_download": "ddcf971a53bff44f8653b30ce3e7e168---png_original_919c8_convert.webp",
         "title": "Салат Греческий с оливками каламата",
         "alt": "Салат Греческий с оливками каламата",
         "width": 600,
         "height": 580,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:01:27.430Z",
-        "uploaded_on": "2026-10-12T08:01:30.426Z"
+        "created_on": "2026-10-12T10:43:23.029Z",
+        "uploaded_on": "2026-10-12T10:43:23.216Z"
       }
     },
     {
@@ -1337,15 +1579,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "cec409d3-ad22-4488-94d3-4a973682a139",
+        "id": "0bc5b55d-713b-47a3-baa9-0cec85f53032",
         "filename_download": "eba6e3c1d15beac36196efbf1157e5fd---jpg_original_919c8_convert.jpg",
         "title": "Салат с хрустящим баклажаном",
         "alt": "Салат с хрустящим баклажаном",
         "width": 600,
         "height": 444,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:30.372Z",
-        "uploaded_on": "2026-10-12T08:01:30.457Z"
+        "created_on": "2026-10-12T10:43:24.092Z",
+        "uploaded_on": "2026-10-12T10:43:24.098Z"
       }
     },
     {
@@ -1367,15 +1609,15 @@
         "new"
       ],
       "photo": {
-        "id": "dc9f6bc1-6c14-4545-a4a9-d8322f7c83d4",
+        "id": "3c583057-0a8f-4e04-ab1a-a6738f70f4ea",
         "filename_download": "f237d433007e60d95421b10237c8ab00---jpeg_original_919c8_convert.jpeg",
         "title": "Салат с морепродуктами под соусом Лемонграсс",
         "alt": "Салат с морепродуктами под соусом Лемонграсс",
         "width": 405,
         "height": 365,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:30.677Z",
-        "uploaded_on": "2026-10-12T08:01:30.716Z"
+        "created_on": "2026-10-12T10:43:25.151Z",
+        "uploaded_on": "2026-10-12T10:43:25.157Z"
       }
     },
     {
@@ -1397,15 +1639,15 @@
         "new"
       ],
       "photo": {
-        "id": "9e56e8cd-2a0e-4594-8645-0baac1bc10c4",
+        "id": "dca914f4-3a24-4fce-99aa-83689640ec08",
         "filename_download": "54a3f593e3b35b12a5a541b0b6cbfa43---png_original_919c8_convert.webp",
         "title": "Оливье с лососем",
         "alt": "Оливье с лососем",
         "width": 461,
         "height": 600,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:01:30.933Z",
-        "uploaded_on": "2026-10-12T08:01:31.610Z"
+        "created_on": "2026-10-12T10:43:26.175Z",
+        "uploaded_on": "2026-10-12T10:43:26.389Z"
       }
     },
     {
@@ -1425,15 +1667,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "e542f910-738f-4709-8177-cd63488879ba",
+        "id": "99fd0c3c-c51e-4003-882e-d43df416d969",
         "filename_download": "0ba8b090f5a84cd77fbc9511b38cc7b0---jpg_original_919c8_convert.jpg",
         "title": "Салат «Цезарь» по-новому с курицей",
         "alt": "Салат «Цезарь» по-новому с курицей",
         "width": 600,
         "height": 400,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:31.417Z",
-        "uploaded_on": "2026-10-12T08:01:31.452Z"
+        "created_on": "2026-10-12T10:43:27.224Z",
+        "uploaded_on": "2026-10-12T10:43:27.232Z"
       }
     },
     {
@@ -1453,15 +1695,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "3ff31829-a2bc-4c55-ad14-de13e3b9c90d",
+        "id": "96eb20b4-c8ed-4ff2-8f23-8a9b7c8ebcb4",
         "filename_download": "b98cf39adf623417f9b117ada49c7e90---jpg_original_919c8_convert.jpg",
         "title": "Салат «Цезарь» по-новому с креветками",
         "alt": "Салат «Цезарь» по-новому с креветками",
         "width": 600,
         "height": 400,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:32.286Z",
-        "uploaded_on": "2026-10-12T08:01:32.472Z"
+        "created_on": "2026-10-12T10:43:28.261Z",
+        "uploaded_on": "2026-10-12T10:43:28.274Z"
       }
     },
     {
@@ -1481,15 +1723,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "2d2b7e97-6378-4d8e-ac95-b0469b74509d",
+        "id": "78eead00-e4c3-4f1e-b425-68dd620f8c59",
         "filename_download": "44c5f1f302f64d20e9ede7642a21f616---jpg_original_919c8_convert.jpg",
         "title": "Тыквенный суп с креветками",
         "alt": "Тыквенный суп с креветками",
         "width": 600,
         "height": 390,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:32.661Z",
-        "uploaded_on": "2026-10-12T08:01:32.727Z"
+        "created_on": "2026-10-12T10:43:29.306Z",
+        "uploaded_on": "2026-10-12T10:43:29.313Z"
       }
     },
     {
@@ -1509,15 +1751,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "cc667be7-d9c1-48b4-ba44-f31b7dd51546",
+        "id": "e7d71279-7480-423f-9dd5-a8b0f5eb9ae8",
         "filename_download": "028039730110a203d9ede9c101c8b127---jpg_original_919c8_convert.jpg",
         "title": "Куриный суп с яйцом и домашней лапшой",
         "alt": "Куриный суп с яйцом и домашней лапшой",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:33.497Z",
-        "uploaded_on": "2026-10-12T08:01:33.863Z"
+        "created_on": "2026-10-12T10:43:30.355Z",
+        "uploaded_on": "2026-10-12T10:43:30.362Z"
       }
     },
     {
@@ -1537,15 +1779,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "8851d716-23cd-4543-866c-e5d24dec8fe6",
+        "id": "7d349e30-43e8-4e81-8c36-196c64658762",
         "filename_download": "0282ca7d3ddc276616755f9a16f0a29f---png_original_919c8_convert.webp",
         "title": "Том Ям",
         "alt": "Том Ям",
         "width": 600,
         "height": 483,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:01:34.375Z",
-        "uploaded_on": "2026-10-12T08:01:40.342Z"
+        "created_on": "2026-10-12T10:43:31.383Z",
+        "uploaded_on": "2026-10-12T10:43:31.913Z"
       }
     },
     {
@@ -1565,22 +1807,22 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "496a62cc-8db5-4b7b-91b9-cceb571f380d",
+        "id": "a356a217-d91e-4eb9-81fc-75bf62b784e8",
         "filename_download": "5f5c148bba7cc563f9dddebbdd56e219---jpeg_original_919c8_convert.jpeg",
         "title": "Борщ",
         "alt": "Борщ",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:40.280Z",
-        "uploaded_on": "2026-10-12T08:01:40.671Z"
+        "created_on": "2026-10-12T10:43:32.469Z",
+        "uploaded_on": "2026-10-12T10:43:32.479Z"
       }
     },
     {
       "id": 25,
       "status": "published",
       "sort": 3005,
-      "category": 3,
+      "category": 10,
       "title": "Брускетта с креветкой",
       "slug": "brusketta-s-krevetkoy",
       "description": null,
@@ -1593,22 +1835,22 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "d94877bf-8c7b-4a3e-9fde-48b1695ac0e3",
+        "id": "62298c37-56f1-45cc-886b-42d1db5ecf29",
         "filename_download": "7a0ea3e5e1038e81115bd1a41b6bcd11---jpg_original_919c8_convert.jpg",
         "title": "Брускетта с креветкой",
         "alt": "Брускетта с креветкой",
         "width": 400,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:41.027Z",
-        "uploaded_on": "2026-10-12T08:01:43.505Z"
+        "created_on": "2026-10-12T10:43:33.521Z",
+        "uploaded_on": "2026-10-12T10:43:33.534Z"
       }
     },
     {
       "id": 26,
       "status": "published",
       "sort": 3006,
-      "category": 3,
+      "category": 10,
       "title": "Брускетта с ростбифом",
       "slug": "brusketta-s-rostbifom",
       "description": null,
@@ -1621,22 +1863,22 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "066cc02b-9d6f-42a3-b308-a8a8faa2d9ad",
+        "id": "40f57a06-b9eb-4d2c-a8f0-b7316872c78b",
         "filename_download": "2a9bb673de29b504ba2ac28bf1cf7d14---jpg_original_919c8_convert.jpg",
         "title": "Брускетта с ростбифом",
         "alt": "Брускетта с ростбифом",
         "width": 400,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:44.401Z",
-        "uploaded_on": "2026-10-12T08:01:45.156Z"
+        "created_on": "2026-10-12T10:43:34.652Z",
+        "uploaded_on": "2026-10-12T10:43:34.662Z"
       }
     },
     {
       "id": 27,
       "status": "published",
       "sort": 3007,
-      "category": 3,
+      "category": 10,
       "title": "Брускетта с лососем",
       "slug": "brusketta-s-lososem",
       "description": null,
@@ -1649,22 +1891,22 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "ccbd9f60-1182-4da6-9428-8e3b3391e276",
+        "id": "3b1715c1-5161-4220-a646-bce47c08bd20",
         "filename_download": "f230bc13bc85d3ab9f3f474a495a4bbd---jpg_original_919c8_convert.jpg",
         "title": "Брускетта с лососем",
         "alt": "Брускетта с лососем",
         "width": 400,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:45.429Z",
-        "uploaded_on": "2026-10-12T08:01:45.613Z"
+        "created_on": "2026-10-12T10:43:35.748Z",
+        "uploaded_on": "2026-10-12T10:43:35.756Z"
       }
     },
     {
       "id": 28,
       "status": "published",
       "sort": 3008,
-      "category": 3,
+      "category": 10,
       "title": "Хлебная корзина со сливочным маслом",
       "slug": "hlebnaya-korzina-so-slivochnym-maslom",
       "description": null,
@@ -1697,15 +1939,15 @@
         "new"
       ],
       "photo": {
-        "id": "da0ae399-2b66-4929-9839-09b443364bf7",
+        "id": "6f102964-633d-4455-b917-341ee30e2021",
         "filename_download": "7d455c3a0dde8220dded392a9988873c---jpeg_original_919c8_convert.jpeg",
         "title": "Стейк судака в сливочном соусе с картофельным пюре",
         "alt": "Стейк судака в сливочном соусе с картофельным пюре",
         "width": 471,
         "height": 399,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:45.898Z",
-        "uploaded_on": "2026-10-12T08:01:45.948Z"
+        "created_on": "2026-10-12T10:43:37.149Z",
+        "uploaded_on": "2026-10-12T10:43:37.157Z"
       }
     },
     {
@@ -1725,15 +1967,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "5304b07a-d133-4955-811b-4f7836bbb558",
+        "id": "67bb41eb-cc97-4fff-ad33-3ce36dc07fa1",
         "filename_download": "dc4f5d8fc6a3b8f6c28be241ecce4ec1---png_original_919c8_convert.webp",
         "title": "Бифштекс с картофельным пюре",
         "alt": "Бифштекс с картофельным пюре",
         "width": 559,
         "height": 600,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:01:46.837Z",
-        "uploaded_on": "2026-10-12T08:01:48.387Z"
+        "created_on": "2026-10-12T10:43:38.181Z",
+        "uploaded_on": "2026-10-12T10:43:38.383Z"
       }
     },
     {
@@ -1755,15 +1997,15 @@
         "new"
       ],
       "photo": {
-        "id": "117671be-4a7b-42db-bb19-9b0efe676f6b",
+        "id": "6986f751-b318-4e4f-8c36-2e5a1bf70d38",
         "filename_download": "ea6db0874b09ef46d1dcfc71e91f25e9---jpg_original_919c8_convert.jpg",
         "title": "Стейк лосося с овощами гриль и двумя видами соусов",
         "alt": "Стейк лосося с овощами гриль и двумя видами соусов",
         "width": 400,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:48.834Z",
-        "uploaded_on": "2026-10-12T08:01:49.396Z"
+        "created_on": "2026-10-12T10:43:39.207Z",
+        "uploaded_on": "2026-10-12T10:43:39.216Z"
       }
     },
     {
@@ -1783,15 +2025,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "77df72d1-b0d0-4e98-acbc-088ce86c1ffc",
+        "id": "e1e783d0-1e53-4e13-9998-35e4647aacbf",
         "filename_download": "d42e8ccf3e9d76b8b3eacc382aace33b---png_original_919c8_convert.webp",
         "title": "Индейка под овощами в сливочном соусе с птитимом карри",
         "alt": "Индейка под овощами в сливочном соусе с птитимом карри",
         "width": 600,
         "height": 533,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:01:49.643Z",
-        "uploaded_on": "2026-10-12T08:01:50.540Z"
+        "created_on": "2026-10-12T10:43:40.233Z",
+        "uploaded_on": "2026-10-12T10:43:40.437Z"
       }
     },
     {
@@ -1811,15 +2053,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "5013b638-be15-41ca-ad7d-7acea65d5b04",
+        "id": "cd27e6d6-c28c-43ef-956e-75fee8ca8dc9",
         "filename_download": "8dbc3984624e0a458a808f880af06a21---jpg_original_919c8_convert.jpg",
         "title": "Кальмар фаршированный тигровыми креветками",
         "alt": "Кальмар фаршированный тигровыми креветками",
         "width": 600,
         "height": 377,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:51.015Z",
-        "uploaded_on": "2026-10-12T08:01:51.568Z"
+        "created_on": "2026-10-12T10:43:41.266Z",
+        "uploaded_on": "2026-10-12T10:43:41.273Z"
       }
     },
     {
@@ -1839,15 +2081,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "2503ebb8-55b3-4ef5-9e20-6ffb436fecfe",
+        "id": "247bd7d1-3ba7-4266-af98-2fe7bec1fb73",
         "filename_download": "2b7c68cc5f24fd95fb893eda2e5807b7---png_original_919c8_convert.webp",
         "title": "Сочная котлета из индейки с картофельным пюре",
         "alt": "Сочная котлета из индейки с картофельным пюре",
         "width": 600,
         "height": 588,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:01:51.900Z",
-        "uploaded_on": "2026-10-12T08:01:54.901Z"
+        "created_on": "2026-10-12T10:43:42.299Z",
+        "uploaded_on": "2026-10-12T10:43:42.521Z"
       }
     },
     {
@@ -1867,15 +2109,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "028ee668-025a-4461-8819-ebc424f36c55",
+        "id": "fb5e8cfe-fe74-4a32-b390-1fc9fd3a7335",
         "filename_download": "0059f26e6cd46573472b5b6e214462a8---jpg_original_919c8_convert.jpg",
         "title": "Котлеты из судака с пюре из батата",
         "alt": "Котлеты из судака с пюре из батата",
         "width": 400,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:54.776Z",
-        "uploaded_on": "2026-10-12T08:01:54.901Z"
+        "created_on": "2026-10-12T10:43:43.354Z",
+        "uploaded_on": "2026-10-12T10:43:43.366Z"
       }
     },
     {
@@ -1895,15 +2137,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "f16ec184-ddef-4e6a-b49a-676076c9e8bd",
+        "id": "347101a3-9423-45da-89f5-f9a1f4abc6cb",
         "filename_download": "e07bd81d2f93e3df6db72cb8557247b7---jpg_original_919c8_convert.jpg",
         "title": "Рваная говядина под томатным соусом с картофельным пюре",
         "alt": "Рваная говядина под томатным соусом с картофельным пюре",
         "width": 400,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:55.198Z",
-        "uploaded_on": "2026-10-12T08:01:55.357Z"
+        "created_on": "2026-10-12T10:43:44.404Z",
+        "uploaded_on": "2026-10-12T10:43:44.413Z"
       }
     },
     {
@@ -1911,7 +2153,7 @@
       "status": "published",
       "sort": 5001,
       "category": 5,
-      "title": "Паста, с ростбифом",
+      "title": "Паста с ростбифом",
       "slug": "pasta-s-rostbifom",
       "description": null,
       "composition": null,
@@ -1925,15 +2167,15 @@
         "new"
       ],
       "photo": {
-        "id": "59fb0e6f-240c-4c57-bb91-fd4bdcaa0e12",
+        "id": "93a6721c-6d30-4dc7-b208-aae551f74d32",
         "filename_download": "cafd6b02397c38579cf6fa245b41538b---png_original_919c8_convert.webp",
         "title": "Паста, с ростбифом",
         "alt": "Паста, с ростбифом",
         "width": 449,
         "height": 600,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:01:55.648Z",
-        "uploaded_on": "2026-10-12T08:01:59.391Z"
+        "created_on": "2026-10-12T10:43:45.445Z",
+        "uploaded_on": "2026-10-12T10:43:45.662Z"
       }
     },
     {
@@ -1953,15 +2195,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "1ad6fe46-2df5-4d6a-84df-58d7031ff376",
+        "id": "ce7e8874-40b6-490a-b00d-0d651b44fcd4",
         "filename_download": "45133d6b26ad39a8acf0eb91ddff1b43---jpeg_original_919c8_convert.jpeg",
         "title": "Паста с морепродуктами",
         "alt": "Паста с морепродуктами",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:59.072Z",
-        "uploaded_on": "2026-10-12T08:01:59.266Z"
+        "created_on": "2026-10-12T10:43:46.483Z",
+        "uploaded_on": "2026-10-12T10:43:46.490Z"
       }
     },
     {
@@ -1983,15 +2225,15 @@
         "hit"
       ],
       "photo": {
-        "id": "8207a8ca-22c8-421a-ab1e-8e0938839693",
+        "id": "4f5c0cc2-8c34-4c97-b46c-b286b74e87c6",
         "filename_download": "a2e525ad00cb0ecadb41939c9f5ee879---jpg_original_919c8_convert.jpg",
         "title": "Паста «Карбонара»",
         "alt": "Паста «Карбонара»",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:59.644Z",
-        "uploaded_on": "2026-10-12T08:01:59.690Z"
+        "created_on": "2026-10-12T10:43:47.519Z",
+        "uploaded_on": "2026-10-12T10:43:47.526Z"
       }
     },
     {
@@ -2013,15 +2255,15 @@
         "hit"
       ],
       "photo": {
-        "id": "2bfb7151-09b6-4c06-be5c-972ac32e9809",
+        "id": "f19bb5cf-f310-4b1e-ad13-9aa7c21b23b7",
         "filename_download": "9b8322e2e5956405aae07172811a65d3---jpg_original_919c8_convert.jpg",
         "title": "Удон с цыпленком",
         "alt": "Удон с цыпленком",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:01:59.987Z",
-        "uploaded_on": "2026-10-12T08:02:00.023Z"
+        "created_on": "2026-10-12T10:43:48.558Z",
+        "uploaded_on": "2026-10-12T10:43:48.564Z"
       }
     },
     {
@@ -2041,15 +2283,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "8f0b872b-90d2-43ab-a7c1-fda05b6a58ab",
+        "id": "bff3f0fd-d0a6-4dff-9444-5c45739fabb0",
         "filename_download": "0dd6af73f4d419d0b04c39c306716e9c---jpg_original_919c8_convert.jpg",
         "title": "Круассан «Классический»",
         "alt": "Круассан «Классический»",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:00.321Z",
-        "uploaded_on": "2026-10-12T08:02:00.369Z"
+        "created_on": "2026-10-12T10:43:49.588Z",
+        "uploaded_on": "2026-10-12T10:43:49.594Z"
       }
     },
     {
@@ -2069,15 +2311,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "256ee9f3-76e4-4427-928c-d8391f1f39a5",
+        "id": "812bcd4a-4dc5-41f8-b8a7-922c0c163c48",
         "filename_download": "bb9f52f7f57c3ea478df0e60030c18a0---jpg_original_919c8_convert.jpg",
         "title": "Круассан «Миндальный»",
         "alt": "Круассан «Миндальный»",
         "width": 400,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:00.673Z",
-        "uploaded_on": "2026-10-12T08:02:00.766Z"
+        "created_on": "2026-10-12T10:43:50.623Z",
+        "uploaded_on": "2026-10-12T10:43:50.630Z"
       }
     },
     {
@@ -2097,15 +2339,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "0529de5c-678a-447a-a4b4-a1920dd3c306",
+        "id": "8ff56a81-6dd2-4f01-9682-977901bf69b7",
         "filename_download": "3d9f830201c6ce73b1511600e41402ac---jpg_original_919c8_convert.jpg",
         "title": "Курник",
         "alt": "Курник",
         "width": 455,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:00.973Z",
-        "uploaded_on": "2026-10-12T08:02:01.017Z"
+        "created_on": "2026-10-12T10:43:51.654Z",
+        "uploaded_on": "2026-10-12T10:43:51.660Z"
       }
     },
     {
@@ -2125,15 +2367,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "7867f7d8-e238-4165-a5f8-77d7a982f635",
+        "id": "ce466093-3dc4-483e-8e8d-6990705d9bb4",
         "filename_download": "a4d21d19f0f7b9d3c621fb50d55c51e3---jpg_original_919c8_convert.jpg",
         "title": "Ватрушка с малиной",
         "alt": "Ватрушка с малиной",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:01.240Z",
-        "uploaded_on": "2026-10-12T08:02:01.289Z"
+        "created_on": "2026-10-12T10:43:52.737Z",
+        "uploaded_on": "2026-10-12T10:43:52.743Z"
       }
     },
     {
@@ -2153,15 +2395,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "d0ceec91-f46f-473f-a3d1-e40c04d56f75",
+        "id": "a9858a01-284f-4e9e-a3a0-772b620b0ff2",
         "filename_download": "fa30411c269faa277d39f590ffd55f69---jpg_original_919c8_convert.jpg",
         "title": "Косичка с маком",
         "alt": "Косичка с маком",
         "width": 450,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:02.242Z",
-        "uploaded_on": "2026-10-12T08:02:02.937Z"
+        "created_on": "2026-10-12T10:43:53.762Z",
+        "uploaded_on": "2026-10-12T10:43:53.769Z"
       }
     },
     {
@@ -2181,15 +2423,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "103147d7-3cba-4f26-a480-a90f2bebeeac",
+        "id": "964a289d-832d-4cad-8782-8b93d5b768a9",
         "filename_download": "d5f17f6a56619d716f73f1460dd6877f---jpg_original_919c8_convert.jpg",
         "title": "Булочка с корицей",
         "alt": "Булочка с корицей",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:03.845Z",
-        "uploaded_on": "2026-10-12T08:02:04.070Z"
+        "created_on": "2026-10-12T10:43:54.791Z",
+        "uploaded_on": "2026-10-12T10:43:54.798Z"
       }
     },
     {
@@ -2209,15 +2451,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "c44fb5c9-a301-4de4-a482-8fb39a9e2001",
+        "id": "bf2e586a-e589-4206-b9b4-51c52a6c06f4",
         "filename_download": "75bcc27969d8f150873616e121431c83---jpeg_original_919c8_convert.jpeg",
         "title": "Пирог с ветчиной и грибами",
         "alt": "Пирог с ветчиной и грибами",
         "width": 400,
         "height": 400,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:04.343Z",
-        "uploaded_on": "2026-10-12T08:02:04.397Z"
+        "created_on": "2026-10-12T10:43:55.828Z",
+        "uploaded_on": "2026-10-12T10:43:55.834Z"
       }
     },
     {
@@ -2237,15 +2479,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "61f077ed-0fbc-4390-9bd6-8740f45c8b8b",
+        "id": "7ff442fa-0910-4ae8-b952-ae863abc3cce",
         "filename_download": "5321320a21a0d12a80c9a45460e9b1df---jpeg_original_919c8_convert.jpeg",
         "title": "Пирог с красной рыбой и брокколи",
         "alt": "Пирог с красной рыбой и брокколи",
         "width": 400,
         "height": 400,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:05.215Z",
-        "uploaded_on": "2026-10-12T08:02:05.585Z"
+        "created_on": "2026-10-12T10:43:56.910Z",
+        "uploaded_on": "2026-10-12T10:43:56.916Z"
       }
     },
     {
@@ -2265,15 +2507,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "dcd6c738-89a3-47fe-a336-9f73abffc27b",
+        "id": "8d54b628-f655-4dae-aebf-94f9e9c2c395",
         "filename_download": "e5164c6945450826e6e5f0dbb5b3e148---jpeg_original_919c8_convert.jpeg",
         "title": "Киш с индейкой",
         "alt": "Киш с индейкой",
         "width": 400,
         "height": 400,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:05.796Z",
-        "uploaded_on": "2026-10-12T08:02:05.838Z"
+        "created_on": "2026-10-12T10:43:58.512Z",
+        "uploaded_on": "2026-10-12T10:43:58.518Z"
       }
     },
     {
@@ -2293,15 +2535,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "b45d73be-453f-4e41-a9bb-68d92c61c51c",
+        "id": "06599a1f-c8bc-48af-8ac4-33ecfbe362d3",
         "filename_download": "388ca6cf997f7fc3813bdfcd4119dc98---png_original_919c8_convert.webp",
         "title": "Киш лосось-шпинат",
         "alt": "Киш лосось-шпинат",
         "width": 482,
         "height": 471,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:02:06.096Z",
-        "uploaded_on": "2026-10-12T08:02:06.568Z"
+        "created_on": "2026-10-12T10:43:59.546Z",
+        "uploaded_on": "2026-10-12T10:43:59.705Z"
       }
     },
     {
@@ -2321,15 +2563,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "89b799b0-e19f-4de1-bb98-034fbd70fd30",
+        "id": "f66b3aa6-6bfa-4e0c-9176-f2ae1a096ab6",
         "filename_download": "d6ba7715ac68460844e3b62e124eab13---jpg_original_919c8_convert.jpg",
         "title": "Слойка яблоко-вишня",
         "alt": "Слойка яблоко-вишня",
         "width": 400,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:06.567Z",
-        "uploaded_on": "2026-10-12T08:02:06.621Z"
+        "created_on": "2026-10-12T10:44:00.593Z",
+        "uploaded_on": "2026-10-12T10:44:00.602Z"
       }
     },
     {
@@ -2349,15 +2591,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "0a6e9987-e778-4965-b2d0-726930ec333f",
+        "id": "a15050c5-e3c7-48d0-b7df-8825aeb61720",
         "filename_download": "23711a6cde2d0d9a57f2dece1816ad8b---jpg_original_919c8_convert.jpg",
         "title": "Тарт с яблоком и меренгой",
         "alt": "Тарт с яблоком и меренгой",
         "width": 600,
         "height": 400,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:07.452Z",
-        "uploaded_on": "2026-10-12T08:02:07.818Z"
+        "created_on": "2026-10-12T10:44:01.688Z",
+        "uploaded_on": "2026-10-12T10:44:01.700Z"
       }
     },
     {
@@ -2377,15 +2619,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "7213583c-6cbb-4c46-83df-c2b8f79a8b28",
+        "id": "3f647dc5-649d-4fca-a318-95259a551fb2",
         "filename_download": "6ca74867ff87d6fedf89678a52844935---jpg_original_919c8_convert.jpg",
         "title": "Круассан с ветчиной",
         "alt": "Круассан с ветчиной",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:08.712Z",
-        "uploaded_on": "2026-10-12T08:02:09.154Z"
+        "created_on": "2026-10-12T10:44:02.724Z",
+        "uploaded_on": "2026-10-12T10:44:02.730Z"
       }
     },
     {
@@ -2395,7 +2637,7 @@
       "category": 6,
       "title": "Круассан с лососем",
       "slug": "kruassan-s-lososem",
-      "description": "Сытный круассан со слабосоленым лососем, соусом основе творожного сыры и свежими свежими овощами",
+      "description": "Сытный круассан со слабосоленым лососем, соусом на основе творожного сыра и свежими овощами",
       "composition": null,
       "weight": null,
       "price": 525,
@@ -2405,15 +2647,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "fb12aed4-83ae-4541-8bfb-6e65ef1be0f4",
+        "id": "8587bc4f-b13b-497b-8167-8cc8a4881ebc",
         "filename_download": "1f01cce5e2d971a7d7df723ef4169d53---png_original_919c8_convert.webp",
         "title": "Круассан с лососем",
         "alt": "Круассан с лососем",
         "width": 600,
         "height": 567,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:02:10.072Z",
-        "uploaded_on": "2026-10-12T08:02:11.780Z"
+        "created_on": "2026-10-12T10:44:03.765Z",
+        "uploaded_on": "2026-10-12T10:44:03.910Z"
       }
     },
     {
@@ -2433,15 +2675,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "e2120dde-c813-491a-b9de-16ae4ed9d60b",
+        "id": "e6d1a801-bf2a-4aa7-b1ed-da2b3428cdde",
         "filename_download": "a5e0260eff4520c85f51ee3e138baa57---png_original_919c8_convert.webp",
         "title": "Круассан с курицей",
         "alt": "Круассан с курицей",
         "width": 600,
         "height": 552,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:02:11.912Z",
-        "uploaded_on": "2026-10-12T08:02:12.623Z"
+        "created_on": "2026-10-12T10:44:04.826Z",
+        "uploaded_on": "2026-10-12T10:44:04.990Z"
       }
     },
     {
@@ -2461,15 +2703,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "f9fce999-93cb-4111-a010-bd4c068a478a",
+        "id": "97fbcc5c-85f1-4e76-8ce0-d6fefd84199c",
         "filename_download": "1e50fd206815d32a7da1bb916f56345b---jpg_original_919c8_convert.jpg",
         "title": "Пирожное \"Медовое с маракуйя\"",
         "alt": "Пирожное \"Медовое с маракуйя\"",
         "width": 480,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:12.494Z",
-        "uploaded_on": "2026-10-12T08:02:12.903Z"
+        "created_on": "2026-10-12T10:44:05.868Z",
+        "uploaded_on": "2026-10-12T10:44:05.879Z"
       }
     },
     {
@@ -2489,15 +2731,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "6ed8bfa0-ceb2-4b94-956b-0941fec2c289",
+        "id": "5101ec6a-b616-4898-b5c6-4f3de6b28a68",
         "filename_download": "1ca6fcc7f90dc752626853bba9be7e6e---jpg_original_919c8_convert.jpg",
         "title": "Пирожное \"Эстерхази\"",
         "alt": "Пирожное \"Эстерхази\"",
         "width": 480,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:13.735Z",
-        "uploaded_on": "2026-10-12T08:02:14.816Z"
+        "created_on": "2026-10-12T10:44:06.923Z",
+        "uploaded_on": "2026-10-12T10:44:06.930Z"
       }
     },
     {
@@ -2507,7 +2749,7 @@
       "category": 7,
       "title": "Пирожное \"Наполеон\"",
       "slug": "pirozhnoe-napoleon",
-      "description": "Домашний рубленный наполеон на сливочном масле с заварным кремом",
+      "description": "Домашний рубленый наполеон на сливочном масле с заварным кремом",
       "composition": null,
       "weight": "140 г",
       "price": 465,
@@ -2517,71 +2759,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "b95b824d-a537-44ae-abe2-6064012a3572",
+        "id": "2dd62cb7-68d9-4619-aaf6-2fed878d8fe9",
         "filename_download": "52fe714e3e519655b4462001664318eb---jpg_original_919c8_convert.jpg",
         "title": "Пирожное \"Наполеон\"",
         "alt": "Пирожное \"Наполеон\"",
         "width": 480,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:15.292Z",
-        "uploaded_on": "2026-10-12T08:02:15.404Z"
-      }
-    },
-    {
-      "id": 59,
-      "status": "published",
-      "sort": 7004,
-      "category": 7,
-      "title": "Пирожное «Медовый с клюквой»",
-      "slug": "pirozhnoe-medovyy-s-klyukvoy",
-      "description": "Медовые коржи, нежный сметанный крем и прослойка из натурального пюре клювы",
-      "composition": null,
-      "weight": "150 г",
-      "price": 475,
-      "old_price": null,
-      "variants": [],
-      "fillings": [],
-      "available": true,
-      "badges": [],
-      "photo": {
-        "id": "d8e25e2f-32fe-45f9-9fee-81346567a4ca",
-        "filename_download": "c93797a432124ace1da3124032aea36a---jpg_original_919c8_convert.jpg",
-        "title": "Пирожное «Медовый с клюквой»",
-        "alt": "Пирожное «Медовый с клюквой»",
-        "width": 480,
-        "height": 600,
-        "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:16.169Z",
-        "uploaded_on": "2026-10-12T08:02:16.843Z"
-      }
-    },
-    {
-      "id": 60,
-      "status": "published",
-      "sort": 7005,
-      "category": 7,
-      "title": "Облачко «Фисташка-малина»",
-      "slug": "oblachko-fistashka-malina",
-      "description": "Нежный десерт на основе фисташкового мусса с хрустящим слоем, нежным бисквитом и кисленькой серединкой из натуральной вишни. По-настоящему воздушное и особенное!",
-      "composition": null,
-      "weight": null,
-      "price": 655,
-      "old_price": null,
-      "variants": [],
-      "fillings": [],
-      "available": true,
-      "badges": [],
-      "photo": {
-        "id": "2f7534f2-4a3f-48ef-96fc-490373fa5469",
-        "filename_download": "ef1e2d33cc7bf2daec7c83536454e9ae---jpeg_original_919c8_convert.jpeg",
-        "title": "Облачко «Фисташка-малина»",
-        "alt": "Облачко «Фисташка-малина»",
-        "width": 600,
-        "height": 600,
-        "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:17.751Z",
-        "uploaded_on": "2026-10-12T08:02:18.200Z"
+        "created_on": "2026-10-12T10:44:07.960Z",
+        "uploaded_on": "2026-10-12T10:44:07.968Z"
       }
     },
     {
@@ -2601,15 +2787,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "ba881d83-62d8-45d2-ae21-09a1fac6b2f6",
+        "id": "f6aa4541-e0ff-4f74-bbca-7e4e8778f750",
         "filename_download": "e9de1b7bbb5bd1aabb8bd6af9344a2a0---jpeg_original_919c8_convert.jpeg",
         "title": "Трубочка с вареной сгущенкой",
         "alt": "Трубочка с вареной сгущенкой",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:18.428Z",
-        "uploaded_on": "2026-10-12T08:02:18.477Z"
+        "created_on": "2026-10-12T10:44:11.221Z",
+        "uploaded_on": "2026-10-12T10:44:11.227Z"
       }
     },
     {
@@ -2629,15 +2815,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "19a4fb4b-22dc-4439-8db2-507734679ab6",
+        "id": "cb448f9f-a1df-4b04-b4dc-e94311897a48",
         "filename_download": "2a6a5b7ccce1b464367b6b92b47b71a6---jpeg_original_919c8_convert.jpeg",
         "title": "Макаронс «Лимон»",
         "alt": "Макаронс «Лимон»",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:18.685Z",
-        "uploaded_on": "2026-10-12T08:02:18.718Z"
+        "created_on": "2026-10-12T10:44:12.253Z",
+        "uploaded_on": "2026-10-12T10:44:12.262Z"
       }
     },
     {
@@ -2657,15 +2843,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "9fe4ad40-19a9-442a-9349-d0683fc55ebb",
+        "id": "25ee4033-9270-4247-9872-d0a07a617166",
         "filename_download": "819de4523e60ca3a16c24b51eb7df724---jpeg_original_919c8_convert.jpeg",
         "title": "Макаронс «Пралине»",
         "alt": "Макаронс «Пралине»",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:18.932Z",
-        "uploaded_on": "2026-10-12T08:02:18.982Z"
+        "created_on": "2026-10-12T10:44:13.307Z",
+        "uploaded_on": "2026-10-12T10:44:13.313Z"
       }
     },
     {
@@ -2685,15 +2871,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "5b202892-b730-4f52-98cc-53971ce215df",
+        "id": "3beaac69-bbb7-4fce-8617-f913157d43c5",
         "filename_download": "1a2832217259217aaf8af79090e0d611---jpeg_original_919c8_convert.jpeg",
         "title": "Макаронс «Карамель»",
         "alt": "Макаронс «Карамель»",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:19.167Z",
-        "uploaded_on": "2026-10-12T08:02:19.208Z"
+        "created_on": "2026-10-12T10:44:14.335Z",
+        "uploaded_on": "2026-10-12T10:44:14.343Z"
       }
     },
     {
@@ -2713,15 +2899,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "a3ccbe74-be29-4341-9ac0-31edfbe8589e",
+        "id": "c5a1fae7-4bde-46a1-b77a-686dd43308c1",
         "filename_download": "0124ac86a6b3d6cb12c6047135bf0e1d---jpeg_original_919c8_convert.jpeg",
         "title": "Макаронс «Фисташка»",
         "alt": "Макаронс «Фисташка»",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:19.977Z",
-        "uploaded_on": "2026-10-12T08:02:20.163Z"
+        "created_on": "2026-10-12T10:44:15.512Z",
+        "uploaded_on": "2026-10-12T10:44:15.517Z"
       }
     },
     {
@@ -2741,15 +2927,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "abc74b9c-8f55-4ca0-8037-84345fb3bb42",
+        "id": "e82152f4-a5ec-4c84-a18c-0e790155d850",
         "filename_download": "2ee5cf99f113f91d0dc485b4457eb5df---jpg_original_919c8_convert.jpg",
         "title": "Макаронс «Ваниль»",
         "alt": "Макаронс «Ваниль»",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:20.900Z",
-        "uploaded_on": "2026-10-12T08:02:21.085Z"
+        "created_on": "2026-10-12T10:44:16.538Z",
+        "uploaded_on": "2026-10-12T10:44:16.544Z"
       }
     },
     {
@@ -2769,15 +2955,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "68fcc45a-0a01-44c3-b32d-91b5c4d4210e",
+        "id": "188725af-c2ca-4f77-a350-102301da9d59",
         "filename_download": "f9160c34aeddf34824a427b402405f5c---jpg_original_919c8_convert.jpg",
         "title": "Эклер «Шоколад»",
         "alt": "Эклер «Шоколад»",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:21.928Z",
-        "uploaded_on": "2026-10-12T08:02:22.379Z"
+        "created_on": "2026-10-12T10:44:17.609Z",
+        "uploaded_on": "2026-10-12T10:44:17.615Z"
       }
     },
     {
@@ -2797,15 +2983,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "a08f4e99-d876-4b1b-89e9-e99dcf1f1726",
+        "id": "e236f664-e451-4700-bd76-097de3fc2cd7",
         "filename_download": "1005361189c881b3477cc84535731e02---jpg_original_919c8_convert.jpg",
         "title": "Эклер «Карамель»",
         "alt": "Эклер «Карамель»",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:23.220Z",
-        "uploaded_on": "2026-10-12T08:02:23.665Z"
+        "created_on": "2026-10-12T10:44:18.638Z",
+        "uploaded_on": "2026-10-12T10:44:18.644Z"
       }
     },
     {
@@ -2815,7 +3001,7 @@
       "category": 7,
       "title": "Эклер «Фисташка»",
       "slug": "ekler-fistashka",
-      "description": "Заварное тесто с нежным заварным кремом и натуральной фисташкой пастой",
+      "description": "Заварное тесто с нежным заварным кремом и натуральной фисташковой пастой",
       "composition": null,
       "weight": "50 г",
       "price": 245,
@@ -2825,15 +3011,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "0b333d09-c77d-4800-a56e-9a6f88e31740",
+        "id": "708e5a91-91be-409f-887d-b07e0a40fa29",
         "filename_download": "daa854709314632fc3bc4340a09b37b3---jpg_original_919c8_convert.jpg",
         "title": "Эклер «Фисташка»",
         "alt": "Эклер «Фисташка»",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:24.410Z",
-        "uploaded_on": "2026-10-12T08:02:24.786Z"
+        "created_on": "2026-10-12T10:44:19.674Z",
+        "uploaded_on": "2026-10-12T10:44:19.682Z"
       }
     },
     {
@@ -2850,18 +3036,18 @@
       "old_price": null,
       "variants": [],
       "fillings": [],
-      "available": true,
+      "available": false,
       "badges": [],
       "photo": {
-        "id": "cd47f212-57bc-44a3-8052-03115b27be20",
+        "id": "de3455f5-a6b9-4657-ae00-0ff506e6baf1",
         "filename_download": "8b08b998c19e2b7e2ae64999b8607349---jpg_original_919c8_convert.jpg",
         "title": "Эклер «Ваниль»",
         "alt": "Эклер «Ваниль»",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:24.996Z",
-        "uploaded_on": "2026-10-12T08:02:25.038Z"
+        "created_on": "2026-10-12T10:44:20.698Z",
+        "uploaded_on": "2026-10-12T10:44:20.705Z"
       }
     },
     {
@@ -2881,15 +3067,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "a14d32a2-84bb-4874-8eca-2528c556a4e3",
+        "id": "6f50713a-cd47-4d23-9dd8-6c8147264b0f",
         "filename_download": "010b4c56b2f4dc17101e792dcaa92db9---png_original_919c8_convert.webp",
         "title": "Кейк-попс «Шоколадный»",
         "alt": "Кейк-попс «Шоколадный»",
         "width": 600,
         "height": 579,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:02:25.953Z",
-        "uploaded_on": "2026-10-12T08:02:27.433Z"
+        "created_on": "2026-10-12T10:44:21.738Z",
+        "uploaded_on": "2026-10-12T10:44:21.969Z"
       }
     },
     {
@@ -2906,46 +3092,18 @@
       "old_price": null,
       "variants": [],
       "fillings": [],
-      "available": true,
+      "available": false,
       "badges": [],
       "photo": {
-        "id": "359ee0ab-4174-4030-95b1-d3c1320a6187",
+        "id": "0d57c8f5-98b9-492c-9a46-8c291af2620f",
         "filename_download": "4a490082ba1b31896d32bca0790a679a---png_original_919c8_convert.webp",
         "title": "Чиа-пудинг с манго",
         "alt": "Чиа-пудинг с манго",
         "width": 535,
         "height": 600,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:02:27.367Z",
-        "uploaded_on": "2026-10-12T08:02:28.812Z"
-      }
-    },
-    {
-      "id": 73,
-      "status": "published",
-      "sort": 7018,
-      "category": 7,
-      "title": "Пирожное «Клюква»",
-      "slug": "pirozhnoe-klyukva",
-      "description": "Нежный мусс на основе белого бельгийского шоколада, прослойка из пюре клюквы, шоколадный велюр.\nИдеальный вариант, чтобы рассказать о своих чувствах",
-      "composition": null,
-      "weight": "90 г",
-      "price": 415,
-      "old_price": null,
-      "variants": [],
-      "fillings": [],
-      "available": true,
-      "badges": [],
-      "photo": {
-        "id": "60a369f4-35f1-4127-98fb-52c4ff6025a9",
-        "filename_download": "b9c3957571825b633b620b73b87f9f9a---jpg_original_919c8_convert.jpg",
-        "title": "Пирожное «Клюква»",
-        "alt": "Пирожное «Клюква»",
-        "width": 600,
-        "height": 600,
-        "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:29.313Z",
-        "uploaded_on": "2026-10-12T08:02:29.680Z"
+        "created_on": "2026-10-12T10:44:22.800Z",
+        "uploaded_on": "2026-10-12T10:44:22.944Z"
       }
     },
     {
@@ -2965,15 +3123,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "0c7bbe1b-c537-4391-b97a-64d85a244874",
+        "id": "d6f44b66-f584-46e7-8463-67170c562b6b",
         "filename_download": "86556f169978c31e2e0b5a901bd54543---jpg_original_919c8_convert.jpg",
         "title": "Пирожное «Медовый крем-чиз»",
         "alt": "Пирожное «Медовый крем-чиз»",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:29.946Z",
-        "uploaded_on": "2026-10-12T08:02:30.050Z"
+        "created_on": "2026-10-12T10:44:24.966Z",
+        "uploaded_on": "2026-10-12T10:44:24.972Z"
       }
     },
     {
@@ -2993,15 +3151,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "a448604b-9ef9-4d61-abbd-c69c525f6077",
+        "id": "4524ccef-c06a-45e9-8d18-a65de9ab3a74",
         "filename_download": "5ac5e40891cf44de18752204b9b619ca---jpg_original_919c8_convert.jpg",
         "title": "Пирожное «Медовый с грецким орехом»",
         "alt": "Пирожное «Медовый с грецким орехом»",
         "width": 480,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:30.319Z",
-        "uploaded_on": "2026-10-12T08:02:30.533Z"
+        "created_on": "2026-10-12T10:44:26.124Z",
+        "uploaded_on": "2026-10-12T10:44:26.133Z"
       }
     },
     {
@@ -3021,75 +3179,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "a4afaea4-b711-4f5e-9d24-bf54f163eca0",
+        "id": "04fd3f6a-4386-4a89-a9ad-cc0f4c3e9342",
         "filename_download": "6570a6961fb2bc21c529947d5992c240---jpg_original_919c8_convert.jpg",
         "title": "Пирожное «Молочная девочка»",
         "alt": "Пирожное «Молочная девочка»",
         "width": 480,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:30.815Z",
-        "uploaded_on": "2026-10-12T08:02:31.201Z"
-      }
-    },
-    {
-      "id": 77,
-      "status": "published",
-      "sort": 7022,
-      "category": 7,
-      "title": "Пирожное \"Мохито\"",
-      "slug": "pirozhnoe-mohito",
-      "description": "Нежный мятно-лайковый мусс и серединка из натурального пюре малины",
-      "composition": null,
-      "weight": "90 г",
-      "price": 425,
-      "old_price": null,
-      "variants": [],
-      "fillings": [],
-      "available": true,
-      "badges": [
-        "hit"
-      ],
-      "photo": {
-        "id": "0e2e059c-276f-425b-8f44-99330239104e",
-        "filename_download": "2a3939b7dbe1a2ba81243bcad176b960---png_original_919c8_convert.png",
-        "title": "Пирожное \"Мохито\"",
-        "alt": "Пирожное \"Мохито\"",
-        "width": 460,
-        "height": 600,
-        "type": "image/png",
-        "created_on": "2026-10-12T08:02:32.165Z",
-        "uploaded_on": "2026-10-12T08:02:33.065Z"
-      }
-    },
-    {
-      "id": 78,
-      "status": "published",
-      "sort": 7023,
-      "category": 7,
-      "title": "Пирожное \"Манго-малина\"",
-      "slug": "pirozhnoe-mango-malina",
-      "description": "Нежный мусс на белом бельгийском шоколаде, прослойка из натурального пюре манго и малины.",
-      "composition": null,
-      "weight": "110 г",
-      "price": 455,
-      "old_price": null,
-      "variants": [],
-      "fillings": [],
-      "available": true,
-      "badges": [
-        "hit"
-      ],
-      "photo": {
-        "id": "664a3a9f-21ad-45d6-b052-a273b7b7fade",
-        "filename_download": "bc483c593ab82fcc882fcc784c3dff03---png_original_919c8_convert.webp",
-        "title": "Пирожное \"Манго-малина\"",
-        "alt": "Пирожное \"Манго-малина\"",
-        "width": 542,
-        "height": 600,
-        "type": "image/webp",
-        "created_on": "2026-10-12T08:02:33.288Z",
-        "uploaded_on": "2026-10-12T08:02:35.121Z"
+        "created_on": "2026-10-12T10:44:27.192Z",
+        "uploaded_on": "2026-10-12T10:44:27.200Z"
       }
     },
     {
@@ -3099,7 +3197,7 @@
       "category": 8,
       "title": "Медовый маракуйя",
       "slug": "medovyy-marakuyya",
-      "description": "Медовый торт нежный со сметанным кремом и проволокой из пюре маракуйя",
+      "description": "Нежный медовый торт со сметанным кремом и прослойкой из пюре маракуйя",
       "composition": null,
       "weight": "1500 г",
       "price": 3750,
@@ -3109,15 +3207,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "b7aa912d-47e5-45ee-9731-03dfeee055c3",
+        "id": "eede8724-303d-46c8-8e16-fe0c750e6b96",
         "filename_download": "adce3f9fe644b92e2ba8ff05c18e7d3d---jpg_original_919c8_convert.jpg",
         "title": "Медовый маракуйя",
         "alt": "Медовый маракуйя",
         "width": 480,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:34.493Z",
-        "uploaded_on": "2026-10-12T08:02:34.630Z"
+        "created_on": "2026-10-12T10:44:30.366Z",
+        "uploaded_on": "2026-10-12T10:44:30.374Z"
       }
     },
     {
@@ -3127,25 +3225,25 @@
       "category": 8,
       "title": "Смородина-лайм",
       "slug": "smorodina-laym",
-      "description": "Нежный муссовый тортик с прослойкой из пюре черной смородины, тонкий бисквит, хрустящий слой и лаймовый, мусс.",
+      "description": "Нежный муссовый тортик с прослойкой из пюре черной смородины, тонкий бисквит, хрустящий слой и лаймовый мусс.",
       "composition": null,
       "weight": "800 г",
       "price": 2750,
       "old_price": null,
       "variants": [],
       "fillings": [],
-      "available": true,
+      "available": false,
       "badges": [],
       "photo": {
-        "id": "a4908b5b-e284-4d48-92f0-7d63dc3eb327",
+        "id": "86b6b3e2-9c98-40c7-9d3a-90aef640dccf",
         "filename_download": "0125b0bf50545084a88480e72fb5c618---jpg_original_919c8_convert.jpg",
         "title": "Смородина-лайм",
         "alt": "Смородина-лайм",
         "width": 480,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:35.540Z",
-        "uploaded_on": "2026-10-12T08:02:36.308Z"
+        "created_on": "2026-10-12T10:44:31.414Z",
+        "uploaded_on": "2026-10-12T10:44:31.422Z"
       }
     },
     {
@@ -3162,18 +3260,18 @@
       "old_price": null,
       "variants": [],
       "fillings": [],
-      "available": true,
+      "available": false,
       "badges": [],
       "photo": {
-        "id": "c0fed95c-b929-4cb3-95d5-46c302050b4a",
+        "id": "91556de3-4d85-4e47-a0cb-8a85f78d7f2f",
         "filename_download": "34b47568b77881d9d0c526eb846a5ef8---jpg_original_919c8_convert.jpg",
         "title": "Морковный торт",
         "alt": "Морковный торт",
         "width": 480,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:36.565Z",
-        "uploaded_on": "2026-10-12T08:02:36.710Z"
+        "created_on": "2026-10-12T10:44:32.506Z",
+        "uploaded_on": "2026-10-12T10:44:32.513Z"
       }
     },
     {
@@ -3181,7 +3279,7 @@
       "status": "published",
       "sort": 8004,
       "category": 8,
-      "title": "Эстерхайзи",
+      "title": "Эстерхази",
       "slug": "esterhayzi",
       "description": "Ореховый торт с нежным заварным кремом на белом шоколаде. Без глютена.",
       "composition": null,
@@ -3193,15 +3291,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "ef1cf6f2-6295-4200-aa6e-8a539cfa1c04",
+        "id": "2cd2bb60-36cb-49aa-a713-66ac73e2ce48",
         "filename_download": "dcee3e1b47484cb71fbcaaa0882c8fe5---jpg_original_919c8_convert.jpg",
         "title": "Эстерхайзи",
         "alt": "Эстерхайзи",
         "width": 480,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:36.912Z",
-        "uploaded_on": "2026-10-12T08:02:37.014Z"
+        "created_on": "2026-10-12T10:44:33.528Z",
+        "uploaded_on": "2026-10-12T10:44:33.540Z"
       }
     },
     {
@@ -3211,7 +3309,7 @@
       "category": 8,
       "title": "Медовый с грецким орехом",
       "slug": "medovyy-s-greckim-orehom",
-      "description": "Нежный классический медовый торт с дробленным грецким орехом",
+      "description": "Нежный классический медовый торт с дробленым грецким орехом",
       "composition": null,
       "weight": "800 г",
       "price": 2150,
@@ -3221,15 +3319,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "1362d2f9-f6fe-48bf-b2cb-90b150902676",
+        "id": "44944f3d-80a8-41fc-8388-d384846b128e",
         "filename_download": "7327914b942e45cf029b2614f7935ad9---jpg_original_919c8_convert.jpg",
         "title": "Медовый с грецким орехом",
         "alt": "Медовый с грецким орехом",
         "width": 480,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:37.805Z",
-        "uploaded_on": "2026-10-12T08:02:38.571Z"
+        "created_on": "2026-10-12T10:44:34.588Z",
+        "uploaded_on": "2026-10-12T10:44:34.598Z"
       }
     },
     {
@@ -3249,15 +3347,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "970aa499-8338-4984-a402-9fe008d1c243",
+        "id": "2843c9b4-bb68-4cae-984d-11c76e44804e",
         "filename_download": "3bf2cd2173b4fe58beff1884e083f84c---jpeg_original_919c8_convert.jpeg",
         "title": "Меренговый рулет",
         "alt": "Меренговый рулет",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:38.776Z",
-        "uploaded_on": "2026-10-12T08:02:38.856Z"
+        "created_on": "2026-10-12T10:44:35.608Z",
+        "uploaded_on": "2026-10-12T10:44:35.614Z"
       }
     },
     {
@@ -3274,18 +3372,18 @@
       "old_price": null,
       "variants": [],
       "fillings": [],
-      "available": true,
+      "available": false,
       "badges": [],
       "photo": {
-        "id": "e8c70d86-8da8-46fe-b619-d1d38bf4647d",
+        "id": "a5d9782a-5243-4466-a7e4-5558325569aa",
         "filename_download": "d94615f9b80facdbc3eb5b309c818a03---jpg_original_919c8_convert.jpg",
         "title": "Медовый с клюквой",
         "alt": "Медовый с клюквой",
         "width": 480,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:39.791Z",
-        "uploaded_on": "2026-10-12T08:02:40.463Z"
+        "created_on": "2026-10-12T10:44:36.625Z",
+        "uploaded_on": "2026-10-12T10:44:36.631Z"
       }
     },
     {
@@ -3295,7 +3393,7 @@
       "category": 8,
       "title": "Медовый торт с карамелью",
       "slug": "medovyy-tort-s-karamelyu",
-      "description": "Медовый торт со сметанным нежным кремом и прополкой из домашней карамели",
+      "description": "Медовый торт с нежным сметанным кремом и прослойкой из домашней карамели",
       "composition": null,
       "weight": "1,5 кг",
       "price": 3750,
@@ -3305,15 +3403,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "7f4ba2aa-8007-49bf-a6fb-5860e73e6fe7",
+        "id": "d0bfd862-1291-43bd-970c-216e14ea0341",
         "filename_download": "7d4795eb6f6a23f6b8d784cd4f44dd8d---png_original_919c8_convert.webp",
         "title": "Медовый торт с карамелью",
         "alt": "Медовый торт с карамелью",
         "width": 592,
         "height": 600,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:02:40.662Z",
-        "uploaded_on": "2026-10-12T08:02:41.398Z"
+        "created_on": "2026-10-12T10:44:37.660Z",
+        "uploaded_on": "2026-10-12T10:44:37.876Z"
       }
     },
     {
@@ -3330,18 +3428,18 @@
       "old_price": null,
       "variants": [],
       "fillings": [],
-      "available": true,
+      "available": false,
       "badges": [],
       "photo": {
-        "id": "231cef8d-f31f-4339-a660-9bee0a472df0",
+        "id": "954ac7ae-0010-4474-b1db-a7e05e35ae28",
         "filename_download": "19369876b8bf43f3cec55857559b13c5---jpg_original_919c8_convert.jpg",
         "title": "Манго-малина",
         "alt": "Манго-малина",
         "width": 480,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:41.194Z",
-        "uploaded_on": "2026-10-12T08:02:41.273Z"
+        "created_on": "2026-10-12T10:44:38.704Z",
+        "uploaded_on": "2026-10-12T10:44:38.711Z"
       }
     },
     {
@@ -3351,7 +3449,7 @@
       "category": 8,
       "title": "Прага",
       "slug": "praga",
-      "description": "Классический торт с шоколадными бисквитами коржами и масляным шоколадным кремом",
+      "description": "Классический торт с шоколадными бисквитными коржами и масляным шоколадным кремом",
       "composition": null,
       "weight": "770 г",
       "price": 2350,
@@ -3361,15 +3459,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "841d3775-43ce-4d35-a43f-5f5b24faf793",
+        "id": "9aee1e5b-8010-474d-95db-76712fab64dd",
         "filename_download": "32d688785a00548244a3488f4fe7eb1e---jpg_original_919c8_convert.jpg",
         "title": "Прага",
         "alt": "Прага",
         "width": 480,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:41.504Z",
-        "uploaded_on": "2026-10-12T08:02:41.639Z"
+        "created_on": "2026-10-12T10:44:39.743Z",
+        "uploaded_on": "2026-10-12T10:44:39.753Z"
       }
     },
     {
@@ -3379,7 +3477,7 @@
       "category": 8,
       "title": "Прага апельсин",
       "slug": "praga-apelsin",
-      "description": "Классический торт с шоколадными бисквитами коржами, масляным шоколадным кремом и апельсиновыми цукатами",
+      "description": "Классический торт с шоколадными бисквитными коржами, масляным шоколадным кремом и апельсиновыми цукатами",
       "composition": null,
       "weight": "770 г",
       "price": 2350,
@@ -3389,15 +3487,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "be3da2c1-2da4-42c3-bb91-f0c42cd72ee1",
+        "id": "13b38246-7126-4260-9536-16562ac8d254",
         "filename_download": "5caea54a962b8d034a668a630b209b88---jpg_original_919c8_convert.jpg",
         "title": "Прага апельсин",
         "alt": "Прага апельсин",
         "width": 480,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:41.883Z",
-        "uploaded_on": "2026-10-12T08:02:41.979Z"
+        "created_on": "2026-10-12T10:44:40.784Z",
+        "uploaded_on": "2026-10-12T10:44:40.792Z"
       }
     },
     {
@@ -3417,15 +3515,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "9666c34c-f24d-4543-9743-30958e6384c4",
+        "id": "4d35e648-663d-4618-9045-03c7a371624b",
         "filename_download": "fdfcbce624c90c865a91ea7742adb3a2---jpg_original_919c8_convert.jpg",
         "title": "Наполеон с белым шоколадом",
         "alt": "Наполеон с белым шоколадом",
         "width": 480,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:42.249Z",
-        "uploaded_on": "2026-10-12T08:02:43.504Z"
+        "created_on": "2026-10-12T10:44:41.822Z",
+        "uploaded_on": "2026-10-12T10:44:41.833Z"
       }
     },
     {
@@ -3445,15 +3543,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "5c219262-f0d7-4dc7-bd0b-ff623c7c8b7e",
+        "id": "ba83fdee-3b67-4352-8b42-a0e828fcf44e",
         "filename_download": "23f65c3e48875dc25d6b70ddf7f0b9cc---png_original_919c8_convert.webp",
         "title": "Молочная девочка",
         "alt": "Молочная девочка",
         "width": 478,
         "height": 600,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:02:44.406Z",
-        "uploaded_on": "2026-10-12T08:02:46.569Z"
+        "created_on": "2026-10-12T10:44:42.862Z",
+        "uploaded_on": "2026-10-12T10:44:43.045Z"
       }
     },
     {
@@ -3473,64 +3571,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "949ac001-830f-40df-bd97-6a59cf629d13",
+        "id": "f485d0cd-a506-4857-a938-29617484bafb",
         "filename_download": "9872c8f15b3c9e9783d349880fb06f7a---jpg_original_919c8_convert.jpg",
         "title": "Молочная девочка с грушей",
         "alt": "Молочная девочка с грушей",
         "width": 480,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:47.254Z",
-        "uploaded_on": "2026-10-12T08:02:48.548Z"
-      }
-    },
-    {
-      "id": 93,
-      "status": "published",
-      "sort": 9001,
-      "category": 9,
-      "title": "Торт «Лего» квадратный",
-      "slug": "tort-lego-kvadratnyy",
-      "description": "Заказ за 48 часов.",
-      "composition": null,
-      "weight": "2 кг",
-      "price": 7000,
-      "old_price": null,
-      "variants": [
-        {
-          "name": "2 кг",
-          "weight": "2 кг",
-          "price": 7000
-        },
-        {
-          "name": "3 кг",
-          "weight": "3 кг",
-          "price": 10500
-        },
-        {
-          "name": "4 кг",
-          "weight": "4 кг",
-          "price": 15000
-        }
-      ],
-      "fillings": [
-        "Прага",
-        "Сникерс",
-        "Молочная девочка",
-        "Медовый с карамелью"
-      ],
-      "available": true,
-      "badges": [],
-      "photo": {
-        "id": "26eb0db2-8c49-4c3c-9d11-f768f46e473c",
-        "filename_download": "a3895a5b4a0a30a08cc12a3776509521---png_original_919c8_convert.png",
-        "title": "Торт «Лего» квадратный",
-        "alt": "Торт «Лего» квадратный",
-        "width": 456,
-        "height": 456,
-        "type": "image/png",
-        "created_on": "2026-10-12T08:02:48.780Z",
-        "uploaded_on": "2026-10-12T08:02:48.933Z"
+        "created_on": "2026-10-12T10:44:43.934Z",
+        "uploaded_on": "2026-10-12T10:44:43.948Z"
       }
     },
     {
@@ -3578,109 +3627,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "a9a32b6a-89d9-4a8b-9704-6096f673204f",
+        "id": "39288674-abb5-4cbb-a13f-aaf8adc2c71f",
         "filename_download": "c5874733d6b851ee6b9052abfc40d49a---png_original_919c8_convert.png",
         "title": "Торт белый с рюшами",
         "alt": "Торт белый с рюшами",
         "width": 455,
         "height": 434,
         "type": "image/png",
-        "created_on": "2026-10-12T08:02:49.108Z",
-        "uploaded_on": "2026-10-12T08:02:49.216Z"
-      }
-    },
-    {
-      "id": 95,
-      "status": "published",
-      "sort": 9003,
-      "category": 9,
-      "title": "Торт «Мужской» квадратный со свечами",
-      "slug": "tort-muzhskoy-kvadratnyy-so-svechami",
-      "description": "Заказ за 48 часов.",
-      "composition": null,
-      "weight": "2 кг",
-      "price": 7000,
-      "old_price": null,
-      "variants": [
-        {
-          "name": "2 кг",
-          "weight": "2 кг",
-          "price": 7000
-        },
-        {
-          "name": "2,5 кг",
-          "weight": "2,5 кг",
-          "price": 8250
-        },
-        {
-          "name": "3 кг",
-          "weight": "3 кг",
-          "price": 9500
-        }
-      ],
-      "fillings": [
-        "Прага",
-        "Сникерс",
-        "Молочная девочка",
-        "Шоколадный с вишней",
-        "Прага апельсин"
-      ],
-      "available": true,
-      "badges": [],
-      "photo": {
-        "id": "899f442c-ff96-4c70-9f4d-9aacf5b8f37c",
-        "filename_download": "c64ca68a3d47db73d4d55645619e2225---png_original_919c8_convert.png",
-        "title": "Торт «Мужской» квадратный со свечами",
-        "alt": "Торт «Мужской» квадратный со свечами",
-        "width": 562,
-        "height": 575,
-        "type": "image/png",
-        "created_on": "2026-10-12T08:02:50.098Z",
-        "uploaded_on": "2026-10-12T08:02:50.998Z"
-      }
-    },
-    {
-      "id": 96,
-      "status": "published",
-      "sort": 9004,
-      "category": 9,
-      "title": "Детский торт «Мишка»",
-      "slug": "detskiy-tort-mishka",
-      "description": "Заказ за 48 часов.",
-      "composition": null,
-      "weight": "1,5 кг",
-      "price": 5950,
-      "old_price": null,
-      "variants": [
-        {
-          "name": "1,5 кг",
-          "weight": "1,5 кг",
-          "price": 5950
-        },
-        {
-          "name": "2 кг",
-          "weight": "2 кг",
-          "price": 7200
-        }
-      ],
-      "fillings": [
-        "Прага",
-        "Сникерс",
-        "Молочная девочка с грушей",
-        "Творожный с клубникой"
-      ],
-      "available": true,
-      "badges": [],
-      "photo": {
-        "id": "bcf5c193-cd33-4685-8879-c608ac73da73",
-        "filename_download": "2b1e195029f4e32392d94d9aad364bf8---jpg_original_919c8_convert.jpg",
-        "title": "Детский торт «Мишка»",
-        "alt": "Детский торт «Мишка»",
-        "width": 600,
-        "height": 600,
-        "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:51.263Z",
-        "uploaded_on": "2026-10-12T08:02:51.305Z"
+        "created_on": "2026-10-12T10:44:46.194Z",
+        "uploaded_on": "2026-10-12T10:44:46.206Z"
       }
     },
     {
@@ -3715,15 +3670,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "a8a8ed90-6bac-46c5-9e62-b94797ac268d",
+        "id": "98b30830-b534-44c0-b36c-3ff2a7577293",
         "filename_download": "c74b00f773481711fd1123758f30ad0c---jpeg_original_919c8_convert.jpeg",
         "title": "Торт «Сердечки» с мишкой",
         "alt": "Торт «Сердечки» с мишкой",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:52.212Z",
-        "uploaded_on": "2026-10-12T08:02:52.677Z"
+        "created_on": "2026-10-12T10:44:50.069Z",
+        "uploaded_on": "2026-10-12T10:44:50.075Z"
       }
     },
     {
@@ -3759,15 +3714,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "31af7bf4-ab70-4f07-823a-49840829ceca",
+        "id": "c9b11757-ed61-49cc-8dc7-885a3f301a5e",
         "filename_download": "d7f8749867b50e33b11c88a396374184---jpeg_original_919c8_convert.jpeg",
         "title": "Торт с сердечками и свечами",
         "alt": "Торт с сердечками и свечами",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:53.598Z",
-        "uploaded_on": "2026-10-12T08:02:54.051Z"
+        "created_on": "2026-10-12T10:44:51.102Z",
+        "uploaded_on": "2026-10-12T10:44:51.108Z"
       }
     },
     {
@@ -3803,15 +3758,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "195add5d-ac73-413e-8836-30c608e658b2",
+        "id": "1b73a1c5-4bce-4bbb-9383-db73b16341f9",
         "filename_download": "ad37fcfde111ee96aeecc1c0800aeedd---png_original_919c8_convert.webp",
         "title": "Торт «Барби» сердце",
         "alt": "Торт «Барби» сердце",
         "width": 600,
         "height": 551,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:02:54.288Z",
-        "uploaded_on": "2026-10-12T08:02:55.150Z"
+        "created_on": "2026-10-12T10:44:52.804Z",
+        "uploaded_on": "2026-10-12T10:44:53.063Z"
       }
     },
     {
@@ -3852,15 +3807,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "fd305c74-ebb4-4dcf-9914-c25c7ee7ac6d",
+        "id": "e4a5e425-d119-4215-8d73-dd29515f7238",
         "filename_download": "3030d0c32fe8d9240c9b75ec3acc9583---png_original_919c8_convert.webp",
         "title": "Торт с бантиками",
         "alt": "Торт с бантиками",
         "width": 580,
         "height": 510,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:02:54.996Z",
-        "uploaded_on": "2026-10-12T08:02:55.335Z"
+        "created_on": "2026-10-12T10:44:53.884Z",
+        "uploaded_on": "2026-10-12T10:44:53.962Z"
       }
     },
     {
@@ -3903,64 +3858,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "8104a95b-1a4a-4c13-974a-5a689f17790b",
+        "id": "81bb1511-cdd4-4ace-9034-655a4eefc33d",
         "filename_download": "5e71d85f3e4c847a09e41ea326db7280---jpeg_original_919c8_convert.jpeg",
         "title": "Красный торт с рюшами",
         "alt": "Красный торт с рюшами",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:02:55.359Z",
-        "uploaded_on": "2026-10-12T08:02:55.428Z"
-      }
-    },
-    {
-      "id": 102,
-      "status": "published",
-      "sort": 9010,
-      "category": 9,
-      "title": "Торт детский «Микки Маус»",
-      "slug": "tort-detskiy-mikki-maus",
-      "description": "Заказ за 48 часов.",
-      "composition": null,
-      "weight": "1 кг",
-      "price": 3900,
-      "old_price": null,
-      "variants": [
-        {
-          "name": "1 кг",
-          "weight": "1 кг",
-          "price": 3900
-        },
-        {
-          "name": "1,5 кг",
-          "weight": "1,5 кг",
-          "price": 5750
-        },
-        {
-          "name": "2 кг",
-          "weight": "2 кг",
-          "price": 7000
-        }
-      ],
-      "fillings": [
-        "Сникерс",
-        "Медовый с карамелью",
-        "Прага апельсин",
-        "Творожный с клубникой"
-      ],
-      "available": true,
-      "badges": [],
-      "photo": {
-        "id": "20e70133-ba9b-463e-b738-c05d2cd9cdc3",
-        "filename_download": "a2c42b7e44e428b5ac0974ddc362b8cc---png_original_919c8_convert.png",
-        "title": "Торт детский «Микки Маус»",
-        "alt": "Торт детский «Микки Маус»",
-        "width": 577,
-        "height": 502,
-        "type": "image/png",
-        "created_on": "2026-10-12T08:02:55.690Z",
-        "uploaded_on": "2026-10-12T08:02:55.832Z"
+        "created_on": "2026-10-12T10:44:54.962Z",
+        "uploaded_on": "2026-10-12T10:44:54.971Z"
       }
     },
     {
@@ -4001,64 +3907,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "c3c08951-288c-442f-ad17-1692d8883ee0",
+        "id": "abce30b9-e963-4a40-b989-280a97645475",
         "filename_download": "85920ab9fcab2da4cbe863d79cadcea3---png_original_919c8_convert.png",
         "title": "Торт детский «Зайка» с пузырьками",
         "alt": "Торт детский «Зайка» с пузырьками",
         "width": 572,
         "height": 516,
         "type": "image/png",
-        "created_on": "2026-10-12T08:02:56.644Z",
-        "uploaded_on": "2026-10-12T08:02:58.381Z"
-      }
-    },
-    {
-      "id": 104,
-      "status": "published",
-      "sort": 9012,
-      "category": 9,
-      "title": "Торт «Бант»",
-      "slug": "tort-bant",
-      "description": "Заказ за 48 часов.",
-      "composition": null,
-      "weight": "1 кг",
-      "price": 4500,
-      "old_price": null,
-      "variants": [
-        {
-          "name": "1 кг",
-          "weight": "1 кг",
-          "price": 4500
-        },
-        {
-          "name": "1,5 кг",
-          "weight": "1,5 кг",
-          "price": 8750
-        },
-        {
-          "name": "2 кг",
-          "weight": "2 кг",
-          "price": 11000
-        }
-      ],
-      "fillings": [
-        "Прага",
-        "Молочная девочка с грушей",
-        "Творожный с клубникой",
-        "Медовый маракуйя"
-      ],
-      "available": true,
-      "badges": [],
-      "photo": {
-        "id": "5b4bd650-949c-4487-8730-fe42ac0e572b",
-        "filename_download": "bf6be7d31006181fa560dbcdbe70e20d---png_original_919c8_convert.png",
-        "title": "Торт «Бант»",
-        "alt": "Торт «Бант»",
-        "width": 580,
-        "height": 549,
-        "type": "image/png",
-        "created_on": "2026-10-12T08:02:58.671Z",
-        "uploaded_on": "2026-10-12T08:02:58.779Z"
+        "created_on": "2026-10-12T10:44:57.183Z",
+        "uploaded_on": "2026-10-12T10:44:57.192Z"
       }
     },
     {
@@ -4100,15 +3957,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "e0f95382-2d0c-496c-a208-7e2dc5ce767c",
+        "id": "2123ce99-05d9-476e-af08-d7779a4e84af",
         "filename_download": "6615bd6da282691b9c8389cccd500fe7---png_original_919c8_convert.png",
         "title": "Торт «Мишка» минимализм",
         "alt": "Торт «Мишка» минимализм",
         "width": 570,
         "height": 536,
         "type": "image/png",
-        "created_on": "2026-10-12T08:02:59.069Z",
-        "uploaded_on": "2026-10-12T08:02:59.228Z"
+        "created_on": "2026-10-12T10:44:59.484Z",
+        "uploaded_on": "2026-10-12T10:44:59.492Z"
       }
     },
     {
@@ -4128,15 +3985,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "b4b2a3b8-e4bf-43f0-9d0a-d534c8168d34",
+        "id": "00e5d59a-f198-4751-b2cc-7d3292d248f4",
         "filename_download": "54d1854ddb583097a499c62eb1f7a8cf---png_original_919c8_convert.png",
         "title": "Круассан с лососем",
         "alt": "Круассан с лососем",
         "width": 472,
         "height": 424,
         "type": "image/png",
-        "created_on": "2026-10-12T08:02:59.443Z",
-        "uploaded_on": "2026-10-12T08:02:59.558Z"
+        "created_on": "2026-10-12T10:45:00.656Z",
+        "uploaded_on": "2026-10-12T10:45:00.674Z"
       }
     },
     {
@@ -4156,15 +4013,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "6f896d8c-d4ae-4cd9-9813-6dd760b0402d",
+        "id": "4511359a-0ea0-4191-b20d-7c01fa9e5744",
         "filename_download": "fb216b37ad2b5c873e8731f453c3e047---jpg_original_919c8_convert.jpg",
         "title": "Круассан с ветчиной",
         "alt": "Круассан с ветчиной",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:03:00.357Z",
-        "uploaded_on": "2026-10-12T08:03:00.716Z"
+        "created_on": "2026-10-12T10:45:01.758Z",
+        "uploaded_on": "2026-10-12T10:45:01.764Z"
       }
     },
     {
@@ -4184,15 +4041,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "df0e2fa5-6a6c-4159-a7ef-8c9e01aedb92",
+        "id": "ba6e604c-45c7-4633-a2f7-94c74470fd29",
         "filename_download": "bb2486b2dba534b2e3b10685f85ebbdf---jpg_original_919c8_convert.jpg",
         "title": "Круассан с курицей",
         "alt": "Круассан с курицей",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:03:00.898Z",
-        "uploaded_on": "2026-10-12T08:03:00.937Z"
+        "created_on": "2026-10-12T10:45:02.840Z",
+        "uploaded_on": "2026-10-12T10:45:02.846Z"
       }
     },
     {
@@ -4212,15 +4069,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "fb962806-2675-4f3b-85dc-2f4fb3c6e74a",
+        "id": "0d38ab06-4b88-4720-be9f-ec922bbae058",
         "filename_download": "25c84045d3510013f3b79f9f072b30fd---jpeg_original_919c8_convert.jpeg",
         "title": "ПП конфета без сахара в белом кунжуте",
         "alt": "ПП конфета без сахара в белом кунжуте",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:03:01.692Z",
-        "uploaded_on": "2026-10-12T08:03:02.072Z"
+        "created_on": "2026-10-12T10:45:03.886Z",
+        "uploaded_on": "2026-10-12T10:45:03.894Z"
       }
     },
     {
@@ -4240,15 +4097,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "f99a4d15-0e19-4fb0-9656-251c2605fbfd",
+        "id": "09a3b7ee-560d-468d-b989-7fd5b071edd9",
         "filename_download": "6fde781e9ad9e30810c38cb9f63a7c19---jpeg_original_919c8_convert.jpeg",
         "title": "Ореховый трюфель",
         "alt": "Ореховый трюфель",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:03:02.311Z",
-        "uploaded_on": "2026-10-12T08:03:02.364Z"
+        "created_on": "2026-10-12T10:45:05.601Z",
+        "uploaded_on": "2026-10-12T10:45:05.611Z"
       }
     },
     {
@@ -4258,7 +4115,7 @@
       "category": 11,
       "title": "Карамельный трюфель",
       "slug": "karamelnyy-tryufel",
-      "description": "Нежный трюфель на основе молочного бельгийского шоколада с домашней карамелью в хрустящем шоколадном корпусе с дробленным орехом",
+      "description": "Нежный трюфель на основе молочного бельгийского шоколада с домашней карамелью в хрустящем шоколадном корпусе с дробленым орехом",
       "composition": null,
       "weight": "30 г",
       "price": 220,
@@ -4268,15 +4125,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "5eac7d0e-848e-4276-87d2-d8b76f8d4e8a",
+        "id": "c413a04e-eb1b-4d39-a756-fe1b2f063ff6",
         "filename_download": "c60db1f0dd6c272b1249d6dccb7b3786---jpeg_original_919c8_convert.jpeg",
         "title": "Карамельный трюфель",
         "alt": "Карамельный трюфель",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:03:02.581Z",
-        "uploaded_on": "2026-10-12T08:03:02.625Z"
+        "created_on": "2026-10-12T10:45:06.649Z",
+        "uploaded_on": "2026-10-12T10:45:06.657Z"
       }
     },
     {
@@ -4296,15 +4153,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "f751c233-083e-4e82-8401-0abf69b525c4",
+        "id": "2f2c8958-a11b-4fac-a7e2-81cd85a860ea",
         "filename_download": "ce429101f6b83c12b55c7ed9ab65bc64---jpeg_original_919c8_convert.jpeg",
         "title": "Классический трюфель",
         "alt": "Классический трюфель",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:03:02.846Z",
-        "uploaded_on": "2026-10-12T08:03:02.892Z"
+        "created_on": "2026-10-12T10:45:07.670Z",
+        "uploaded_on": "2026-10-12T10:45:07.675Z"
       }
     },
     {
@@ -4324,15 +4181,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "e5fedf5f-57b1-4e9d-a8f9-76f5b58b733e",
+        "id": "0ee6a4b6-c3af-4b98-a38e-d39944733720",
         "filename_download": "18275f405d1a27df4459d20b53bf175e---jpeg_original_919c8_convert.jpeg",
         "title": "Трюфель «Малина»",
         "alt": "Трюфель «Малина»",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:03:03.214Z",
-        "uploaded_on": "2026-10-12T08:03:03.257Z"
+        "created_on": "2026-10-12T10:45:08.702Z",
+        "uploaded_on": "2026-10-12T10:45:08.710Z"
       }
     },
     {
@@ -4352,15 +4209,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "c67bc130-c649-446b-b8ce-491baf753949",
+        "id": "f05a58fa-9859-4282-9319-f45486ed8924",
         "filename_download": "75b386dee0ceda41116cdfa63bba075c---jpeg_original_919c8_convert.jpeg",
         "title": "Трюфель «Тропик»",
         "alt": "Трюфель «Тропик»",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:03:04.148Z",
-        "uploaded_on": "2026-10-12T08:03:04.372Z"
+        "created_on": "2026-10-12T10:45:10.293Z",
+        "uploaded_on": "2026-10-12T10:45:10.299Z"
       }
     },
     {
@@ -4380,15 +4237,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "e7bbe7c5-c364-4439-b2d2-a0f24841c525",
+        "id": "8f8ff326-b882-4a75-a9cd-8bb246028471",
         "filename_download": "d7494b1b2369fdea31b1a2d1c31df458---jpg_original_919c8_convert.jpg",
         "title": "Багет большой",
         "alt": "Багет большой",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:03:04.692Z",
-        "uploaded_on": "2026-10-12T08:03:05.201Z"
+        "created_on": "2026-10-12T10:45:11.335Z",
+        "uploaded_on": "2026-10-12T10:45:11.342Z"
       }
     },
     {
@@ -4426,15 +4283,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "dfe663fc-0faa-422d-801f-684bae495082",
+        "id": "9054e65f-97f5-4817-b709-b65d9555d623",
         "filename_download": "5a10b68445e3636cbbf565e6f133232b---jpg_original_919c8_convert.jpg",
         "title": "Фитнес хлеб",
         "alt": "Фитнес хлеб",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:03:05.999Z",
-        "uploaded_on": "2026-10-12T08:03:06.571Z"
+        "created_on": "2026-10-12T10:45:12.684Z",
+        "uploaded_on": "2026-10-12T10:45:12.694Z"
       }
     },
     {
@@ -4454,15 +4311,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "a0b9c604-4ca1-4a42-b1e9-660dae7728e9",
+        "id": "c82845d8-8cd3-4802-9fe5-d4f071f6c638",
         "filename_download": "e4c818a34aef33be00c7f2fbe85f70d4---jpeg_original_919c8_convert.jpeg",
         "title": "Хлеб ржаной с проросшей пшеницей",
         "alt": "Хлеб ржаной с проросшей пшеницей",
         "width": 600,
         "height": 600,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T08:03:07.386Z",
-        "uploaded_on": "2026-10-12T08:03:08.135Z"
+        "created_on": "2026-10-12T10:45:13.718Z",
+        "uploaded_on": "2026-10-12T10:45:13.726Z"
       }
     },
     {
@@ -4482,15 +4339,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "ea44a311-5104-4185-9bac-afdea8467950",
+        "id": "aada4e9d-0ae0-420c-8a0c-03c34ecebc2b",
         "filename_download": "8b33ce5dba0e20509d707e63b96dba79---png_original_919c8_convert.webp",
         "title": "Набор ягодных трюфелей 9 шт.",
         "alt": "Набор ягодных трюфелей 9 шт.",
         "width": 587,
         "height": 600,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:03:09.007Z",
-        "uploaded_on": "2026-10-12T08:03:10.556Z"
+        "created_on": "2026-10-12T10:45:14.752Z",
+        "uploaded_on": "2026-10-12T10:45:14.975Z"
       }
     },
     {
@@ -4510,15 +4367,15 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "3afb779d-8b50-438e-9823-99c5593468d3",
+        "id": "3a35a0eb-8d29-4a9f-8470-4bc54fc89855",
         "filename_download": "055e9632fbe3ba50e98bd44b84fb38e6---png_original_919c8_convert.webp",
         "title": "Набор шоколадных трюфелей 9 шт.",
         "alt": "Набор шоколадных трюфелей 9 шт.",
         "width": 526,
         "height": 600,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:03:11.086Z",
-        "uploaded_on": "2026-10-12T08:03:12.538Z"
+        "created_on": "2026-10-12T10:45:15.804Z",
+        "uploaded_on": "2026-10-12T10:45:16.021Z"
       }
     },
     {
@@ -4538,29 +4395,162 @@
       "available": true,
       "badges": [],
       "photo": {
-        "id": "88033b24-6c43-41e1-a1b7-9ad926365ddf",
+        "id": "82fbcd56-9f19-4f5c-ac8a-31781e63f535",
         "filename_download": "bf7426d214e8b3a03b93fc03548c10c8---png_original_919c8_convert.webp",
         "title": "Набор трюфелей ассорти 16 шт.",
         "alt": "Набор трюфелей ассорти 16 шт.",
         "width": 469,
         "height": 600,
         "type": "image/webp",
-        "created_on": "2026-10-12T08:03:13.037Z",
-        "uploaded_on": "2026-10-12T08:03:15.143Z"
+        "created_on": "2026-10-12T10:45:16.858Z",
+        "uploaded_on": "2026-10-12T10:45:17.289Z"
+      }
+    },
+    {
+      "id": 126,
+      "status": "published",
+      "sort": 99999,
+      "category": 10,
+      "title": "Проверка оплаты",
+      "slug": "proverka-oplaty",
+      "description": "Служебный товар для проверки оплаты картой. Не для продажи.",
+      "composition": null,
+      "weight": null,
+      "price": 1,
+      "old_price": null,
+      "variants": [],
+      "fillings": [],
+      "available": true,
+      "badges": [],
+      "photo": null
+    },
+    {
+      "id": 122,
+      "status": "published",
+      "sort": null,
+      "category": 7,
+      "title": "Корпусная малина ",
+      "slug": null,
+      "description": "Ванильный мусс, малиновая начинка, бельгийский шоколад ",
+      "composition": null,
+      "weight": "85",
+      "price": 395,
+      "old_price": null,
+      "variants": null,
+      "fillings": null,
+      "available": true,
+      "badges": [
+        "hit"
+      ],
+      "photo": {
+        "id": "26e900cc-08fc-487c-8400-dd8687dcecf5",
+        "filename_download": "IMG_7247.jpg",
+        "title": "Img 7247",
+        "alt": null,
+        "width": 600,
+        "height": 403,
+        "type": "image/jpeg",
+        "created_on": "2026-10-19T10:57:21.483Z",
+        "uploaded_on": "2026-10-19T10:57:22.150Z"
+      }
+    },
+    {
+      "id": 123,
+      "status": "published",
+      "sort": null,
+      "category": 7,
+      "title": "Корпусная фисташка ",
+      "slug": null,
+      "description": "Фисташковый мусс, бисквитная прослойка, хрустящий слой из карамели и фисташки, бельгийский шоколад ",
+      "composition": null,
+      "weight": "115",
+      "price": 645,
+      "old_price": null,
+      "variants": null,
+      "fillings": null,
+      "available": true,
+      "badges": null,
+      "photo": {
+        "id": "ef031ed7-f5ca-46af-9a6b-20a69a091d92",
+        "filename_download": "IMG_7243.jpg",
+        "title": "Img 7243",
+        "alt": null,
+        "width": 600,
+        "height": 465,
+        "type": "image/jpeg",
+        "created_on": "2026-10-19T17:00:03.345Z",
+        "uploaded_on": "2026-10-19T17:00:03.855Z"
+      }
+    },
+    {
+      "id": 124,
+      "status": "published",
+      "sort": null,
+      "category": 7,
+      "title": "Корпусное манго ",
+      "slug": null,
+      "description": "Банановый мусс, начинка с кусочками манго, бельгийский шоколад ",
+      "composition": null,
+      "weight": "85",
+      "price": 425,
+      "old_price": null,
+      "variants": null,
+      "fillings": null,
+      "available": true,
+      "badges": null,
+      "photo": {
+        "id": "efedea86-d866-4783-bca4-7b82f7c748e8",
+        "filename_download": "IMG_7235.jpg",
+        "title": "Img 7235",
+        "alt": null,
+        "width": 600,
+        "height": 429,
+        "type": "image/jpeg",
+        "created_on": "2026-10-19T17:07:17.730Z",
+        "uploaded_on": "2026-10-19T17:07:18.170Z"
+      }
+    },
+    {
+      "id": 125,
+      "status": "published",
+      "sort": null,
+      "category": 7,
+      "title": "Корпусная черника ",
+      "slug": null,
+      "description": "Мусс с добавлением лайма, черничная начинка, бельгийский шоколад ",
+      "composition": null,
+      "weight": "75",
+      "price": 425,
+      "old_price": null,
+      "variants": null,
+      "fillings": null,
+      "available": true,
+      "badges": null,
+      "photo": {
+        "id": "90bae990-92d3-4294-86f0-8fa812b4bae2",
+        "filename_download": "IMG_7240.jpg",
+        "title": "Img 7240",
+        "alt": null,
+        "width": 600,
+        "height": 417,
+        "type": "image/jpeg",
+        "created_on": "2026-10-19T17:08:51.591Z",
+        "uploaded_on": "2026-10-19T17:08:52.003Z"
       }
     }
   ],
   "catering_page": {
     "id": 1,
-    "hero_title": "Вы можете доверить нам свой праздник на 100 %",
-    "hero_text": "От блюд и алкоголя до организации события с обслуживанием, оформлением пространства и программой «под ключ».",
+    "date_updated": "2026-10-26T06:29:28.113Z",
+    "hero_title": "Кейтеринг и банкеты в Самаре",
+    "hero_text": "Вы можете доверить нам свой праздник на 100 %: от блюд и алкоголя до организации события с обслуживанием, оформлением пространства и программой «под ключ».",
     "facts": [
       {
         "value": "6 лет",
         "label": "делаем праздники"
       },
       {
-        "value": "до 140",
+        "value": "100+",
         "label": "гостей в наших залах"
       },
       {
@@ -4597,7 +4587,7 @@
       },
       {
         "title": "Собственные площадки",
-        "text": "Рестораны «Вкусной компании» всегда рады встретить вас в гостях. Наши залы готовы к приему как небольших компаний, так и праздников до 140 человек."
+        "text": "Рестораны «Вкусной компании» всегда рады встретить вас в гостях. Наши залы готовы к приему как небольших компаний, так и праздников на 100+ человек."
       }
     ],
     "steps_title": "От мечты до идеального события — всего 4 шага",
@@ -4618,197 +4608,196 @@
     "hours_note": "с 09:00 до 20:00",
     "contacts_text": "На дегустацию, просмотр площадки или встречу с менеджером",
     "seo_title": "Кейтеринг и банкеты в Самаре — Вкусная компания",
-    "seo_description": "Банкеты в наших залах до 140 гостей, фуршеты, кофе-брейки и доставка боксов по Самаре и области. Банкет от 3 500 ₽ на гостя. Оставьте заявку — перезвоним.",
+    "seo_description": "Банкеты в наших залах на 100+ гостей, фуршеты, кофе-брейки и доставка боксов по Самаре и области. Банкет от 3 500 ₽ на гостя. Оставьте заявку — перезвоним.",
     "services_seo_title": "Форматы и цены кейтеринга — Вкусная компания",
     "services_seo_description": "Доставка боксов от 1 250 ₽, фуршет, кофе-брейк, праздники и корпоративы в Самаре: что входит в каждый формат, сколько гостей и как заказать.",
     "faq_seo_title": "Вопросы о кейтеринге и банкетах — Вкусная компания",
     "faq_seo_description": "Цены и предоплата, дегустация, пробковый сбор, официанты, доставка по области: ответы о банкетах и кейтеринге «Вкусной компании» в Самаре.",
-    "date_updated": "2026-10-12T12:36:04.491Z",
     "formats_title": "Форматы банкетов и кейтеринга",
     "formats_text": "Каждый праздник — это всегда что-то уникальное и незабываемое — как для вас, так и для нас.",
     "gallery": [
       {
-        "id": 11,
+        "id": 1,
         "sort": 1,
         "caption": null,
         "directus_files_id": {
-          "id": "dad3f68c-f55b-49ac-8bc0-d78ca82d4a9b",
+          "id": "5cf0bd9e-c9ce-446e-9ea1-447e6c148451",
           "filename_download": "ss1.jpg",
           "title": "Гости поднимают бокалы за длинным банкетным столом",
           "alt": "Гости поднимают бокалы за длинным банкетным столом",
           "width": 500,
           "height": 750,
           "type": "image/jpeg",
-          "created_on": "2026-10-12T12:33:49.518Z",
-          "uploaded_on": "2026-10-12T12:33:50.649Z"
+          "created_on": "2026-10-12T13:58:39.769Z",
+          "uploaded_on": "2026-10-12T13:58:39.786Z"
         }
       },
       {
-        "id": 12,
+        "id": 2,
         "sort": 2,
         "caption": null,
         "directus_files_id": {
-          "id": "c7629b72-4b82-4ea1-b960-148ab13127af",
+          "id": "f3590d9f-0d60-486e-aafb-7d197eba87b2",
           "filename_download": "ss2.jpg",
           "title": "Закуски на доске: сыры, фрукты, брускетты",
           "alt": "Закуски на доске: сыры, фрукты, брускетты",
           "width": 500,
           "height": 750,
           "type": "image/jpeg",
-          "created_on": "2026-10-12T12:35:00.296Z",
-          "uploaded_on": "2026-10-12T12:35:01.619Z"
+          "created_on": "2026-10-12T13:58:39.827Z",
+          "uploaded_on": "2026-10-12T13:58:39.854Z"
         }
       },
       {
-        "id": 13,
+        "id": 3,
         "sort": 3,
         "caption": null,
         "directus_files_id": {
-          "id": "72116828-e1bc-4188-9c67-f65f9f7de789",
+          "id": "8c5bcc0c-8dab-4f78-9222-48d911cedda9",
           "filename_download": "ss3.jpg",
           "title": "Гостья с канапе в руке",
           "alt": "Гостья с канапе в руке",
           "width": 500,
           "height": 750,
           "type": "image/jpeg",
-          "created_on": "2026-10-12T12:33:52.079Z",
-          "uploaded_on": "2026-10-12T12:33:53.034Z"
+          "created_on": "2026-10-12T13:58:39.901Z",
+          "uploaded_on": "2026-10-12T13:58:39.922Z"
         }
       },
       {
-        "id": 14,
+        "id": 4,
         "sort": 4,
         "caption": null,
         "directus_files_id": {
-          "id": "82cac87f-2b72-4b26-8c5c-d3147512eaaf",
+          "id": "be387835-a4df-41fd-bd59-e1f9cc88bb30",
           "filename_download": "ss4.jpg",
           "title": "Ведущая вечера с микрофоном",
           "alt": "Ведущая вечера с микрофоном",
           "width": 500,
           "height": 736,
           "type": "image/jpeg",
-          "created_on": "2026-10-12T12:35:03.561Z",
-          "uploaded_on": "2026-10-12T12:35:04.793Z"
+          "created_on": "2026-10-12T13:58:39.969Z",
+          "uploaded_on": "2026-10-12T13:58:40.001Z"
         }
       },
       {
-        "id": 15,
+        "id": 5,
         "sort": 5,
         "caption": null,
         "directus_files_id": {
-          "id": "ba0420af-a5aa-498d-a0c3-ae8b66540f04",
+          "id": "3ca38ab0-77d5-45fc-bc31-66ac8cd81d3d",
           "filename_download": "ss5.jpg",
           "title": "Сервировка банкетного стола с розами",
           "alt": "Сервировка банкетного стола с розами",
           "width": 500,
           "height": 750,
           "type": "image/jpeg",
-          "created_on": "2026-10-12T12:36:01.416Z",
-          "uploaded_on": "2026-10-12T12:36:02.705Z"
+          "created_on": "2026-10-12T13:58:40.046Z",
+          "uploaded_on": "2026-10-12T13:58:40.068Z"
         }
       },
       {
-        "id": 16,
+        "id": 6,
         "sort": 6,
         "caption": null,
         "directus_files_id": {
-          "id": "b518a1f1-adfb-4b7f-9538-dfade9a2af9e",
+          "id": "3e7c69ae-79f5-4f05-bc9c-410ceb58d14e",
           "filename_download": "ss6.jpg",
           "title": "Тост при свечах: бокалы над столом",
           "alt": "Тост при свечах: бокалы над столом",
           "width": 500,
           "height": 625,
           "type": "image/jpeg",
-          "created_on": "2026-10-12T12:33:54.845Z",
-          "uploaded_on": "2026-10-12T12:33:56.230Z"
+          "created_on": "2026-10-12T13:58:40.107Z",
+          "uploaded_on": "2026-10-12T13:58:40.125Z"
         }
       },
       {
-        "id": 17,
+        "id": 7,
         "sort": 7,
         "caption": null,
         "directus_files_id": {
-          "id": "cfb0284b-9704-460e-aaaf-95a7447bf2a9",
+          "id": "ae58aac7-2b48-4c6b-843a-546c35fee138",
           "filename_download": "a2.JPG",
           "title": "Зал ресторана: столы у стены и зелёные стулья",
           "alt": "Зал ресторана: столы у стены и зелёные стулья",
           "width": 1067,
           "height": 1600,
           "type": "image/jpeg",
-          "created_on": "2026-10-12T12:33:57.527Z",
-          "uploaded_on": "2026-10-12T12:34:03.231Z"
+          "created_on": "2026-10-12T13:58:40.164Z",
+          "uploaded_on": "2026-10-12T13:58:40.208Z"
         }
       },
       {
-        "id": 18,
+        "id": 8,
         "sort": 8,
         "caption": null,
         "directus_files_id": {
-          "id": "66777bd8-fa98-44dd-8690-e78110081b49",
+          "id": "ae7bcc74-aaa0-42c0-bcfe-dc553eb0e26d",
           "filename_download": "a3.JPG",
           "title": "Зал ресторана с декоративной стеной",
           "alt": "Зал ресторана с декоративной стеной",
           "width": 1067,
           "height": 1600,
           "type": "image/jpeg",
-          "created_on": "2026-10-12T12:34:04.277Z",
-          "uploaded_on": "2026-10-12T12:34:06.229Z"
+          "created_on": "2026-10-12T13:58:40.250Z",
+          "uploaded_on": "2026-10-12T13:58:40.289Z"
         }
       },
       {
-        "id": 19,
+        "id": 9,
         "sort": 9,
         "caption": null,
         "directus_files_id": {
-          "id": "e9ee3199-7859-433f-a768-944d81d2f898",
+          "id": "69d0da3f-8978-4959-8b1d-e0be93ac5627",
           "filename_download": "a4.JPG",
           "title": "Зал ресторана со стеллажами и неоновой надписью",
           "alt": "Зал ресторана со стеллажами и неоновой надписью",
           "width": 1067,
           "height": 1600,
           "type": "image/jpeg",
-          "created_on": "2026-10-12T12:35:25.126Z",
-          "uploaded_on": "2026-10-12T12:35:26.578Z"
+          "created_on": "2026-10-12T13:58:40.326Z",
+          "uploaded_on": "2026-10-12T13:58:40.347Z"
         }
       },
       {
-        "id": 20,
+        "id": 10,
         "sort": 10,
         "caption": null,
         "directus_files_id": {
-          "id": "9e708d26-44a5-4033-b404-7394cd5c58d6",
+          "id": "895c3459-f0e1-48bb-93b0-2022f3055bad",
           "filename_download": "a1.JPG",
           "title": "Детская комната в зале: вигвам, игрушки и стеллаж",
           "alt": "Детская комната в зале: вигвам, игрушки и стеллаж",
           "width": 1067,
           "height": 1600,
           "type": "image/jpeg",
-          "created_on": "2026-10-12T12:35:30.973Z",
-          "uploaded_on": "2026-10-12T12:35:34.346Z"
+          "created_on": "2026-10-12T13:58:40.385Z",
+          "uploaded_on": "2026-10-12T13:58:40.419Z"
         }
       }
     ],
     "hero_image": {
-      "id": "bd1ffb7e-2712-42bd-8820-0d4183d742ef",
+      "id": "8d6b8333-006c-47b4-9114-651ef5334fe8",
       "filename_download": "a22.JPG",
       "title": "Банкетный зал со светлыми окнами, накрытый стол",
       "alt": "Банкетный зал со светлыми окнами, накрытый стол",
       "width": 1280,
       "height": 1280,
       "type": "image/jpeg",
-      "created_on": "2026-10-12T12:34:54.758Z",
-      "uploaded_on": "2026-10-12T12:34:55.797Z"
+      "created_on": "2026-10-12T13:58:39.600Z",
+      "uploaded_on": "2026-10-12T13:58:39.626Z"
     },
     "request_image": {
-      "id": "0def4d5d-571a-4797-889e-192c230e8b31",
+      "id": "4cd0d160-66c0-4487-abbc-56027c7fb2f0",
       "filename_download": "ss2.webp",
       "title": "Канапе с рыбой и мясом на сланцевой доске",
       "alt": "Канапе с рыбой и мясом на сланцевой доске",
       "width": 700,
       "height": 600,
       "type": "image/webp",
-      "created_on": "2026-10-12T12:33:46.522Z",
-      "uploaded_on": "2026-10-12T12:33:48.686Z"
+      "created_on": "2026-10-12T13:58:39.672Z",
+      "uploaded_on": "2026-10-12T13:58:39.900Z"
     }
   },
   "catering_formats": [
@@ -4841,15 +4830,15 @@
       "guests_to": null,
       "lead_time": "Готовим около 2 часов",
       "photo": {
-        "id": "c7629b72-4b82-4ea1-b960-148ab13127af",
+        "id": "f3590d9f-0d60-486e-aafb-7d197eba87b2",
         "filename_download": "ss2.jpg",
         "title": "Закуски на доске: сыры, фрукты, брускетты",
         "alt": "Закуски на доске: сыры, фрукты, брускетты",
         "width": 500,
         "height": 750,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T12:35:00.296Z",
-        "uploaded_on": "2026-10-12T12:35:01.619Z"
+        "created_on": "2026-10-12T13:58:39.827Z",
+        "uploaded_on": "2026-10-12T13:58:39.854Z"
       }
     },
     {
@@ -4887,15 +4876,15 @@
       "guests_to": null,
       "lead_time": null,
       "photo": {
-        "id": "72116828-e1bc-4188-9c67-f65f9f7de789",
+        "id": "8c5bcc0c-8dab-4f78-9222-48d911cedda9",
         "filename_download": "ss3.jpg",
         "title": "Гостья с канапе в руке",
         "alt": "Гостья с канапе в руке",
         "width": 500,
         "height": 750,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T12:33:52.079Z",
-        "uploaded_on": "2026-10-12T12:33:53.034Z"
+        "created_on": "2026-10-12T13:58:39.901Z",
+        "uploaded_on": "2026-10-12T13:58:39.922Z"
       }
     },
     {
@@ -4924,15 +4913,15 @@
       "guests_to": null,
       "lead_time": null,
       "photo": {
-        "id": "653735f5-11f5-4ebf-97cf-9554046d96ba",
+        "id": "65e057ab-db76-472d-9575-fc7de3e9fd48",
         "filename_download": "ss1.webp",
         "title": "Канапе с брускеттами на сланцевой доске",
         "alt": "Канапе с брускеттами на сланцевой доске",
         "width": 700,
         "height": 600,
         "type": "image/webp",
-        "created_on": "2026-10-12T12:34:08.555Z",
-        "uploaded_on": "2026-10-12T12:34:10.103Z"
+        "created_on": "2026-10-12T13:58:40.892Z",
+        "uploaded_on": "2026-10-12T13:58:41.372Z"
       }
     },
     {
@@ -4966,19 +4955,19 @@
       "price_from": 3500,
       "price_unit": "за гостя",
       "price_note": "банкет в наших залах",
-      "guests_from": null,
-      "guests_to": 140,
+      "guests_from": 100,
+      "guests_to": null,
       "lead_time": null,
       "photo": {
-        "id": "dad3f68c-f55b-49ac-8bc0-d78ca82d4a9b",
+        "id": "5cf0bd9e-c9ce-446e-9ea1-447e6c148451",
         "filename_download": "ss1.jpg",
         "title": "Гости поднимают бокалы за длинным банкетным столом",
         "alt": "Гости поднимают бокалы за длинным банкетным столом",
         "width": 500,
         "height": 750,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T12:33:49.518Z",
-        "uploaded_on": "2026-10-12T12:33:50.649Z"
+        "created_on": "2026-10-12T13:58:39.769Z",
+        "uploaded_on": "2026-10-12T13:58:39.786Z"
       }
     },
     {
@@ -5006,19 +4995,19 @@
       "price_from": 3500,
       "price_unit": "за гостя",
       "price_note": "банкет в наших залах",
-      "guests_from": null,
-      "guests_to": 140,
+      "guests_from": 100,
+      "guests_to": null,
       "lead_time": null,
       "photo": {
-        "id": "b518a1f1-adfb-4b7f-9538-dfade9a2af9e",
+        "id": "3e7c69ae-79f5-4f05-bc9c-410ceb58d14e",
         "filename_download": "ss6.jpg",
         "title": "Тост при свечах: бокалы над столом",
         "alt": "Тост при свечах: бокалы над столом",
         "width": 500,
         "height": 625,
         "type": "image/jpeg",
-        "created_on": "2026-10-12T12:33:54.845Z",
-        "uploaded_on": "2026-10-12T12:33:56.230Z"
+        "created_on": "2026-10-12T13:58:40.107Z",
+        "uploaded_on": "2026-10-12T13:58:40.125Z"
       }
     }
   ],
@@ -5450,23 +5439,6 @@
     "signup_bonus": 200,
     "points_ttl_days": 365,
     "max_share_percent": 30,
-    "tiers": [
-      {
-        "name": "1",
-        "from": 0,
-        "percent": 3
-      },
-      {
-        "name": "2",
-        "from": 10000,
-        "percent": 5
-      },
-      {
-        "name": "3",
-        "from": 30000,
-        "percent": 7
-      }
-    ],
     "birthday_bonus": 500,
     "birthday_window_days": 3,
     "birthday_discount_percent": 0
@@ -5481,7 +5453,7 @@
       "description": "Договор купли-продажи и доставки блюд с сайта vkus-com.ru: как оформить и подтвердить заказ, как считается доставка, оплата онлайн, отмена и возврат денег.",
       "body": "<p>Индивидуальный предприниматель Стрельникова Екатерина Александровна (далее — Продавец) предлагает любому дееспособному лицу (далее — Покупатель) купить блюда, выпечку, торты и другие товары с доставкой или самовывозом на условиях этого договора. Предложение публичное: оформляя заказ на сайте vkus-com.ru или по телефону, Покупатель принимает все условия ниже.</p>\n<h2>1. Термины</h2>\n<p>1.1. Сайт — vkus-com.ru со всеми страницами, в том числе каталог доставки <a href=\"/catalog/\">vkus-com.ru/catalog/</a> и личный кабинет <a href=\"/account/\">vkus-com.ru/account/</a>.</p>\n<p>1.2. Продавец — ИП Стрельникова Екатерина Александровна. Реквизиты — в разделе 11 и на странице <a href=\"/docs/requisites/\">«Реквизиты и контакты»</a>.</p>\n<p>1.3. Товары — продукция Продавца из каталога на Сайте. Внешний вид Товара может отличаться от фотографии на Сайте.</p>\n<p>1.4. Покупатель — дееспособное лицо, которое заказывает, покупает или использует Товары только для личных, семейных, домашних и иных нужд, не связанных с предпринимательской деятельностью.</p>\n<p>1.5. Заказ — заявка Покупателя на покупку Товаров, оформленная в корзине на Сайте или принятая Продавцом по телефону.</p>\n<p>1.6. Оферта — этот документ, публичный договор, который регулирует отношения Продавца и Покупателя.</p>\n<h2>2. Общие положения</h2>\n<p>2.1. Покупатель знакомится с условиями Оферты до оформления Заказа. Оформляя Заказ, он подтверждает, что прочитал и принимает Оферту.</p>\n<p>2.2. Договор розничной купли-продажи по образцам считается заключённым с момента, когда Продавец получил Заказ.</p>\n<p>2.3. Продавец вправе изменять Оферту. Новая редакция действует с момента публикации на Сайте, дата редакции указана вверху страницы. Покупатель самостоятельно следит за изменениями; Заказ исполняется на условиях редакции, действовавшей в момент его оформления.</p>\n<p>2.4. Оферта действует бессрочно.</p>\n<p>2.5. Отношения Продавца и Покупателя регулируются законодательством Российской Федерации, в том числе Законом РФ «О защите прав потребителей».</p>\n<h2>3. Предмет договора</h2>\n<p>3.1. Продавец продаёт Товары из Заказа по ценам, указанным на Сайте, и передаёт их Покупателю: доставляет курьером по адресу Покупателя или выдаёт в точке самовывоза. Покупатель оплачивает и принимает Товары на условиях Оферты.</p>\n<p>3.2. Право собственности и риск случайной гибели или повреждения Товаров переходят к Покупателю в момент передачи Товаров.</p>\n<p>3.3. Состав, вес и описание Товаров указаны в карточке Товара на Сайте. Если у Покупателя есть вопросы о Товаре, до оформления Заказа он может задать их по телефону [[телефон]] в часы работы Продавца.</p>\n<p>3.4. Заявка на кейтеринг или банкет, оставленная в разделе <a href=\"/catering/\">«Кейтеринг и банкеты»</a>, Заказом по Оферте не является: формат, меню, стоимость и порядок оплаты мероприятия Продавец согласует с Покупателем отдельно.</p>\n<h2>4. Оформление и подтверждение заказа</h2>\n<p>4.1. Покупатель оформляет Заказ в корзине каталога на Сайте: выбирает Товары, указывает имя и телефон, способ получения (доставка с адресом или самовывоз из точки), желаемое время и даёт согласие на обработку персональных данных. Заказ можно оформить и по телефону.</p>\n<p>4.2. Покупатель указывает достоверные данные, достаточные для исполнения Заказа.</p>\n<p>4.3. Заказу на Сайте присваивается номер. Продавец перезванивает Покупателю, чтобы подтвердить состав Заказа, адрес и время доставки или самовывоза.</p>\n<p>4.4. Заказать можно только Товары, которые есть в наличии в момент оформления. Если какого-то Товара нет в нужном количестве или ассортименте, Продавец сообщает об этом Покупателю до подтверждения Заказа. Покупатель вправе согласиться на другое количество или ассортимент либо отменить Заказ. Если Покупатель не отвечает, Продавец вправе отменить Заказ полностью.</p>\n<p>4.5. Изменить состав Заказа после его подтверждения можно только по согласованию с Продавцом.</p>\n<p>4.6. Продавец вправе временно приостановить приём Заказов из-за технических неполадок или нехватки продуктов для приготовления Товаров.</p>\n<p>4.7. Продавец вправе звонить Покупателю и отправлять сообщения на телефон из Заказа, чтобы подтвердить Заказ и сообщить о ходе его исполнения. Покупатель, вошедший в личный кабинет на Сайте, видит там статус своих Заказов.</p>\n<h2>5. Цена и оплата</h2>\n<p>5.1. Цены Товаров указаны на Сайте в рублях и устанавливаются Продавцом. Цена Товара в оформленном Заказе не меняется.</p>\n<p>5.2. Стоимость доставки в цену Товаров не входит. Она зависит от зоны доставки, в которую попадает адрес, и от суммы Заказа; зоны, стоимость доставки и сумма, от которой доставка бесплатна, указаны на странице <a href=\"/docs/delivery/\">«Доставка и оплата»</a>. Стоимость доставки рассчитывается по адресу при оформлении Заказа и оплачивается вместе с Заказом. Если адрес не удалось определить на карте, стоимость доставки Продавец называет при подтверждении Заказа, а Покупатель оплачивает её при получении.</p>\n<p>5.3. Заказ на Сайте оплачивается онлайн банковской картой, другого способа оплаты Заказа на Сайте нет. После оформления Заказа Покупатель переходит на защищённую страницу платёжного сервиса ЮKassa и вводит данные карты там, Продавцу они не передаются. Одним платежом оплачивается сумма «К оплате»: стоимость Товаров и доставки за вычетом скидок и баллов (п. 5.4). Только стоимость доставки, которую Продавец называет при подтверждении Заказа, оплачивается при получении (п. 5.2).</p>\n<p>5.4. Покупатель, вошедший в личный кабинет, может оплатить часть Заказа баллами программы «Вкусные баллы» по её правилам, опубликованным в личном кабинете. Оплате деньгами подлежит сумма «К оплате» — за вычетом баллов.</p>\n<p>5.5. При онлайн-оплате электронный чек направляется на телефон или электронную почту, указанные при оплате. Если стоимость доставки оплачивается при получении (п. 5.2), кассовый чек на неё Покупатель получает на месте. Покупателю рекомендуется сохранять подтверждение онлайн-оплаты.</p>\n<h2>6. Доставка и самовывоз</h2>\n<p>6.1. Товары доставляются курьером по адресу, указанному в Заказе, или передаются Покупателю в точке самовывоза.</p>\n<p>6.2. Доставка выполняется в пределах зоны доставки и в часы, указанные на странице <a href=\"/docs/delivery/\">«Доставка и оплата»</a>. По адресам вне зоны доставки Товары не доставляются.</p>\n<p>6.3. Доставка выполняется при Заказе на сумму не меньше минимальной для зоны доставки. Минимальную сумму для каждой зоны Продавец устанавливает сам и указывает на странице <a href=\"/docs/delivery/\">«Доставка и оплата»</a>; она и сумма, от которой доставка бесплатна, считаются по стоимости Товаров до скидок и оплаты баллами. Заказ на меньшую сумму можно забрать самовывозом.</p>\n<p>6.4. Время доставки согласуется при звонке и может отличаться от желаемого времени, указанного в Заказе.</p>\n<p>6.5. Продавец вправе отказаться от исполнения договора, если курьер не может передать Товары по вине Покупателя: Покупатель в течение 10 минут не отвечает на звонок или не открывает дверь.</p>\n<h2>7. Отмена заказа и возврат денег</h2>\n<p>7.1. Покупатель вправе отменить Заказ до передачи Товаров, позвонив Продавцу по телефону [[телефон]].</p>\n<p>7.2. Если Заказ оплачен онлайн, Покупатель вправе до передачи Товаров попросить отменить платёж. Решение о возврате денег Продавец принимает с учётом требований законодательства РФ и обстоятельств Заказа.</p>\n<p>7.3. Деньги возвращаются на банковский счёт карты, с которой оплачен Заказ, в течение 5–30 рабочих дней: срок зависит от банка, выпустившего карту.</p>\n<p>7.4. При отмене Заказа баллы, списанные за него, возвращаются на счёт Покупателя в программе «Вкусные баллы», а начисленные за него — списываются.</p>\n<h2>8. Качество, возврат и обмен</h2>\n<p>8.1. Продавец передаёт Покупателю Товары, которые соответствуют Заказу и информации о Товаре на Сайте, на этикетке или упаковке.</p>\n<p>8.2. При получении Покупатель в течение 10 минут проверяет, соответствуют ли Товары Заказу, всё ли на месте и нет ли претензий к внешнему виду.</p>\n<p>8.3. Если Товар некачественный или не соответствует Заказу (например, в нём нет заявленных ингредиентов), Покупатель вправе в течение 5 минут после проверки потребовать заменить его Товаром надлежащего качества, сообщив об этом курьеру, сотруднику точки или по телефону [[телефон]].</p>\n<p>8.4. Товар надлежащего качества возврату и обмену не подлежит.</p>\n<p>8.5. Остальные требования о качестве Товара Покупатель предъявляет в порядке, установленном Законом РФ «О защите прав потребителей».</p>\n<h2>9. Ответственность</h2>\n<p>9.1. Продавец не отвечает за вред, причинённый Покупателю из-за ненадлежащего использования приобретённых Товаров.</p>\n<p>9.2. Продавец не отвечает за убытки Покупателя, возникшие из-за неправильно заполненного Заказа, в том числе неверно указанных данных.</p>\n<p>9.3. Если Покупатель злоупотребляет правами потребителя, например отказывается принять или оплатить заказанный и доставленный Товар, Продавец вправе не принимать от него Заказы в будущем.</p>\n<p>9.4. Стороны освобождаются от ответственности за полное или частичное неисполнение обязательств, если оно вызвано обстоятельствами непреодолимой силы: стихийными бедствиями, пожарами, наводнениями, военными действиями, забастовками и другими событиями, которые стороны не могли предвидеть и предотвратить разумными средствами.</p>\n<h2>10. Персональные данные и споры</h2>\n<p>10.1. Продавец обрабатывает персональные данные Покупателя по <a href=\"/docs/privacy/\">Политике конфиденциальности</a>.</p>\n<p>10.2. Стороны решают споры переговорами. Претензию Покупатель направляет Продавцу по контактам из раздела 11. Спор, который не удалось урегулировать, рассматривается в суде по законодательству Российской Федерации.</p>\n<h2>11. Реквизиты продавца</h2>\n<p>[[реквизиты]]</p>\n<p>[[связь]]</p>",
       "revised": "2026-10-22",
-      "date_updated": "2026-10-20T12:34:31.424Z"
+      "date_updated": "2026-10-22T11:23:29.953Z"
     },
     {
       "id": 2,
@@ -5492,7 +5464,7 @@
       "description": "Зоны и стоимость доставки по Самаре, минимальный заказ, часы 08:00–21:00, самовывоз из двух точек, оплата онлайн картой и баллами, чек и возврат.",
       "body": "<h2>Как заказать</h2>\n<ol>\n<li>Соберите корзину в <a href=\"/catalog/\">каталоге доставки</a>. У тортов и блюд с размерами выберите размер и начинку.</li>\n<li>Оформите заказ: имя, телефон, доставка или самовывоз, время — «как можно скорее» или к определённому часу. Для доставки укажите адрес: корзина сразу посчитает стоимость доставки и сумму к оплате.</li>\n<li>Оплатите заказ картой на защищённой странице ЮKassa — блюда и доставку одним платежом.</li>\n<li>Мы перезвоним и подтвердим состав, адрес и время.</li>\n</ol>\n<p>Можно заказать и по телефону [[телефон]]. Если войти в <a href=\"/account/\">личный кабинет</a> по номеру телефона, за заказы с сайта копятся «Вкусные баллы», а статус заказа виден в кабинете.</p>\n<h2>Доставка по Самаре</h2>\n<p>Курьер привозит заказы ежедневно с 08:00 до 21:00. Стоимость доставки зависит от зоны, в которую попадает адрес, и от суммы блюд в заказе:</p>\n<ul>\n<li><strong>Рядом с нами — Советский, Промышленный, Октябрьский, Кировский</strong><br>доставка 400&nbsp;₽, бесплатно от 7&nbsp;000&nbsp;₽, минимальный заказ 1&nbsp;000&nbsp;₽</li>\n<li><strong>Центр — Ленинский, Самарский, Железнодорожный</strong><br>доставка 600&nbsp;₽, бесплатно от 7&nbsp;000&nbsp;₽, минимальный заказ 1&nbsp;000&nbsp;₽</li>\n<li><strong>Куйбышевский район — Волгарь, Сухая Самарка, 116-й километр</strong><br>доставка 1&nbsp;000&nbsp;₽, бесплатно от 10&nbsp;000&nbsp;₽, минимальный заказ 1&nbsp;000&nbsp;₽</li>\n<li><strong>Красноглинский район, Зубчаниновка, Мехзавод, Крутые Ключи, Кошелев-Парк, Смышляевка</strong><br>доставка 1&nbsp;000&nbsp;₽, бесплатно от 10&nbsp;000&nbsp;₽, минимальный заказ 2&nbsp;500&nbsp;₽</li>\n<li><strong>Дальние посёлки — Курумоч, Новосемейкино, Царевщина, Волжский</strong><br>доставка 2&nbsp;500&nbsp;₽, бесплатно от 30&nbsp;000&nbsp;₽, минимальный заказ 1&nbsp;000&nbsp;₽</li>\n<li><strong>Новокуйбышевск</strong><br>доставка 4&nbsp;000&nbsp;₽, бесплатно от 170&nbsp;000&nbsp;₽, минимальный заказ 2&nbsp;500&nbsp;₽</li>\n</ul>\n<p>Стоимость доставки корзина считает по адресу при оформлении — она оплачивается онлайн вместе с заказом. Бесплатная доставка и минимальный заказ считаются по сумме блюд до скидки и баллов.</p>\n<ul>\n<li>Если сумма меньше минимального заказа зоны, корзина подскажет, сколько добавить, — или выберите самовывоз.</li>\n<li>Если адрес не нашли на карте, заказ всё равно можно отправить: онлайн оплачиваются блюда, а стоимость доставки назовём при звонке и возьмём при доставке.</li>\n<li>Если адрес вне зон доставки, заказ можно забрать самовывозом.</li>\n<li>Время доставки подтвердим при звонке: оно может отличаться от указанного в заказе.</li>\n<li>Курьер ждёт 10 минут: если за это время до вас не дозвониться или вы не открываете дверь, заказ может быть отменён.</li>\n</ul>\n<h2>Самовывоз</h2>\n<p>Заберите заказ в одной из двух наших точек в часы их работы. Самовывоз бесплатный: оплачиваются только блюда. Когда заказ будет готов, скажем при звонке.</p>\n<p>[[точки]]</p>\n<h2>Оплата</h2>\n<p>Заказ с сайта оплачивается онлайн сразу после оформления: блюда и доставка — одним платежом.</p>\n<ul>\n<li><strong>Онлайн картой на сайте.</strong> После оформления заказа откроется защищённая страница платёжного сервиса ЮKassa: данные карты вводятся там, нам они не передаются.</li>\n<li><strong>Баллами.</strong> Гость, который вошёл в личный кабинет, может оплатить баллами часть заказа: сколько можно списать, показывает корзина. Остальное оплачивается картой.</li>\n</ul>\n<p>Исключение — доставка по адресу, который не нашёлся на карте: её стоимость назовём при звонке и возьмём при доставке.</p>\n<h2>Чек</h2>\n<p>Электронный чек за онлайн-оплату приходит от ЮKassa на телефон или почту, указанные при оплате. Если стоимость доставки назвали при звонке и вы оплатили её курьеру, чек на доставку выдаём на месте.</p>\n<h2>Отмена и возврат</h2>\n<ul>\n<li>Отменить заказ можно до того, как его передали вам: позвоните [[телефон]].</li>\n<li>Деньги за онлайн-оплату возвращаются на карту, с которой платили, за 5–30 рабочих дней: срок зависит от банка карты.</li>\n<li>Баллы, списанные за отменённый заказ, возвращаются на ваш счёт.</li>\n<li>Проверьте заказ при получении: всё ли на месте и в порядке ли внешний вид. Если блюдо не то или с ним что-то не так, сразу скажите курьеру или позвоните — заменим.</li>\n<li>Блюда и торты надлежащего качества возврату и обмену не подлежат.</li>\n</ul>\n<p>Подробно порядок отмены, возврата и замены описан в <a href=\"/docs/offer/\">публичной оферте</a>, разделы 7 и 8.</p>\n<h2>Банкеты и кейтеринг</h2>\n<p>Для праздника оставьте заявку в разделе <a href=\"/catering/\">«Кейтеринг и банкеты»</a>: менеджер перезвонит, обсудит формат, меню и смету. Условия оплаты мероприятия согласуем отдельно.</p>",
       "revised": "2026-10-22",
-      "date_updated": "2026-10-20T12:34:31.595Z"
+      "date_updated": "2026-10-22T11:23:30.052Z"
     },
     {
       "id": 3,
@@ -5503,10 +5475,10 @@
       "description": "Какие данные получает сайт vkus-com.ru, зачем, кому их передаём, сколько храним и как отозвать согласие на обработку персональных данных.",
       "body": "<p>Политика объясняет, какие персональные данные получает сайт vkus-com.ru, зачем, кому их передаём, сколько храним и как их удалить или отозвать согласие. Политика действует для всех страниц сайта: каталога доставки, корзины, личного кабинета и раздела «Кейтеринг и банкеты». Она составлена по Федеральному закону от 27.07.2006 № 152-ФЗ «О персональных данных».</p>\n<h2>1. Оператор</h2>\n<p>Оператор персональных данных — индивидуальный предприниматель Стрельникова Екатерина Александровна (далее — Оператор).</p>\n<p>[[реквизиты]]</p>\n<p>Обращения о персональных данных принимаем по этим контактам:</p>\n<p>[[связь]]</p>\n<h2>2. Термины</h2>\n<p>2.1. Персональные данные — любая информация, относящаяся прямо или косвенно к определённому или определяемому физическому лицу (субъекту персональных данных).</p>\n<p>2.2. Обработка персональных данных — любое действие с персональными данными с использованием средств автоматизации или без них: сбор, запись, систематизация, накопление, хранение, уточнение, извлечение, использование, передача, обезличивание, блокирование, удаление, уничтожение.</p>\n<p>2.3. Пользователь — человек, который пользуется сайтом vkus-com.ru.</p>\n<p>2.4. Cookie и локальное хранилище — небольшие фрагменты данных, которые сайт сохраняет в браузере Пользователя, чтобы помнить корзину, черновики форм и вход в личный кабинет.</p>\n<p>2.5. IP-адрес — сетевой адрес устройства, с которого Пользователь открывает сайт.</p>\n<h2>3. Какие данные мы получаем</h2>\n<p>Только те, что Пользователь сам указывает в формах сайта, и технические данные, без которых сайт не работает.</p>\n<ul>\n<li><strong>Заказ в каталоге доставки</strong>: имя, телефон, способ получения, адрес доставки с подъездом, этажом и квартирой, желаемое время, комментарий, состав и сумма заказа.</li>\n<li><strong>Личный кабинет и «Вкусные баллы»</strong>: телефон, по которому Пользователь входит по коду; фамилия, имя, отчество, дата рождения, пол и почта для восстановления, если Пользователь их указал; история заказов и операций с баллами.</li>\n<li><strong>Заявка на кейтеринг или банкет</strong>: имя, телефон, дата мероприятия, число гостей, формат, зал или адрес, пожелания.</li>\n<li><strong>Онлайн-оплата</strong>: номер и сумма заказа, статус платежа. Данные банковской карты Пользователь вводит на странице платёжного сервиса ЮKassa, Оператору они не передаются.</li>\n<li><strong>Технические данные</strong>: IP-адрес и данные в cookie и локальном хранилище браузера.</li>\n</ul>\n<p>Сайт не запрашивает специальные категории персональных данных (о здоровье, убеждениях и т. п.) и биометрические данные.</p>\n<h2>4. Цели обработки</h2>\n<ul>\n<li>оформить, подтвердить, приготовить, доставить или выдать заказ, связаться с Пользователем по заказу;</li>\n<li>принять онлайн-оплату, сделать возврат, выдать кассовый чек;</li>\n<li>пустить Пользователя в личный кабинет по коду из SMS или звонка, вести программу «Вкусные баллы»: начислять и списывать баллы, считать уровень, дарить баллы ко дню рождения. Дата рождения нужна только для подарка ко дню рождения;</li>\n<li>обработать заявку на кейтеринг или банкет: перезвонить, обсудить формат и смету;</li>\n<li>отвечать на обращения и претензии Пользователя;</li>\n<li>защищать сайт от мошенничества и злоупотреблений: ограничивать число заказов, заявок и кодов входа с одного адреса;</li>\n<li>находить и исправлять технические сбои, вести обезличенную статистику посещений.</li>\n</ul>\n<p>Рекламные рассылки Оператор отправляет только с отдельного согласия Пользователя. Сейчас сайт рекламу не рассылает.</p>\n<h2>5. Правовые основания</h2>\n<p>Оператор обрабатывает персональные данные на основании согласия Пользователя (отметка «Согласен на обработку персональных данных» в форме заказа, заявки или входа в кабинет) и для исполнения договора, стороной которого является Пользователь, — <a href=\"/docs/offer/\">публичной оферты</a>.</p>\n<h2>6. Как обрабатываем и кому передаём</h2>\n<p>6.1. Данные обрабатываются с использованием средств автоматизации и без них. Доступ к ним есть только у сотрудников, которым он нужен для работы, по личным учётным записям. Сайт и обмен данными с ним защищены шифрованием (HTTPS).</p>\n<p>6.2. Оператор передаёт данные третьим лицам только в объёме, нужном для цели:</p>\n<ul>\n<li>курьерам и курьерским службам — имя, телефон и адрес, чтобы доставить заказ;</li>\n<li>оператору SMS-рассылки (SMS Aero) и операторам связи — телефон, чтобы отправить код входа в личный кабинет;</li>\n<li>платёжному сервису ЮKassa — номер и сумму заказа, а для электронного чека — телефон или почту;</li>\n<li>хостинг-провайдеру, на сервере которого работают сайт и база данных.</li>\n</ul>\n<p>6.3. Уведомления о новых заказах и заявках (номер, имя, телефон, адрес, состав) приходят сотрудникам Оператора на рабочую почту и в рабочий чат в мессенджере Telegram.</p>\n<p>6.4. Государственным органам данные передаются только по основаниям и в порядке, установленным законодательством РФ.</p>\n<p>6.5. Оператор не продаёт и не публикует персональные данные Пользователей.</p>\n<p>6.6. Если персональные данные утрачены или разглашены, Оператор сообщает об этом Пользователю и принимает меры, чтобы предотвратить отрицательные последствия.</p>\n<h2>7. Сроки хранения</h2>\n<p>7.1. Данные хранятся, пока это нужно для целей обработки, или до отзыва согласия, если более долгий срок не требует закон (например, для бухгалтерских документов).</p>\n<p>7.2. Коды входа в личный кабинет удаляются через двое суток. Профиль личного кабинета хранится, пока Пользователь им пользуется или пока он не попросит его удалить.</p>\n<h2>8. Cookie и локальное хранилище</h2>\n<p>8.1. Сайт хранит в браузере корзину и черновик заказа, черновик заявки на кейтеринг, ключ входа в личный кабинет (он действует 30 дней) и состояние онлайн-оплаты. Без этого корзина и вход в кабинет не работают.</p>\n<p>8.2. Если на сайте подключена Яндекс Метрика, она получает обезличенные сведения о посещениях: просмотренные страницы, тип устройства и браузера, примерное местоположение по IP-адресу. Сведения нужны для статистики; данные обрабатывает ООО «Яндекс» по своей политике конфиденциальности.</p>\n<p>8.3. Отключить cookie и очистить хранилище можно в настройках браузера. Тогда корзина, черновики и вход в кабинет перестанут сохраняться.</p>\n<h2>9. Права Пользователя</h2>\n<p>9.1. Пользователь вправе получить сведения об обработке своих персональных данных, потребовать уточнить, заблокировать или удалить их, если они неполные, устаревшие, неточные или обрабатываются незаконно, отозвать согласие на обработку и обжаловать действия Оператора в Роскомнадзоре или в суде.</p>\n<p>9.2. Чтобы воспользоваться правом, Пользователь направляет обращение по контактам Оператора из раздела 1. Отзыв согласия отправляется с пометкой «Отзыв согласия на обработку персональных данных». Оператор отвечает в течение 10 рабочих дней с момента получения обращения.</p>\n<p>9.3. После отзыва согласия Оператор прекращает обработку и удаляет данные в течение 30 дней, если нет других законных оснований их хранить.</p>\n<p>9.4. Имя, отчество, фамилию, пол и почту Пользователь может исправить сам во вкладке «Профиль» личного кабинета. Телефон для входа и дату рождения исправит сотрудник по звонку Пользователя.</p>\n<h2>10. Обязанности Пользователя</h2>\n<p>Пользователь указывает достоверные данные, обновляет их, если они изменились, и не указывает данные других людей без их согласия.</p>\n<h2>11. Изменения политики</h2>\n<p>Оператор вправе изменять политику. Новая редакция действует с момента публикации на этой странице, если в ней не сказано иное; дата редакции указана вверху страницы.</p>",
       "revised": "2026-10-20",
-      "date_updated": "2026-10-20T12:34:31.645Z"
+      "date_updated": null
     },
     {
-      "id": 5,
+      "id": 4,
       "status": "published",
       "sort": 4,
       "slug": "requisites",
