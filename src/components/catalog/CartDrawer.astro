@@ -20,6 +20,7 @@ import PayStep from './PayStep.astro';
 import HelpLine from './HelpLine.astro';
 import { hoursRows } from '../../data/site.ts';
 import type { Content } from '../../lib/content.ts';
+import { typo } from '../../lib/content.ts';
 import { DOC, docHref } from '../../lib/pages.ts';
 import { CART_NOTE } from '../../lib/delivery.ts';
 
@@ -130,6 +131,29 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
             />
             <p class="field__hint" id="co-phone-hint">Перезвоним на него, чтобы подтвердить заказ</p>
             <p class="field__err" id="co-phone-err" data-err="phone" hidden></p>
+          </div>
+          {/* The mail for the ЮKassa receipt: optional, shown by the payment
+              script only while online payment is on — with no online payment
+              there is no receipt to send. Russian mail only, as in the account.
+              Почта для чека ЮKassa: необязательна, скрипт оплаты показывает её,
+              только пока включена онлайн-оплата, — без неё чека не будет.
+              Только российская почта, как в кабинете. */}
+          <div class="field" data-receipt-email hidden>
+            <label for="co-email">E-mail для чека <span class="field__opt">необязательно</span></label>
+            <input
+              id="co-email"
+              name="email"
+              type="email"
+              inputmode="email"
+              autocomplete="email"
+              autocapitalize="off"
+              spellcheck="false"
+              maxlength="120"
+              placeholder="name@mail.ru"
+              aria-describedby="co-email-hint co-email-err"
+            />
+            <p class="field__hint" id="co-email-hint">{typo('Чек об оплате придёт на почту. Без почты — смской на телефон')}</p>
+            <p class="field__err" id="co-email-err" data-err="email" hidden></p>
           </div>
         </fieldset>
 

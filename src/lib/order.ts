@@ -8,6 +8,7 @@
  */
 import type { Cart, CartIndex } from './cart.ts';
 import { priced } from './cart.ts';
+import { RU_MAIL_ERROR, emailDomain, isRuEmail } from './email.ts';
 
 export const CHECKOUT_KEY = 'vk-checkout-v1';
 
@@ -16,6 +17,8 @@ export type Fulfillment = 'delivery' | 'pickup';
 export type CheckoutForm = {
   name: string;
   phone: string;
+  /** почта для чека ЮKassa — необязательна; пусто — чек на телефон */
+  email?: string;
   fulfillment: Fulfillment;
   /** id точки самовывоза */
   place?: number | null;
@@ -50,6 +53,8 @@ export type OrderPayload = {
   number: string;
   customer_name: string;
   phone: string;
+  /** почта для чека; без почты поле не шлётся вовсе */
+  email?: string;
   fulfillment: Fulfillment;
   place: number | null;
   address: string | null;
@@ -135,7 +140,33 @@ export const maskPhone = (value: string) => {
   return out;
 };
 
-export type Errors = Partial<Record<'name' | 'phone' | 'address' | 'place' | 'time' | 'consent', string>>;
+export type Errors = Partial<Record<'name' | 'phone' | 'email' | 'address' | 'place' | 'time' | 'consent', string>>;
+
+// ── the mail for the receipt / почта для чека ──
+
+/** Предел длины почты — тот же, что у `maxlength` поля, у кабинета и у сервера (`order-guard`). */
+export const EMAIL_MAX = 120;
+
+/**
+ * The mail for the ЮKassa receipt as the order sends it: trimmed, lower case;
+ * empty — `null`. Whether it is taken is `emailError`'s business.
+ * Почта для чека ЮKassa в том виде, в каком уходит в заказ: без пробелов по
+ * краям, строчными; пусто — `null`. Подходит ли она — решает `emailError`.
+ */
+export const receiptEmail = (value: string | null | undefined) => String(value ?? '').trim().toLowerCase() || null;
+
+/**
+ * Why the mail is refused, or `null` when it fits or is empty — the account's
+ * rules (`profileErrors`): a broken address first, then Russian mail only.
+ * Почему почта не подходит, или `null`, если подходит или пуста, — правила
+ * кабинета (`profileErrors`): сначала кривой адрес, затем только российская почта.
+ */
+export const emailError = (value: string | null | undefined) => {
+  const email = receiptEmail(value);
+  if (!email) return null;
+  if (email.length > EMAIL_MAX || !emailDomain(email)) return 'Проверьте адрес: name@mail.ru';
+  return isRuEmail(email) ? null : RU_MAIL_ERROR;
+};
 
 /** Ошибки формы по полям; пустой объект — можно отправлять. */
 export const validate = (form: CheckoutForm): Errors => {
@@ -143,6 +174,8 @@ export const validate = (form: CheckoutForm): Errors => {
   if (!form.name.trim()) errors.name = 'Как к вам обращаться?';
   if (!form.phone.replace(/\D/g, '')) errors.phone = 'Нужен телефон: по нему подтвердим заказ';
   else if (!normalizePhone(form.phone)) errors.phone = 'Проверьте номер: 10 цифр после +7';
+  const email = emailError(form.email);
+  if (email) errors.email = email;
   if (form.fulfillment === 'delivery' && (form.address ?? '').trim().length < 5)
     errors.address = 'Укажите улицу и дом, куда привезти';
   if (form.fulfillment === 'pickup' && !form.place) errors.place = 'Выберите, откуда заберёте';
@@ -348,10 +381,16 @@ export const orderNumber = (now: Date, random: number) => {
 export const buildOrder = (cart: Cart, index: CartIndex, form: CheckoutForm, number: string): OrderPayload => {
   const { lines, total } = priced(cart, index);
   const delivery = form.fulfillment === 'delivery';
+  // no mail — no key at all: the order goes through even where the public
+  // role has no right on `email` yet
+  // нет почты — нет и ключа: заказ проходит даже там, где у публичной роли
+  // ещё нет права на `email`
+  const email = receiptEmail(form.email);
   return {
     number,
     customer_name: form.name.trim(),
     phone: normalizePhone(form.phone) ?? form.phone.trim(),
+    ...(email && { email }),
     fulfillment: form.fulfillment,
     place: delivery ? null : (form.place ?? null),
     address: delivery ? (form.address ?? '').trim() : null,

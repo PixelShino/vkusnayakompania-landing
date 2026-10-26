@@ -1,0 +1,11 @@
+# vkusnayakompania.ru (old catering site, WordPress) → vkus-com.ru. Everything else → /catering/.
+# vkusnayakompania.ru (старый сайт кейтеринга, WordPress) → vkus-com.ru. Всё остальное → /catering/.
+"/" "/catering/";
+"/services" "/catering/services/";
+"/services/" "/catering/services/";
+"/faq" "/catering/faq/";
+"/faq/" "/catering/faq/";
+"/contacts" "/#contacts";
+"/contacts/" "/#contacts";
+"/about" "/#about";
+"/about/" "/#about";

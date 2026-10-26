@@ -1,7 +1,8 @@
 /**
  * «Вкусные баллы» in the cart drawer. Signed out — the pitch and «Войти по
  * номеру» that opens the sign-in as a step of the drawer; signed in — the
- * name and the phone go into the form, the balance is fetched, the slider
+ * name, the phone and the mail for the receipt go into the form, the balance
+ * is fetched, the slider
  * and the number field «Списать баллы» stay within what the server allows
  * (the balance, the programme's share of the order after the birthday
  * discount). The footer's bill gets the rows of what is taken off (the bill
@@ -13,8 +14,8 @@
  * drawer step, the cart total, the address fields, the order, a refused
  * token, the receipt.
  * «Вкусные баллы» в выдвижной корзине. Не вошёл — приглашение и «Войти по
- * номеру», которое открывает вход шагом корзины; вошёл — имя и телефон
- * встают в форму, баланс подтягивается, ползунок и поле «Списать баллы»
+ * номеру», которое открывает вход шагом корзины; вошёл — имя, телефон и
+ * почта для чека встают в форму, баланс подтягивается, ползунок и поле «Списать баллы»
  * держатся в пределах, которые разрешит сервер (баланс, доля программы от
  * заказа после скидки именинника). В счёт подвала встают строки того, что
  * вычтено (сам счёт — блюда, доставка, к оплате — ведёт `catalog.ts`, ему
@@ -41,6 +42,7 @@ import {
 import { accrualFor, birthdayDiscountFor, dayOf, maxSpend, points, type Program } from '../lib/loyalty';
 import { rub } from '../lib/catalog';
 import { maskPhone } from '../lib/order';
+import { isRuEmail } from '../lib/email';
 import { clearSession, loadSession, onSessionChange } from './account-session';
 import { mountLogin } from './account-login';
 
@@ -303,17 +305,24 @@ export const mountCartAccount = ({
     }
   };
 
-  // the name and the phone of the guest go where they are empty — what was typed stays;
-  // the first saved address goes to an empty delivery address — a draft or the guest's own choice comes first
-  // имя и телефон гостя встают туда, где пусто, — набранное остаётся; первый сохранённый
-  // адрес встаёт в пустой адрес доставки — черновик или выбор самого гостя важнее
+  // the name, the phone and the account's mail (for the receipt) go where they are empty —
+  // what was typed stays; the first saved address goes to an empty delivery address — a
+  // draft or the guest's own choice comes first
+  // имя, телефон и почта кабинета (для чека) встают туда, где пусто, — набранное остаётся;
+  // первый сохранённый адрес встаёт в пустой адрес доставки — черновик или выбор самого
+  // гостя важнее
   const prefill = () => {
     if (!me) return;
     const name = form.elements.namedItem('name') as HTMLInputElement | null;
     const phone = form.elements.namedItem('phone') as HTMLInputElement | null;
+    const email = form.elements.namedItem('email') as HTMLInputElement | null;
     const full = displayName(me.profile);
     if (name && !name.value.trim() && full) name.value = full;
     if (phone && phone.value.replace(/\D/g, '').length <= 1) phone.value = maskPhone(me.profile.phone);
+    // only a mail the order would take: an old non-Russian one would greet the guest with an error
+    // только почта, которую примет заказ: старая нероссийская встретила бы гостя ошибкой
+    const mail = me.profile.recovery_email?.trim().toLowerCase();
+    if (email && !email.value.trim() && mail && isRuEmail(mail)) email.value = mail;
 
     const list = me.profile.addresses;
     saved = Array.isArray(list) ? list : [];

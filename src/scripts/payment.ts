@@ -61,6 +61,9 @@ const esc = (text: string) =>
 const drawer = document.getElementById('cart') as HTMLDialogElement | null;
 const step = drawer?.querySelector<HTMLElement>('[data-pay-step]') ?? null;
 const choice = drawer?.querySelector<HTMLFieldSetElement>('[data-pay-choice]') ?? null;
+// «E-mail для чека» in the contacts: shown with the choice — no online payment, no receipt
+// «E-mail для чека» в контактах: видно вместе с выбором — нет онлайн-оплаты, нет и чека
+const receiptMail = drawer?.querySelector<HTMLElement>('[data-receipt-email]') ?? null;
 const api = step?.dataset.payApi ?? '';
 
 let config: PayConfig = parsePayConfig(null);
@@ -109,6 +112,7 @@ if (submitLabel) new MutationObserver(paintLabel).observe(submitLabel, { childLi
 const offer = (next: PayConfig) => {
   config = next;
   offered = Boolean(choice) && next.online && (!next.test || tester());
+  if (receiptMail) receiptMail.hidden = !offered;
   if (!choice) return;
   choice.hidden = !offered;
   if (!offered) return;

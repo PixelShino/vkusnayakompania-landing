@@ -12455,6 +12455,53 @@ fields:
       foreign_key_table: null
       foreign_key_column: null
   - collection: orders
+    field: email
+    type: string
+    meta:
+      collection: orders
+      conditions: null
+      display: null
+      display_options: null
+      field: email
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Гость указывает её в корзине, по желанию. Чек ЮKassa об онлайн-оплате
+        уходит на эту почту, а если она пуста — смской на телефон
+      options:
+        iconLeft: alternate_email
+        placeholder: name@mail.ru
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 8
+      special: null
+      translations:
+        - language: ru-RU
+          translation: E-mail для чека
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: email
+      table: orders
+      data_type: character varying
+      default_value: null
+      max_length: 120
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: orders
     field: fulfillment
     type: string
     meta:

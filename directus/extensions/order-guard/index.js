@@ -41,11 +41,23 @@
  * `address_entrance`, `address_floor`, `address_intercom`; старое однострочное
  * `address_details` от старой страницы по-прежнему принимается.
  *
+ * The mail for the receipt (since 26.10.2026): `email` is optional; when given
+ * it is trimmed, lower-cased and must be a Russian mail service — the list of
+ * `../email-guard/domains.js`, the same as the account's. The `pay` extension
+ * hands it to ЮKassa as `receipt.customer.email`; empty — the order carries no
+ * `email` at all, the receipt goes to the phone.
+ * Почта для чека (с 26.10.2026): `email` необязательна; если есть — без
+ * пробелов по краям, строчными и только российская почтовая служба (список
+ * `../email-guard/domains.js`, тот же, что у кабинета). Расширение `pay`
+ * передаёт её ЮKassa как `receipt.customer.email`; пусто — в заказе нет
+ * `email` вовсе, чек уходит на телефон.
+ *
  * No build step: this file is the extension. / Без сборки: этот файл и есть расширение.
  */
 import { deliveryCost, minOrderError, normalizeAddress, quote, toZones } from '../delivery/geo.js';
 import { geocoder } from '../delivery/photon.js';
 import { ADDRESS_PARTS, addressLine } from '../notify/lib.js';
+import { isRuEmail } from '../email-guard/domains.js';
 
 const LIMITS = {
   lines: 40,
@@ -62,6 +74,9 @@ const LIMITS = {
   details: 120,
   when: 80,
   comment: 1000,
+  // the mail for the receipt, as the form's `maxlength` and the account
+  // почта для чека, как `maxlength` формы и кабинет
+  email: 120,
 };
 // one visitor, ten minutes, six orders: enough for a mistake and a retry,
 // too few for a script
@@ -138,6 +153,25 @@ const freshNumber = () => {
 // гость, вошедший на сайте (расширение `guest-auth`), несёт эту роль
 const GUEST_ROLE = 'Гость';
 
+// what the guest reads when the mail for the receipt is refused
+// что читает гость, когда почту для чека не приняли
+export const EMAIL_ERROR =
+  'E-mail для чека: подойдёт российская почта — mail.ru, yandex.ru, rambler.ru, vk.com… Или оставьте поле пустым: чек придёт смской на телефон.';
+
+/**
+ * The mail for the receipt as the order keeps it: trimmed, lower case; empty
+ * or not a string — `null`; a broken, too long or non-Russian one — `false`.
+ * Почта для чека, как её хранит заказ: без пробелов по краям, строчными; пусто
+ * или не строка — `null`; кривая, слишком длинная или нероссийская — `false`.
+ * @param {unknown} value
+ * @returns {string | null | false}
+ */
+export const receiptEmail = (value) => {
+  const email = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  if (!email) return null;
+  return email.length <= LIMITS.email && isRuEmail(email) ? email : false;
+};
+
 // what the manager reads when the address gave no zone / что читает менеджер, когда зоны по адресу нет
 export const NOTE_NOT_FOUND = 'Адрес не найден на карте — стоимость доставки назвать при звонке.';
 export const NOTE_OUTSIDE = 'Адрес вне зон доставки — предложить самовывоз или назвать стоимость при звонке.';
@@ -188,6 +222,21 @@ export default ({ filter, action }, { services, logger, emitter = null, database
     }
   };
 
+  // a page that sends the mail before `schema apply` made the column: the mail
+  // is dropped (the receipt goes to the phone), the order is not lost; once in the log
+  // страница шлёт почту раньше, чем `schema apply` завёл колонку: почта
+  // отбрасывается (чек уйдёт на телефон), заказ не теряется; в логе один раз
+  let emailColumnWarned = false;
+  const emailColumn = (schema) => {
+    const fields = schema?.collections?.orders?.fields;
+    if (!fields || fields.email) return true;
+    if (!emailColumnWarned) {
+      emailColumnWarned = true;
+      logger.warn('order-guard: в orders нет поля email — почта для чека отброшена. Примените directus/snapshot.yaml (schema apply)');
+    }
+    return false;
+  };
+
   filter('orders.items.create', async (payload, _meta, { accountability, database, schema }) => {
     // editors entering a phone order and internal calls pass as they are; a
     // guest signed in on the site is checked like the public and owns the order
@@ -203,6 +252,8 @@ export default ({ filter, action }, { services, logger, emitter = null, database
     if (!name) throw new OrderError('Укажите имя.');
     const phone = normalizePhone(payload.phone);
     if (!phone) throw new OrderError('Телефон не похож на российский номер.');
+    const email = receiptEmail(payload.email);
+    if (email === false) throw new OrderError(EMAIL_ERROR);
     if (payload.consent !== true) throw new OrderError('Нужно согласие на обработку данных.');
 
     const fulfillment = payload.fulfillment === 'pickup' ? 'pickup' : payload.fulfillment === 'delivery' ? 'delivery' : null;
@@ -335,6 +386,12 @@ export default ({ filter, action }, { services, logger, emitter = null, database
       source: 'site',
       customer_name: name,
       phone,
+      // only a filled mail: an empty one stays the column's null, so an order
+      // without it goes through even before `pnpm setup` gave the public role
+      // the field
+      // только заполненная почта: пустая остаётся null колонки, поэтому заказ
+      // без неё проходит и до того, как `pnpm setup` дал публичной роли поле
+      ...(email && emailColumn(schema) ? { email } : {}),
       fulfillment,
       place,
       address: fulfillment === 'delivery' ? address : null,

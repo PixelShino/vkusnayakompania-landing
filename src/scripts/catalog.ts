@@ -506,9 +506,15 @@ if (dataNode && drawer && dishDialog) {
   // (`saved_address`, `save_address`, `save_label*`) never reach the order or the draft
   // только поля самого заказа: поля кабинета в той же форме
   // (`saved_address`, `save_address`, `save_label*`) не попадают ни в заказ, ни в черновик
+  // the mail for the receipt counts only while its field is shown — with
+  // online payment on (`payment.ts`); a hidden one is neither checked nor sent
+  // почта для чека считается, только пока её поле видно — при включённой
+  // онлайн-оплате (`payment.ts`); скрытую не проверяем и не отправляем
+  const emailBox = $('[data-receipt-email]', form);
   const read = (): CheckoutForm => ({
     name: field('name')?.value ?? '',
     phone: field('phone')?.value ?? '',
+    email: emailBox && !emailBox.hidden ? (field('email')?.value ?? '') : '',
     fulfillment: radio('fulfillment') === 'pickup' ? 'pickup' : 'delivery',
     place: Number(radio('place')) || null,
     address: field('address')?.value ?? '',
@@ -997,7 +1003,7 @@ if (dataNode && drawer && dishDialog) {
 
   // the contact part of the form is remembered for the next order on this device
   // контактная часть формы запоминается для следующего заказа на этом устройстве
-  const DRAFT_FIELDS = ['name', 'phone', 'address', 'flat', 'entrance', 'floor', 'intercom'] as const;
+  const DRAFT_FIELDS = ['name', 'phone', 'email', 'address', 'flat', 'entrance', 'floor', 'intercom'] as const;
   // words of an old draft that fit no field wait in the comment, and in the
   // draft too, until the order leaves or the guest erases them
   // слова старого черновика, не подошедшие ни к одному полю, ждут в комментарии
@@ -1011,6 +1017,9 @@ if (dataNode && drawer && dishDialog) {
       JSON.stringify({
         name: data.name,
         phone: data.phone,
+        // as typed, even while the field is hidden: online payment may come back on
+        // как набрана, даже пока поле скрыто: онлайн-оплату могут снова включить
+        email: field('email')?.value ?? '',
         address: data.address,
         flat: data.flat,
         entrance: data.entrance,
@@ -1068,6 +1077,7 @@ if (dataNode && drawer && dishDialog) {
   const ERROR_FIELD: Record<keyof Errors, string> = {
     name: 'name',
     phone: 'phone',
+    email: 'email',
     address: 'address',
     place: 'place',
     time: 'time',
@@ -1171,7 +1181,14 @@ if (dataNode && drawer && dishDialog) {
     // paid online — the receipt from ЮKassa follows; otherwise payment is settled on the call
     // оплачено онлайн — следом чек от ЮKassa; иначе оплату согласуют при звонке
     if (after)
-      after.textContent = bill.cost === null ? 'Стоимость доставки назовём там же.' : paysOnline() ? 'Чек придёт на почту или телефон.' : 'Оплату обсудим там же.';
+      after.textContent =
+        bill.cost === null
+          ? 'Стоимость доставки назовём там же.'
+          : paysOnline()
+            ? sent.email
+              ? `Чек придёт на ${sent.email}.`
+              : 'Чек придёт смской на телефон.'
+            : 'Оплату обсудим там же.';
     // where and when, as they left: the guest checks them before the call, the manager says the same
     // куда и когда — как ушло: гость сверяет до звонка, менеджер назовёт то же
     const where = $('[data-done-where]', drawer);
