@@ -134,6 +134,13 @@ assert.ok(tg.includes('Иван &lt;b&gt;Петров&lt;/b&gt;'), 'имя го�
 assert.ok(tg.includes('Позвоните за час &amp; не стучите'));
 assert.ok(tg.includes('Доставка: ул. Ленина, 1, кв. 5, домофон 5'));
 assert.ok(tg.includes(`<a href="${URL}">Открыть в админке</a>`));
+// the mail for the receipt stays in the admin card: not in Telegram, not in the letter
+// почта для чека остаётся в карточке админки: ни в Telegram, ни в письме
+{
+  const mailed = orderModel({ ...order, email: 'anna@mail.ru' }, { adminUrl: URL });
+  assert.equal(telegramText(mailed), tg, 'Telegram без почты гостя');
+  assert.ok(!emailText(mailed).includes('anna@mail.ru'), 'письмо без почты гостя');
+}
 const huge = telegramText(orderModel({ ...order, comment: 'очень длинно '.repeat(800) }, { adminUrl: URL }));
 assert.ok(huge.length <= 4096, `длина ${huge.length}`);
 assert.ok(huge.endsWith('</a>'), 'ссылка в админку не отрезана');

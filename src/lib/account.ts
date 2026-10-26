@@ -88,6 +88,8 @@ export type Order = {
   comment?: string | null;
   customer_name?: string | null;
   phone?: string | null;
+  /** почта для чека ЮKassa — с 26.10.2026; пусто — чек ушёл на телефон */
+  email?: string | null;
   payment_method?: 'online' | 'on_delivery' | string | null;
   payment_status?: 'none' | 'pending' | 'paid' | 'failed' | 'refunded' | string | null;
   payment_test?: boolean | null;
@@ -445,13 +447,15 @@ export const placeText = (place: PickupPlace | undefined) => {
 /**
  * Everything the full card of an order shows, counted from the order itself:
  * the dishes, the bill row by row (the same rows as «Заказ принят»), where
- * and when, the comment, who receives it, the payment and the status history.
+ * and when, the comment, who receives it, where the receipt goes, the payment
+ * and the status history.
  * An order from before the history was kept gets the server's own rule:
  * «Принят» at its time, then its status with no time.
  * Всё, что показывает карточка заказа целиком, из самого заказа: блюда, счёт
  * строками (те же строки, что на «Заказ принят»), куда и когда, комментарий,
- * получатель, оплата и история статусов. Заказу из времени до истории — то же
- * правило, что у сервера: «Принят» его временем, затем статус без времени.
+ * получатель, куда уходит чек, оплата и история статусов. Заказу из времени
+ * до истории — то же правило, что у сервера: «Принят» его временем, затем
+ * статус без времени.
  */
 export const orderCard = (order: Order, places: PickupPlace[], today: string) => {
   const pickup = order.fulfillment === 'pickup';
@@ -478,6 +482,12 @@ export const orderCard = (order: Order, places: PickupPlace[], today: string) =>
     : { label: 'Куда', value: orderAddress(order) || 'адрес уточним при звонке', note: zone ? `Зона доставки: ${zone}` : null };
 
   const who = [order.customer_name?.trim(), order.phone ? maskPhone(order.phone) : null].filter(Boolean).join(' · ') || null;
+  // where the ЮKassa receipt goes: only a mail the guest gave, and not for a
+  // payment on delivery — there the bank sends no receipt
+  // куда уходит чек ЮKassa: только почта, которую дал гость, и не при оплате
+  // при получении — тогда банк чек не присылает
+  const mail = order.email?.trim();
+  const receipt = mail && order.payment_method !== 'on_delivery' ? `на почту ${mail}` : null;
 
   // the payment: a word for the state only when it says something — an order
   // paid on delivery has no state of its own until the bank is involved
@@ -517,6 +527,7 @@ export const orderCard = (order: Order, places: PickupPlace[], today: string) =>
     when: order.desired_time?.trim() || null,
     comment: order.comment?.trim() || null,
     who,
+    receipt,
     pay,
     history,
   };

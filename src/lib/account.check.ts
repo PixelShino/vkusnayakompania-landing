@@ -256,6 +256,13 @@ assert.equal(profileErrors({ recovery_email: 'anna@' }, '2026-10-19').recovery_e
   assert.deepEqual(orderCard({ ...base, history: [{ status: 'new', at: base.date_created }, { status: 'done', at: null }] }, places, today).history.at(-1), { status: 'done', label: 'Выполнен', at: null });
   assert.equal(payLabel({ status: 'cancelled', payment_status: 'refunded' }), 'Итого');
   assert.equal(payLabel({ status: 'new', payment_status: null }), 'К оплате');
+  // чек: строка только с почтой гостя; без почты, со старым ответом `/me` и при оплате при получении — нет
+  // the receipt: a row only with the guest's mail; none without it, from an older `/me` or paid on delivery
+  assert.equal(orderCard({ ...base, email: ' anna@mail.ru ' }, places, today).receipt, 'на почту anna@mail.ru');
+  assert.equal(card.receipt, null, 'старый ответ без поля email');
+  assert.equal(orderCard({ ...base, email: null }, places, today).receipt, null);
+  assert.equal(orderCard({ ...base, email: '   ' }, places, today).receipt, null);
+  assert.equal(orderCard({ ...base, email: 'anna@mail.ru', payment_method: 'on_delivery' }, places, today).receipt, null, 'при получении чек ЮKassa не уходит');
 }
 
 // ── points × online payment and notifications / баллы × онлайн-оплата и оповещения

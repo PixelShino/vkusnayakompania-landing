@@ -308,6 +308,7 @@ if (node) {
       card.when ? fact('Когда', esc(card.when)) : '',
       card.comment ? fact('Комментарий', esc(typo(card.comment))) : '',
       card.who ? fact('Получатель', `<span class="tnum">${esc(card.who)}</span>`) : '',
+      card.receipt ? fact('Чек', esc(card.receipt)) : '',
       pay ? fact('Оплата', `<span class="acc-pay__line">${pay}</span>`) : '',
     ].join('');
     const history = card.history

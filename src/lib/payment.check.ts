@@ -761,4 +761,156 @@ assert.deepEqual(site.DEFAULT_TEXTS, core.DEFAULT_TEXTS, 'тексты по ум
   assert.deepEqual(await hooks['orders.items.update'](forged, {}, { accountability: null }), forged, 'сам сервер пишет всё');
 }
 
+// ── почта для чека: форма → заказ (order-guard) → чек ЮKassa (pay) ──────────
+// the mail for the receipt: the form → the order (order-guard) → the ЮKassa receipt (pay)
+{
+  type Row = Record<string, any>;
+  const { buildOrder, emailError, receiptEmail, validate } = await import('./order.ts');
+  const { RU_MAIL_ERROR } = await import('./email.ts');
+
+  // форма: необязательна, только российская почта, как в кабинете; уходит строчными, пустая — не уходит
+  const form = { name: 'Анна', phone: '9879552565', fulfillment: 'pickup' as const, place: 1, when: 'asap' as const, consent: true };
+  assert.deepEqual(validate(form), {}, 'без почты — можно отправлять');
+  assert.deepEqual(validate({ ...form, email: '   ' }), {});
+  assert.deepEqual(validate({ ...form, email: ' Anna@Mail.RU ' }), {});
+  assert.equal(validate({ ...form, email: 'anna@gmail.com' }).email, RU_MAIL_ERROR);
+  assert.equal(validate({ ...form, email: 'anna@' }).email, 'Проверьте адрес: name@mail.ru');
+  assert.equal(emailError(`${'a'.repeat(120)}@mail.ru`), 'Проверьте адрес: name@mail.ru', 'длиннее 120 знаков');
+  assert.deepEqual(Object.keys(validate({ ...form, name: '', email: 'x@gmail.com' })), ['name', 'email'], 'ошибки в порядке полей формы');
+  assert.equal(receiptEmail(' Anna@Mail.RU '), 'anna@mail.ru');
+  assert.equal(receiptEmail(''), null);
+  const empty = { v: 1 as const, lines: [] };
+  assert.equal(buildOrder(empty, new Map(), { ...form, email: ' Anna@Mail.RU ' }, '2610-1000').email, 'anna@mail.ru');
+  assert.ok(!('email' in buildOrder(empty, new Map(), form, '2610-1001')), 'без почты ключа нет — заказ проходит и без права на поле');
+  assert.ok(!('email' in buildOrder(empty, new Map(), { ...form, email: '  ' }, '2610-1002')));
+
+  // сервер: те же правила, понятная причина в 400, пусто — поля нет
+  const fakeDb = (tables: Record<string, Row[]>) => (name: string) => {
+    let rows = [...(tables[name] ?? [])];
+    const query = {
+      where(match: Row) {
+        rows = rows.filter((row) => Object.entries(match).every(([key, value]) => row[key] === value));
+        return query;
+      },
+      whereIn(column: string, values: unknown[]) {
+        rows = rows.filter((row) => values.includes(row[column]));
+        return query;
+      },
+      select: async () => rows,
+      first: async () => rows[0],
+    };
+    return query;
+  };
+  const database = fakeDb({
+    products: [{ id: 5, title: 'Морс', price: 150, weight: '0,5 л', variants: [], fillings: [], available: true, status: 'published' }],
+    orders: [],
+    places: [{ id: 1 }],
+  });
+  const filters: Record<string, (payload: Row, meta: Row, context: Row) => Promise<Row>> = {};
+  const warnings: string[] = [];
+  const orderGuard = await import('../../directus/extensions/order-guard/index.js');
+  orderGuard.default(
+    { filter: (event: string, fn: (typeof filters)[string]) => (filters[event] = fn), action: () => {} },
+    { services: {}, logger: { warn: (text: string) => warnings.push(text), error: () => {} } },
+  );
+  const order: Row = { customer_name: 'Анна', phone: '8 987 955 25 65', fulfillment: 'pickup', place: 1, items: [{ product: 5, qty: 1 }], consent: true };
+  let ip = 0;
+  const withColumn = { collections: { orders: { fields: { phone: {}, email: {} } } } };
+  const send = (extra: Row, schema: Row = withColumn) =>
+    filters['orders.items.create']({ ...order, ...extra }, {}, { accountability: { user: null, ip: `10.0.7.${(ip += 1)}` }, database, schema });
+  assert.equal((await send({ email: ' Anna@Mail.RU ' })).email, 'anna@mail.ru', 'почта — строчными, без пробелов');
+  for (const blank of [undefined, null, '', '   ', 42, { a: 1 }])
+    assert.ok(!('email' in (await send({ email: blank }))), `пусто или не строка (${JSON.stringify(blank)}) — поля нет`);
+  for (const bad of ['anna@gmail.com', 'anna@', 'anna@mail.ru.evil.com', `${'a'.repeat(120)}@mail.ru`])
+    await assert.rejects(send({ email: bad }), (error: any) => error.status === 400 && error.extensions?.reason === orderGuard.EMAIL_ERROR, bad);
+  assert.match(orderGuard.EMAIL_ERROR, /^E-mail для чека: .*российская почта.*Или оставьте поле пустым/);
+  // колонки ещё нет (schema apply не сделан): почта отброшена, заказ не потерян, в логе один раз
+  const noColumn = { collections: { orders: { fields: { phone: {} } } } };
+  assert.ok(!('email' in (await send({ email: 'anna@mail.ru' }, noColumn))));
+  await send({ email: 'anna@mail.ru' }, noColumn);
+  assert.equal(warnings.filter((w) => w.includes('нет поля email')).length, 1);
+
+  // pay: почта заказа уходит в `receipt.customer.email` запроса к ЮKassa рядом с телефоном
+  const { createServer } = await import('node:http');
+  const { createPayService } = await import('../../directus/extensions/pay/service.js');
+  const bodies: Row[] = [];
+  const bank = createServer((req, res) => {
+    let raw = '';
+    req.on('data', (chunk) => (raw += chunk));
+    req.on('end', () => {
+      res.setHeader('Content-Type', 'application/json');
+      if (req.method !== 'POST' || !req.url?.endsWith('/payments')) {
+        res.statusCode = 404;
+        res.end(JSON.stringify({ type: 'error', code: 'not_found' }));
+        return;
+      }
+      const body = JSON.parse(raw);
+      bodies.push(body);
+      res.end(JSON.stringify({ id: `P-${bodies.length}`, status: 'pending', test: true, confirmation: { type: 'redirect', confirmation_url: `https://yoomoney.ru/checkout/P-${bodies.length}` } }));
+    });
+  });
+  await new Promise<void>((resolve) => bank.listen(0, '127.0.0.1', resolve));
+  const { port } = bank.address() as { port: number };
+  const now = new Date().toISOString();
+  const line = { product: 5, title: 'Морс', variant: null, filling: null, qty: 2, price: 150, sum: 300 };
+  const tables: Record<string, Row[]> = {
+    payment_settings: [{ id: 1, online_enabled: true, provider: 'yookassa', mode: 'test', yookassa_shop_id: '100500', yookassa_secret_key: 'test_k', site_url: 'https://vkus-com.ru' }],
+    orders: [
+      { id: 70, number: '2610-4821', status: 'new', date_created: now, customer_name: 'Анна', phone: '+7 987 955-25-65', email: 'anna@mail.ru', fulfillment: 'pickup', items: [line], total: 300, to_pay: 300, delivery_cost: 0, payment_status: 'none', payment_meta: null, payment_log: '' },
+      { id: 71, number: '2610-4822', status: 'new', date_created: now, customer_name: 'Борис', phone: '+7 987 955-25-66', email: null, fulfillment: 'pickup', items: [line], total: 300, to_pay: 300, delivery_cost: 0, payment_status: 'none', payment_meta: null, payment_log: '' },
+    ],
+  };
+  // knex в миниатюре с цепочкой `findOrder`: where(fn) / orWhere(like) / andWhere / orderBy
+  const payDb = (name: string) => {
+    let rows = [...(tables[name] ?? [])];
+    const like = (pattern: string) => new RegExp(`^${pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/_/g, '.')}$`);
+    const query: Row = {
+      where(match: Row | ((q: Row) => void), value?: unknown) {
+        if (typeof match === 'function') {
+          const tests: ((row: Row) => boolean)[] = [];
+          const sub = {
+            where: (column: string, v: unknown) => (tests.push((row) => row[column] === v), sub),
+            orWhere: (column: string, op: string, v: string) => (tests.push((row) => (op === 'like' ? like(v).test(String(row[column])) : row[column] === op)), sub),
+          };
+          match(sub);
+          rows = rows.filter((row) => tests.some((test) => test(row)));
+        } else if (typeof match === 'string') rows = rows.filter((row) => row[match] === value);
+        else rows = rows.filter((row) => Object.entries(match).every(([key, v]) => row[key] === v));
+        return query;
+      },
+      andWhere(column: string, value: unknown) {
+        return query.where(column, value);
+      },
+      orderBy(column: string, dir = 'asc') {
+        rows.sort((a, b) => (a[column] > b[column] ? 1 : -1) * (dir === 'desc' ? -1 : 1));
+        return query;
+      },
+      first: async () => rows[0],
+    };
+    return query;
+  };
+  const service = createPayService({
+    services: {
+      ItemsService: class {
+        async updateOne(id: number, patch: Row) {
+          Object.assign(tables.orders.find((row) => row.id === id)!, patch);
+        }
+      },
+    },
+    database: payDb,
+    getSchema: async () => ({}),
+    env: { PUBLIC_URL: 'https://admin.vkus-com.ru', PAY_YOOKASSA_API: `http://127.0.0.1:${port}/v3/` },
+    logger: { warn: () => {}, error: () => {} },
+  });
+  try {
+    const started = await service.start({ number: '2610-4821', phone: '8 987 955 25 65', origin: 'https://vkus-com.ru', path: '/catalog/' });
+    assert.equal(started.url, 'https://yoomoney.ru/checkout/P-1');
+    assert.deepEqual(bodies[0].receipt.customer, { email: 'anna@mail.ru', phone: '79879552565' }, 'почта заказа — в чеке ЮKassa');
+    await service.start({ number: '2610-4822', phone: '+7 987 955-25-66', origin: 'https://vkus-com.ru', path: '/catalog/' });
+    assert.deepEqual(bodies[1].receipt.customer, { phone: '79879552566' }, 'без почты — чек на телефон');
+  } finally {
+    bank.close();
+  }
+}
+
 console.log('payment: ok');

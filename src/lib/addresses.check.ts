@@ -188,7 +188,42 @@ console.log('адреса гостя: правила, метки, тот же а
 
   // гость читает ровно поля кабинета, служебных — нет / the guest reads the account's fields, not the staff's
   assert.deepEqual([...guard.ORDER_FIELDS].sort(), [...GUEST_ORDER_READ].sort());
-  assert.ok(guard.LEGACY_ORDER_FIELDS.every((f: string) => guard.ORDER_FIELDS.includes(f)));
+  assert.ok(guard.LEGACY_ORDER_FIELDS.every((f: string) => guard.CARD_ORDER_FIELDS.includes(f)));
+  assert.ok(guard.CARD_ORDER_FIELDS.every((f: string) => guard.ORDER_FIELDS.includes(f)));
+  assert.ok(guard.ORDER_FIELDS.includes('email') && !guard.CARD_ORDER_FIELDS.includes('email'), 'почта для чека — только в новом наборе');
+
+  // до `pnpm setup` новое поле отвечает 403: читается набор до него, вплоть до самого старого
+  // before `pnpm setup` a newer field is refused with 403: the set before it is read, down to the oldest
+  {
+    const forbidden = Object.assign(new Error('forbidden'), { code: 'FORBIDDEN', status: 403 });
+    const reader = (allowed: string[]) => {
+      const asked: string[][] = [];
+      return {
+        asked,
+        readByQuery: async (query: Record<string, unknown>) => {
+          const fields = query.fields as string[];
+          asked.push(fields);
+          if (fields.some((f) => !allowed.includes(f))) throw forbidden;
+          return [{ id: 1 }];
+        },
+      };
+    };
+    const warned: string[][] = [];
+    const full = reader(guard.ORDER_FIELDS);
+    assert.deepEqual(await guard.readGuestOrders(full, (f: string[]) => warned.push(f)), [{ id: 1 }]);
+    assert.deepEqual(full.asked, [guard.ORDER_FIELDS]);
+    assert.equal(warned.length, 0);
+    const card = reader(guard.CARD_ORDER_FIELDS);
+    await guard.readGuestOrders(card, (f: string[]) => warned.push(f));
+    assert.deepEqual(card.asked, [guard.ORDER_FIELDS, guard.CARD_ORDER_FIELDS], 'без права на email — карточка без почты, а не старые поля');
+    assert.deepEqual(warned, [guard.ORDER_FIELDS], 'в лог — про отказанный набор');
+    const legacy = reader(guard.LEGACY_ORDER_FIELDS);
+    await guard.readGuestOrders(legacy);
+    assert.deepEqual(legacy.asked, [guard.ORDER_FIELDS, guard.CARD_ORDER_FIELDS, guard.LEGACY_ORDER_FIELDS]);
+    await assert.rejects(guard.readGuestOrders(reader([])), (error: any) => error.status === 403, 'и старые поля не дали — ошибка наружу');
+    const broken = { readByQuery: async () => { throw new Error('база недоступна'); } };
+    await assert.rejects(guard.readGuestOrders(broken), /база недоступна/, 'не 403 — без отката');
+  }
   for (const secret of ['status_log', 'telegram_meta', 'manager_note', 'payment_url', 'payment_id', 'payment_log', 'payment_meta', 'notify_result'])
     assert.ok(!GUEST_ORDER_READ.includes(secret) && !guard.ORDER_FIELDS.includes(secret), secret);
 
