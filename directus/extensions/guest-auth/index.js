@@ -68,21 +68,50 @@ export const LEGACY_ORDER_FIELDS = [
   'address_flat', 'address_entrance', 'address_floor', 'address_intercom', 'delivery_zone', 'delivery_cost',
   'items', 'total', 'bonus_spent', 'discount', 'to_pay', 'bonus_earned',
 ];
-/**
- * The full order card (since 24.10.2026) — the same list as `GUEST_ORDER_READ`
- * in `scripts/setup/account.mjs`. Never the staff's fields: `status_log`,
- * `telegram_meta` (names of the staff), `manager_note`, `payment_url/_id/_log/_meta`,
- * `notify_result`.
- * Полная карточка заказа (с 24.10.2026) — тот же список, что `GUEST_ORDER_READ`
- * в `scripts/setup/account.mjs`. Без служебных полей: `status_log`,
- * `telegram_meta` (имена сотрудников), `manager_note`, `payment_url/_id/_log/_meta`,
- * `notify_result`.
- */
-export const ORDER_FIELDS = [
+/** What the guest's read right gave from 24.10.2026 to 26.10.2026: the full card without the receipt's mail. / Полная карточка без почты для чека. */
+export const CARD_ORDER_FIELDS = [
   ...LEGACY_ORDER_FIELDS,
   'comment', 'customer_name', 'phone', 'address_details',
   'payment_method', 'payment_status', 'payment_test', 'paid_at',
 ];
+/**
+ * The full order card (since 24.10.2026) with the mail the receipt went to
+ * (since 26.10.2026) — the same list as `GUEST_ORDER_READ` in
+ * `scripts/setup/account.mjs`. Never the staff's fields: `status_log`,
+ * `telegram_meta` (names of the staff), `manager_note`, `payment_url/_id/_log/_meta`,
+ * `notify_result`.
+ * Полная карточка заказа (с 24.10.2026) с почтой, куда ушёл чек (с 26.10.2026), —
+ * тот же список, что `GUEST_ORDER_READ` в `scripts/setup/account.mjs`. Без
+ * служебных полей: `status_log`, `telegram_meta` (имена сотрудников),
+ * `manager_note`, `payment_url/_id/_log/_meta`, `notify_result`.
+ */
+export const ORDER_FIELDS = [...CARD_ORDER_FIELDS, 'email'];
+
+/**
+ * The guest's orders with the widest set his read right allows: after a
+ * deploy and before `pnpm setup` (or `schema apply`) a newer field is
+ * refused with 403 — then the set before it is read, down to the oldest.
+ * `warn` hears which set was refused.
+ * Заказы гостя самым широким набором, который позволяет его право: после
+ * выкатки и до `pnpm setup` (или `schema apply`) новое поле отвечает 403 —
+ * тогда читается набор до него, вплоть до самого старого. `warn` узнаёт,
+ * какой набор не дали.
+ * @param {{ readByQuery: (query: Record<string, unknown>) => Promise<any[]> }} items
+ * @param {(fields: string[]) => void} [warn]
+ */
+export const readGuestOrders = async (items, warn = () => {}) => {
+  const query = { sort: ['-date_created'], limit: 100 };
+  const sets = [ORDER_FIELDS, CARD_ORDER_FIELDS, LEGACY_ORDER_FIELDS];
+  for (const [i, fields] of sets.entries()) {
+    try {
+      return await items.readByQuery({ ...query, fields });
+    } catch (error) {
+      const forbidden = error?.code === 'FORBIDDEN' || Number(error?.status) === 403;
+      if (!forbidden || i === sets.length - 1) throw error;
+      warn(fields);
+    }
+  }
+};
 const TX_FIELDS = ['id', 'type', 'amount', 'date_created', 'expires_at', 'comment', 'order.number'];
 
 /** «8 (987) 955 25 65» → «+7 987 955-25-65» — как в заказах (`order-guard`); null — не российский номер. */
@@ -236,24 +265,17 @@ export default {
 
     // after a deploy and before `pnpm setup` the guest may not read the new
     // order fields yet: the account (and the points in the cart) must not fall
-    // with 403 — the old set is read, the log says so once
+    // with 403 — the set before them is read, the log says so once
     // после выкатки и до `pnpm setup` у гостя может ещё не быть права на новые
     // поля заказа: кабинет (и баллы в корзине) не должны падать 403 — читается
-    // прежний набор, в логе об этом один раз
+    // набор до них, в логе об этом один раз
     let legacyWarned = false;
-    const readOrders = async (items) => {
-      const query = { sort: ['-date_created'], limit: 100 };
-      try {
-        return await items.readByQuery({ ...query, fields: ORDER_FIELDS });
-      } catch (error) {
-        if (error?.code !== 'FORBIDDEN' && Number(error?.status) !== 403) throw error;
-        if (!legacyWarned) {
-          legacyWarned = true;
-          logger.warn('guest-auth: у роли «Гость» нет права на полную карточку заказа — кабинет показывает прежние поля. Прогоните `pnpm setup`');
-        }
-        return items.readByQuery({ ...query, fields: LEGACY_ORDER_FIELDS });
-      }
-    };
+    const readOrders = (items) =>
+      readGuestOrders(items, () => {
+        if (legacyWarned) return;
+        legacyWarned = true;
+        logger.warn('guest-auth: у роли «Гость» нет права на новые поля заказа — кабинет показывает прежние. Прогоните `pnpm setup`');
+      });
     // the saved addresses are read past the policy: the guest has no right on
     // the field — he changes it only through the routes below
     // сохранённые адреса читаются мимо политики: права на поле у гостя нет —

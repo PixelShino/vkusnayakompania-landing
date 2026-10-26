@@ -43,6 +43,8 @@ const CONTENT = [
 const ORDERS = 'orders';
 const ORDER_FIELDS_PUBLIC = [
   'number', 'customer_name', 'phone', 'fulfillment', 'place', 'address', 'address_details',
+  // the mail for the ЮKassa receipt, optional (since 26.10.2026) / почта для чека ЮKassa, необязательна (с 26.10.2026)
+  'email',
   // the address by parts (since 23.10.2026) / адрес по пунктам (с 23.10.2026)
   'address_flat', 'address_entrance', 'address_floor', 'address_intercom',
   'desired_time', 'comment', 'items', 'total', 'consent',

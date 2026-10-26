@@ -35,6 +35,8 @@ export const GUEST_ORDER_READ = [
   // the full card in the account (since 24.10.2026) / полная карточка в кабинете (с 24.10.2026)
   'comment', 'customer_name', 'phone', 'address_details',
   'payment_method', 'payment_status', 'payment_test', 'paid_at',
+  // the mail the receipt went to (since 26.10.2026) / почта, куда ушёл чек (с 26.10.2026)
+  'email',
 ];
 // what `order-guard` adds to a guest's order on top of the public fields
 // что `order-guard` добавляет к заказу гостя поверх публичных полей
