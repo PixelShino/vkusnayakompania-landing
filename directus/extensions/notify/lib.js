@@ -469,7 +469,8 @@ export const requestModel = (request, { place = null, format = null, adminUrl = 
     person: [request.name, request.phone].filter(Boolean).join(', '),
     facts: [
       `Дата: ${request.event_date ? longDate(request.event_date) : 'не названа'}`,
-      `Гостей: ${request.guests ? guestsText(Number(request.guests)) : 'не назвали'}`,
+      // «Гостей: 40», not «Гостей: 40 гостей» / «Гостей: 40», а не «Гостей: 40 гостей»
+      `Гостей: ${request.guests ? Number(request.guests) : 'не назвали'}`,
       `Формат: ${formatText}`,
       `Где: ${where}`,
     ],
