@@ -112,13 +112,21 @@ const link = (href: string, text: string, external = false) =>
 const andList = (items: string[]) =>
   items.length <= 1 ? (items[0] ?? '') : `${items.slice(0, -1).join(', ')} и ${items[items.length - 1]}`;
 
-/** «Рядом с нами — Советский, …» → «Рядом с нами»; «Красноглинский район, Зубчаниновка, …» → «Красноглинский район» */
-export const shortZone = (name: string) => name.split(/\s[—–-]\s|,/)[0].trim();
+/**
+ * «Рядом с нами — Советский, …» → «Рядом с нами»; a name without the dash stays
+ * whole: since 26.10.2026 zones are named by their districts, «Советский,
+ * Промышленный, Октябрьский, Кировский», and cutting at the comma would leave
+ * one district out of four.
+ * «Рядом с нами — Советский, …» → «Рядом с нами»; имя без тире остаётся целиком:
+ * с 26.10.2026 зоны названы районами, «Советский, Промышленный, Октябрьский,
+ * Кировский», и обрезка по запятой оставила бы один район из четырёх.
+ */
+export const shortZone = (name: string) => name.split(/\s[—–-]\s/)[0].trim();
 
 /** «Рядом с нами — Советский, …» → [«Рядом с нами», «Советский, …»]; без пояснения — [имя, ''] */
 const splitZone = (name: string) => {
   const short = shortZone(name);
-  const rest = name.slice(short.length).replace(/^\s*(?:[—–-]\s|,)\s*/, '').trim();
+  const rest = name.slice(short.length).replace(/^\s*[—–-]\s\s*/, '').trim();
   return [short, rest] as const;
 };
 

@@ -201,11 +201,16 @@ export const addressLine = (order = {}) => {
  * и те же факты. `rows` — строки базы, `names` — названия связей (`place`,
  * `format`), `adminUrl` — карточка в админке.
  */
-/** «Самовывоз: Садовая» or «Доставка: <адрес> · зона «…»». / Самовывоз с точкой или доставка с адресом и зоной. */
+/**
+ * «Самовывоз: Садовая» or «Доставка: <адрес>». The delivery zone stays in the
+ * admin card only: the owner dropped it from the messages on 26.10.2026
+ * («сборная солянка из районов»), the delivery cost already tells the zone.
+ * «Самовывоз: Садовая» или «Доставка: <адрес>». Зона доставки остаётся только
+ * в карточке админки: владелец убрал её из сообщений 26.10.2026 («сборная
+ * солянка из районов»), стоимость доставки и так говорит о зоне.
+ */
 export const fulfillmentLine = (order = {}, place = null) =>
-  order.fulfillment === 'pickup'
-    ? `Самовывоз${place ? `: ${place}` : ''}`
-    : `Доставка: ${addressLine(order) || 'адрес не указан'}${order.delivery_zone ? ` · зона «${order.delivery_zone}»` : ''}`;
+  order.fulfillment === 'pickup' ? `Самовывоз${place ? `: ${place}` : ''}` : `Доставка: ${addressLine(order) || 'адрес не указан'}`;
 
 export const orderModel = (order, { place = null, adminUrl = null, now = new Date() } = {}) => {
   const items = json(order.items, []) ?? [];
@@ -305,10 +310,11 @@ export const pendingModel = (order, { place = null, adminUrl = null } = {}) => {
     title: 'Начал оформление',
     number,
     vars: { number, total: money(order.total), name: order.customer_name ?? '', phone: order.phone ?? '', when: order.desired_time ?? '' },
-    headline: `${isTestPayment(order) ? TEST_MARK : ''}Начал оформление: заказ №${order.number ?? order.id} — ${rub(order.total)}`,
-    person: [order.phone, order.customer_name].filter(Boolean).join(', '),
+    // one line says it all: the number, the sum and that the bank is still to answer
+    // одна строка говорит всё: номер, сумма и что банк ещё не ответил
+    headline: `${isTestPayment(order) ? TEST_MARK : ''}Корзина №${order.number ?? order.id} на ${rub(order.total)}, ждём оплату`,
+    person: [order.customer_name, order.phone].filter(Boolean).join(', '),
     facts: [
-      'Оплата онлайн, банк ещё не подтвердил',
       ...(shown.length ? [`Состав: ${shown.join(', ')}${more > 0 ? ` и ещё ${more}` : ''}`] : []),
       fulfillmentLine(order, place),
     ],

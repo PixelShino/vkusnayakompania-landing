@@ -76,7 +76,7 @@ assert.ok(short.includes('Доставка боксов — от 1 250 ₽ за 
 assert.ok(short.includes('Праздники — от 3 500 ₽ за гостя, 100+ гостей'), 'llms.txt: цена и гости банкета');
 assert.ok(short.includes('Кофе-брейк — по смете'), 'llms.txt: формат без цены — «по смете», как на странице');
 assert.ok(
-  short.includes('- Рядом с нами — Советский, Промышленный, Октябрьский, Кировский: доставка 400 ₽, бесплатно от 7 000 ₽, минимальный заказ 1 000 ₽'),
+  short.includes('- Советский, Промышленный, Октябрьский, Кировский: доставка 400 ₽, бесплатно от 7 000 ₽, минимальный заказ 1 000 ₽'),
   'llms.txt: зона доставки с ценой, порогом и минимумом',
 );
 // the count follows the fixture: items in stock and the sections that have them
@@ -138,7 +138,7 @@ assert.ok(full.includes(`- ИНН: ${content.settings.inn}`), 'llms-full.txt: в
 assert.ok(full.includes('- Telegram: https://t.me/vkusnayakompania'), 'llms-full.txt: вставка [[связь]] развёрнута');
 assert.ok(full.includes('Можно заказать и по телефону +7 987 955-25-65.'), 'llms-full.txt: вставка [[телефон]] — номер словами');
 assert.ok(
-  full.includes('Рядом с нами — Советский, Промышленный, Октябрьский, Кировский: доставка 400 ₽, бесплатно от 7 000 ₽'),
+  full.includes('Советский, Промышленный, Октябрьский, Кировский: доставка 400 ₽, бесплатно от 7 000 ₽'),
   'llms-full.txt: строка зоны из документа — «название: условия»',
 );
 assert.ok(full.includes('[«Реквизиты и контакты»](https://vkus-com.ru/docs/requisites/)'), 'llms-full.txt: ссылка в документе стала абсолютной');

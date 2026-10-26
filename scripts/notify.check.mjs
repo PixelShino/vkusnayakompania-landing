@@ -144,7 +144,8 @@ assert.ok(huge.endsWith('</a>'), 'ссылка в админку не отрез
   const line = 'Советской Армии, 177, кв. 12, подъезд 2, этаж 5, домофон 12К';
   assert.equal(addressLine(parts), line);
   const pm = orderModel({ ...order, ...parts, address_details: null, delivery_zone: 'Рядом с нами' }, { adminUrl: URL });
-  assert.equal(pm.facts[0], `Доставка: ${line} · зона «Рядом с нами»`);
+  assert.equal(pm.facts[0], `Доставка: ${line}`, 'адрес без хвоста про зону');
+  assert.ok(!telegramText(pm).includes('Рядом с нами'), 'зона доставки в сообщение не попадает');
   assert.ok(telegramText(pm).includes(line), 'адрес по пунктам в Telegram');
   assert.ok(emailText(pm).includes(line), 'адрес по пунктам в письме');
   // empty parts are skipped / пустые пункты пропускаются
@@ -813,11 +814,10 @@ assert.ok(!scrub(`token ${TOKEN} leaked`, [TOKEN]).includes(TOKEN));
   assert.equal(
     sp(telegramText(pm)),
     [
-      '<b>Начал оформление: заказ №1023-4812 — 1 850 ₽</b>',
-      '+7 919 111-11-11, Анна &lt;Тест&gt;',
-      'Оплата онлайн, банк ещё не подтвердил',
+      '<b>Корзина №1023-4812 на 1 850 ₽, ждём оплату</b>',
+      'Анна &lt;Тест&gt;, +7 919 111-11-11',
       'Состав: Торт «Наполеон» (1 кг) ×1, Морс ×2, Пирожок ×1',
-      'Доставка: Советской Армии, 177, кв. 12 · зона «Рядом с нами»',
+      'Доставка: Советской Армии, 177, кв. 12',
       '',
       `<a href="${ADMIN}">Открыть в админке</a>`,
     ].join('\n'),
@@ -825,18 +825,18 @@ assert.ok(!scrub(`token ${TOKEN} leaked`, [TOKEN]).includes(TOKEN));
   assert.ok(!/\p{Extended_Pictographic}/u.test(telegramText(pm)), 'ни одного эмодзи');
   // more than three dishes: «и ещё N» / больше трёх блюд — «и ещё N»
   const many = pendingModel({ ...waiting, items: [...JSON.parse(waiting.items), { title: 'Чай', qty: 3 }, { title: 'Кофе', qty: 1 }] });
-  assert.equal(many.facts[1], 'Состав: Торт «Наполеон» (1 кг) ×1, Морс ×2, Пирожок ×1 и ещё 2');
+  assert.equal(many.facts[0], 'Состав: Торт «Наполеон» (1 кг) ×1, Морс ×2, Пирожок ×1 и ещё 2');
   // pickup, the test shop / самовывоз, тестовый магазин
   const trial = pendingModel({ ...waiting, fulfillment: 'pickup', payment_test: true }, { place: 'Садовая' });
-  assert.equal(sp(trial.headline), 'ТЕСТ · Начал оформление: заказ №1023-4812 — 1 850 ₽');
+  assert.equal(sp(trial.headline), 'ТЕСТ · Корзина №1023-4812 на 1 850 ₽, ждём оплату');
   assert.equal(trial.facts.at(-1), 'Самовывоз: Садовая');
   assert.ok(!/\p{Extended_Pictographic}/u.test(telegramText(trial)));
   // an empty or broken composition: no «Состав» line, nothing breaks / пустой или битый состав
   for (const items of ['[]', null, 'не json', JSON.stringify([null, 5])]) {
     const empty = pendingModel({ ...waiting, items });
-    assert.deepEqual(empty.facts, ['Оплата онлайн, банк ещё не подтвердил', 'Доставка: Советской Армии, 177, кв. 12 · зона «Рядом с нами»'], String(items));
+    assert.deepEqual(empty.facts, ['Доставка: Советской Армии, 177, кв. 12'], String(items));
   }
-  assert.equal(pendingModel({ ...waiting, items: [{ title: '', qty: null }] }).facts[1], 'Состав: блюдо ×1');
+  assert.equal(pendingModel({ ...waiting, items: [{ title: '', qty: null }] }).facts[0], 'Состав: блюдо ×1');
   // the outcome line, appended by the edit / строка исхода, которую дописывает правка
   assert.equal(pendingOutcomeLine({ kind: 'paid', at: '2026-10-23T08:41:00Z' }), 'Оплачен в 12:41, ушёл в заказы');
   assert.equal(pendingOutcomeLine({ kind: 'unpaid', at: '2026-10-23T08:50:00Z' }), 'Не оплачен: отменён 12:50');

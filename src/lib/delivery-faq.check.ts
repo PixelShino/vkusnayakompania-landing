@@ -32,7 +32,7 @@ assert.equal(zonesFrom([{ ...seed[0], status: 'draft' }]).length, 0, 'выклю
 assert.equal(zonesFrom([{ ...seed[0], polygon: [] }]).length, 0, 'зона без границы не печатается — корзина её не найдёт');
 assert.deepEqual(zonesFrom(null), []);
 assert.equal(shortZone('Рядом с нами — Советский, Промышленный'), 'Рядом с нами');
-assert.equal(shortZone('Красноглинский район, Зубчаниновка, Мехзавод'), 'Красноглинский район');
+assert.equal(shortZone('Советский, Промышленный, Октябрьский, Кировский'), 'Советский, Промышленный, Октябрьский, Кировский', 'имя по районам не режется по запятой');
 assert.equal(shortZone('Новокуйбышевск'), 'Новокуйбышевск');
 
 // ── общее: ни одного пустого места ──────────────────────────────────────────
@@ -56,20 +56,25 @@ for (const item of faq) {
 const where = byId(faq, 'zones')!;
 assert.match(plain(where.a), /^По Самаре и окрестностям: доставка стоит от 400 ₽ до 4 000 ₽/);
 assert.ok(where.a.includes(`от ${rub(400)} до ${rub(4000)}`), 'цены как «от 400 ₽» с неразрывными пробелами');
-assert.ok(plain(where.a).includes('Бесплатно — при заказе блюд от 7 000 ₽ в зонах «Рядом с нами» и «Центр», в остальных порог выше.'));
+assert.ok(plain(where.a).includes('Бесплатно — при заказе блюд от 7 000 ₽ в зонах «Советский, Промышленный, Октябрьский, Кировский» и «Ленинский, Самарский, Железнодорожный», в остальных порог выше.'));
 for (const zone of zones) {
   assert.ok(where.a.includes(`доставка ${rub(zone.price)}`), `${zone.name}: цена ${zone.price}`);
   assert.ok(where.aHtml!.includes(rub(zone.price)), `${zone.name}: цена в списке страницы`);
   assert.ok(where.aHtml!.includes(rub(zone.min_order)), `${zone.name}: минимум в списке страницы`);
 }
 assert.equal((where.aHtml!.match(/<li class="dfaq-zone">/g) ?? []).length, zones.length, 'строка на каждую зону');
-assert.ok(where.aHtml!.includes('Рядом с нами</b><span class="sr-only">\u00a0— </span>'), 'без стилей строка называет зону полностью');
+// zones named by districts (since 26.10.2026) carry no explanation after the dash: bold name only, no stray dash
+// зоны по районам (с 26.10.2026) без пояснения после тире: только имя жирным, без висячего тире
+assert.ok(where.aHtml!.includes('<b>Советский, Промышленный, Октябрьский, Кировский</b></span>'), 'имя зоны целиком и без тире');
+assert.ok(!where.aHtml!.includes('sr-only'), 'без пояснения нет и скрытого тире');
+const explained = buildDeliveryFaq(content, { zones: zones.map((zone, i) => (i === 0 ? { ...zone, name: 'Рядом с нами — Советский, Промышленный' } : zone)), deliveryHref: href });
+assert.ok(byId(explained, 'zones')!.aHtml!.includes('Рядом с нами</b><span class="sr-only">\u00a0— </span>'), 'без стилей строка называет зону полностью');
 
 // ── минимальный заказ ───────────────────────────────────────────────────────
 const min = byId(faq, 'minimum')!;
 assert.equal(
   plain(min.a),
-  'Да, для доставки: 1 000 ₽ за блюда, а в зонах «Красноглинский район» и «Новокуйбышевск» — 2 500 ₽. Для самовывоза минимальной суммы нет. Если в корзине меньше, она подскажет, сколько добавить.',
+  'Да, для доставки: 1 000 ₽ за блюда, а в зонах «Красноглинский район и Смышляевка» и «Новокуйбышевск» — 2 500 ₽. Для самовывоза минимальной суммы нет. Если в корзине меньше, она подскажет, сколько добавить.',
 );
 // у зон нет минимума — вопроса нет
 const noMin = buildDeliveryFaq(content, { zones: zones.map((zone) => ({ ...zone, min_order: 0 })), deliveryHref: href });
