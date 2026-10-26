@@ -6,15 +6,21 @@
 // Run / Запуск: pnpm fixture  (needs DIRECTUS_URL, DIRECTUS_TOKEN in .env)
 import fs from 'node:fs/promises';
 import { loadEnv } from './env.mjs';
-import { OPTIONAL, QUERIES, docTarget, fileExt } from './queries.mjs';
+import { FALLBACK, OPTIONAL, QUERIES, docTarget, fileExt } from './queries.mjs';
 
 loadEnv();
 const BASE = process.env.DIRECTUS_URL;
 const TOKEN = process.env.DIRECTUS_TOKEN;
 if (!BASE || !TOKEN) throw new Error('нужны DIRECTUS_URL и DIRECTUS_TOKEN в .env');
 
-const get = async (path, optional = false) => {
-  const r = await fetch(`${BASE}${path}`, { headers: { Authorization: `Bearer ${TOKEN}` } });
+const get = async (path, optional = false, fallback = null) => {
+  let r = await fetch(`${BASE}${path}`, { headers: { Authorization: `Bearer ${TOKEN}` } });
+  // a Directus without a newer field («Готовят на»): the records without it
+  // Directus без нового поля («Готовят на»): записи без него
+  if (!r.ok && fallback) {
+    console.warn(`fixture: ${path.split('?')[0]} → ${r.status}, беру без новых полей`);
+    r = await fetch(`${BASE}${fallback}`, { headers: { Authorization: `Bearer ${TOKEN}` } });
+  }
   // the catalog may be absent from the schema: the fixture then has none
   // каталога может не быть в схеме — тогда его нет и в фикстуре
   if (!r.ok && optional) return [];
@@ -23,7 +29,7 @@ const get = async (path, optional = false) => {
 };
 
 const fixture = { exportedAt: new Date().toISOString() };
-for (const [key, path] of Object.entries(QUERIES)) fixture[key] = await get(path, OPTIONAL.has(key));
+for (const [key, path] of Object.entries(QUERIES)) fixture[key] = await get(path, OPTIONAL.has(key), FALLBACK[key]);
 
 // every file object anywhere in the payload is downloaded once by id
 // каждый объект файла в ответе скачивается один раз по id

@@ -205,18 +205,36 @@ export const menusOf = (content: Content, place: Place): Menu[] => {
 };
 
 /**
- * An order from the site: the catalog takes it for delivery by courier or for
- * pickup at either venue (the offer, «Доставка и оплата»). `DeliveryModeOwnFleet`
- * in GoodRelations covers couriers of the seller's own or hired.
- * Заказ с сайта: каталог принимает его на доставку курьером или на самовывоз из
- * любой точки (оферта, «Доставка и оплата»). `DeliveryModeOwnFleet` в
- * GoodRelations — курьеры продавца, свои или нанятые.
+ * The catalog opened on one venue: since 26.10.2026 each venue has its own menu
+ * and `?place=<id>` picks it (a QR code on a table adds `&table=`). The page
+ * is the same, its canonical address stays `/catalog/`.
+ * Каталог, открытый на одной точке: с 26.10.2026 у каждой точки своё меню, и
+ * `?place=<id>` выбирает её (QR-код на столе добавит `&table=`). Страница та
+ * же, канонический адрес остаётся `/catalog/`.
  */
-export const orderAction = (site: URL) => ({
+export const placeCatalogUrl = (site: URL, place: Pick<Place, 'id'>) => {
+  const url = new URL(`${BASE}catalog/`, site);
+  url.searchParams.set('place', String(place.id));
+  return url.href;
+};
+
+/**
+ * An order from the site at one venue: the catalog opened on its menu takes it
+ * for delivery by courier, for pickup or at a table in its hall (the offer,
+ * «Доставка и оплата»). Schema.org has no delivery method for the hall, so
+ * only the courier and pickup are named. `DeliveryModeOwnFleet` in
+ * GoodRelations covers couriers of the seller's own or hired.
+ * Заказ с сайта на одной точке: каталог, открытый на её меню, принимает его на
+ * доставку курьером, на самовывоз или к столику в её зале (оферта, «Доставка и
+ * оплата»). Способа получения «в зале» в Schema.org нет, поэтому названы только
+ * курьер и самовывоз. `DeliveryModeOwnFleet` в GoodRelations — курьеры
+ * продавца, свои или нанятые.
+ */
+export const orderAction = (site: URL, place: Pick<Place, 'id'>) => ({
   '@type': 'OrderAction',
   target: {
     '@type': 'EntryPoint',
-    urlTemplate: new URL(`${BASE}catalog/`, site).href,
+    urlTemplate: placeCatalogUrl(site, place),
     inLanguage: LANG,
     actionPlatform: ['https://schema.org/DesktopWebPlatform', 'https://schema.org/MobileWebPlatform'],
   },
@@ -255,18 +273,23 @@ export const placeNodes = (content: Content, site: URL, images: PlaceImages = {}
       image: images.byPlace?.[place.n] ?? images.brand,
       openingHours: schemaHours(place.schedule),
       openingHoursSpecification: schemaHoursSpec(place.schedule),
-      hasMenu: menus.map((menu) => ({
-        '@type': 'Menu',
-        name: menu.title,
-        url: absolute(menu.file.href, site),
-        dateModified: menu.updated,
-      })),
+      hasMenu: [
+        ...menus.map((menu) => ({
+          '@type': 'Menu',
+          name: menu.title,
+          url: absolute(menu.file.href, site),
+          dateModified: menu.updated,
+        })),
+        // the venue's own menu in the catalog, with prices and the order (26.10.2026)
+        // своё меню точки в каталоге, с ценами и заказом (26.10.2026)
+        ...(content.catalog.count > 0 ? [{ '@type': 'Menu', name: 'Меню для заказа на сайте', url: placeCatalogUrl(site, place) }] : []),
+      ],
       // «Бронь стола» in the header and on the first screen: by phone or messenger
       // «Бронь стола» в шапке и на первом экране: по телефону или в мессенджере
       acceptsReservations: true,
       currenciesAccepted: 'RUB',
       areaServed: city(),
-      ...(content.catalog.count > 0 && { potentialAction: orderAction(site) }),
+      ...(content.catalog.count > 0 && { potentialAction: orderAction(site, place) }),
       // без aggregateRating: Google запрещает переносить в разметку оценки
       // с чужих площадок, а собственных отзывов у сайта нет
     });

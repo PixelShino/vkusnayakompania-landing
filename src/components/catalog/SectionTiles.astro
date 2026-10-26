@@ -11,31 +11,50 @@
  * доставки, а не строка слов, которую листают вбок. Плитка — обычный якорь
  * (`#slug`): работает до скрипта и оставляет адрес, которым можно поделиться.
  * С 1200 px эту работу делает левая колонка, и плитки уступают ей место.
+ * Tiles of the other venue's sections are hidden by `data-places`, the counts
+ * are the chosen venue's (`VenueText`).
+ * Плитки разделов другой точки прячет `data-places`, числа — выбранной точки
+ * (`VenueText`).
  */
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import Icon from '../Icon.astro';
+import VenueText from './VenueText.astro';
 import { coverOf, photoWidths, positions, type Catalog } from '../../lib/catalog.ts';
+import { countsAt, placesAttr, sectionPlaces } from '../../lib/venue.ts';
 
 interface Props {
   catalog: Catalog;
+  /** id точек сайта, по порядку */
+  places: number[];
 }
 
-const { catalog } = Astro.props;
+const { catalog, places } = Astro.props;
 // two columns on a phone, three on a tablet: the photo is a third of the screen at most
 // две колонки на телефоне, три на планшете: фото — не больше трети экрана
 const SIZES = '(min-width: 768px) 30vw, 46vw';
-const tiles = catalog.categories.map((category) => ({ category, cover: coverOf(category) }));
+const tiles = catalog.categories.map((category) => ({
+  category,
+  cover: coverOf(category),
+  where: sectionPlaces(category.products, places),
+  counts: countsAt(category.products, places),
+}));
+// how many sections each venue has: a tile is shown where its section has something
+// сколько разделов у каждой точки: плитка видна там, где у её раздела что-то есть
+const sectionsAt = Object.fromEntries(
+  places.map((id) => [id, String(tiles.filter((tile) => !tile.where.length || tile.where.includes(id)).length)]),
+);
+const label = (counts: Record<number, number>) => Object.fromEntries(Object.entries(counts).map(([id, n]) => [id, positions(n)]));
 ---
 
 <nav class="container cat-tiles" aria-labelledby="tiles-title" data-tiles>
   <h2 class="cat-tiles__title" id="tiles-title">
-    Разделы <span class="cat-tiles__n tnum">{catalog.categories.length}</span>
+    Разделы <span class="cat-tiles__n tnum"><VenueText all={String(catalog.categories.length)} at={sectionsAt} /></span>
   </h2>
   <ul class="tiles" role="list">
     {
-      tiles.map(({ category, cover }, i) => (
-        <li>
+      tiles.map(({ category, cover, where, counts }, i) => (
+        <li data-places={placesAttr(where)}>
           <a class="tile" href={`#${category.slug}`} data-tile={category.slug}>
             <span class="tile__frame">
               {cover?.photo ? (
@@ -58,7 +77,9 @@ const tiles = catalog.categories.map((category) => ({ category, cover: coverOf(c
               )}
             </span>
             <span class="tile__name">{category.title}</span>
-            <span class="tile__n tnum">{positions(category.products.length)}</span>
+            <span class="tile__n tnum">
+              <VenueText all={positions(category.products.length)} at={label(counts)} />
+            </span>
           </a>
         </li>
       ))

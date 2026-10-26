@@ -357,7 +357,7 @@ if (rawCats.length && rawDishes.length) {
       { product: simple.id, title: simple.title, variant: null, filling: null, qty: 3, price: simple.price, sum: simple.price * 3 },
     ]);
     assert.equal(order.desired_time, 'Как можно скорее');
-    assert.equal(order.place, null, 'заказ: у доставки нет точки самовывоза');
+    assert.equal(order.place, null, 'заказ: доставка без выбранной точки уходит без точки — кухню назначит сервер');
     const pickup = buildOrder(add(empty(), simple.id), index, { ...form, fulfillment: 'pickup', place: content.places[0].id }, 'x');
     assert.equal(pickup.address, null, 'заказ: у самовывоза нет адреса');
     assert.equal(pickup.place, content.places[0].id);
@@ -425,6 +425,45 @@ if (rawCats.length && rawDishes.length) {
       () => {},
     );
     assert.equal(quoted.categories[0].products[0].title, 'Пирожное «Мохито»', 'кавычки: прямые не заменились ёлочками');
+  }
+
+  // «Готовят на» (since 26.10.2026): the csv field in every shape it arrives in;
+  // empty and garbage read as «both venues», never as a hidden dish
+  // «Готовят на» (с 26.10.2026): поле csv во всех видах, в каких приходит;
+  // пусто и мусор читаются как «на обеих», а не как спрятанное блюдо
+  {
+    const { normalizeCatalog, placesOf, cookedAt } = await import('../lib/catalog.ts');
+    assert.deepEqual(placesOf(['1', '2']), [1, 2], 'готовят на: массив строк из API');
+    assert.deepEqual(placesOf([2, 1]), [2, 1], 'готовят на: числа');
+    assert.deepEqual(placesOf('1,2'), [1, 2], 'готовят на: сырая строка csv');
+    assert.deepEqual(placesOf(' 2 , 1 '), [2, 1], 'готовят на: пробелы вокруг');
+    assert.deepEqual(placesOf('["2"]'), [2], 'готовят на: JSON-строка');
+    assert.deepEqual(placesOf(['2', 2, '2']), [2], 'готовят на: дубли схлопываются');
+    for (const junk of [null, undefined, '', '[', 'обе', ['x', null, -1, 0, 1.5], { places_id: 1 }, 7])
+      assert.deepEqual(placesOf(junk as never), [], `готовят на: мусор → на обеих (${JSON.stringify(junk)})`);
+    assert.deepEqual(placesOf(['1', 'x', '2']), [1, 2], 'готовят на: битый элемент выпадает, остальные остаются');
+    assert.equal(cookedAt({ places: [] }, 1), true, 'пусто — готовят на обеих');
+    assert.equal(cookedAt({ places: [2] }, 1), false);
+    assert.equal(cookedAt({ places: [1, 2] }, 2), true);
+    const venues = normalizeCatalog(
+      [{ id: 1, status: 'published', sort: 1, title: 'Супы', slug: 'supy' }],
+      [
+        { id: 1, status: 'published', sort: 1, title: 'Борщ', price: 390, category: 1, places: ['2'] },
+        { id: 2, status: 'published', sort: 2, title: 'Морс', price: 150, category: 1, places: '1,2' },
+        { id: 3, status: 'published', sort: 3, title: 'Компот', price: 120, category: 1 },
+      ] as never,
+      () => undefined,
+      () => {},
+    );
+    assert.deepEqual(
+      venues.categories[0].products.map((product) => [product.title, product.places]),
+      [['Борщ', [2]], ['Морс', [1, 2]], ['Компот', []]],
+      'каталог: у каждого блюда свой список точек; без поля — пусто, то есть на обеих',
+    );
+    assert.ok(
+      catalog.categories.every((category) => category.products.every((product) => Array.isArray(product.places))),
+      'каталог фикстуры: у каждого блюда есть places',
+    );
   }
 
   // the order hook in Directus repeats the site's rules: the same phone and the

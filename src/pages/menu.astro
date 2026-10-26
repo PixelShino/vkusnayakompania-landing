@@ -3,15 +3,17 @@
  * «Меню «Вкусной компании»»: the whole catalog as an HTML menu, so the search
  * for «вкусная компания меню» lands on a page instead of a PDF. An index of
  * the sections with their counts under the H1, then every section as a price
- * list; each dish opens its window in the catalog. The menu is one for both
- * venues: there is no venue switch, only where it can be picked up. A real
- * PDF menu of a venue, once the owner uploads one, is linked under the H1.
+ * list; each dish opens its window in the catalog. The page shows the dishes
+ * of both venues together; since 26.10.2026 each venue has its own menu, and
+ * the catalog shows the chosen one (`/catalog/?place=<id>`). A real PDF menu
+ * of a venue, once the owner uploads one, is linked under the H1.
  * Texts and numbers come from `src/data/landings-shop.ts`.
  * «Меню «Вкусной компании»»: весь каталог HTML-меню, чтобы запрос «вкусная
  * компания меню» приводил на страницу, а не в PDF. Под H1 — оглавление
  * разделов со счётчиками, затем каждый раздел прейскурантом; каждое блюдо
- * открывает своё окно в каталоге. Меню общее для обеих точек: переключателя
- * точки нет, есть только пометка, где забрать. Настоящее PDF-меню точки, когда
+ * открывает своё окно в каталоге. Страница показывает блюда обеих точек
+ * вместе; с 26.10.2026 у каждой точки своё меню, и каталог показывает
+ * выбранную (`/catalog/?place=<id>`). Настоящее PDF-меню точки, когда
  * владелица его загрузит, ставится ссылкой под H1. Тексты и числа — из
  * `src/data/landings-shop.ts`.
  */
@@ -106,7 +108,7 @@ const prints = printsOf((pick.length === 3 ? pick : catalog.categories).map((cat
       places={places}
       id="gde"
       title="Кафе и ресторан"
-      lead="Блюда этого меню — из каталога: заказ можно забрать в любой из точек или получить с доставкой по Самаре."
+      lead="Меню у точек разное: выберите точку в каталоге — заказ заберёте там или получите с доставкой по Самаре."
     />
 
     <FaqBand items={faq} title="Вопросы о меню" />

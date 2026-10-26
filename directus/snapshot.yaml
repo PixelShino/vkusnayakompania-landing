@@ -9823,10 +9823,10 @@ fields:
         icon: loyalty
         text: >-
           1 балл = 1 ₽. Баллы начисляются, когда заказ с сайта переведён в
-          «Выполнен», — процентом от суммы, оплаченной деньгами, по уровню
-          гостя. Отменённый заказ возвращает списанные баллы и забирает
-          начисленные. Начислить или списать вручную — запись в «Операциях по
-          баллам».
+          «Выполнен», — процентом от суммы блюд по уровню гостя; за заказ, в
+          котором списаны баллы, начисления нет. Отменённый заказ возвращает
+          списанные баллы и забирает начисленные. Начислить или списать вручную
+          — запись в «Операциях по баллам».
       readonly: false
       required: false
       searchable: true
@@ -12514,6 +12514,8 @@ fields:
             value: delivery
           - text: Самовывоз
             value: pickup
+          - text: В зале
+            value: dine_in
       field: fulfillment
       group: null
       hidden: false
@@ -12525,6 +12527,8 @@ fields:
             value: delivery
           - text: Самовывоз
             value: pickup
+          - text: В зале
+            value: dine_in
       readonly: false
       required: true
       searchable: true
@@ -12603,10 +12607,12 @@ fields:
       collection: orders
       conditions:
         - hidden: true
-          name: Самовывоз
+          name: Самовывоз или зал
           rule:
             fulfillment:
-              _eq: pickup
+              _in:
+                - pickup
+                - dine_in
       display: null
       display_options: null
       field: address
@@ -12651,10 +12657,12 @@ fields:
       collection: orders
       conditions:
         - hidden: true
-          name: Самовывоз
+          name: Самовывоз или зал
           rule:
             fulfillment:
-              _eq: pickup
+              _in:
+                - pickup
+                - dine_in
         - hidden: true
           name: Пусто
           rule:
@@ -12701,12 +12709,7 @@ fields:
     type: integer
     meta:
       collection: orders
-      conditions:
-        - hidden: true
-          name: Доставка
-          rule:
-            fulfillment:
-              _eq: delivery
+      conditions: null
       display: related-values
       display_options:
         template: '{{name}}'
@@ -12714,7 +12717,9 @@ fields:
       group: null
       hidden: false
       interface: select-dropdown-m2o
-      note: null
+      note: >-
+        Самовывоз — откуда заберут, «В зале» — где сидит гость, доставка — какая
+        точка готовит: меню на точках разное. Пусто — точку выбирают при звонке
       options:
         template: '{{name}}'
       readonly: false
@@ -12725,7 +12730,7 @@ fields:
         - m2o
       translations:
         - language: ru-RU
-          translation: Точка самовывоза
+          translation: Точка
       validation: null
       validation_message: null
       width: half
@@ -12818,7 +12823,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 20
+      sort: 21
       special:
         - cast-json
       translations:
@@ -12863,7 +12868,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 21
+      sort: 22
       special: null
       translations:
         - language: ru-RU
@@ -12906,7 +12911,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 35
+      sort: 36
       special: null
       translations:
         - language: ru-RU
@@ -12948,7 +12953,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 33
+      sort: 34
       special: null
       translations:
         - language: ru-RU
@@ -12990,7 +12995,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 34
+      sort: 35
       special: null
       translations:
         - language: ru-RU
@@ -13032,7 +13037,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 36
+      sort: 37
       special:
         - date-updated
       translations: null
@@ -13080,7 +13085,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 26
+      sort: 27
       special:
         - m2o
       translations:
@@ -13123,7 +13128,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 29
+      sort: 30
       special: null
       translations:
         - language: ru-RU
@@ -13165,7 +13170,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 32
+      sort: 33
       special: null
       translations:
         - language: ru-RU
@@ -13209,7 +13214,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 33
+      sort: 34
       special: null
       translations:
         - language: ru-RU
@@ -13251,7 +13256,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 34
+      sort: 35
       special: null
       translations:
         - language: ru-RU
@@ -13296,7 +13301,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 50
+      sort: 51
       special: null
       translations:
         - language: ru-RU
@@ -13376,7 +13381,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 22
+      sort: 23
       special: null
       translations:
         - language: ru-RU
@@ -13435,7 +13440,7 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 23
+      sort: 24
       special: null
       translations:
         - language: ru-RU
@@ -13478,7 +13483,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 24
+      sort: 25
       special: null
       translations:
         - language: ru-RU
@@ -13520,7 +13525,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 25
+      sort: 26
       special: null
       translations:
         - language: ru-RU
@@ -13562,7 +13567,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 26
+      sort: 27
       special: null
       translations:
         - language: ru-RU
@@ -13604,7 +13609,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 27
+      sort: 28
       special: null
       translations:
         - language: ru-RU
@@ -13647,7 +13652,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 30
+      sort: 31
       special:
         - cast-json
       translations: null
@@ -13746,6 +13751,55 @@ fields:
       validation: null
       validation_message: null
       width: full
+  - collection: orders
+    field: table
+    type: string
+    meta:
+      collection: orders
+      conditions:
+        - hidden: true
+          name: Не в зале
+          rule:
+            fulfillment:
+              _neq: dine_in
+      display: null
+      display_options: null
+      field: table
+      group: null
+      hidden: false
+      interface: input
+      note: Номер стола, если гость указал
+      options:
+        placeholder: '4'
+        trim: true
+      readonly: false
+      required: false
+      searchable: true
+      sort: 20
+      special: null
+      translations:
+        - language: ru-RU
+          translation: Стол
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: table
+      table: orders
+      data_type: character varying
+      default_value: null
+      max_length: 10
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: orders
     field: payment_test
     type: boolean
@@ -13894,10 +13948,12 @@ fields:
       collection: orders
       conditions:
         - hidden: true
-          name: Самовывоз
+          name: Самовывоз или зал
           rule:
             fulfillment:
-              _eq: pickup
+              _in:
+                - pickup
+                - dine_in
       display: null
       display_options: null
       field: address_flat
@@ -13942,10 +13998,12 @@ fields:
       collection: orders
       conditions:
         - hidden: true
-          name: Самовывоз
+          name: Самовывоз или зал
           rule:
             fulfillment:
-              _eq: pickup
+              _in:
+                - pickup
+                - dine_in
       display: null
       display_options: null
       field: address_entrance
@@ -13990,10 +14048,12 @@ fields:
       collection: orders
       conditions:
         - hidden: true
-          name: Самовывоз
+          name: Самовывоз или зал
           rule:
             fulfillment:
-              _eq: pickup
+              _in:
+                - pickup
+                - dine_in
       display: null
       display_options: null
       field: address_floor
@@ -14038,10 +14098,12 @@ fields:
       collection: orders
       conditions:
         - hidden: true
-          name: Самовывоз
+          name: Самовывоз или зал
           rule:
             fulfillment:
-              _eq: pickup
+              _in:
+                - pickup
+                - dine_in
       display: null
       display_options: null
       field: address_intercom
@@ -14096,7 +14158,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 28
+      sort: 29
       special: null
       translations:
         - language: ru-RU
@@ -14139,7 +14201,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 31
+      sort: 32
       special:
         - cast-json
       translations: null
@@ -18177,6 +18239,61 @@ fields:
       validation: null
       validation_message: null
       width: full
+  - collection: products
+    field: places
+    type: csv
+    meta:
+      collection: products
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Садовая, 212Б
+            value: '1'
+          - text: Советской Армии, 177
+            value: '2'
+      field: places
+      group: null
+      hidden: false
+      interface: select-multiple-checkbox
+      note: >-
+        Где готовят это блюдо. Гость видит в каталоге только меню выбранной
+        точки.
+      options:
+        choices:
+          - text: Садовая, 212Б
+            value: '1'
+          - text: Советской Армии, 177
+            value: '2'
+      readonly: false
+      required: true
+      searchable: true
+      sort: 7
+      special:
+        - cast-csv
+      translations:
+        - language: ru-RU
+          translation: Готовят на
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: places
+      table: products
+      data_type: text
+      default_value: 1,2
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: promos
     field: id
     type: integer

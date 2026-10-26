@@ -327,7 +327,9 @@ export const mountCartAccount = ({
     const list = me.profile.addresses;
     saved = Array.isArray(list) ? list : [];
     savedFor = Array.isArray(list) ? token : null;
-    const delivery = form.querySelector<HTMLInputElement>('input[name="fulfillment"]:checked')?.value !== 'pickup';
+    // only a delivery takes an address: pickup and «В зале» (since 26.10.2026) do not
+    // адрес нужен только доставке: самовывозу и «В зале» (с 26.10.2026) — нет
+    const delivery = form.querySelector<HTMLInputElement>('input[name="fulfillment"]:checked')?.value === 'delivery';
     const empty = Object.values(fieldsNow()).every((value) => !value.trim());
     if (saved[0] && delivery && empty && !addressTouched) setAddress?.(toCheckoutFields(saved[0]));
   };

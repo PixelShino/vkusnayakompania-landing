@@ -23,6 +23,7 @@ import { rub } from './catalog.ts';
 import { priceLine } from './catering.ts';
 import { chatLinks, isChatLink } from './contact-links.ts';
 import { longDate } from './pages.ts';
+import { DEFAULT_TEXTS } from './payment.ts';
 import { menusFor } from './select.ts';
 import { BRAND, hoursRows, plural, yandexOrgUrl } from '../data/site.ts';
 import { cakeShowcase } from '../data/landings-shop.ts';
@@ -500,12 +501,27 @@ export const buildLlms = (content: Content, site: string | URL, { full = false, 
         ),
       ),
     );
+  // each venue's menu has its own address: `?place=` opens the catalog on that venue (26.10.2026)
+  // у меню каждой точки свой адрес: `?place=` открывает каталог на этой точке (26.10.2026)
+  if (stockCount > 0 && places.length > 1)
+    for (const place of places) delivery.push(item(`Меню точки ${place.name}`, page(`catalog/?place=${place.id}`), 'каталог сразу с меню этой точки'));
   const deliveryDoc = doc('delivery');
   if (deliveryDoc) delivery.push(item(deliveryDoc.title, at(deliveryDoc.href), deliveryDoc.description));
+  // how an order is got and paid — the owner's decisions of 22.10 and 26.10.2026, as the delivery questions say them
+  // как получить и оплатить заказ — решения владельца 22.10 и 26.10.2026, теми же словами, что вопросы о доставке
+  const howTo =
+    stockCount > 0 && places.length
+      ? sentences([
+          places.length > 1 && 'Меню на точках разное: в каталоге сначала выбирают точку, и заказ готовит она',
+          `Заказ можно получить с доставкой по зонам${zones.length ? ' ниже' : ''}, самовывозом из точки или в зале: гость за столиком выбирает точку, при желании номер стола, оплачивает на сайте, и заказ приносят к столу`,
+          `Оплата на сайте только онлайн: ${lower(DEFAULT_TEXTS.online)}; электронный чек приходит на почту, указанную при оформлении`,
+        ])
+      : '';
   const zoneBlock = zones.length
     ? `Зоны доставки и стоимость (считается по адресу при оформлении заказа):\n\n${zones.map((zone) => `- ${zone.name}: ${zoneText(zone)}`).join('\n')}`
     : '';
-  if (delivery.length || zoneBlock) out.push('## Доставка и каталог', [delivery.join('\n'), zoneBlock].filter(Boolean).join('\n\n'));
+  if (delivery.length || zoneBlock)
+    out.push('## Доставка и каталог', [delivery.join('\n'), howTo, zoneBlock].filter(Boolean).join('\n\n'));
 
   if (full && inStock.length) {
     out.push(

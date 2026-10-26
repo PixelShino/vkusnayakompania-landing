@@ -40,6 +40,13 @@ export type Product = {
   photo?: Img;
   /** slug раздела — якорь на странице каталога */
   category: string;
+  /**
+   * Venues that cook the dish (`places` ids); empty — both venues. The menus
+   * differ per venue (Валерия, 26.10.2026), the catalog shows one venue at a time.
+   * Точки, где готовят блюдо (id из `places`); пусто — на обеих. Меню на точках
+   * разное (Валерия, 26.10.2026), каталог показывает одну точку за раз.
+   */
+  places: number[];
 };
 
 export type CatalogCategory = {
@@ -87,6 +94,13 @@ export type RawProduct = {
   available?: boolean | null;
   badges?: string[] | string | null;
   photo?: RawPhoto | null;
+  /**
+   * «Готовят на», a csv field: the API gives `["1","2"]`, the database and an
+   * older export `"1,2"` or a JSON string; a Directus without the field gives none.
+   * «Готовят на», поле csv: API отдаёт `["1","2"]`, база и старая выгрузка —
+   * `"1,2"` или JSON-строку; Directus без поля не отдаёт ничего.
+   */
+  places?: Array<string | number | null> | string | null;
 };
 
 /** Файл → кадр; `alt` — запасная подпись, если у файла пусто и в alt, и в заголовке. */
@@ -174,6 +188,35 @@ const bySort = <T extends { sort?: number | null; id: number }>(a: T, b: T) =>
 const published = (status?: string | null) => !status || status === 'published';
 
 /**
+ * «Готовят на» → venue ids without repeats: `["1","2"]`, `[1, 2]`, `"1,2"`,
+ * `'["1","2"]'`. Empty, null or anything unexpected — `[]`, «on both»: the admin
+ * never leaves the field empty, so this is the fallback for old rows and
+ * failures, and a dish is never hidden by a typo.
+ * «Готовят на» → id точек без повторов: `["1","2"]`, `[1, 2]`, `"1,2"`,
+ * `'["1","2"]'`. Пусто, null или что-то неожиданное — `[]`, «на обеих»: админка
+ * пустым поле не оставляет, так что это запасной путь для старых строк и
+ * сбоев, и опечатка блюдо не прячет.
+ */
+export const placesOf = (value: RawProduct['places'] | unknown): number[] => {
+  let list: unknown = value;
+  if (typeof list === 'string') {
+    const text = list.trim();
+    try {
+      list = text.startsWith('[') ? JSON.parse(text) : text.split(',');
+    } catch {
+      list = [];
+    }
+  }
+  if (!Array.isArray(list)) return [];
+  const ids = list.map((item) => (typeof item === 'number' || typeof item === 'string' ? Number(String(item).trim()) : NaN));
+  return [...new Set(ids.filter((id) => Number.isInteger(id) && id > 0))];
+};
+
+/** Готовят ли блюдо на точке: пустой список — на обеих. / Whether the venue cooks the dish; empty — both do. */
+export const cookedAt = (product: Pick<Product, 'places'>, place: number) =>
+  product.places.length === 0 || product.places.includes(place);
+
+/**
  * Raw sections and dishes → the catalog page. `warn` hears about every record
  * that was dropped, so a half-filled dish shows up in the build log instead of
  * vanishing silently.
@@ -256,6 +299,7 @@ export const normalizeCatalog = (
       badges: badgesOf(raw.badges),
       photo: raw.photo ? image(raw.photo, title) : undefined,
       category: category.slug,
+      places: placesOf(raw.places),
     });
   }
 
@@ -306,9 +350,17 @@ export const photoWidths = (width: number) => [
  */
 export const coverOf = (category: CatalogCategory): Product | undefined => {
   const shot = (product: Product) => Boolean(product.photo && !product.photo.placeholder);
+  // the tile is one for both venues (since 26.10.2026 the menus differ): a dish
+  // cooked everywhere makes a cover that is never «not here»; one venue's dish
+  // only when the section has nothing shared
+  // плитка одна на обе точки (с 26.10.2026 меню разное): блюдо, которое готовят
+  // везде, даёт обложку, которой не бывает «не здесь»; блюдо одной точки —
+  // только если общих в разделе нет
+  const pick = (ok: (product: Product) => boolean) =>
+    category.products.find((p) => ok(p) && p.places.length === 0) ?? category.products.find(ok);
   return (
-    category.products.find((p) => p.available && p.badges.includes('hit') && shot(p)) ??
-    category.products.find((p) => p.available && shot(p)) ??
-    category.products.find(shot)
+    pick((p) => p.available && p.badges.includes('hit') && shot(p)) ??
+    pick((p) => p.available && shot(p)) ??
+    pick(shot)
   );
 };

@@ -131,7 +131,12 @@ for (const page of SHOP_LANDINGS) {
   for (const item of faq) {
     assert.ok(!TAG.test(item.a) && !BAD.test(item.a) && item.a.trim().length > 10, `${page.path}: ответ «${item.a}»`);
     assert.ok(/[.?!»)]$/.test(item.a), `${page.path}: ответ без точки «${item.a}»`);
-    if (item.link) assert.match(item.link.href, /^\/[a-z-/#]*$/, `${page.path}: ссылка ${item.link.href}`);
+    // a venue's link may open the catalog on it: `/catalog/?place=2` (26.10.2026)
+    // ссылка точки может открыть каталог на ней: `/catalog/?place=2` (26.10.2026)
+    if (item.link) assert.match(item.link.href, /^\/[a-z-/#]*(\?place=\d+)?$/, `${page.path}: ссылка ${item.link.href}`);
+    // the venues' menus differ: a whole shelf is never promised «at both» (26.10.2026)
+    // меню точек разное: целую полку не обещаем «на обеих» (26.10.2026)
+    assert.doesNotMatch(item.a, /самовывоз\p{L}* на [^.]* и [^.]*\d/u, `${page.path}: «самовывоз на обеих точках» — ${item.a}`);
   }
 
   const related = relatedOf(key);
@@ -167,6 +172,18 @@ assert.ok(menuLd(`${PAGE}/menu/`, CATALOG, content).hasMenuSection.length === co
 const line = menuLine(content.catalog.categories[0].products[0]);
 assert.ok(line.text.length <= 90 && line.price, 'строка меню');
 
+
+// the venues' menus (26.10.2026): the menu lead and the venue's question
+// меню точек (26.10.2026): вводный текст меню и вопрос страницы точки
+assert.match(introOf('menu', content), /На Садовой, 212Б и Советской Армии, 177 меню разное: в каталоге выберите точку/);
+for (const key of ['sadovaya', 'sovetskoy-armii'] as const) {
+  const place = placeOf(key, content)!;
+  const order = faqOf(key, content).find((item) => item.id === 'dostavka')!;
+  assert.deepEqual(order.link, { href: `/catalog/?place=${place.id}`, label: 'Меню точки в каталоге' }, `${key}: ссылка на меню точки`);
+  assert.ok(order.a.includes(`самовывоз на ${placeAt(place)}, а в зале можно заказать прямо со столика`), `${key}: самовывоз и заказ в зале`);
+}
+const oneVenue = { ...content, places: content.places.slice(0, 1) };
+assert.ok(introOf('menu', oneVenue).endsWith('забрать самовывозом на Садовой, 212Б.'), 'одна точка — она и называется');
 
 // how to order a cake / как заказать торт
 {

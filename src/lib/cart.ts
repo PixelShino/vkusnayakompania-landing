@@ -11,6 +11,7 @@
  * собрана страница, поэтому цена, изменённая в админке, не застревает в корзине.
  */
 import type { Variant } from './catalog.ts';
+import { cookedHere } from './venue.ts';
 
 export const CART_KEY = 'vk-cart-v1';
 /** больше 50 одного блюда — уже кейтеринг, а не доставка; то же ограничение у сервера */
@@ -38,6 +39,8 @@ export type CartProduct = {
   /** начинки на выбор; пусто — выбирать нечего */
   fillings: string[];
   available: boolean;
+  /** точки, где блюдо готовят; пусто или нет поля — на всех */
+  places?: readonly number[];
 };
 export type CartIndex = Map<number, CartProduct>;
 
@@ -49,6 +52,10 @@ export type PricedLine = CartLine & {
   price: number;
   sum: number;
   available: boolean;
+  /** точки, где блюдо готовят; пусто — на всех */
+  places: readonly number[];
+  /** выбранная точка это блюдо не готовит: в сумму не идёт, оформление закрыто */
+  elsewhere: boolean;
 };
 
 export const empty = (): Cart => ({ v: 1, lines: [] });
@@ -132,8 +139,18 @@ export const reconcile = (cart: Cart, index: CartIndex) => {
   return { cart: { v: 1 as const, lines }, dropped };
 };
 
-/** Корзина с названиями, ценами и суммами; в сумму идёт только то, что есть в наличии. */
-export const priced = (cart: Cart, index: CartIndex) => {
+/**
+ * The cart with titles, prices and sums for the chosen venue (`place`). Only
+ * what can be ordered counts: a dish from the stop list (`blocked`) or one the
+ * venue does not cook (`elsewhere`) stays in the list, named, but out of the
+ * total until the guest removes it or picks the venue that cooks it.
+ * Корзина с названиями, ценами и суммами для выбранной точки (`place`).
+ * Считается только то, что можно заказать: блюдо из стоп-листа (`blocked`) или
+ * блюдо, которого эта точка не готовит (`elsewhere`), остаётся в списке и
+ * называется, но в сумму не идёт, пока гость его не уберёт или не выберет
+ * точку, где его готовят.
+ */
+export const priced = (cart: Cart, index: CartIndex, place?: number | null) => {
   const lines: PricedLine[] = cart.lines.flatMap((line) => {
     const product = index.get(line.id);
     const price = product && valid(product, line) ? linePrice(product, line.variant) : null;
@@ -149,16 +166,20 @@ export const priced = (cart: Cart, index: CartIndex) => {
         price,
         sum: price * line.qty,
         available: product.available,
+        places: product.places ?? [],
+        elsewhere: !cookedHere(product, place),
       },
     ];
   });
-  const ready = lines.filter((line) => line.available);
+  const ready = lines.filter((line) => line.available && !line.elsewhere);
   return {
     lines,
     total: ready.reduce((sum, line) => sum + line.sum, 0),
     count: ready.reduce((sum, line) => sum + line.qty, 0),
     /** есть строки из стоп-листа: оформить нельзя, пока их не убрали */
     blocked: lines.some((line) => !line.available),
+    /** строки, которых выбранная точка не готовит: оформить нельзя, пока их не убрали или не сменили точку */
+    elsewhere: lines.filter((line) => line.elsewhere),
   };
 };
 

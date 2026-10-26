@@ -124,8 +124,11 @@
     font-size: clamp(40px, 5.2vw, 52px);
   }
 
+  /* as many columns as facts: two since the venue switch took «Самовывоз» */
+  /* столько колонок, сколько фактов: два, с тех пор как «Самовывоз» стал переключателем */
   .facts {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
     gap: 24px;
     margin-top: 28px;
   }
@@ -135,6 +138,250 @@
   .crumbs a:hover,
   .facts a:hover {
     color: var(--terracotta-text);
+  }
+}
+
+/* From 1200 the head has room to the right of the lead: the facts stand there,
+   by the lead and the venue switch under it, instead of a row below — the
+   right half of the head is no longer empty.
+   С 1200 у шапки есть место справа от лида: факты встают туда, рядом с лидом
+   и переключателем точек под ним, а не строкой ниже — правая половина шапки
+   больше не пустует. */
+@media (min-width: 1200px) {
+  .cat-head__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 456px);
+    column-gap: 64px;
+    align-items: start;
+  }
+
+  .cat-head__mark,
+  .cat-head__title {
+    grid-column: 1 / -1;
+  }
+
+  .cat-head__lead {
+    grid-column: 1;
+  }
+
+  .cat-head__row > .pswitch--head {
+    grid-column: 1;
+  }
+
+  .cat-head__row > .facts {
+    grid-column: 2;
+    grid-row: 3 / span 2;
+    grid-auto-flow: row;
+    gap: 12px;
+    margin: 12px 0 0;
+    padding: 2px 0 2px 28px;
+    border-top: 0;
+    box-shadow: inset 1px 0 0 var(--line);
+  }
+}
+
+/* ── точка: переключатель над меню ───────────────────────────────────────── */
+
+/* The venue switch (owner, 26.10.2026: «два переключателя адреса … и важно
+   подписать, что разное меню»): the cart's segment language — two halves in
+   one 3 px frame, the chosen one in ink — because the system has no pills.
+   The ink is one surface that slides to the chosen half, not two fills that
+   blink; which half comes from `<html data-venue>` (`--at`, `--fg`, `--fg-2`
+   in `venueCss`), so the right venue is drawn before the page script runs.
+   Переключатель точек (владелец, 26.10.2026: «два переключателя адреса … и
+   важно подписать, что разное меню»): язык сегмента корзины — две половины в
+   одной рамке 3 px, выбранная чернилами, — потому что пилюль в системе нет.
+   Чернила — одна поверхность, которая едет к выбранной половине, а не две
+   заливки, которые мигают; какая половина — решает `<html data-venue>`
+   (`--at`, `--fg`, `--fg-2` из `venueCss`), поэтому нужная точка нарисована до
+   скрипта страницы. */
+.pswitch {
+  margin-top: 20px;
+}
+
+.pswitch__note {
+  margin-bottom: 10px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--text-2);
+  text-wrap: pretty;
+}
+
+.pswitch__note b {
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* a caption, not a heading: the column and the sheet say it in the minicart's voice
+   подпись, а не заголовок: колонка и лист говорят голосом «Вашего заказа» */
+.pswitch__label {
+  margin-bottom: 10px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+
+.pswitch__seg {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  border-radius: var(--r-sq);
+  box-shadow: inset 0 0 0 1px var(--line-4);
+}
+
+.pswitch__seg::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: -1;
+  width: calc(100% / var(--n, 2));
+  border-radius: var(--r-sq);
+  background: var(--ink);
+  translate: calc(var(--at, 0) * 100%) 0;
+  transition: translate 260ms var(--ease-out);
+}
+
+.pswitch__opt {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 6px 10px;
+  border-radius: var(--r-sq);
+  color: var(--fg, var(--text));
+  text-align: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 160ms ease;
+}
+
+.pswitch__opt input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.pswitch__name {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.pswitch__meta {
+  font-size: 11px;
+  line-height: 1.25;
+  color: var(--fg-2, var(--text-4));
+  text-wrap: balance;
+  transition: color 160ms ease;
+}
+
+.pswitch__opt:has(input:focus-visible) {
+  outline: 2px solid var(--terracotta);
+  outline-offset: -4px;
+}
+
+/* on the ink the ring is the light terracotta, the one text on ink takes
+   на чернилах кольцо — осветлённая терракота, та же, что у текста на чернилах */
+.pswitch__opt:has(input:checked:focus-visible) {
+  outline-color: var(--terracotta-on-ink);
+}
+
+.pswitch__cart {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 12px;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--terracotta-text);
+}
+
+.pswitch__cart .tlink {
+  font-size: 13px;
+  color: var(--terracotta-text);
+}
+
+.pswitch__dine {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--olive-dark);
+}
+
+.pswitch__dine .ico {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+@media (min-width: 768px) {
+  .pswitch--head {
+    margin-top: 24px;
+  }
+
+  .pswitch--head .pswitch__seg {
+    max-width: 560px;
+  }
+
+  .pswitch__opt {
+    min-height: 48px;
+    padding: 7px 16px;
+  }
+
+  .pswitch__name {
+    font-size: 14px;
+  }
+
+  .pswitch__meta {
+    font-size: 12px;
+  }
+}
+
+/* as wide as the lead over it: the lead's own measure, 54ch of its type
+   шириной с лид над ним: собственная мера лида, 54ch его кегля */
+@media (min-width: 1200px) {
+  .pswitch--head {
+    max-width: 54ch;
+    font-size: var(--fs-lead);
+  }
+
+  .pswitch--head .pswitch__seg {
+    max-width: none;
+  }
+
+  .pswitch--head .pswitch__note {
+    font-size: 14px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pswitch__opt:has(input:not(:checked)):hover {
+    background: color-mix(in srgb, var(--text) 5%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pswitch__seg::before,
+  .side-venue,
+  .side-venue[data-on] {
+    transition: none;
   }
 }
 
@@ -247,6 +494,77 @@
     padding: 2px 4px 2px 0;
     overflow-y: auto;
     scrollbar-width: thin;
+  }
+
+  /* The copy of the venue switch on top of the column — venue, then section,
+     then dish; the halves stack, the ink slides down. Closed while the head
+     switch is on the screen (two in view would be noise) and without
+     scripts; it opens by its height (`grid-template-rows` 0fr → 1fr), so the
+     sections under it ride down instead of jumping.
+     Копия переключателя на верху колонки — точка, раздел, блюдо; половины
+     друг под другом, чернила едут вниз. Закрыта, пока шапочный на экране (два
+     в поле зрения — шум), и без скриптов; раскрывается по высоте
+     (`grid-template-rows` 0fr → 1fr), поэтому разделы под ней съезжают, а
+     не прыгают. */
+  .side-venue {
+    display: grid;
+    grid-template-rows: 0fr;
+    /* the column's gap belongs to the copy: closed, it takes no room at all
+       зазор колонки принадлежит копии: закрытая, она не занимает места вовсе */
+    margin-bottom: -26px;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      grid-template-rows 280ms var(--ease-out),
+      opacity 180ms ease,
+      visibility 0s linear 280ms;
+  }
+
+  .side-venue[data-on] {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    visibility: visible;
+    transition:
+      grid-template-rows 280ms var(--ease-out),
+      opacity 220ms ease 60ms,
+      visibility 0s;
+  }
+
+  .side-venue__in {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .pswitch--side {
+    margin: 0;
+    padding-bottom: 26px;
+  }
+
+  .pswitch--side .pswitch__seg {
+    grid-auto-flow: row;
+    grid-auto-rows: minmax(0, 1fr);
+  }
+
+  .pswitch--side .pswitch__seg::before {
+    inset: 0 0 auto;
+    width: auto;
+    height: calc(100% / var(--n, 2));
+    translate: 0 calc(var(--at, 0) * 100%);
+  }
+
+  .pswitch--side .pswitch__opt {
+    align-items: flex-start;
+    min-height: 54px;
+    padding: 8px 14px;
+    text-align: left;
+  }
+
+  .pswitch--side .pswitch__name {
+    font-size: 14px;
+  }
+
+  .pswitch--side .pswitch__meta {
+    font-size: 12px;
   }
 
   .cat-nav ul {
@@ -505,6 +823,48 @@
   }
 }
 
+/* An odd last tile on a phone takes the whole row and lies on its side —
+   photo in the left column, name in the right — instead of leaving half a
+   row empty. Which tile is last depends on the venue (`venueCss` sets
+   `--span`); without a venue it is the last one.
+   Нечётная последняя плитка на телефоне берёт весь ряд и ложится на бок —
+   фото в левой колонке, название в правой, — а не оставляет полряда пустым.
+   Какая плитка последняя, зависит от точки (`--span` ставит `venueCss`); без
+   точки — просто последняя. */
+@media (max-width: 767px) {
+  .tiles > li {
+    container: tile / inline-size;
+    grid-column: span var(--span, 1);
+  }
+
+  :root:not([data-venue]) .tiles > li:last-child:nth-child(odd) {
+    --span: 2;
+  }
+}
+
+@container tile (min-width: 300px) {
+  .tile {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-content: center;
+    column-gap: 10px;
+  }
+
+  .tile__frame {
+    grid-row: 1 / span 2;
+  }
+
+  .tile__name {
+    align-self: end;
+    margin-top: 0;
+  }
+
+  .tile__n {
+    align-self: start;
+  }
+}
+
 @media (min-width: 768px) {
   .tiles {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -573,17 +933,52 @@
 
 .secbar__now {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   min-width: 0;
 }
 
+/* on the name's line, not in the middle of the name and the venue
+   на линии названия, а не посередине названия и точки */
 .secbar__mark {
   flex: none;
   width: 7px;
   height: 7px;
+  margin-top: 8px;
   background: var(--terracotta);
   rotate: 45deg;
+}
+
+.secbar__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* whose menu: the section's name is not enough when the venues cook different menus
+   чьё меню: имени раздела мало, когда точки готовят разное */
+.secbar__venue {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  margin-top: 2px;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text-4);
+}
+
+.secbar__venue > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.secbar__venue .ico {
+  flex: none;
+  width: 13px;
+  height: 13px;
 }
 
 .secbar__name {
@@ -691,6 +1086,14 @@
   color: var(--text-4);
 }
 
+/* the venue over the list: the list answers the switch at once
+   точка над списком: список отвечает переключателю сразу */
+.pswitch--sheet {
+  margin: 0;
+  padding: 14px var(--pad) 16px;
+  border-bottom: 1px solid var(--line-3);
+}
+
 .sheet__list {
   margin: 0;
   padding: 4px var(--pad) calc(18px + env(safe-area-inset-bottom));
@@ -777,6 +1180,10 @@
 
   .sheet__head {
     padding: 22px 24px 14px;
+  }
+
+  .pswitch--sheet {
+    padding: 16px 24px 18px;
   }
 
   .sheet__list {
@@ -1396,6 +1803,50 @@ html:has(.dlg[open]) {
 
 .dish-dlg__out[hidden] {
   display: none;
+}
+
+/* the other venue's dish: where it is cooked and the way to that menu, instead of the buy row
+   блюдо другой точки: где его готовят и путь в то меню — вместо строки покупки */
+.dish-dlg__away {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: var(--r-sq);
+  background: var(--surface-warm);
+  box-shadow: inset 0 0 0 1px var(--line-warm);
+}
+
+.dish-dlg__away[hidden] {
+  display: none;
+}
+
+.dish-dlg__away-text {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--terracotta-text);
+  text-wrap: pretty;
+}
+
+.dish-dlg__away-text .ico {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+
+/* the title takes the focus to be read out, not to be ringed: the ring around
+   a heading on a link-opened window was noise
+   заголовок получает фокус, чтобы его прочли, а не обвели: кольцо вокруг
+   заголовка окна, открытого по ссылке, было шумом */
+.dish-dlg__title:focus-visible,
+.drawer__title:focus-visible,
+.done__title:focus-visible {
+  outline: none;
 }
 
 .variants {
@@ -2019,6 +2470,55 @@ html:has(.dlg[open]) {
   color: var(--terracotta-text);
 }
 
+/* a line that cannot be ordered here: the way out in a word, not an unlabelled bin
+   строка, которую здесь не заказать: выход словом, а не безымянной корзиной */
+.line__drop {
+  gap: 6px;
+  margin-right: 2px;
+  font-size: 13px;
+  color: var(--terracotta-text);
+}
+
+.line__drop .ico {
+  width: 17px;
+  height: 17px;
+}
+
+.away__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 18px;
+  margin-top: 2px;
+}
+
+.away__actions .tlink {
+  font-size: 13px;
+  color: var(--terracotta-text);
+}
+
+/* why «Оформить заказ» is off, right over it: the notice above may be scrolled away
+   почему «Оформить заказ» выключена — прямо над ней: плашка вверху могла уехать */
+.cart-warn {
+  margin: -4px 0 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--terracotta-text);
+  text-wrap: balance;
+}
+
+.bill__note--away {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 12px;
+}
+
+.bill__note--away .tlink {
+  font-size: 12.5px;
+  color: var(--terracotta-text);
+}
+
 /* пустая корзина */
 .drawer__empty {
   display: flex;
@@ -2587,6 +3087,100 @@ html:has(.dlg[open]) {
 .place-opt:has(input:checked) {
   background: var(--olive-tint);
   box-shadow: inset 0 0 0 2px var(--olive);
+}
+
+/* three ways: «Самовывоз» keeps its whole word down to 320 px — the type gets
+   a half step smaller there, the word is never cut
+   три способа: «Самовывоз» целым словом до 320 px — шрифт там на полшага
+   меньше, слово не режется */
+.seg--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.seg--3 .seg__opt span {
+  padding-inline: 4px;
+}
+
+@media (max-width: 359px) {
+  .seg--3 .seg__opt span {
+    font-size: 12.5px;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* «Готовит: Садовая, 212Б · Поменять» — the venue of a delivery, one line
+   «Готовит: Садовая, 212Б · Поменять» — точка доставки одной строкой */
+.from {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -2px 0 16px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
+.from > .ico {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--olive);
+}
+
+.from__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.from__text b {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.from__swap {
+  flex: none;
+  font-size: 13px;
+}
+
+.places__label {
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+/* the payment note speaks of delivery: at a table it says nothing, the line below says how it goes
+   сноска оплаты говорит о доставке: в зале ей нечего сказать, как всё будет — говорит строка ниже */
+.checkout:has(input[name='fulfillment'][value='dine_in']:checked) .pay-choice__note,
+.checkout:has(input[name='fulfillment'][value='dine_in']:checked) .place-opt__hours {
+  display: none;
+}
+
+/* at a table: a short number field and the one line that says how it goes
+   в зале: короткое поле номера и одна строка о том, как всё будет */
+.dine {
+  margin-top: 16px;
+}
+
+.dine__table input {
+  max-width: 168px;
+}
+
+.dine__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: -2px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+.dine__note .ico {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--olive);
 }
 
 .when {

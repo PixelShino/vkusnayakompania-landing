@@ -15,6 +15,7 @@ import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import Icon from '../Icon.astro';
 import { BADGE_LABEL, photoWidths, priceLabel, rub, sizeLabel, type Product } from '../../lib/catalog.ts';
+import { placesAttr } from '../../lib/venue.ts';
 
 interface Props {
   product: Product;
@@ -43,6 +44,7 @@ const SIZES = '(min-width: 1200px) 316px, (min-width: 768px) 30vw, 46vw';
   class:list={['dish', { 'dish--out': !product.available }]}
   id={`p-${product.slug}`}
   data-dish={product.id}
+  data-places={placesAttr(product.places)}
 >
   {/* the frame repeats the title's link for the mouse; the keyboard and the
       screen reader go through the title, so the frame is not a second stop

@@ -738,6 +738,9 @@ assert.deepEqual(site.DEFAULT_TEXTS, core.DEFAULT_TEXTS, 'тексты по ум
     items: [{ product: 5, qty: 2 }],
     total: 300,
     consent: true,
+    // online needs the mail since 26.10.2026 (the rule itself — scripts/notify.check.mjs)
+    // онлайн-оплате с 26.10.2026 нужна почта (само правило — scripts/notify.check.mjs)
+    email: 'anna@mail.ru',
   };
   const guest = { accountability: { user: null, ip: '10.0.0.1' }, database };
   const sent = await filters['orders.items.create']({ ...order, payment_method: 'online', payment_status: 'paid', paid_at: '2026-01-01' }, {}, guest);
@@ -768,9 +771,13 @@ assert.deepEqual(site.DEFAULT_TEXTS, core.DEFAULT_TEXTS, 'тексты по ум
   const { buildOrder, emailError, receiptEmail, validate } = await import('./order.ts');
   const { RU_MAIL_ERROR } = await import('./email.ts');
 
-  // форма: необязательна, только российская почта, как в кабинете; уходит строчными, пустая — не уходит
+  // форма: только российская почта, как в кабинете; уходит строчными, пустая — не уходит;
+  // при онлайн-оплате обязательна (владелец, 26.10.2026: «чтобы точно пришло»)
   const form = { name: 'Анна', phone: '9879552565', fulfillment: 'pickup' as const, place: 1, when: 'asap' as const, consent: true };
-  assert.deepEqual(validate(form), {}, 'без почты — можно отправлять');
+  assert.deepEqual(validate(form), {}, 'без онлайн-оплаты и без почты — можно отправлять');
+  const { EMAIL_NEEDED } = await import('./order.ts');
+  assert.equal(validate({ ...form, payment: 'online' }).email, EMAIL_NEEDED, 'онлайн-оплата без почты — ошибка до сервера');
+  assert.deepEqual(validate({ ...form, payment: 'online', email: 'anna@mail.ru' }), {}, 'онлайн-оплата с почтой — можно отправлять');
   assert.deepEqual(validate({ ...form, email: '   ' }), {});
   assert.deepEqual(validate({ ...form, email: ' Anna@Mail.RU ' }), {});
   assert.equal(validate({ ...form, email: 'anna@gmail.com' }).email, RU_MAIL_ERROR);

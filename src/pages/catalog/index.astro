@@ -11,6 +11,12 @@
  * здесь, скрипт страницы (`catalog.ts`) только добавляет корзину, окно блюда и
  * форму. С пустым каталогом страница всё равно собирается и говорит, где
  * заказать.
+ * The two venues cook different menus: the page shows one at a time (the
+ * switch over the menu, `src/lib/venue.ts`), the HTML holds both, so search
+ * engines and a page without scripts get the whole menu.
+ * Две точки готовят разное меню: страница показывает одну за раз
+ * (переключатель над меню, `src/lib/venue.ts`), в HTML — обе, поэтому поиск и
+ * страница без скриптов получают всё меню.
  */
 import type { ImageMetadata } from 'astro';
 import { getImage } from 'astro:assets';
@@ -25,6 +31,8 @@ import SectionTiles from '../../components/catalog/SectionTiles.astro';
 import SectionsSheet from '../../components/catalog/SectionsSheet.astro';
 import CartDrawer from '../../components/catalog/CartDrawer.astro';
 import DishDialog from '../../components/catalog/DishDialog.astro';
+import PlaceSwitch from '../../components/catalog/PlaceSwitch.astro';
+import VenueText from '../../components/catalog/VenueText.astro';
 import { BASE } from '../../lib/base.ts';
 import { BRAND } from '../../data/site.ts';
 import { getContent, typo } from '../../lib/content.ts';
@@ -32,6 +40,8 @@ import { positions, rub } from '../../lib/catalog.ts';
 import { FREE_FROM } from '../../lib/delivery.ts';
 import { buildDeliveryFaq, faqJsonLd, loadZones } from '../../lib/delivery-faq.ts';
 import { DOC, docHref } from '../../lib/pages.ts';
+import { CHECKOUT_KEY } from '../../lib/order.ts';
+import { countsAt, placesAttr, sectionPlaces, venueCss, venueScript } from '../../lib/venue.ts';
 import '../../styles/catalog.css';
 
 const content = await getContent();
@@ -128,6 +138,20 @@ const jsonLd = {
   ],
 };
 
+// The venues: their ids in the admin's order, what each one cooks. One venue
+// (or none) is no choice — no switch, no hiding.
+// Точки: id в порядке админки и что готовит каждая. Одна точка (или ни одной)
+// — не выбор: нет ни переключателя, ни скрытия.
+const venues = places.length > 1 ? places.map((place) => place.id) : [];
+const allDishes = catalog.categories.flatMap((category) => category.products);
+const say = (counts: Record<number, number>, word = positions) =>
+  Object.fromEntries(Object.entries(counts).map(([id, n]) => [id, word(n)]));
+const sections = catalog.categories.map((category) => ({
+  category,
+  where: placesAttr(sectionPlaces(category.products, venues)),
+  counts: countsAt(category.products, venues),
+}));
+
 // What the page script needs to price the cart and fill the dish window. Image
 // addresses are not here: the window borrows them from the card already on the page.
 // Что нужно скрипту, чтобы посчитать корзину и заполнить окно блюда. Адресов
@@ -148,8 +172,14 @@ const data = {
       fillings: product.fillings,
       available: product.available,
       badges: product.badges,
+      places: product.places,
     })),
   ),
+  // names for «Готовят только на …», dish counts for what the switch announces
+  // имена для «Готовят только на …», число блюд — для того, что объявит переключатель
+  places: venues.length
+    ? places.map((place) => ({ id: place.id, name: place.name, dishes: countsAt(allDishes, venues)[place.id] ?? 0 }))
+    : [],
 };
 
 // the first row of dishes is above the fold on a phone and a desktop alike
@@ -168,6 +198,10 @@ let rendered = 0;
   landing={false}
 >
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} is:inline />
+  {/* the venue before the first paint: the other menu is hidden at once, not after the page script
+      точка до первой отрисовки: чужое меню спрятано сразу, а не после скрипта страницы */}
+  {venues.length > 0 && !empty && <style slot="head" is:inline set:html={venueCss(venues)} />}
+  {venues.length > 0 && !empty && <script slot="head" is:inline set:html={venueScript(venues, CHECKOUT_KEY)} />}
   <Header content={content} over={false} cart={!empty} />
 
   <main id="main" class="cat" tabindex="-1">
@@ -185,34 +219,49 @@ let rendered = 0;
             typo(
               empty
                 ? 'Каталог на сайте обновляется. Пока заказать можно по телефону.'
-                : 'Всё меню доставки по Самаре и самовывоз из двух наших кафе — от завтраков до праздничных тортов. Соберите корзину, мы перезвоним и подтвердим состав, сумму и время.',
+                : venues.length
+                  ? 'Всё меню двух наших заведений, от завтраков до праздничных тортов, с доставкой по Самаре или самовывозом.'
+                  : 'Всё меню, от завтраков до праздничных тортов, с доставкой по Самаре или самовывозом.',
             )
           }
         </p>
-      </div>
+        {/* the venue first, the dishes after (Валерия, 26.10.2026): «сверху» on
+            every width, under the lead; the sticky column has a copy for when this
+            one is gone over the top
+            сначала точка, потом блюда (Валерия, 26.10.2026): «сверху» на любой
+            ширине, под лидом; у липкой колонки есть копия на случай, когда этот
+            ушёл за верх экрана */}
+        {venues.length > 0 && !empty && <PlaceSwitch places={places} id="head" />}
 
-      <ul class="facts" aria-label="Как это работает">
-        <li>
-          <Icon name="phone" />
-          <span><b>Подтверждаем звонком.</b> Перезвоним, уточним состав и время</span>
-        </li>
-        <li>
-          <Icon name="delivery" />
-          <span>
-            <b>Доставка по Самаре.</b> Стоимость считается по адресу при оформлении, бесплатно от{'\u00a0'}{rub(FREE_FROM)}{
-              deliveryHref && (
-                <>
-                  {' '}— <a href={deliveryHref}>условия доставки и оплаты</a>
-                </>
-              )
-            }
-          </span>
-        </li>
-        <li>
-          <Icon name="pin" />
-          <span><b>Самовывоз:</b> {places.map((place) => place.name).join(' и ')}</span>
-        </li>
-      </ul>
+        <ul class="facts" aria-label="Как это работает">
+          <li>
+            <Icon name="phone" />
+            <span><b>Подтверждаем звонком.</b> Перезвоним, уточним состав и время</span>
+          </li>
+          <li>
+            <Icon name="delivery" />
+            <span>
+              <b>Доставка по Самаре.</b> Стоимость считается по адресу при оформлении, бесплатно от{'\u00a0'}{rub(FREE_FROM)}{
+                deliveryHref && (
+                  <>
+                    {' '}— <a href={deliveryHref}>условия доставки и оплаты</a>
+                  </>
+                )
+              }
+            </span>
+          </li>
+          {
+            !venues.length && places.length > 0 && (
+              <li>
+                <Icon name="pin" />
+                <span>
+                  <b>Самовывоз:</b> {places.map((place) => place.name).join(' и ')}
+                </span>
+              </li>
+            )
+          }
+        </ul>
+      </div>
     </section>
 
     {
@@ -230,17 +279,28 @@ let rendered = 0;
           </div>
         </section>
       ) : (
-        <SectionTiles catalog={catalog} />
+        <SectionTiles catalog={catalog} places={venues} />
         <div class="container cat-layout">
           <aside class="cat-side">
+            {/* the copy opens once the head switch is gone over the top: never two in view
+                копия раскрывается, когда шапочный ушёл за верх экрана: двух в поле зрения нет */}
+            {
+              venues.length > 0 && (
+                <div class="side-venue" data-side-venue>
+                  <div class="side-venue__in">
+                    <PlaceSwitch places={places} id="side" variant="side" />
+                  </div>
+                </div>
+              )
+            }
             <nav class="cat-nav" aria-label="Разделы каталога" data-cat-nav>
               <ul role="list">
-                {catalog.categories.map((category, i) => (
-                  <li>
+                {sections.map(({ category, where, counts }, i) => (
+                  <li data-places={where}>
                     <a href={`#${category.slug}`} data-nav={category.slug} aria-current={i === 0 ? 'true' : undefined}>
                       <span>{category.title}</span>
                       <span class="cat-nav__n tnum" aria-hidden="true">
-                        {category.products.length}
+                        <VenueText all={String(category.products.length)} at={say(counts, String)} />
                       </span>
                     </a>
                   </li>
@@ -267,18 +327,26 @@ let rendered = 0;
           </aside>
 
           <div class="cat-main">
-            {catalog.categories.map((category) => (
-              <section class="cat-sec" id={category.slug} aria-labelledby={`h-${category.slug}`} data-sec={category.slug}>
+            {sections.map(({ category, where, counts }) => (
+              <section
+                class="cat-sec"
+                id={category.slug}
+                aria-labelledby={`h-${category.slug}`}
+                data-sec={category.slug}
+                data-places={where}
+              >
                 <header class="cat-sec__head" data-reveal>
                   <h2 class="display-caps cat-sec__title" id={`h-${category.slug}`} tabindex="-1">
                     {category.title}
                   </h2>
-                  <span class="tag cat-sec__n">{positions(category.products.length)}</span>
+                  <span class="tag cat-sec__n">
+                    <VenueText all={positions(category.products.length)} at={say(counts)} />
+                  </span>
                   {category.description && <p class="cat-sec__desc">{category.description}</p>}
                 </header>
                 <ul class="cat-grid" role="list">
                   {category.products.map((product) => (
-                    <li>
+                    <li data-places={venues.length ? placesAttr(product.places) : undefined}>
                       <DishCard product={product} eager={rendered++ < firstEager} />
                     </li>
                   ))}
@@ -325,7 +393,19 @@ let rendered = 0;
           >
             <span class="secbar__now">
               <span class="secbar__mark" aria-hidden="true"></span>
-              <span class="secbar__name" data-secbar-name>{catalog.categories[0]?.title}</span>
+              <span class="secbar__text">
+                <span class="secbar__name" data-secbar-name>{catalog.categories[0]?.title}</span>
+                {/* whose menu this is: the menus differ, the bar says it under the section
+                    чьё это меню: меню разное, строка говорит это под разделом */}
+                {
+                  venues.length > 0 && (
+                    <span class="secbar__venue">
+                      <Icon name="pin" />
+                      <span data-venue-name>{places[0]?.name}</span>
+                    </span>
+                  )
+                }
+              </span>
             </span>
             <span class="secbar__all" aria-hidden="true">
               Разделы
@@ -336,7 +416,7 @@ let rendered = 0;
         <button type="button" class="round-btn totop" data-totop aria-label="Наверх, к началу каталога">
           <Icon name="arrow-up" />
         </button>
-        <SectionsSheet catalog={catalog} />
+        <SectionsSheet catalog={catalog} places={venues.length ? places : []} />
         <DishDialog />
         <CartDrawer content={content} />
         <p class="sr-only" aria-live="polite" data-announce></p>

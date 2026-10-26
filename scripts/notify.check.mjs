@@ -27,6 +27,8 @@ import {
   demoModel,
   emailText,
   fillTemplate,
+  fulfillmentLine,
+  kitchenLine,
   mailState,
   normalizeSettings,
   orderModel,
@@ -258,6 +260,188 @@ assert.ok(huge.endsWith('</a>'), 'ссылка в админку не отрез
   );
   assert.ok(sent[1].message.includes('Доставка: ул. Ленина, 1, кв. 5, домофон 5 · '), sent[1].message);
   assert.ok(sent[2].message.includes('Самовывоз. Когда:'), sent[2].message);
+}
+
+// ── venues, «В зале», the mail for an online payment (26.10.2026) ───────────
+// ── точки, «В зале», почта при онлайн-оплате (26.10.2026) ────────────────────
+{
+  // the lines of the message / строки сообщения
+  assert.equal(fulfillmentLine({ fulfillment: 'dine_in', table: '4' }, 'Садовая, 212Б'), 'В зале: Садовая, 212Б, стол 4');
+  assert.equal(fulfillmentLine({ fulfillment: 'dine_in', table: ' ' }, 'Садовая, 212Б'), 'В зале: Садовая, 212Б', 'без стола');
+  assert.equal(fulfillmentLine({ fulfillment: 'dine_in', table: 7 }, null), 'В зале: стол 7');
+  assert.equal(fulfillmentLine({ fulfillment: 'dine_in' }), 'В зале');
+  assert.equal(kitchenLine({ fulfillment: 'delivery' }, 'Садовая, 212Б'), 'Готовит: Садовая, 212Б');
+  assert.equal(kitchenLine({ fulfillment: 'delivery' }, null), null, 'доставка без точки — строки нет');
+  assert.equal(kitchenLine({ fulfillment: 'pickup' }, 'Садовая, 212Б'), null, 'самовывоз уже называет точку');
+  assert.equal(kitchenLine({ fulfillment: 'dine_in' }, 'Садовая, 212Б'), null, 'зал уже называет точку');
+  const delivered = orderModel({ ...order, desired_time: 'Сегодня к 18:00' }, { place: 'Советской Армии, 177', adminUrl: URL });
+  assert.deepEqual(
+    delivered.facts,
+    ['Доставка: ул. Ленина, 1, кв. 5, домофон 5', 'Готовит: Советской Армии, 177', 'Когда: Сегодня к 18:00'],
+    '«Готовит» сразу после адреса',
+  );
+  assert.ok(telegramText(delivered).includes('Готовит: Советской Армии, 177'));
+  assert.ok(emailText(delivered).includes('Готовит: Советской Армии, 177'));
+  assert.deepEqual(orderModel(order).facts.slice(0, 2), ['Доставка: ул. Ленина, 1, кв. 5, домофон 5', 'Когда: Сегодня к 18:00'], 'точки нет — строки нет');
+  const hall = orderModel({ ...order, fulfillment: 'dine_in', table: '4', address: null, address_details: null }, { place: 'Садовая, 212Б' });
+  assert.equal(hall.facts[0], 'В зале: Садовая, 212Б, стол 4');
+  assert.ok(!hall.facts.some((fact) => fact.startsWith('Готовит')), 'в зале «Готовит» не дублируется');
+  const picked = orderModel({ ...order, fulfillment: 'pickup' }, { place: 'Садовая, 212Б' });
+  assert.equal(picked.facts.filter((fact) => fact.includes('Садовая')).length, 1, 'самовывоз: точка один раз');
+  const waiting = pendingModel({ ...order, payment_method: 'online' }, { place: 'Садовая, 212Б' });
+  assert.deepEqual(waiting.facts.slice(1), ['Доставка: ул. Ленина, 1, кв. 5, домофон 5', 'Готовит: Садовая, 212Б'], '«Неоформленные»: кухня после адреса');
+  assert.equal(pendingModel({ ...order, fulfillment: 'dine_in', table: '12А' }, { place: 'Садовая, 212Б' }).facts.at(-1), 'В зале: Садовая, 212Б, стол 12А');
+
+  // the guard's pure rules / чистые правила хука
+  const guard = await import('../directus/extensions/order-guard/index.js');
+  assert.deepEqual(guard.dishPlaces('1,2'), [1, 2], 'csv из базы');
+  assert.deepEqual(guard.dishPlaces(['2']), [2]);
+  assert.deepEqual(guard.dishPlaces('["1"]'), [1]);
+  for (const junk of [null, '', 'обе', '[', {}, ['x']]) assert.deepEqual(guard.dishPlaces(junk), [], JSON.stringify(junk));
+  for (const [raw, want] of [[' 4 ', '4'], ['стол 4', '4'], ['Столик №12А', '12А'], ['№ 7', '7'], ['В-3', 'В-3'], ['', null], [null, null], [5, '5']])
+    assert.equal(guard.tableNumber(raw), want, `стол «${raw}»`);
+  for (const bad of ['4; drop', '<b>', '12345678901', 'стол 4!']) assert.equal(guard.tableNumber(bad), false, `стол «${bad}»`);
+  const names = new Map([[1, 'Садовая, 212Б'], [2, 'Советской Армии, 177']]);
+  const borsch = { title: 'Борщ', places: [2] };
+  const croissant = { title: 'Круассан', places: [1] };
+  const mors = { title: 'Морс', places: [1, 2] };
+  const bread = { title: 'Хлеб', places: [] };
+  assert.deepEqual(guard.kitchenFor(2, [borsch, mors, bread], names), { place: 2 });
+  assert.deepEqual(guard.kitchenFor(1, [borsch], names), {
+    error: '«Борщ» готовят только по адресу Советской Армии, 177. Поменяйте точку или уберите блюдо из корзины.',
+  });
+  assert.deepEqual(guard.kitchenFor(null, [borsch, mors], names), { place: 2 }, 'доставка без точки: единственная, где готовят всё');
+  assert.deepEqual(guard.kitchenFor(null, [mors, bread], names), { place: null }, 'готовят обе — точка остаётся пустой');
+  assert.deepEqual(guard.kitchenFor(null, [croissant, mors, borsch], names), {
+    error:
+      'В корзине блюда с разных точек: «Круассан» готовят по адресу Садовая, 212Б, а «Борщ» — Советской Армии, 177. Оформите их разными заказами или уберите лишнее.',
+  });
+
+  // the hook / хук
+  const fakeDb = (tables) => (name) => {
+    let list = [...(tables[name] ?? [])];
+    const query = {
+      where(match) {
+        list = list.filter((row) => Object.entries(match).every(([key, value]) => row[key] === value));
+        return query;
+      },
+      whereIn(column, values) {
+        list = list.filter((row) => values.includes(row[column]));
+        return query;
+      },
+      select: async () => list,
+      first: async () => list[0],
+      pluck: async (column) => list.map((row) => row[column]),
+    };
+    return query;
+  };
+  const dish = (id, title, places) => ({ id, title, price: 100, weight: null, variants: [], fillings: [], available: true, status: 'published', places });
+  const tables = {
+    products: [dish(1, 'Борщ', '2'), dish(2, 'Круассан', '1'), dish(3, 'Морс', '1,2'), dish(4, 'Хлеб', null)],
+    orders: [],
+    places: [{ id: 1, name: 'Садовая, 212Б' }, { id: 2, name: 'Советской Армии, 177' }],
+    payment_settings: [],
+    directus_roles: [{ id: 'r1', name: 'Administrator' }],
+    directus_users: [{ id: 'u1', role: 'r1', status: 'active' }],
+  };
+  const database = fakeDb(tables);
+  const sent = [];
+  const warned = [];
+  const filters = {};
+  const actions = {};
+  guard.default(
+    { filter: (event, fn) => (filters[event] = fn), action: (event, fn) => (actions[event] = fn) },
+    {
+      services: { NotificationsService: class { async createOne(data) { sent.push(data); } } },
+      logger: { warn: (text) => warned.push(text), error: () => {}, info: () => {} },
+    },
+  );
+  const full = { collections: { orders: { fields: { email: {}, table: {} } }, products: { fields: { places: {} } }, payment_settings: {} } };
+  let ip = 0;
+  const send = (extra, schema = full) =>
+    filters['orders.items.create'](
+      { customer_name: 'Анна', phone: '8 987 955 25 65', consent: true, fulfillment: 'delivery', address: 'Ленина, 1', ...extra },
+      {},
+      { accountability: { user: null, ip: `10.0.26.${(ip += 1)}` }, database, schema },
+    );
+  const items = (...ids) => ids.map((product) => ({ product, qty: 1 }));
+  const reason = (text) => (error) => error.status === 400 && error.extensions?.reason === text;
+
+  // the menu of the chosen venue / меню выбранной точки
+  await assert.rejects(
+    send({ fulfillment: 'pickup', place: 1, items: items(1, 3) }),
+    reason('«Борщ» готовят только по адресу Советской Армии, 177. Поменяйте точку или уберите блюдо из корзины.'),
+  );
+  assert.equal((await send({ fulfillment: 'pickup', place: 2, items: items(1, 3, 4) })).place, 2);
+  await assert.rejects(send({ fulfillment: 'pickup', items: items(3) }), reason('Выберите точку самовывоза.'));
+  // delivery: the venue is optional, sent — it is checked and kept; not sent — found by the dishes
+  // доставка: точка необязательна; прислана — проверяется и пишется; нет — находится по блюдам
+  assert.equal((await send({ place: '2', items: items(1) })).place, 2, 'строка «2» — точка 2');
+  await assert.rejects(send({ place: 1, items: items(1) }), reason('«Борщ» готовят только по адресу Советской Армии, 177. Поменяйте точку или уберите блюдо из корзины.'));
+  await assert.rejects(send({ place: 99, items: items(3) }), reason('Такой точки нет. Обновите страницу и выберите точку заново.'));
+  assert.equal((await send({ items: items(1, 3) })).place, 2, 'борщ готовят только на Советской Армии — она и ставится');
+  assert.equal((await send({ items: items(2, 4) })).place, 1);
+  assert.equal((await send({ items: items(3, 4) })).place, null, 'готовят обе — точку выберут при звонке');
+  assert.equal((await send({ place: null, items: items(3) })).place, null);
+  await assert.rejects(
+    send({ items: items(2, 1) }),
+    reason('В корзине блюда с разных точек: «Круассан» готовят по адресу Садовая, 212Б, а «Борщ» — Советской Армии, 177. Оформите их разными заказами или уберите лишнее.'),
+  );
+  // a Directus without «Готовят на»: no menu check, the column is not even asked
+  // Directus без «Готовят на»: проверки меню нет, колонку даже не спрашиваем
+  assert.equal((await send({ fulfillment: 'pickup', place: 1, items: items(1) }, { collections: { orders: { fields: { table: {} } } } })).place, 1);
+
+  // «В зале»: the venue is required, the table optional, no address, no delivery cost
+  // «В зале»: точка обязательна, стол — нет, без адреса и без стоимости доставки
+  await assert.rejects(send({ fulfillment: 'dine_in', items: items(3) }), reason('Выберите точку, в зале которой вы сидите.'));
+  const hallOrder = await send({ fulfillment: 'dine_in', place: 1, table: ' стол 4 ', address_flat: '12', items: items(2, 3) });
+  assert.deepEqual(
+    [hallOrder.fulfillment, hallOrder.place, hallOrder.table, hallOrder.address, hallOrder.address_details, hallOrder.delivery_cost, hallOrder.delivery_zone],
+    ['dine_in', 1, '4', null, null, 0, null],
+  );
+  assert.ok(!('address_flat' in hallOrder), 'в зале пунктов адреса нет');
+  assert.equal(hallOrder.to_pay, hallOrder.total, 'к оплате — только блюда');
+  assert.ok(!('table' in (await send({ fulfillment: 'dine_in', place: 2, items: items(1) }))), 'без стола — ключа нет');
+  assert.ok(!('table' in (await send({ fulfillment: 'pickup', place: 2, table: '4', items: items(1) }))), 'стол только у зала');
+  await assert.rejects(send({ fulfillment: 'dine_in', place: 1, table: '4; drop', items: items(3) }), reason(guard.TABLE_ERROR));
+  await assert.rejects(send({ fulfillment: 'dine_in', place: 2, items: items(2) }), reason('«Круассан» готовят только по адресу Садовая, 212Б. Поменяйте точку или уберите блюдо из корзины.'));
+  // no `table` column yet: the number goes to the manager's note, once in the log
+  // колонки `table` ещё нет: номер — в заметку менеджера, в логе один раз
+  const noTable = { collections: { orders: { fields: { email: {} } }, products: { fields: { places: {} } } } };
+  const early = await send({ fulfillment: 'dine_in', place: 1, table: '4', items: items(3) }, noTable);
+  assert.ok(!('table' in early));
+  assert.equal(early.manager_note, 'Стол: 4');
+  await send({ fulfillment: 'dine_in', place: 1, table: '5', items: items(3) }, noTable);
+  assert.equal(warned.filter((line) => line.includes('нет поля table')).length, 1);
+  await assert.rejects(send({ fulfillment: 'takeaway', items: items(3) }), reason('Выберите, как получить заказ: доставка, самовывоз или в зале.'));
+
+  // the mail is required for an online payment / почта обязательна при онлайн-оплате
+  assert.equal(guard.EMAIL_REQUIRED, 'Укажите почту: на неё придёт чек об оплате.');
+  await assert.rejects(send({ payment_method: 'online', items: items(3) }), reason(guard.EMAIL_REQUIRED));
+  await assert.rejects(send({ payment_method: 'online', email: '  ', items: items(3) }), reason(guard.EMAIL_REQUIRED));
+  await assert.rejects(send({ payment_method: 'online', email: 'anna@gmail.com', items: items(3) }), reason(guard.EMAIL_ERROR), 'чужая почта — прежний текст');
+  assert.equal((await send({ payment_method: 'online', email: 'Anna@Mail.ru', items: items(3) })).email, 'anna@mail.ru');
+  assert.ok(!('email' in (await send({ payment_method: 'on_delivery', items: items(3) }))), 'при получении почта необязательна');
+  assert.ok(!('email' in (await send({ items: items(3) }))), 'без онлайн-оплаты на сайте — необязательна');
+  // online only (on delivery switched off): an order without the method pays online all the same
+  // только онлайн («при получении» выключено): заказ без способа всё равно платится онлайн
+  tables.payment_settings.push({ id: 1, online_enabled: true, allow_on_delivery: false, provider: 'yookassa', mode: 'test' });
+  await assert.rejects(send({ items: items(3) }), reason(guard.EMAIL_REQUIRED));
+  tables.payment_settings[0].allow_on_delivery = true;
+  assert.ok(!('email' in (await send({ items: items(3) }))), 'при получении разрешено — почта по желанию');
+  tables.payment_settings.length = 0;
+
+  // the bell in the admin names the venue / колокольчик в админке называет точку
+  for (const [key, row] of [
+    [1, await send({ items: items(1), address: 'Ленина, 1' })],
+    [2, await send({ fulfillment: 'dine_in', place: 1, table: '4', items: items(2) })],
+    [3, await send({ fulfillment: 'pickup', place: 2, items: items(1) })],
+  ])
+    await actions['orders.items.create']({ key, payload: { ...row, number: `2610-000${key}` } }, { database, schema: {} });
+  assert.equal(sent.length, 3);
+  assert.ok(sent[0].message.includes('Доставка: Ленина, 1 · стоимость назвать при звонке. Готовит: Советской Армии, 177. Когда:'), sent[0].message);
+  assert.ok(sent[1].message.includes('В зале: Садовая, 212Б, стол 4. Когда:'), sent[1].message);
+  assert.ok(sent[2].message.includes('Самовывоз: Советской Армии, 177. Когда:'), sent[2].message);
 }
 
 // ── mail state / состояние почты ─────────────────────────────────────────────
@@ -1045,4 +1229,4 @@ assert.ok(!scrub(`token ${TOKEN} leaked`, [TOKEN]).includes(TOKEN));
   assert.equal(payloadProblem(rule('settings.items.update'), { email: null }), null);
 }
 
-console.log('оповещения: темы, тексты, повторы Telegram, кнопки и опрос нажатий, темы форума и «Неоформленные», переезд группы, виденные чаты, почта без SMTP, только российская почта — проверки прошли');
+console.log('оповещения: темы, тексты, повторы Telegram, кнопки и опрос нажатий, темы форума и «Неоформленные», переезд группы, виденные чаты, почта без SMTP, только российская почта, точки и «В зале», почта при онлайн-оплате — проверки прошли');

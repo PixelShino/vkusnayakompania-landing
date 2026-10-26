@@ -9,6 +9,12 @@
  * уходящий в Directus. Всё, что гость видит без скриптов, уже есть в HTML; этот
  * файл только добавляет поведение, поэтому упавший скрипт оставляет читаемое
  * меню с ценами, а не пустую страницу.
+ * The venue (whose menu the page shows) is one choice for the switches over
+ * the menu, the cart's venue radios and the order: `setPlace` changes all of
+ * them, `<html data-venue>` hides the other menu (`src/lib/venue.ts`).
+ * Точка (чьё меню показывает страница) — один выбор для переключателей над
+ * меню, радио точки в корзине и заказа: `setPlace` меняет их все, а
+ * `<html data-venue>` прячет чужое меню (`src/lib/venue.ts`).
  */
 import {
   CART_KEY,
@@ -32,15 +38,20 @@ import {
   buildOrder,
   daysFrom,
   bindPhoneMask,
+  fulfillmentOf,
   orderNumber,
   slotsFor,
   splitDetails,
+  tableLine,
+  tableNumber,
   validate,
   type AptKey,
   type CheckoutForm,
   type Errors,
 } from '../lib/order';
 import { BADGE_LABEL, positions, rub, type Badge } from '../lib/catalog';
+import { PLACE_KEY, cookedHere, venueCase } from '../lib/venue';
+import { plural } from '../data/site';
 import {
   HOME_CITY,
   QUOTE_DEBOUNCE_MS,
@@ -123,10 +134,37 @@ const drawer = document.getElementById('cart') as HTMLDialogElement | null;
 const dishDialog = document.getElementById('dish') as HTMLDialogElement | null;
 
 if (dataNode && drawer && dishDialog) {
-  const { products } = JSON.parse(dataNode.textContent || '{}') as { products: Dish[] };
+  const { products, places: venues = [] } = JSON.parse(dataNode.textContent || '{}') as {
+    products: Dish[];
+    places?: { id: number; name: string; dishes: number }[];
+  };
   const dishes = new Map(products.map((dish) => [dish.id, dish]));
   const index: CartIndex = dishes;
   const bySlug = new Map(products.map((dish) => [dish.slug, dish]));
+
+  // ── venue: whose menu / точка: чьё меню ──────────────────────────────────
+  // The head script has already chosen it (`?place=`, the remembered one, the
+  // first venue) and hidden the other menu; here it becomes the cart's too.
+  // `null` — a site with one venue: nothing to choose, nothing hidden.
+  // Скрипт в `<head>` её уже выбрал (`?place=`, запомненная, первая точка) и
+  // спрятал чужое меню; здесь она становится точкой и корзины. `null` — сайт
+  // с одной точкой: выбирать нечего, ничего не спрятано.
+  const root = document.documentElement;
+  const venueById = new Map(venues.map((venue) => [venue.id, venue]));
+  let place: number | null = venues.length ? (venueById.has(Number(root.dataset.venue)) ? Number(root.dataset.venue) : venues[0].id) : null;
+  const nameOf = (id: number | null | undefined) => (id ? (venueById.get(id)?.name ?? '') : '');
+  /** «на Садовой, 212Б» (и «на Советской Армии, 177») — где готовят блюдо */
+  const whereCooked = (ids: readonly number[]) =>
+    ids
+      .filter((id) => venueById.has(id))
+      .map((id) => `на ${venueCase(nameOf(id), 'loc')}`)
+      .join(' и ');
+  const dishWord = (n: number) => `${n}\u00a0${plural(n, 'блюдо', 'блюда', 'блюд')}`;
+  /** Видна ли разметка (раздел, плитка, пункт) на точке: `data-places` пуст — везде. */
+  const shownAt = (node: HTMLElement, id: number | null) => {
+    const list = node.dataset.places;
+    return !id || !list || list.split(' ').includes(String(id));
+  };
 
   const restored = reconcile(parseCart(store.get(CART_KEY)), index);
   let cart: Cart = restored.cart;
@@ -166,7 +204,7 @@ if (dataNode && drawer && dishDialog) {
   // ── render ──────────────────────────────────────────────────────────────
   let lastCount = -1;
   const render = () => {
-    const sum = priced(cart, index);
+    const sum = priced(cart, index, place);
     const changed = sum.count !== lastCount && lastCount !== -1;
     lastCount = sum.count;
 
@@ -229,6 +267,14 @@ if (dataNode && drawer && dishDialog) {
       $('[data-cart-open]', bar)?.setAttribute('aria-label', `Открыть корзину: ${label}`);
     }
 
+    // over the menu: the cart still holds dishes the chosen venue does not cook
+    // над меню: в корзине остались блюда, которых выбранная точка не готовит
+    for (const node of $$('[data-venue-cart]')) {
+      const n = sum.elsewhere.length;
+      node.hidden = n === 0;
+      const text = $('[data-venue-cart-text]', node);
+      if (text) text.textContent = n ? `${n === 1 ? 'Одно блюдо' : dishWord(n)} из корзины здесь не готовят.` : '';
+    }
     for (const node of $$('[data-count]', drawer)) node.textContent = sum.count ? `· ${positions(sum.count)}` : '';
     for (const node of $$('[data-total]', drawer)) node.textContent = rub(sum.total);
     renderLines(sum);
@@ -239,7 +285,7 @@ if (dataNode && drawer && dishDialog) {
     cartAccount?.refresh();
   };
 
-  const renderLines = (sum = priced(cart, index)) => {
+  const renderLines = (sum = priced(cart, index, place)) => {
     const list = $('[data-lines]', drawer);
     const emptyBox = $('[data-empty]', drawer);
     const foot = $('[data-cart-foot]', drawer);
@@ -254,19 +300,31 @@ if (dataNode && drawer && dishDialog) {
         ]
           .filter(Boolean)
           .join(' · ');
-        return `<li class="line${line.available ? '' : ' line--out'}">
+        // a line that cannot be ordered here says why and offers the one way out in words
+        // строка, которую здесь не заказать, говорит почему и называет выход словом
+        const flag = !line.available
+          ? 'Закончилось — уберите из заказа'
+          : line.elsewhere
+            ? `Готовят только ${whereCooked(line.places)}`
+            : '';
+        const stuck = Boolean(flag);
+        return `<li class="line${stuck ? ' line--out' : ''}${line.elsewhere ? ' line--away' : ''}">
           <div class="line__img">${thumb(line.id)}</div>
           <p class="line__title">${esc(line.title)}</p>
           <p class="line__sum tnum">${rub(line.sum)}</p>
           ${meta ? `<p class="line__meta tnum">${esc(meta)}</p>` : ''}
-          ${line.available ? '' : '<p class="line__flag">Закончилось — уберите из заказа</p>'}
+          ${flag ? `<p class="line__flag">${esc(flag)}</p>` : ''}
           <div class="line__ctl">
             <div class="qty qty--sm" role="group" aria-label="Количество: ${esc(line.title)}">
               <button type="button" class="qty__btn" data-line-dec="${key}" aria-label="Убрать одну">${icon(minusIcon)}</button>
               <output class="qty__n tnum">${line.qty}</output>
-              <button type="button" class="qty__btn" data-line-inc="${key}" aria-label="Добавить ещё"${line.qty >= MAX_QTY || !line.available ? ' disabled' : ''}>${icon(plusIcon)}</button>
+              <button type="button" class="qty__btn" data-line-inc="${key}" aria-label="Добавить ещё"${line.qty >= MAX_QTY || stuck ? ' disabled' : ''}>${icon(plusIcon)}</button>
             </div>
-            <button type="button" class="round-btn line__remove" data-line-remove="${key}" aria-label="Убрать из корзины: ${esc(line.title)}">${icon(trashIcon)}</button>
+            ${
+              stuck
+                ? `<button type="button" class="tlink line__drop" data-line-remove="${key}" aria-label="Убрать из корзины: ${esc(line.title)}">${icon(trashIcon)}<span>Убрать</span></button>`
+                : `<button type="button" class="round-btn line__remove" data-line-remove="${key}" aria-label="Убрать из корзины: ${esc(line.title)}">${icon(trashIcon)}</button>`
+            }
           </div>
         </li>`;
       })
@@ -276,8 +334,9 @@ if (dataNode && drawer && dishDialog) {
     foot.hidden = isEmpty;
     const blocked = $('[data-blocked]', drawer);
     if (blocked) blocked.hidden = !sum.blocked;
+    paintAway(sum);
     const toCheckout = $<HTMLButtonElement>('[data-to-checkout]', drawer);
-    if (toCheckout) toCheckout.disabled = sum.blocked || sum.count === 0;
+    if (toCheckout) toCheckout.disabled = sum.blocked || sum.elsewhere.length > 0 || sum.count === 0;
 
     const notice = $('[data-dropped]', drawer);
     if (notice) {
@@ -299,7 +358,7 @@ if (dataNode && drawer && dishDialog) {
     if (suggest && suggestList) {
       const sections = new Set<string>();
       const picks = products
-        .filter((dish) => dish.available && !dish.variants.length && !dish.fillings.length && dish.badges.includes('hit'))
+        .filter((dish) => dish.available && cookedHere(dish, place) && !dish.variants.length && !dish.fillings.length && dish.badges.includes('hit'))
         .filter((dish) => !sections.has(dish.category) && Boolean(sections.add(dish.category)))
         .slice(0, 3);
       suggest.hidden = !isEmpty || picks.length === 0;
@@ -315,6 +374,48 @@ if (dataNode && drawer && dishDialog) {
     }
   };
 
+  /**
+   * Dishes the chosen venue does not cook: the notice over the lines says how
+   * many and offers to remove them, or — when everything in the cart is cooked
+   * at another venue — to switch to it; the line over the closed button says
+   * why it is closed.
+   * Блюда, которых выбранная точка не готовит: плашка над строками говорит,
+   * сколько их, и предлагает убрать их или — если всё в корзине готовят на
+   * другой точке — перейти на неё; строка над закрытой кнопкой говорит, почему
+   * она закрыта.
+   */
+  const paintAway = (sum = priced(cart, index, place)) => {
+    const note = $('[data-away-note]', drawer);
+    const warn = $('[data-cart-warn]', drawer);
+    const away = sum.elsewhere;
+    // a venue that cooks everything in the cart: switching there fixes it all at once
+    // точка, которая готовит всё из корзины: переход туда чинит всё разом
+    const fits = away.length ? venues.find((venue) => venue.id !== place && sum.lines.every((line) => cookedHere(line, venue.id))) : undefined;
+    const n = away.length;
+    if (warn) {
+      warn.hidden = !n && !sum.blocked;
+      warn.textContent = n
+        ? `${n === 1 ? 'Одно блюдо здесь не готовят — уберите его' : `${dishWord(n)} здесь не готовят — уберите их`}${fits ? ' или смените точку' : ''}`
+        : sum.blocked
+          ? 'Сначала уберите то, что закончилось'
+          : '';
+    }
+    if (!note) return;
+    note.hidden = !n;
+    if (!n) return;
+    $('[data-away-note-text]', note)!.textContent =
+      `${n === 1 ? `«${away[0].title}» не готовят` : `${dishWord(n)} из корзины не готовят`} ${whereCooked(place ? [place] : [])}. ` +
+      (fits ? `${n === 1 ? 'Его' : 'Их'} готовят ${whereCooked([fits.id])} — можно перейти туда.` : `Уберите ${n === 1 ? 'его' : 'их'}, чтобы оформить заказ.`);
+    const drop = $('[data-away-drop]', note)!;
+    drop.textContent = n === 1 ? 'Убрать его' : `Убрать ${dishWord(n)}`;
+    const move = $<HTMLButtonElement>('[data-away-move]', note)!;
+    move.hidden = !fits;
+    if (fits) {
+      move.textContent = `Перейти на ${venueCase(fits.name, 'acc')}`;
+      move.dataset.awayMove = String(fits.id);
+    }
+  };
+
   const commit = (next: Cart, message?: string) => {
     cart = next;
     store.set(CART_KEY, JSON.stringify(cart));
@@ -323,7 +424,7 @@ if (dataNode && drawer && dishDialog) {
   };
 
   const summary = () => {
-    const sum = priced(cart, index);
+    const sum = priced(cart, index, place);
     return sum.count ? `В корзине ${positions(sum.count)} на ${rub(sum.total)}` : 'Корзина пуста';
   };
 
@@ -358,6 +459,24 @@ if (dataNode && drawer && dishDialog) {
     if (incart && incartText) {
       incart.hidden = inCart === 0;
       incartText.textContent = `Уже в корзине: ${inCart} шт.`;
+    }
+    // Not cooked at the chosen venue (a shared link, a dish seen at the other
+    // venue): no buy row, the venue that cooks it and the way to its menu.
+    // Не готовят на выбранной точке (ссылка, блюдо, увиденное на другой точке):
+    // строки покупки нет — есть точка, где его готовят, и переход в её меню.
+    const away = current.available && !cookedHere(current, place);
+    $('[data-out]', dishDialog)!.hidden = current.available;
+    $('[data-buy]', dishDialog)!.hidden = !current.available || away;
+    const awayBox = $('[data-away]', dishDialog);
+    if (awayBox) {
+      awayBox.hidden = !away;
+      const there = (current.places ?? []).find((id) => venueById.has(id));
+      if (away && there) {
+        $('[data-away-text]', awayBox)!.textContent = `Это блюдо готовят только ${whereCooked(current.places ?? [])}: меню на точках разное.`;
+        const go = $<HTMLButtonElement>('[data-away-go]', awayBox)!;
+        go.textContent = `Перейти на ${venueCase(nameOf(there), 'acc')}`;
+        go.dataset.awayGo = String(there);
+      }
     }
   };
 
@@ -424,8 +543,6 @@ if (dataNode && drawer && dishDialog) {
       )
       .join('');
 
-    $('[data-out]', dishDialog)!.hidden = dish.available;
-    $('[data-buy]', dishDialog)!.hidden = !dish.available;
     paintDialog();
 
     if (drawer.open) drawer.close();
@@ -510,13 +627,19 @@ if (dataNode && drawer && dishDialog) {
   // online payment on (`payment.ts`); a hidden one is neither checked nor sent
   // почта для чека считается, только пока её поле видно — при включённой
   // онлайн-оплате (`payment.ts`); скрытую не проверяем и не отправляем
+  // the mail is required while it is shown: shown means online payment, and the
+  // receipt of an online payment needs it (owner, 26.10.2026)
+  // почта обязательна, пока её поле видно: видно — значит онлайн-оплата, а чеку
+  // онлайн-оплаты она нужна (владелец, 26.10.2026)
   const emailBox = $('[data-receipt-email]', form);
   const read = (): CheckoutForm => ({
     name: field('name')?.value ?? '',
     phone: field('phone')?.value ?? '',
     email: emailBox && !emailBox.hidden ? (field('email')?.value ?? '') : '',
-    fulfillment: radio('fulfillment') === 'pickup' ? 'pickup' : 'delivery',
-    place: Number(radio('place')) || null,
+    payment: emailBox && !emailBox.hidden && paysOnline() ? 'online' : null,
+    fulfillment: fulfillmentOf(radio('fulfillment')),
+    place: Number(radio('place')) || place || null,
+    table: field('table')?.value ?? '',
     address: field('address')?.value ?? '',
     flat: field('flat')?.value ?? '',
     entrance: field('entrance')?.value ?? '',
@@ -561,7 +684,7 @@ if (dataNode && drawer && dishDialog) {
   let quoteSeq = 0;
   let quoting: Promise<void> | null = null;
   let lastSaid = '';
-  const dishesTotal = () => priced(cart, index).total;
+  const dishesTotal = () => priced(cart, index, place).total;
 
   const paintDelivery = () => {
     if (!dlv || !addressInput) return;
@@ -595,6 +718,9 @@ if (dataNode && drawer && dishDialog) {
     const row = billRow(delivery, dishes);
     const rowNode = $('[data-bill-delivery]', form);
     if (rowNode) {
+      // at a table there is nothing to deliver and nothing to take: no row at all
+      // в зале нечего ни везти, ни забирать: строки нет вовсе
+      rowNode.hidden = radio('fulfillment') === 'dine_in';
       $('[data-bill-delivery-label]', rowNode)!.textContent = row.label;
       const value = $('[data-bill-delivery-value]', rowNode)!;
       value.textContent = row.value;
@@ -612,12 +738,21 @@ if (dataNode && drawer && dishDialog) {
     // без галочки согласия кнопка тоже выглядит закрытой; клик всё равно
     // запускает проверку, которая называет галочку и подсвечивает её
     const consented = field('consent')?.checked ?? false;
-    if (blocked || !consented) button?.setAttribute('aria-disabled', 'true');
+    // the venue changed on this step and the cart has dishes it does not cook
+    // точку сменили на этом шаге, а в корзине блюда, которых она не готовит
+    const away = priced(cart, index, place).elsewhere;
+    if (blocked || !consented || away.length) button?.setAttribute('aria-disabled', 'true');
     else button?.removeAttribute('aria-disabled');
     const note = $('[data-bill-note]', form);
     if (note) {
       note.hidden = !blocked;
       note.textContent = blocked ? shortText(shortOfMin(delivery, dishes)) : '';
+    }
+    const awayNote = $('[data-bill-away]', form);
+    if (awayNote) {
+      awayNote.hidden = !away.length;
+      if (away.length)
+        $('[data-bill-away-text]', awayNote)!.textContent = `${away.length === 1 ? `«${away[0].title}» не готовят` : `${dishWord(away.length)} из корзины не готовят`} ${whereCooked(place ? [place] : [])}.`;
     }
   };
 
@@ -693,9 +828,9 @@ if (dataNode && drawer && dishDialog) {
     return quote(address);
   };
 
-  /** Доставка ↔ самовывоз: у самовывоза доставки нет, при возврате — снова расчёт адреса. */
+  /** Доставка ↔ самовывоз и зал: у них доставки нет, при возврате — снова расчёт адреса. */
   const syncFulfillment = () => {
-    if (radio('fulfillment') === 'pickup') {
+    if (radio('fulfillment') !== 'delivery') {
       if (delivery.kind === 'pickup') return;
       quoteSeq += 1;
       quoting = null;
@@ -980,10 +1115,28 @@ if (dataNode && drawer && dishDialog) {
   const togglePart = () => {
     const data = read();
     for (const part of $$('[data-for]', form)) {
-      const key = part.dataset.for;
-      part.hidden = key === 'later' ? data.when !== 'later' : key !== data.fulfillment;
+      // `data-for="pickup dine_in"`: the venue radios serve both
+      // `data-for="pickup dine_in"`: радио точки нужны обоим
+      const keys = (part.dataset.for ?? '').split(' ');
+      part.hidden = keys[0] === 'later' ? data.when !== 'later' : !keys.includes(data.fulfillment);
     }
+    // the same radios: «where from» for pickup, «where you sit» at a table
+    // те же радио: «откуда» для самовывоза, «где сидите» в зале
+    const label = $('[data-place-label]', form);
+    if (label) label.textContent = data.fulfillment === 'dine_in' ? 'Где вы сидите' : 'Откуда заберёте';
+    // the example in the comment fits the way: a door for a courier, a time to collect, a table
+    // пример в комментарии — под способ: дверь для курьера, время забрать, стол
+    const comment = field<HTMLTextAreaElement>('comment');
+    if (comment) comment.placeholder = COMMENT_EXAMPLE[data.fulfillment];
+    // at a table nobody calls: a waiter comes to the table and confirms (owner, 26.10.2026)
+    // в зале не звонят: сотрудник подходит к столу и подтверждает (владелец, 26.10.2026)
+    const dine = data.fulfillment === 'dine_in';
+    const phoneHint = $('[data-phone-hint]', form);
+    if (phoneHint) phoneHint.textContent = dine ? 'Номер нужен для заказа, звонить не будем' : 'Перезвоним на него, чтобы подтвердить заказ';
+    const whenHint = $('[data-when-hint]', form);
+    if (whenHint) whenHint.textContent = dine ? 'Подойдём к столу и подтвердим заказ' : 'Точное время подтвердим при звонке';
     syncFulfillment();
+    paintDine();
   };
 
   const fillTimes = () => {
@@ -999,6 +1152,48 @@ if (dataNode && drawer && dishDialog) {
     const slots = slotsFor(days.value, now);
     times.innerHTML = slots.map((slot) => `<option value="${slot}">к ${slot}</option>`).join('');
     if (slots.includes(keepTime)) times.value = keepTime;
+  };
+
+  /**
+   * Every control that names the venue, after a change from any of them: the
+   * switches over the menu, the cart's venue radios, «Готовит: …» and the bar.
+   * Всё, что называет точку, — после смены из любого места: переключатели над
+   * меню, радио точки в корзине, «Готовит: …» и строка разделов.
+   */
+  const paintVenue = () => {
+    if (!place) return;
+    for (const input of $$<HTMLInputElement>('[data-venue-switch] input[type="radio"]')) input.checked = Number(input.value) === place;
+    for (const input of $$<HTMLInputElement>('input[name="place"]', form)) input.checked = Number(input.value) === place;
+    for (const node of $$('[data-venue-name]')) node.textContent = nameOf(place);
+    const other = venues.find((venue) => venue.id !== place);
+    for (const swap of $$('[data-venue-swap]')) {
+      swap.hidden = !other;
+      if (other) swap.setAttribute('aria-label', `Поменять точку: ${other.name}`);
+    }
+  };
+
+  /** Над меню — «Стол 5: оплатите на сайте, принесём к столу», пока корзина в режиме «В зале». */
+  const paintDine = () => {
+    const dine = radio('fulfillment') === 'dine_in';
+    const table = tableNumber(field('table')?.value);
+    for (const note of $$('[data-dine-note]')) {
+      note.hidden = !dine || !place;
+      const text = $('[data-dine-text]', note);
+      if (text) text.textContent = dine ? `${table ? `Стол ${table}` : 'В зале'}: оплатите на сайте, принесём к столу` : '';
+    }
+  };
+
+  const COMMENT_EXAMPLE: Record<CheckoutForm['fulfillment'], string> = {
+    delivery: 'Например: позвоните за 10 минут, оставьте у двери',
+    pickup: 'Например: заберу после работы, соберите в один пакет',
+    dine_in: 'Например: без лука, сначала салат, потом горячее',
+  };
+
+  /** Сколько «В зале» и номер стола живут в черновике: один визит, а не неделя. */
+  const DINE_KEEP_MS = 4 * 60 * 60 * 1000;
+  const checkFulfillment = (mode: CheckoutForm['fulfillment']) => {
+    const input = form.querySelector<HTMLInputElement>(`input[name="fulfillment"][value="${mode}"]`);
+    if (input) input.checked = true;
   };
 
   // the contact part of the form is remembered for the next order on this device
@@ -1027,6 +1222,10 @@ if (dataNode && drawer && dishDialog) {
         intercom: data.intercom,
         fulfillment: data.fulfillment,
         place: data.place,
+        table: data.table,
+        // when: a table is good for one visit, not for an order from home next week
+        // когда: стол годится на один визит, а не на заказ из дома через неделю
+        at: Date.now(),
         ...(legacyRest && { details: legacyRest }),
       }),
     );
@@ -1050,18 +1249,41 @@ if (dataNode && drawer && dishDialog) {
       comment.value = legacy.rest;
       legacyRest = legacy.rest;
     }
-    if (draft.fulfillment === 'pickup') {
-      const pickup = form.querySelector<HTMLInputElement>('input[name="fulfillment"][value="pickup"]');
-      if (pickup) pickup.checked = true;
-    }
-    if (draft.place) {
-      const place = form.querySelector<HTMLInputElement>(`input[name="place"][value="${Number(draft.place)}"]`);
-      if (place) place.checked = true;
+    // «В зале» comes back only within the visit (a reload, a second round of
+    // dessert): a week later the same guest orders from home
+    // «В зале» возвращается только в пределах визита (обновили страницу,
+    // заказали десерт вторым заходом): через неделю тот же гость заказывает из дома
+    const fresh = Number(draft.at) > Date.now() - DINE_KEEP_MS;
+    const mode = draft.fulfillment === 'dine_in' && !fresh ? 'delivery' : fulfillmentOf(draft.fulfillment);
+    if (mode !== 'delivery') checkFulfillment(mode);
+    const table = field('table');
+    if (table && mode === 'dine_in' && typeof draft.table === 'string') table.value = draft.table;
+    // with one venue the radio is the guest's own choice, as before the switch
+    // с одной точкой радио — собственный выбор гостя, как до переключателя
+    if (!venues.length && draft.place) {
+      const radioPlace = form.querySelector<HTMLInputElement>(`input[name="place"][value="${Number(draft.place)}"]`);
+      if (radioPlace) radioPlace.checked = true;
     }
     if (legacy) saveDraft();
   } catch {
     /* a broken draft is just no draft / битый черновик — просто без черновика */
   }
+  // A QR code on a table: `?place=2&table=5` — the head script already chose
+  // the venue, here the cart goes to «В зале» with the table filled in. The
+  // address keeps the parameters: a reload lands at the same table.
+  // QR-код на столе: `?place=2&table=5` — точку уже выбрал скрипт в `<head>`,
+  // здесь корзина переходит в «В зале» с номером стола. Адрес сохраняет
+  // параметры: обновление страницы приводит к тому же столу.
+  {
+    const params = new URLSearchParams(location.search);
+    const table = field('table');
+    if (params.has('table') && venueById.has(Number(params.get('place')))) {
+      checkFulfillment('dine_in');
+      if (table) table.value = tableNumber(params.get('table')) ?? '';
+      saveDraft();
+    }
+  }
+  paintVenue();
   togglePart();
   cartAccount = mountCartAccount({
     drawer,
@@ -1117,13 +1339,17 @@ if (dataNode && drawer && dishDialog) {
 
   form.addEventListener('change', (event) => {
     const target = event.target as HTMLInputElement;
+    // the cart's venue radios are the catalog's switch inside the form
+    // радио точки в корзине — это переключатель каталога внутри формы
+    if (target.name === 'place' && venues.length) setPlace(Number(target.value));
     if (target.name === 'date') fillTimes();
     if (target.name === 'consent') paintBill();
     togglePart();
     if (tried) showErrors(validate(read()));
     saveDraft();
   });
-  form.addEventListener('input', () => {
+  form.addEventListener('input', (event) => {
+    if ((event.target as HTMLInputElement).name === 'table') paintDine();
     if (tried) showErrors(validate(read()));
   });
   form.addEventListener('focusout', () => saveDraft());
@@ -1160,13 +1386,16 @@ if (dataNode && drawer && dishDialog) {
 
   const finish = (number: string, sent: ReturnType<typeof buildOrder>, bill: Bill) => {
     $('[data-done-number]', drawer)!.textContent = number;
-    $('[data-done-phone]', drawer)!.textContent = sent.phone;
     $('[data-done-total]', drawer)!.textContent = rub(bill.pay);
     // under the dishes: the delivery, then what points and the birthday took off — the rows the bill had
     // под блюдами: доставка, затем что сняли баллы и скидка именинника — те же строки, что в счёте
     const row = billRow(bill.delivery, bill.dishes);
     const extras = [
-      `<li class="done__extra"><span>${esc(row.label)}</span><b class="tnum${row.tone === 'quiet' ? ' is-quiet' : ''}">${esc(row.value)}</b></li>`,
+      // at a table there is nothing to deliver or take: no row, as in the bill
+      // в зале нечего ни везти, ни забирать: строки нет, как и в счёте
+      sent.fulfillment === 'dine_in'
+        ? ''
+        : `<li class="done__extra"><span>${esc(row.label)}</span><b class="tnum${row.tone === 'quiet' ? ' is-quiet' : ''}">${esc(row.value)}</b></li>`,
       bill.discount ? `<li class="done__extra"><span>Скидка именинника</span><b class="tnum">−${rub(bill.discount)}</b></li>` : '',
       bill.points ? `<li class="done__extra"><span>Баллами</span><b class="tnum">−${rub(bill.points)}</b></li>` : '',
     ];
@@ -1177,9 +1406,21 @@ if (dataNode && drawer && dishDialog) {
           return `<li><span>${esc(line.title)}${choice ? `, ${esc(choice)}` : ''}\u00a0×\u00a0${line.qty}</span><b class="tnum">${rub(line.sum)}</b></li>`;
         })
         .join('') + extras.join('');
+    // what happens next: a call to confirm — or, at a table, the dishes come to it
+    // что дальше: звонок для подтверждения — или, в зале, блюда несут к столу
+    const mode = sent.fulfillment;
+    const lead = $('[data-done-lead]', drawer);
+    const phoneTag = `<b class="tnum">${esc(sent.phone)}</b>`;
+    if (lead)
+      lead.innerHTML =
+        mode === 'dine_in'
+          ? 'Подойдём к столу и подтвердим заказ. Принесём, как будет готово.'
+          : `Перезвоним на ${phoneTag}, чтобы подтвердить состав, сумму${mode === 'delivery' ? ', адрес' : ''} и время.`;
     const after = $('[data-done-after]', drawer);
-    // paid online — the receipt from ЮKassa follows; otherwise payment is settled on the call
-    // оплачено онлайн — следом чек от ЮKassa; иначе оплату согласуют при звонке
+    // paid online — the receipt from ЮKassa follows to the mail (required since
+    // 26.10.2026); otherwise payment is settled on the call
+    // оплачено онлайн — следом чек ЮKassa на почту (обязательна с 26.10.2026);
+    // иначе оплату согласуют при звонке
     if (after)
       after.textContent =
         bill.cost === null
@@ -1187,18 +1428,22 @@ if (dataNode && drawer && dishDialog) {
           : paysOnline()
             ? sent.email
               ? `Чек придёт на ${sent.email}.`
-              : 'Чек придёт смской на телефон.'
-            : 'Оплату обсудим там же.';
+              : ''
+            : mode === 'dine_in'
+              ? ''
+              : 'Оплату обсудим там же.';
     // where and when, as they left: the guest checks them before the call, the manager says the same
     // куда и когда — как ушло: гость сверяет до звонка, менеджер назовёт то же
     const where = $('[data-done-where]', drawer);
     if (where) {
-      const pickup = sent.fulfillment === 'pickup';
-      const place = form.querySelector<HTMLInputElement>('input[name="place"]:checked')?.closest('.place-opt')?.querySelector('.place-opt__name')?.textContent?.trim();
+      const venue =
+        nameOf(sent.place) ||
+        form.querySelector<HTMLInputElement>('input[name="place"]:checked')?.closest('.place-opt')?.querySelector('.place-opt__name')?.textContent?.trim() ||
+        '';
       // «Куда», not «Доставка»: the bill right under it has its own «Доставка» row
       // «Куда», а не «Доставка»: у счёта прямо под ним своя строка «Доставка»
-      $('[data-done-where-label]', drawer)!.textContent = pickup ? 'Откуда' : 'Куда';
-      where.textContent = pickup ? (place ?? '') : addressLine(sent);
+      $('[data-done-where-label]', drawer)!.textContent = mode === 'pickup' ? 'Откуда' : mode === 'dine_in' ? 'Где' : 'Куда';
+      where.textContent = mode === 'pickup' ? venue : mode === 'dine_in' ? tableLine(venue, sent.table) : addressLine(sent);
       $('[data-done-when]', drawer)!.textContent = sent.desired_time;
     }
     // the account gets the order as it left: the points it took, the address it went to
@@ -1211,7 +1456,9 @@ if (dataNode && drawer && dishDialog) {
     saveDraft();
     render();
     goto('done');
-    announce(`Заказ ${number} принят. К оплате ${rub(bill.pay)}. Перезвоним для подтверждения.`);
+    announce(
+      `Заказ ${number} принят. К оплате ${rub(bill.pay)}. ${sent.fulfillment === 'dine_in' ? 'Подойдём к столу и подтвердим заказ.' : 'Перезвоним для подтверждения.'}`,
+    );
   };
 
   form.addEventListener('submit', async (event) => {
@@ -1244,8 +1491,8 @@ if (dataNode && drawer && dishDialog) {
       target?.focus();
       return;
     }
-    const sum = priced(cart, index);
-    if (!sum.count || sum.blocked) {
+    const sum = priced(cart, index, place);
+    if (!sum.count || sum.blocked || sum.elsewhere.length) {
       goto('cart');
       return;
     }
@@ -1415,6 +1662,40 @@ if (dataNode && drawer && dishDialog) {
       return;
     }
 
+    // the venue, from the dish window, the cart's notice and «Готовит: … · Поменять»
+    // точка — из окна блюда, плашки корзины и «Готовит: … · Поменять»
+    const goVenue = hit('[data-away-go]');
+    if (goVenue) {
+      setPlace(Number(goVenue.dataset.awayGo));
+      // the button is gone with the notice: the focus goes to what it opened — the buy row
+      // кнопка ушла вместе с плашкой: фокус — туда, что она открыла, на строку покупки
+      $<HTMLButtonElement>('[data-dlg-add]', dishDialog)?.focus();
+      return;
+    }
+    const moveVenue = hit('[data-away-move]');
+    if (moveVenue) {
+      setPlace(Number(moveVenue.dataset.awayMove));
+      $('[data-drawer-title]', drawer)?.focus();
+      return;
+    }
+    if (hit('[data-venue-swap]')) {
+      const other = venues.find((venue) => venue.id !== place);
+      if (other) setPlace(other.id);
+      return;
+    }
+    if (hit('[data-away-drop]')) {
+      const away = priced(cart, index, place).elsewhere;
+      let next = cart;
+      for (const line of away) next = setQty(next, line.id, line.variant, 0, line.filling);
+      commit(next, `Убрали: ${away.map((line) => line.title).join(', ')}. ${summary()}`);
+      $('[data-drawer-title]', drawer)?.focus();
+      return;
+    }
+    if (hit('[data-to-cart]')) {
+      goto('cart');
+      return;
+    }
+
     // inside the drawer
     const lineInc = hit('[data-line-inc]');
     if (lineInc) {
@@ -1517,24 +1798,32 @@ if (dataNode && drawer && dishDialog) {
       }
     const title = titles.get(slug) ?? '';
     if (barName) barName.textContent = title;
-    barButton?.setAttribute('aria-label', `Все разделы. Сейчас: ${title}`);
+    labelBar();
   };
-  mark(sections[0]?.dataset.sec ?? '');
+  const labelBar = () =>
+    barButton?.setAttribute('aria-label', `Все разделы. Сейчас: ${titles.get(active) ?? ''}${place ? `. Меню: ${nameOf(place)}` : ''}`);
+  // sections of the other venue are hidden (no boxes): they are never current
+  // разделы другой точки спрятаны (без коробок): текущими они не бывают
+  const shown = () => sections.filter((section) => section.getClientRects().length > 0);
+  mark(shown()[0]?.dataset.sec ?? sections[0]?.dataset.sec ?? '');
+
+  /** Текущий раздел по линии чтения на трети экрана: последний видимый, чей верх её прошёл. */
+  const measure = () => {
+    const line = window.innerHeight * 0.33;
+    const visible = shown();
+    let slug = visible[0]?.dataset.sec ?? '';
+    for (const section of visible) {
+      if (section.getBoundingClientRect().top <= line) slug = section.dataset.sec!;
+      else break;
+    }
+    mark(slug);
+  };
 
   // the page script runs where IntersectionObserver exists; without it the
   // column, the tiles and the sheet still work as plain anchors
   // скрипт работает там, где есть IntersectionObserver; без него колонка,
   // плитки и лист всё равно работают как обычные якоря
   if ('IntersectionObserver' in window) {
-    const measure = () => {
-      const line = window.innerHeight * 0.33;
-      let slug = sections[0]?.dataset.sec ?? '';
-      for (const section of sections) {
-        if (section.getBoundingClientRect().top <= line) slug = section.dataset.sec!;
-        else break;
-      }
-      mark(slug);
-    };
     const reading = new IntersectionObserver(measure, { rootMargin: '-33% 0px -66% 0px' });
     for (const section of sections) reading.observe(section);
     // what follows the last section crosses the line too: a jump to the very
@@ -1543,6 +1832,20 @@ if (dataNode && drawer && dishDialog) {
     // низ попадает туда, мимо всех разделов
     const after = sections.at(-1)?.closest('.cat-layout')?.nextElementSibling;
     if (after) reading.observe(after);
+    // A jump from a place where nothing crosses the line to another such place
+    // (Home, End, the top from the footer) gives the observer nothing to report:
+    // the end of a scroll is measured too, once a frame at most.
+    // Прыжок из места, где линию ничто не пересекает, в другое такое же (Home,
+    // End, наверх из подвала) не даёт наблюдателю ни одной записи: конец
+    // прокрутки тоже меряется, не чаще раза за кадр.
+    let measuring = 0;
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!measuring) measuring = requestAnimationFrame(() => ((measuring = 0), measure()));
+      },
+      { passive: true },
+    );
 
     // The bar comes out once the tiles have gone under the header and goes
     // back once the last section has: over the help strip and the footer a
@@ -1575,6 +1878,20 @@ if (dataNode && drawer && dishDialog) {
       ).observe(layout);
     }
 
+    // The column's copy of the venue switch opens once the head switch has gone
+    // over the top (under the header), and closes when it comes back: never two
+    // switches in view.
+    // Копия переключателя в колонке раскрывается, когда шапочный ушёл за верх
+    // (под шапку сайта), и закрывается, когда он вернулся: двух переключателей в
+    // поле зрения не бывает.
+    const headSwitch = $('.pswitch--head');
+    const sideVenue = $('[data-side-venue]');
+    if (headSwitch && sideVenue)
+      new IntersectionObserver(
+        ([entry]) => sideVenue.toggleAttribute('data-on', !entry.isIntersecting && entry.boundingClientRect.bottom <= (entry.rootBounds?.top ?? 0) + 1),
+        { rootMargin: `-${Math.round(header)}px 0px 0px 0px` },
+      ).observe(headSwitch);
+
     // «наверх» — once the first screen is gone: the mark is the first screen's
     // height, so leaving it is one crossing however far the jump
     // «наверх» — когда первый экран ушёл: метка высотой в первый экран, и уход
@@ -1584,6 +1901,77 @@ if (dataNode && drawer && dishDialog) {
     if (totop && firstScreen)
       new IntersectionObserver(([entry]) => totop.toggleAttribute('data-on', !entry.isIntersecting)).observe(firstScreen);
   }
+
+  // ── the venue changes / точка меняется ──
+  // Sections above the eye may vanish or come back: the eye keeps its place.
+  // The current section stays where it was on the screen; when the new venue
+  // does not have it, the next section it has comes under the header. Above
+  // the menu (the head, the tiles) nothing moves under the eye, nothing to keep.
+  // Разделы выше взгляда могут исчезнуть или вернуться — взгляд остаётся на
+  // месте. Текущий раздел стоит, где стоял на экране; если у новой точки его
+  // нет, под шапку встаёт следующий раздел, который у неё есть. Выше меню
+  // (шапка, плитки) под взглядом ничего не двигается — держать нечего.
+  const anchorFor = (next: number) => {
+    const layout = sections[0]?.closest<HTMLElement>('.cat-layout');
+    if (!layout || layout.getBoundingClientRect().top > window.innerHeight * 0.33) return null;
+    const now = sections.find((section) => section.dataset.sec === active);
+    const from = now ? sections.indexOf(now) : 0;
+    const stays = Boolean(now && shownAt(now, next));
+    const node = stays
+      ? now!
+      : (sections.slice(from).find((section) => shownAt(section, next)) ?? [...sections].reverse().find((section) => shownAt(section, next)));
+    return node ? { node, top: stays ? node.getBoundingClientRect().top : null } : null;
+  };
+
+  /**
+   * Show another venue's menu: the page, the cart, the dish window and every
+   * control that names the venue follow; the choice is remembered for the
+   * next visit and a `?place=` in the address follows too.
+   * Показать меню другой точки: страница, корзина, окно блюда и всё, что
+   * называет точку, идут следом; выбор запоминается до следующего визита, а
+   * `?place=` в адресе тоже меняется.
+   */
+  function setPlace(next: number, { say = true, keep = true } = {}) {
+    if (!venueById.has(next)) return;
+    if (next === place) {
+      paintVenue();
+      return;
+    }
+    const anchor = keep ? anchorFor(next) : null;
+    // the browser's own scroll anchoring would move the page a second time
+    // собственная привязка прокрутки браузера сдвинула бы страницу второй раз
+    if (anchor) root.style.overflowAnchor = 'none';
+    place = next;
+    root.dataset.venue = String(next);
+    store.set(PLACE_KEY, String(next));
+    const url = new URL(location.href);
+    if (url.searchParams.has('place')) {
+      url.searchParams.set('place', String(next));
+      history.replaceState(history.state, '', url.pathname + url.search + url.hash);
+    }
+    paintVenue();
+    if (anchor) {
+      if (anchor.top === null) anchor.node.scrollIntoView({ block: 'start' });
+      else window.scrollBy(0, anchor.node.getBoundingClientRect().top - anchor.top);
+      requestAnimationFrame(() => root.style.removeProperty('overflow-anchor'));
+    }
+    saveDraft();
+    render();
+    if (current) paintDialog();
+    measure();
+    labelBar();
+    if (!say) return;
+    const venue = venueById.get(next)!;
+    const away = priced(cart, index, place).elsewhere.length;
+    announce(`Меню: ${venue.name}, ${positions(venue.dishes)}.${away ? ` В корзине ${dishWord(away)}, которых здесь не готовят.` : ''}`);
+  }
+
+  // the switches over the menu (head, column, sheet) are one choice
+  // переключатели над меню (шапка, колонка, лист) — один выбор
+  document.addEventListener('change', (event) => {
+    const input = event.target as HTMLInputElement;
+    if (input.closest('[data-venue-switch]')) setPlace(Number(input.value));
+  });
 
   // A jump to a section lands its heading right under the header (and the
   // bar), puts the focus there for a keyboard or a screen reader, and keeps
@@ -1635,11 +2023,27 @@ if (dataNode && drawer && dishDialog) {
 
   // ── first paint and deep links ──────────────────────────────────────────
   render();
+  labelBar();
   const hash = decodeURIComponent(location.hash);
   if (hash.startsWith('#p-')) {
     const dish = bySlug.get(hash.slice(3));
     if (dish) openDish(dish.id, false);
   } else if (hash === '#cart') openCart();
+  else if (hash.length > 1) {
+    // A link to a section the chosen venue does not have (the landing's
+    // «Салаты» while the menu is Садовая's): the guest came for that section,
+    // so the venue that has it opens, and the page lands on it.
+    // Ссылка на раздел, которого у выбранной точки нет («Салаты» с главной, а
+    // меню — Садовой): гость пришёл за этим разделом, поэтому открывается
+    // точка, где он есть, и страница встаёт на него.
+    const section = sections.find((item) => item.dataset.sec === hash.slice(1));
+    const there = section && !shownAt(section, place) ? section.dataset.places?.split(' ').map(Number).find((id) => venueById.has(id)) : undefined;
+    if (section && there) {
+      setPlace(there, { keep: false });
+      mark(section.dataset.sec!);
+      section.scrollIntoView({ block: 'start' });
+    }
+  }
   window.addEventListener('hashchange', () => {
     const next = decodeURIComponent(location.hash);
     if (next.startsWith('#p-')) {

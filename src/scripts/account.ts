@@ -22,6 +22,7 @@ import {
   monthIn,
   orderAnchor,
   orderCard,
+  orderHow,
   paidOf,
   payLabel,
   profileErrors,
@@ -39,7 +40,7 @@ import { LABEL_PRESETS, MAX_ADDRESSES, addressErrors, defaultLabel, savedLine, t
 import { canQuote, normalizeAddress, parseQuote } from '../lib/delivery';
 import { addDays, daysBetween, dayOf, points, type Program } from '../lib/loyalty';
 import { CART_KEY, parseCart } from '../lib/cart';
-import { CHECKOUT_KEY, addressLine, maskPhone } from '../lib/order';
+import { CHECKOUT_KEY, maskPhone } from '../lib/order';
 import { clearSession, loadSession, onSessionChange, storage, touchSession } from './account-session';
 import { mountLogin } from './account-login';
 import repeatIcon from '../assets/icons/repeat.svg?raw';
@@ -342,11 +343,9 @@ if (node) {
     const names = items.map((item) => times(item.title, item.qty));
     const shown = names.slice(0, 3).join(', ');
     const more = names.length > 3 ? ` и ещё ${names.length - 3}` : '';
-    const place = data.places.find((item) => item.id === Number(order.place));
-    const how =
-      order.fulfillment === 'pickup'
-        ? `самовывоз${place ? `, ${place.name}` : ''}`
-        : `доставка${order.address ? `, ${addressLine(order)}` : ''}`;
+    // delivery, pickup or «в зале, Садовая, 212Б, стол 4» (since 26.10.2026) — one rule with the card
+    // доставка, самовывоз или «в зале, Садовая, 212Б, стол 4» (с 26.10.2026) — одно правило с карточкой
+    const how = orderHow(order, data.places);
     const paid = paidOf(order);
     const sums = [
       `<div><dt>Сумма</dt><dd class="tnum">${rub(order.total)}</dd></div>`,

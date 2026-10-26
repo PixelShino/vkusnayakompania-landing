@@ -1,0 +1,37 @@
+---
+/**
+ * A text that differs per venue — «13 позиций» of the whole menu, «9 позиций»
+ * at one venue: every variant is in the HTML, `venueCss` shows the one of
+ * `<html data-venue>` (the whole menu's without scripts). Rendered once at
+ * build, so a count never flickers from one number to another on load. Equal
+ * everywhere — a plain text.
+ * Текст, который зависит от точки, — «13 позиций» всего меню, «9 позиций» на
+ * одной точке: все варианты в HTML, `venueCss` показывает вариант
+ * `<html data-venue>` (без скриптов — всего меню). Собирается один раз на
+ * сборке, поэтому счётчик не мигает с числа на число при загрузке. Везде
+ * одинаковый — обычный текст.
+ */
+interface Props {
+  /** весь каталог: без скриптов и без выбранной точки */
+  all: string;
+  /** по точкам: `{ 1: '9 позиций', 2: '13 позиций' }` */
+  at: Record<number, string>;
+}
+
+const { all, at } = Astro.props;
+const variants = Object.entries(at);
+const same = variants.every(([, text]) => text === all);
+---
+
+{
+  same ? (
+    all
+  ) : (
+    <>
+      <span data-for-venue="">{all}</span>
+      {variants.map(([venue, text]) => (
+        <span data-for-venue={venue}>{text}</span>
+      ))}
+    </>
+  )
+}

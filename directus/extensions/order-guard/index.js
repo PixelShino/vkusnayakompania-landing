@@ -52,12 +52,33 @@
  * передаёт её ЮKassa как `receipt.customer.email`; пусто — в заказе нет
  * `email` вовсе, чек уходит на телефон.
  *
+ * The venues (since 26.10.2026): the menus of the two venues differ, so every
+ * dish names where it is cooked (`products.places`, «Готовят на», csv of
+ * `places` ids; empty — both). `place` is required for pickup and for an order
+ * at a table («В зале», `dine_in`), optional for delivery — there it names the
+ * kitchen. A dish the chosen venue does not cook is refused; a delivery without
+ * a venue gets the only one that cooks its dishes, or is refused when they come
+ * from different venues. The table number (`table`) is optional.
+ * Точки (с 26.10.2026): меню на двух точках разное, поэтому у каждого блюда
+ * указано, где его готовят (`products.places`, «Готовят на», csv из id
+ * `places`; пусто — на обеих). `place` обязателен для самовывоза и для заказа
+ * за столиком («В зале», `dine_in`), необязателен для доставки — там он
+ * называет кухню. Блюдо, которого выбранная точка не готовит, — отказ;
+ * доставка без точки получает единственную, где готовят все её блюда, или
+ * отказ, если блюда с разных точек. Номер стола (`table`) необязателен.
+ *
+ * The mail is required for an online payment (since 26.10.2026): the ЮKassa
+ * receipt must reach the guest by mail; the phone stays the second contact.
+ * Почта обязательна при онлайн-оплате (с 26.10.2026): чек ЮKassa должен прийти
+ * гостю на почту; телефон остаётся вторым контактом.
+ *
  * No build step: this file is the extension. / Без сборки: этот файл и есть расширение.
  */
 import { deliveryCost, minOrderError, normalizeAddress, quote, toZones } from '../delivery/geo.js';
 import { geocoder } from '../delivery/photon.js';
-import { ADDRESS_PARTS, addressLine } from '../notify/lib.js';
+import { ADDRESS_PARTS, addressLine, fulfillmentLine, kitchenLine } from '../notify/lib.js';
 import { isRuEmail } from '../email-guard/domains.js';
+import { resolveSettings } from '../pay/core.js';
 
 const LIMITS = {
   lines: 40,
@@ -77,6 +98,8 @@ const LIMITS = {
   // the mail for the receipt, as the form's `maxlength` and the account
   // почта для чека, как `maxlength` формы и кабинет
   email: 120,
+  // the table number of an order in the hall / номер стола у заказа в зале
+  table: 10,
 };
 // one visitor, ten minutes, six orders: enough for a mistake and a retry,
 // too few for a script
@@ -172,6 +195,97 @@ export const receiptEmail = (value) => {
   return email.length <= LIMITS.email && isRuEmail(email) ? email : false;
 };
 
+// an online payment sends the ЮKassa receipt by mail: without it the order is refused
+// онлайн-оплата присылает чек ЮKassa на почту: без неё заказ не принимается
+export const EMAIL_REQUIRED = 'Укажите почту: на неё придёт чек об оплате.';
+
+// how the guest gets the order: delivery, pickup and, since 26.10.2026, at a table in the hall
+// как гость получает заказ: доставка, самовывоз и, с 26.10.2026, за столиком в зале
+const FULFILLMENT = ['delivery', 'pickup', 'dine_in'];
+// what the guest reads when the venue is not chosen / что читает гость, когда точка не выбрана
+const PLACE_REQUIRED = {
+  pickup: 'Выберите точку самовывоза.',
+  dine_in: 'Выберите точку, в зале которой вы сидите.',
+};
+export const TABLE_ERROR = 'Номер стола: цифры и буквы, например 4 или 12А.';
+
+/**
+ * The table as the order keeps it: «4», «12А», «В-3». «стол 4», «Столик №4» →
+ * «4»; empty — `null`; longer than 10 or with other signs — `false`.
+ * Стол, как его хранит заказ: «4», «12А», «В-3». «стол 4», «Столик №4» → «4»;
+ * пусто — `null`; длиннее 10 знаков или с другими знаками — `false`.
+ * @param {unknown} value
+ * @returns {string | null | false}
+ */
+export const tableNumber = (value) => {
+  const raw = part(value, 40)
+    .replace(/^(?:стол(?:ик)?|table)\.?\s*/iu, '')
+    .replace(/^№\s*/u, '')
+    .replace(/\s+/g, '');
+  if (!raw) return null;
+  return raw.length <= LIMITS.table && /^[\p{L}\d-]+$/u.test(raw) ? raw : false;
+};
+
+/**
+ * The venues that cook a dish, from `products.places`: «1,2» as the database
+ * keeps a csv field, `["1","2"]`, `[1, 2]`. Empty or unreadable — `[]`, both
+ * venues: the same rule as the site's `placesOf` (`src/lib/catalog.ts`).
+ * Точки, где готовят блюдо, из `products.places`: «1,2», как база хранит поле
+ * csv, `["1","2"]`, `[1, 2]`. Пусто или не читается — `[]`, обе точки: то же
+ * правило, что `placesOf` сайта (`src/lib/catalog.ts`).
+ */
+export const dishPlaces = (value) => {
+  let list = value;
+  if (typeof list === 'string') {
+    const text = list.trim();
+    try {
+      list = text.startsWith('[') ? JSON.parse(text) : text.split(',');
+    } catch {
+      list = [];
+    }
+  }
+  if (!Array.isArray(list)) return [];
+  const ids = list.map((item) => (typeof item === 'number' || typeof item === 'string' ? Number(String(item).trim()) : NaN));
+  return [...new Set(ids.filter((id) => Number.isInteger(id) && id > 0))];
+};
+
+/**
+ * Which venue cooks the order. `place` — the venue the guest chose (null for
+ * a delivery without one), `dishes` — `{ title, places }` of every line,
+ * `names` — venue id → its name. Returns `{ place }` (a delivery without a
+ * venue gets the only one that cooks all its dishes, or stays null when both
+ * do) or `{ error }` with the text for the guest.
+ * Какая точка готовит заказ. `place` — точка, выбранная гостем (null у
+ * доставки без неё), `dishes` — `{ title, places }` каждой строки, `names` —
+ * id точки → её название. Возвращает `{ place }` (доставка без точки получает
+ * единственную, где готовят все её блюда, или остаётся null, если готовят
+ * обе) или `{ error }` с текстом для гостя.
+ * @param {number | null} place
+ * @param {Array<{ title: string, places: number[] }>} dishes
+ * @param {Map<number, string>} names
+ * @returns {{ place: number | null, error?: undefined } | { error: string, place?: undefined }}
+ */
+export const kitchenFor = (place, dishes, names) => {
+  const where = (ids) => ids.map((id) => names.get(id) ?? `точка ${id}`).join(' или ');
+  const limited = dishes.filter((dish) => dish.places.length);
+  if (place) {
+    const wrong = limited.find((dish) => !dish.places.includes(place));
+    return wrong
+      ? { error: `«${wrong.title}» готовят только по адресу ${where(wrong.places)}. Поменяйте точку или уберите блюдо из корзины.` }
+      : { place };
+  }
+  if (!limited.length) return { place: null };
+  const common = limited.reduce((ids, dish) => ids.filter((id) => dish.places.includes(id)), limited[0].places);
+  if (!common.length) {
+    const [first] = limited;
+    const other = limited.find((dish) => !dish.places.some((id) => first.places.includes(id))) ?? limited[1];
+    return {
+      error: `В корзине блюда с разных точек: «${first.title}» готовят по адресу ${where(first.places)}, а «${other.title}» — ${where(other.places)}. Оформите их разными заказами или уберите лишнее.`,
+    };
+  }
+  return { place: common.length === 1 ? common[0] : null };
+};
+
 // what the manager reads when the address gave no zone / что читает менеджер, когда зоны по адресу нет
 export const NOTE_NOT_FOUND = 'Адрес не найден на карте — стоимость доставки назвать при звонке.';
 export const NOTE_OUTSIDE = 'Адрес вне зон доставки — предложить самовывоз или назвать стоимость при звонке.';
@@ -189,7 +303,7 @@ export const deliveryText = ({ zone, cost, freeFrom = null }) => {
   return `${where}бесплатно${freeFrom ? ` (от ${rub(freeFrom)})` : ''}`;
 };
 
-export default ({ filter, action }, { services, logger, emitter = null, database: root = null }) => {
+export default ({ filter, action }, { services, logger, emitter = null, database: root = null, env = {} }) => {
   const hits = new Map();
   const isGuest = async (accountability, database) =>
     Boolean(accountability?.user && accountability.role) &&
@@ -237,6 +351,41 @@ export default ({ filter, action }, { services, logger, emitter = null, database
     return false;
   };
 
+  /**
+   * Whether the site takes only online payments: online is on and «on
+   * delivery» is off (the `pay` extension's own rule, `resolveSettings`). Then
+   * an order without `payment_method` is paid online all the same and needs
+   * the mail. Read outside the order's transaction, like the zones.
+   * Принимает ли сайт только онлайн-оплату: онлайн включена, «при получении»
+   * выключено (правило самого расширения `pay`, `resolveSettings`). Тогда
+   * заказ без `payment_method` всё равно платится онлайн и требует почту.
+   * Читается вне транзакции заказа, как и зоны.
+   */
+  const onlineOnly = async (database, schema) => {
+    if (schema?.collections && !schema.collections.payment_settings) return false;
+    try {
+      const settings = resolveSettings(await (root ?? database)('payment_settings').first(), env);
+      return settings.enabled && !settings.onDelivery;
+    } catch {
+      return false;
+    }
+  };
+
+  // a page that sends the table before `schema apply` made the column: the
+  // number goes to the manager's note instead, once in the log
+  // страница шлёт стол раньше, чем `schema apply` завёл колонку: номер уходит
+  // в заметку менеджера, в логе один раз
+  let tableColumnWarned = false;
+  const tableColumn = (schema) => {
+    const fields = schema?.collections?.orders?.fields;
+    if (!fields || fields.table) return true;
+    if (!tableColumnWarned) {
+      tableColumnWarned = true;
+      logger.warn('order-guard: в orders нет поля table — номер стола уходит в заметку менеджера. Примените directus/snapshot.yaml (schema apply)');
+    }
+    return false;
+  };
+
   filter('orders.items.create', async (payload, _meta, { accountability, database, schema }) => {
     // editors entering a phone order and internal calls pass as they are; a
     // guest signed in on the site is checked like the public and owns the order
@@ -254,18 +403,26 @@ export default ({ filter, action }, { services, logger, emitter = null, database
     if (!phone) throw new OrderError('Телефон не похож на российский номер.');
     const email = receiptEmail(payload.email);
     if (email === false) throw new OrderError(EMAIL_ERROR);
+    // an online payment needs the mail: the receipt goes there (since 26.10.2026)
+    // онлайн-оплате нужна почта: туда уходит чек (с 26.10.2026)
+    if (!email && (payload.payment_method === 'online' || (await onlineOnly(database, schema)))) throw new OrderError(EMAIL_REQUIRED);
     if (payload.consent !== true) throw new OrderError('Нужно согласие на обработку данных.');
 
-    const fulfillment = payload.fulfillment === 'pickup' ? 'pickup' : payload.fulfillment === 'delivery' ? 'delivery' : null;
-    if (!fulfillment) throw new OrderError('Выберите доставку или самовывоз.');
+    const fulfillment = FULFILLMENT.includes(payload.fulfillment) ? payload.fulfillment : null;
+    if (!fulfillment) throw new OrderError('Выберите, как получить заказ: доставка, самовывоз или в зале.');
     const address = text(payload.address, LIMITS.address);
-    let place = null;
     if (fulfillment === 'delivery' && address.length < 5) throw new OrderError('Укажите адрес доставки.');
-    if (fulfillment === 'pickup') {
-      place = Number(payload.place);
-      const known = Number.isInteger(place) && (await database('places').where({ id: place }).first('id'));
-      if (!known) throw new OrderError('Выберите точку самовывоза.');
-    }
+    // the venue: required for pickup and the hall, optional for delivery — but
+    // when sent, it must be one of ours
+    // точка: обязательна для самовывоза и зала, необязательна для доставки — но
+    // если прислана, должна быть нашей
+    const names = new Map((await database('places').select('id', 'name')).map((row) => [Number(row.id), row.name]));
+    const asked = payload.place === null || payload.place === undefined || payload.place === '' ? null : Number(payload.place);
+    let place = Number.isInteger(asked) && names.has(asked) ? asked : null;
+    if (!place && PLACE_REQUIRED[fulfillment]) throw new OrderError(PLACE_REQUIRED[fulfillment]);
+    if (!place && asked !== null) throw new OrderError('Такой точки нет. Обновите страницу и выберите точку заново.');
+    const table = fulfillment === 'dine_in' ? tableNumber(payload.table) : null;
+    if (table === false) throw new OrderError(TABLE_ERROR);
 
     // lines are rebuilt from the catalog: the browser names the dish, the
     // variant and the quantity, the price is ours
@@ -275,10 +432,15 @@ export default ({ filter, action }, { services, logger, emitter = null, database
     if (!lines.length) throw new OrderError('Корзина пуста.');
     if (lines.length > LIMITS.lines) throw new OrderError(`В одном заказе до ${LIMITS.lines} позиций.`);
     const ids = [...new Set(lines.map((line) => Number(line?.product)).filter(Number.isInteger))];
+    // «Готовят на» only where the schema has it: a missing column inside the
+    // order's transaction would break the whole write
+    // «Готовят на» — только если оно есть в схеме: отсутствующая колонка в
+    // транзакции заказа сломала бы всю запись
+    const venues = Boolean(schema?.collections?.products?.fields?.places);
     const rows = ids.length
       ? await database('products')
           .whereIn('id', ids)
-          .select('id', 'title', 'price', 'weight', 'variants', 'fillings', 'available', 'status')
+          .select('id', 'title', 'price', 'weight', 'variants', 'fillings', 'available', 'status', ...(venues ? ['places'] : []))
       : [];
     const byId = new Map(rows.map((row) => [row.id, row]));
 
@@ -324,6 +486,16 @@ export default ({ filter, action }, { services, logger, emitter = null, database
     });
     const total = items.reduce((sum, line) => sum + line.sum, 0);
 
+    // the menus differ per venue: every dish must be cooked where the order is
+    // меню на точках разное: каждое блюдо должно готовиться там, где заказ
+    const kitchen = kitchenFor(
+      place,
+      items.map((line) => ({ title: byId.get(line.product).title, places: venues ? dishPlaces(byId.get(line.product).places) : [] })),
+      names,
+    );
+    if (kitchen.error) throw new OrderError(kitchen.error);
+    place = kitchen.place;
+
     // the guest saw the build-time prices; if the admin changed one since, the
     // manager learns it before the call, not from the guest
     // гость видел цены на момент сборки; если в админке их с тех пор поменяли,
@@ -338,12 +510,12 @@ export default ({ filter, action }, { services, logger, emitter = null, database
     // Free from the zone's threshold, counted on the dishes before the discount
     // and the points; below the zone's minimum the order is refused. No zone
     // (the address is not on the map, or outside every zone) — the order goes
-    // through, the delivery is priced on the call. Pickup costs nothing.
+    // through, the delivery is priced on the call. Pickup and the hall cost nothing.
     // Доставка по зонам: зона ищется здесь заново, что бы ни показала корзина.
     // Бесплатно от порога зоны, считая блюда до скидки и баллов; меньше минимума
     // зоны — отказ. Нет зоны (адреса нет на карте или он вне всех зон) — заказ
-    // проходит, стоимость доставки называют при звонке. Самовывоз — 0 ₽.
-    const delivery = { zone: null, cost: fulfillment === 'pickup' ? 0 : null, note: null };
+    // проходит, стоимость доставки называют при звонке. Самовывоз и зал — 0 ₽.
+    const delivery = { zone: null, cost: fulfillment === 'delivery' ? null : 0, note: null };
     if (fulfillment === 'delivery') {
       const zones = await zonesNow(database, schema);
       if (zones.length) {
@@ -393,7 +565,12 @@ export default ({ filter, action }, { services, logger, emitter = null, database
       // без неё проходит и до того, как `pnpm setup` дал публичной роли поле
       ...(email && emailColumn(schema) ? { email } : {}),
       fulfillment,
+      // pickup and the hall: where; delivery: which kitchen cooks (null — chosen on the call)
+      // самовывоз и зал — где; доставка — какая кухня готовит (null — выберут при звонке)
       place,
+      // only a filled table, and only where the column is: see `tableColumn`
+      // только заполненный стол и только там, где есть колонка: см. `tableColumn`
+      ...(table && tableColumn(schema) ? { table } : {}),
       address: fulfillment === 'delivery' ? address : null,
       // the flat, the entrance, the floor, the intercom — only the filled ones:
       // an empty part stays the column's null, so an order from a page without
@@ -413,7 +590,7 @@ export default ({ filter, action }, { services, logger, emitter = null, database
       items,
       total,
       consent: true,
-      manager_note: [note, delivery.note, loyalty?.note].filter(Boolean).join('\n') || null,
+      manager_note: [note, delivery.note, loyalty?.note, table && !tableColumn(schema) ? `Стол: ${table}` : null].filter(Boolean).join('\n') || null,
       // how the guest wants to pay, when the site offered the choice; the rest
       // of `payment_*` (paid or not) is never taken from here — the `pay`
       // extension writes it from the bank's answer
@@ -453,13 +630,20 @@ export default ({ filter, action }, { services, logger, emitter = null, database
       // an order entered by an editor carries no delivery fields: its line stays as it was
       // у заказа, который вбил редактор, полей доставки нет: его строка остаётся как была
       const priced = 'delivery_cost' in payload || payload.source === 'site';
-      // «Доставка: Советской Армии, 177, кв. 12, подъезд 2, этаж 5, домофон 12К · зона …»
+      // the venue by name: where to pick up or sit, or which kitchen cooks the delivery
+      // точка по названию: где забрать или где сидит гость, или какая кухня готовит доставку
+      const venue = payload.place
+        ? ((await database('places').where({ id: payload.place }).first('name').catch(() => null))?.name ?? null)
+        : null;
+      // «Доставка: Советской Армии, 177, кв. 12, подъезд 2, этаж 5, домофон 12К · зона …. Готовит: Садовая, 212Б»,
+      // «Самовывоз: Садовая, 212Б», «В зале: Садовая, 212Б, стол 4»
+      const kitchen = kitchenLine(payload, venue);
       const how =
-        payload.fulfillment === 'pickup'
-          ? 'Самовывоз'
-          : `Доставка: ${addressLine(payload) || 'адрес не указан'}${
+        payload.fulfillment === 'delivery' || !payload.fulfillment
+          ? `Доставка: ${addressLine(payload) || 'адрес не указан'}${
               priced ? ` · ${deliveryText({ zone: payload.delivery_zone, cost: payload.delivery_cost, freeFrom })}` : ''
-            }`;
+            }${kitchen ? `. ${kitchen}` : ''}`
+          : fulfillmentLine(payload, venue);
       const toPay = payload.to_pay ?? payload.total ?? 0;
       const message = [
         `**${payload.customer_name}**, ${payload.phone}`,

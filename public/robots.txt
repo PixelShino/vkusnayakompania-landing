@@ -15,6 +15,8 @@ Allow: /
 Disallow: /account/
 # метки рекламы и переходов — одна и та же страница; Яндекс читает Clean-param в любой группе
 Clean-param: utm_source&utm_medium&utm_campaign&utm_content&utm_term&yclid&ysclid&gclid&fbclid
+# точка и стол (ссылки с QR-кодов на столах) — тот же каталог, его адрес /catalog/
+Clean-param: place&table /catalog/
 
 User-agent: YandexAdditional
 Allow: /

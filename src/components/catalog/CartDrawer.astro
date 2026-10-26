@@ -12,6 +12,14 @@
  * страницы заполняет строки, дни и время и отправляет заказ на
  * `PUBLIC_DIRECTUS_URL`; без этого адреса вместо формы — звонок: недонастроенный
  * сайт не примет заказ, который не сможет доставить.
+ * The venue is one choice with the catalog's switch: the pickup and «В зале»
+ * radios are that switch inside the form, delivery names it in one line
+ * («Готовит: Садовая, 212Б · Поменять»); a dish the venue does not cook is
+ * named in the cart and closes the checkout until it is removed.
+ * Точка — один выбор с переключателем каталога: радио самовывоза и «В зале» —
+ * этот же переключатель внутри формы, доставка называет её одной строкой
+ * («Готовит: Садовая, 212Б · Поменять»); блюдо, которого точка не готовит,
+ * называется в корзине и закрывает оформление, пока его не уберут.
  */
 import Icon from '../Icon.astro';
 import CartAccount from '../account/CartAccount.astro';
@@ -23,6 +31,7 @@ import type { Content } from '../../lib/content.ts';
 import { typo } from '../../lib/content.ts';
 import { DOC, docHref } from '../../lib/pages.ts';
 import { CART_NOTE } from '../../lib/delivery.ts';
+import { TABLE_MAX } from '../../lib/order.ts';
 
 interface Props {
   content: Content;
@@ -38,6 +47,9 @@ const endpoint = directus ? `${directus}/items/orders` : '';
 // address suggestions and the zone quote (`directus/extensions/delivery`); without it the price is named on the call
 // подсказки адресов и расчёт зоны (`directus/extensions/delivery`); без него стоимость называют при звонке
 const deliveryApi = directus ? `${directus}/delivery` : '';
+// the first venue until the page script reads the chosen one (the drawer is closed by then)
+// первая точка, пока скрипт страницы не прочтёт выбранную (корзина к тому времени закрыта)
+const first = places[0];
 ---
 
 <dialog id="cart" class="dlg drawer" aria-labelledby="cart-title" data-endpoint={endpoint} data-delivery-api={deliveryApi}>
@@ -64,6 +76,15 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
         <p class="drawer__notice drawer__notice--warn" data-blocked hidden>
           Часть блюд закончилась — уберите их, чтобы оформить заказ.
         </p>
+        {/* dishes the chosen venue does not cook: what to do, right above them
+            блюда, которых выбранная точка не готовит: что делать — прямо над ними */}
+        <div class="drawer__notice drawer__notice--warn away" data-away-note role="status" hidden>
+          <p data-away-note-text></p>
+          <p class="away__actions">
+            <button type="button" class="tlink" data-away-drop></button>
+            <button type="button" class="tlink" data-away-move hidden></button>
+          </p>
+        </div>
         <ul class="lines" role="list" data-lines></ul>
 
         <div class="drawer__empty" data-empty hidden>
@@ -84,6 +105,7 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
           <b class="tnum" data-total></b>
         </p>
         <p class="sum__note">{CART_NOTE}</p>
+        <p class="cart-warn" data-cart-warn hidden></p>
         {/* no order endpoint on this build (PUBLIC_DIRECTUS_URL is empty): the
             cart is still a list to dictate over the phone
             у этой сборки нет адреса для заказов (PUBLIC_DIRECTUS_URL пуст):
@@ -129,17 +151,17 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
               required
               aria-describedby="co-phone-hint co-phone-err"
             />
-            <p class="field__hint" id="co-phone-hint">Перезвоним на него, чтобы подтвердить заказ</p>
+            <p class="field__hint" id="co-phone-hint" data-phone-hint>Перезвоним на него, чтобы подтвердить заказ</p>
             <p class="field__err" id="co-phone-err" data-err="phone" hidden></p>
           </div>
-          {/* The mail for the ЮKassa receipt: optional, shown by the payment
-              script only while online payment is on — with no online payment
-              there is no receipt to send. Russian mail only, as in the account.
-              Почта для чека ЮKassa: необязательна, скрипт оплаты показывает её,
-              только пока включена онлайн-оплата, — без неё чека не будет.
-              Только российская почта, как в кабинете. */}
+          {/* The mail for the ЮKassa receipt: shown by the payment script only
+              while online payment is on — and then required (owner,
+              26.10.2026: «чтобы точно пришло»). Russian mail only, as in the account.
+              Почта для чека ЮKassa: скрипт оплаты показывает её, только пока
+              включена онлайн-оплата, — и тогда она обязательна (владелец,
+              26.10.2026: «чтобы точно пришло»). Только российская почта, как в кабинете. */}
           <div class="field" data-receipt-email hidden>
-            <label for="co-email">E-mail для чека <span class="field__opt">необязательно</span></label>
+            <label for="co-email">E-mail для чека</label>
             <input
               id="co-email"
               name="email"
@@ -150,16 +172,17 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
               spellcheck="false"
               maxlength="120"
               placeholder="name@mail.ru"
+              aria-required="true"
               aria-describedby="co-email-hint co-email-err"
             />
-            <p class="field__hint" id="co-email-hint">{typo('Чек об оплате придёт на почту. Без почты — смской на телефон')}</p>
+            <p class="field__hint" id="co-email-hint">{typo('Сюда придёт чек об оплате')}</p>
             <p class="field__err" id="co-email-err" data-err="email" hidden></p>
           </div>
         </fieldset>
 
         <fieldset class="fs">
           <legend class="fs__legend">Как получить</legend>
-          <div class="seg">
+          <div class="seg seg--3">
             <label class="seg__opt">
               <input type="radio" name="fulfillment" value="delivery" checked />
               <span>Доставка</span>
@@ -168,9 +191,28 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
               <input type="radio" name="fulfillment" value="pickup" />
               <span>Самовывоз</span>
             </label>
+            <label class="seg__opt">
+              <input type="radio" name="fulfillment" value="dine_in" />
+              <span>В зале</span>
+            </label>
           </div>
 
           <div class="fs__part" data-for="delivery">
+            {/* the venue that cooks the delivery: the catalog's choice, changed here without closing the cart
+                точка, которая готовит доставку: выбор каталога, меняется здесь, не закрывая корзину */}
+            {
+              places.length > 1 && first && (
+                <p class="from">
+                  <Icon name="pin" />
+                  <span class="from__text">
+                    Готовит: <b data-venue-name>{first.name}</b>
+                  </span>
+                  <button type="button" class="tlink from__swap" data-venue-swap>
+                    Поменять
+                  </button>
+                </p>
+              )
+            }
             <CartAccount content={Astro.props.content} part="addresses" />
             {/* The address is a combobox once the script finds the API: houses
                 from `GET /delivery/suggest` under the field, the zone quote under
@@ -245,21 +287,53 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
             <CartAccount content={Astro.props.content} part="save-address" />
           </div>
 
-          <div class="fs__part" data-for="pickup" hidden>
-            <div class="places" role="radiogroup" aria-label="Откуда заберёте" aria-describedby="co-place-err">
+          {/* the venue for pickup and for a table: the same radios, the caption says which
+              точка самовывоза и стола: те же радио, подпись говорит, о чём речь */}
+          <div class="fs__part" data-for="pickup dine_in" hidden>
+            <p class="places__label" id="co-place-label" data-place-label>Откуда заберёте</p>
+            <div class="places" role="radiogroup" aria-labelledby="co-place-label" aria-describedby="co-place-err">
               {
                 places.map((place) => (
                   <label class="place-opt">
                     <input type="radio" name="place" value={place.id} />
                     <span class="place-opt__name">{place.name}</span>
+                    {/* the hours are for pickup: a guest at a table is already there
+                        часы — для самовывоза: гость за столом уже на месте */}
                     <span class="place-opt__meta">
-                      {place.kind} · {hoursRows(place.schedule).map((row) => `${row.days} ${row.hours}`).join(', ')}
+                      {place.kind}
+                      <span class="place-opt__hours">
+                        · {hoursRows(place.schedule).map((row) => `${row.days} ${row.hours}`).join(', ')}
+                      </span>
                     </span>
                   </label>
                 ))
               }
             </div>
             <p class="field__err" id="co-place-err" data-err="place" hidden></p>
+          </div>
+
+          {/* At a table (owner, 26.10.2026): the number if the table has one, paid
+              on the site, brought to the table. `?place=2&table=5` fills both.
+              За столиком (владелец, 26.10.2026): номер, если он есть на столе,
+              оплата на сайте, принесут к столу. `?place=2&table=5` заполняет оба. */}
+          <div class="fs__part dine" data-for="dine_in" hidden>
+            <div class="field dine__table">
+              <label for="co-table">Номер стола <span class="field__opt">необязательно</span></label>
+              <input
+                id="co-table"
+                name="table"
+                inputmode="numeric"
+                maxlength={TABLE_MAX}
+                autocomplete="off"
+                spellcheck="false"
+                aria-describedby="co-table-hint"
+              />
+              <p class="field__hint" id="co-table-hint">Если на столе есть номер</p>
+            </div>
+            <p class="dine__note">
+              <Icon name="chair" />
+              <span>Оплата на сайте, принесём к столу</span>
+            </p>
           </div>
         </fieldset>
 
@@ -286,7 +360,9 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
             </div>
             <p class="field__err" id="co-time-err" data-err="time" hidden></p>
           </div>
-          <p class="field__hint">Точное время подтвердим при звонке</p>
+          {/* at a table nobody calls: a waiter comes to confirm (owner, 26.10.2026)
+              в зале не звонят: к столу подходит сотрудник и подтверждает (владелец, 26.10.2026) */}
+          <p class="field__hint" data-when-hint>Точное время подтвердим при звонке</p>
         </fieldset>
 
         <PayChoice />
@@ -355,6 +431,12 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
         </div>
         <CartAccount content={Astro.props.content} part="earn" />
         <p class="bill__note" data-bill-note hidden></p>
+        {/* dishes the venue does not cook, found at the last step (the venue changed here)
+            блюда, которых точка не готовит, — на последнем шаге (точку сменили здесь же) */}
+        <p class="bill__note bill__note--away" data-bill-away hidden>
+          <span data-bill-away-text></span>
+          <button type="button" class="tlink" data-to-cart>К корзине</button>
+        </p>
         <button type="submit" class="btn btn--primary btn--block" data-submit>
           <span data-submit-label>Отправить заказ</span>
         </button>
@@ -395,7 +477,7 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
           <span class="display tnum" data-done-number></span>
         </p>
         <p class="done__text">
-          Перезвоним на <b class="tnum" data-done-phone></b>, чтобы подтвердить состав, сумму, адрес и время.
+          <span data-done-lead>Перезвоним на <b class="tnum" data-done-phone></b>, чтобы подтвердить состав, сумму, адрес и время.</span>
           <span data-done-after>Оплату обсудим там же.</span>
         </p>
         {/* the phone and the messengers right under «we will call you»: the old

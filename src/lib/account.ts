@@ -66,8 +66,12 @@ export type Order = {
   number: string;
   status: 'new' | 'in_work' | 'done' | 'cancelled' | string;
   date_created: string;
-  fulfillment: 'delivery' | 'pickup';
+  /** `dine_in` — «В зале»: гость заказал со своего столика (с 26.10.2026) */
+  fulfillment: 'delivery' | 'pickup' | 'dine_in';
+  /** самовывоз и зал — где; доставка — какая точка готовит (с 26.10.2026), пусто — выбрали при звонке */
   place: number | null;
+  /** номер стола у заказа в зале — с 26.10.2026; у остальных нет */
+  table?: string | null;
   address: string | null;
   /** квартира, подъезд, этаж, домофон — с 23.10.2026; у старых заказов их нет */
   address_flat?: string | null;
@@ -404,7 +408,7 @@ export const PAY_STATUS: Record<string, string> = {
   refunded: 'Возврат',
 };
 
-/** Точка самовывоза, как её знает страница: имя и улица. */
+/** Точка, как её знает страница: имя и улица (самовывоз, зал и кухня доставки). */
 export type PickupPlace = { id: number; name: string; street: string };
 
 /** Якорь заказа в адресе: `#order-2310-4821` открывает его карточку. */
@@ -445,6 +449,20 @@ export const placeText = (place: PickupPlace | undefined) => {
 };
 
 /**
+ * How the order is received, for the order's row in the list: «самовывоз,
+ * Садовая, 212Б», «в зале, Садовая, 212Б, стол 4» (since 26.10.2026),
+ * «доставка, Советской Армии, 177, кв. 12».
+ * Как получают заказ — для строки заказа в списке.
+ */
+export const orderHow = (order: Order, places: PickupPlace[]) => {
+  const place = places.find((item) => item.id === Number(order.place));
+  const table = String(order.table ?? '').trim();
+  if (order.fulfillment === 'pickup') return `самовывоз${place ? `, ${place.name}` : ''}`;
+  if (order.fulfillment === 'dine_in') return ['в зале', place?.name, table ? `стол ${table}` : null].filter(Boolean).join(', ');
+  return `доставка${order.address ? `, ${addressLine(order)}` : ''}`;
+};
+
+/**
  * Everything the full card of an order shows, counted from the order itself:
  * the dishes, the bill row by row (the same rows as «Заказ принят»), where
  * and when, the comment, who receives it, where the receipt goes, the payment
@@ -458,7 +476,8 @@ export const placeText = (place: PickupPlace | undefined) => {
  * статус без времени.
  */
 export const orderCard = (order: Order, places: PickupPlace[], today: string) => {
-  const pickup = order.fulfillment === 'pickup';
+  // pickup and the hall: no delivery row, no address / самовывоз и зал: без строки доставки и адреса
+  const pickup = order.fulfillment === 'pickup' || order.fulfillment === 'dine_in';
   const lines = (order.items ?? []).map((item) => ({ title: String(item.title ?? ''), qty: Math.max(1, Number(item.qty) || 1), sum: Number(item.sum) || 0 }));
 
   const bill: BillRow[] = [{ label: 'Блюда', value: rub(Number(order.total) || 0), tone: 'money' }];
@@ -477,9 +496,20 @@ export const orderCard = (order: Order, places: PickupPlace[], today: string) =>
   if (Number(order.bonus_spent) > 0) bill.push({ label: 'Баллами', value: `−${rub(Number(order.bonus_spent))}`, tone: 'minus' });
 
   const zone = !pickup && order.delivery_zone ? String(order.delivery_zone).trim() : '';
-  const where = pickup
-    ? { label: 'Откуда', value: placeText(places.find((place) => place.id === Number(order.place))) ?? 'точку назовём при звонке', note: null }
-    : { label: 'Куда', value: orderAddress(order) || 'адрес уточним при звонке', note: zone ? `Зона доставки: ${zone}` : null };
+  const venue = placeText(places.find((place) => place.id === Number(order.place)));
+  const table = String(order.table ?? '').trim();
+  // «Где: В зале, Садовая, 212Б, стол 4»; a delivery names its kitchen next to the address (since 26.10.2026)
+  // «Где: В зале, Садовая, 212Б, стол 4»; доставка называет кухню рядом с адресом (с 26.10.2026)
+  const where =
+    order.fulfillment === 'dine_in'
+      ? { label: 'Где', value: ['В зале', venue, table ? `стол ${table}` : null].filter(Boolean).join(', '), note: null }
+      : pickup
+        ? { label: 'Откуда', value: venue ?? 'точку назовём при звонке', note: null }
+        : {
+            label: 'Куда',
+            value: orderAddress(order) || 'адрес уточним при звонке',
+            note: [venue ? `Готовит: ${venue}` : null, zone ? `Зона доставки: ${zone}` : null].filter(Boolean).join(' · ') || null,
+          };
 
   const who = [order.customer_name?.trim(), order.phone ? maskPhone(order.phone) : null].filter(Boolean).join(' · ') || null;
   // where the ЮKassa receipt goes: only a mail the guest gave, and not for a

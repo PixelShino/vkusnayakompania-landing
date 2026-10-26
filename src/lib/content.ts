@@ -9,7 +9,7 @@ import type { ImageMetadata } from 'astro';
 import { toSchedule, type HoursRow, type Schedule } from '../data/site.ts';
 import { BASE } from './base.ts';
 import { currentAfisha, livePromos, type Dated } from './select.ts';
-import { OPTIONAL, QUERIES, docKind, docTarget } from '../../scripts/queries.mjs';
+import { FALLBACK, OPTIONAL, QUERIES, docKind, docTarget } from '../../scripts/queries.mjs';
 import { normalizeCatalog, type Catalog, type RawCategory, type RawProduct } from './catalog.ts';
 import {
   normalizeCatering,
@@ -613,7 +613,18 @@ const fetchPatient = async (url: string, init: RequestInit, tries = 4): Promise<
 const fromDirectus = async (base: string, token: string): Promise<Raw> => {
   const entries = await Promise.all(
     Object.entries(QUERIES).map(async ([key, path]) => {
-      const response = await fetchPatient(base + path, { headers: { Authorization: `Bearer ${token}` } });
+      const init = { headers: { Authorization: `Bearer ${token}` } };
+      let response = await fetchPatient(base + path, init);
+      // a field Directus does not have yet («Готовят на» before `schema apply`):
+      // the same records without it, not an empty section
+      // поля, которого в Directus ещё нет («Готовят на» до `schema apply`):
+      // те же записи без него, а не пустой раздел
+      const fallback = (FALLBACK as Record<string, string>)[key];
+      if (!response.ok && fallback) {
+        const first = response.status;
+        response = await fetchPatient(base + fallback, init);
+        if (response.ok) console.warn(`контент: ${key} без новых полей (${first}) — «Готовят на» не прочитано, все блюда на обеих точках`);
+      }
       if (!response.ok) {
         // the catalog and catering are additions, not the site: a schema not yet
         // applied or a builder without the new rights gives an empty section and

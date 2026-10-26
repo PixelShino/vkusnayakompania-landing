@@ -12,7 +12,23 @@ import { RU_MAIL_ERROR, emailDomain, isRuEmail } from './email.ts';
 
 export const CHECKOUT_KEY = 'vk-checkout-v1';
 
-export type Fulfillment = 'delivery' | 'pickup';
+/**
+ * How the order reaches the guest: brought to the address, taken from the
+ * venue, or brought to the table (owner, 26.10.2026: «а как же — в
+ * заведении?» — a guest at a table opens the catalog, later by a QR code
+ * `/catalog/?place=2&table=5`, pays on the site and gets the dishes at the table).
+ * Как заказ попадает к гостю: привозим по адресу, гость забирает с точки или
+ * приносим к столу (владелец, 26.10.2026: «а как же — в заведении?» — гость за
+ * столиком открывает каталог, потом по QR-коду `/catalog/?place=2&table=5`,
+ * платит на сайте, и блюда приносят к столу).
+ */
+export type Fulfillment = 'delivery' | 'pickup' | 'dine_in';
+
+export const FULFILLMENTS: readonly Fulfillment[] = ['delivery', 'pickup', 'dine_in'];
+
+/** Значение радио «Как получить» → способ; незнакомое — доставка, как по умолчанию в форме. */
+export const fulfillmentOf = (value: unknown): Fulfillment =>
+  FULFILLMENTS.includes(value as Fulfillment) ? (value as Fulfillment) : 'delivery';
 
 export type CheckoutForm = {
   name: string;
@@ -20,8 +36,17 @@ export type CheckoutForm = {
   /** почта для чека ЮKassa — необязательна; пусто — чек на телефон */
   email?: string;
   fulfillment: Fulfillment;
-  /** id точки самовывоза */
+  /**
+   * The venue: where it is cooked (delivery), taken from (pickup) or where the
+   * guest sits (dine in) — one choice with the catalog's switch.
+   * Точка: где готовят (доставка), откуда заберут (самовывоз) или где сидит
+   * гость (в зале) — один выбор с переключателем каталога.
+   */
   place?: number | null;
+  /** номер стола в зале — необязательный, «Если на столе есть номер» */
+  table?: string;
+  /** способ оплаты, который видит гость: онлайн нужен e-mail для чека */
+  payment?: 'online' | 'on_delivery' | null;
   /** улица и дом — то, что ищется на карте */
   address?: string;
   /** квартира или офис, подъезд, этаж, код домофона — для курьера, все необязательны */
@@ -56,7 +81,10 @@ export type OrderPayload = {
   /** почта для чека; без почты поле не шлётся вовсе */
   email?: string;
   fulfillment: Fulfillment;
+  /** точка: где готовят, откуда заберут или где сидит гость — уходит при любом способе */
   place: number | null;
+  /** номер стола — только у заказа «В зале» и только если указан */
+  table?: string;
   address: string | null;
   address_flat: string | null;
   address_entrance: string | null;
@@ -168,20 +196,68 @@ export const emailError = (value: string | null | undefined) => {
   return isRuEmail(email) ? null : RU_MAIL_ERROR;
 };
 
+/**
+ * Online payment needs the mail (owner, 26.10.2026: «сделай почту обязательной
+ * … чтобы точно пришло и точно передать ЮKassa почту»); the server refuses an
+ * online order without it too.
+ * Онлайн-оплате нужна почта (владелец, 26.10.2026: «сделай почту обязательной
+ * … чтобы точно пришло и точно передать ЮKassa почту»); сервер тоже отклонит
+ * онлайн-заказ без неё.
+ */
+export const EMAIL_NEEDED = 'Нужна почта: на неё придёт чек об оплате';
+
+/** Что сказать, если точка не выбрана: самовывозу — откуда, залу — где сидите. */
+export const PLACE_NEEDED: Record<Exclude<Fulfillment, 'delivery'>, string> = {
+  pickup: 'Выберите, откуда заберёте',
+  dine_in: 'Выберите, где вы сидите',
+};
+
 /** Ошибки формы по полям; пустой объект — можно отправлять. */
 export const validate = (form: CheckoutForm): Errors => {
   const errors: Errors = {};
   if (!form.name.trim()) errors.name = 'Как к вам обращаться?';
   if (!form.phone.replace(/\D/g, '')) errors.phone = 'Нужен телефон: по нему подтвердим заказ';
   else if (!normalizePhone(form.phone)) errors.phone = 'Проверьте номер: 10 цифр после +7';
-  const email = emailError(form.email);
+  const email = form.payment === 'online' && !receiptEmail(form.email) ? EMAIL_NEEDED : emailError(form.email);
   if (email) errors.email = email;
   if (form.fulfillment === 'delivery' && (form.address ?? '').trim().length < 5)
     errors.address = 'Укажите улицу и дом, куда привезти';
-  if (form.fulfillment === 'pickup' && !form.place) errors.place = 'Выберите, откуда заберёте';
+  if (form.fulfillment !== 'delivery' && !form.place) errors.place = PLACE_NEEDED[form.fulfillment];
   if (form.when === 'later' && !(form.date && form.time)) errors.time = 'Выберите день и время';
   if (!form.consent) errors.consent = 'Поставьте галочку выше — без согласия заказ не отправить';
   return errors;
+};
+
+// ── the table / стол ──
+
+/** Предел длины номера стола — тот же, что у `maxlength` поля и у сервера. */
+export const TABLE_MAX = 10;
+
+/**
+ * The table as the order sends it: «стол № 5» → «5», «12А» stays, «VIP-2»
+ * stays; only letters, digits and a hyphen, at most ten; empty — `null`.
+ * Номер стола в том виде, в каком уходит в заказ: «стол № 5» → «5», «12А»
+ * остаётся, «VIP-2» остаётся; только буквы, цифры и дефис, не длиннее десяти
+ * знаков; пусто — `null`.
+ */
+export const tableNumber = (value: string | null | undefined) =>
+  String(value ?? '')
+    .replace(/№/g, ' ')
+    .normalize('NFKC')
+    .replace(/^\s*(?:стол(?:ик)?|table)(?![\p{L}])\.?/iu, '')
+    .replace(/[^\p{L}\p{N}-]+/gu, '')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, TABLE_MAX) || null;
+
+/**
+ * Where the guest sits, for the eyes: «В зале: Садовая, 212Б, стол 4» (no
+ * table — just the venue). The same line on «order accepted».
+ * Где сидит гость — для глаз: «В зале: Садовая, 212Б, стол 4» (без стола —
+ * только точка). Та же строка на «Заказ принят».
+ */
+export const tableLine = (place: string, table: string | null | undefined) => {
+  const number = tableNumber(table);
+  return `В зале: ${[place.trim(), number && `стол ${number}`].filter(Boolean).join(', ')}`;
 };
 
 // ── the flat, the entrance, the floor, the intercom / квартира, подъезд, этаж, домофон ──
@@ -371,16 +447,26 @@ export const orderNumber = (now: Date, random: number) => {
 };
 
 /**
- * The order as it leaves the browser. Only lines that can be ordered go;
- * titles and prices are for the server's comparison and the manager's eyes —
- * the server rebuilds both from the catalog.
+ * The order as it leaves the browser. Only lines that can be ordered go — in
+ * stock and cooked at the chosen venue; titles and prices are for the
+ * server's comparison and the manager's eyes — the server rebuilds both from
+ * the catalog. The venue goes with every way of getting the order: delivery
+ * is cooked there too (the server checks the dishes against it).
  * Заказ в том виде, в каком он уходит из браузера. Идут только строки, которые
- * можно заказать; названия и цены — для сверки на сервере и глаз менеджера,
- * сервер всё равно собирает их заново из каталога.
+ * можно заказать, — в наличии и готовятся на выбранной точке; названия и цены —
+ * для сверки на сервере и глаз менеджера, сервер всё равно собирает их заново
+ * из каталога. Точка уходит при любом способе получения: доставку тоже
+ * готовят там (сервер сверяет с ней блюда).
  */
 export const buildOrder = (cart: Cart, index: CartIndex, form: CheckoutForm, number: string): OrderPayload => {
-  const { lines, total } = priced(cart, index);
+  const place = form.place ?? null;
+  const { lines, total } = priced(cart, index, place);
   const delivery = form.fulfillment === 'delivery';
+  // a table only for a dine-in order and only when given: no key otherwise,
+  // so an order goes through where the public role has no right on `table` yet
+  // стол — только у заказа в зале и только если указан: иначе ключа нет, и заказ
+  // проходит там, где у публичной роли ещё нет права на `table`
+  const table = form.fulfillment === 'dine_in' ? tableNumber(form.table) : null;
   // no mail — no key at all: the order goes through even where the public
   // role has no right on `email` yet
   // нет почты — нет и ключа: заказ проходит даже там, где у публичной роли
@@ -392,7 +478,8 @@ export const buildOrder = (cart: Cart, index: CartIndex, form: CheckoutForm, num
     phone: normalizePhone(form.phone) ?? form.phone.trim(),
     ...(email && { email }),
     fulfillment: form.fulfillment,
-    place: delivery ? null : (form.place ?? null),
+    place,
+    ...(table && { table }),
     address: delivery ? (form.address ?? '').trim() : null,
     address_flat: delivery ? aptPart('flat', form.flat) : null,
     address_entrance: delivery ? aptPart('entrance', form.entrance) : null,
@@ -401,7 +488,7 @@ export const buildOrder = (cart: Cart, index: CartIndex, form: CheckoutForm, num
     desired_time: desiredTime(form),
     comment: (form.comment ?? '').trim() || null,
     items: lines
-      .filter((line) => line.available)
+      .filter((line) => line.available && !line.elsewhere)
       .map((line) => ({
         product: line.id,
         title: line.title,

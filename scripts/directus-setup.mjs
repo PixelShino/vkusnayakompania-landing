@@ -47,6 +47,8 @@ const ORDER_FIELDS_PUBLIC = [
   'email',
   // the address by parts (since 23.10.2026) / адрес по пунктам (с 23.10.2026)
   'address_flat', 'address_entrance', 'address_floor', 'address_intercom',
+  // the table of an order in the hall (since 26.10.2026) / стол заказа в зале (с 26.10.2026)
+  'table',
   'desired_time', 'comment', 'items', 'total', 'consent',
   // set by the `order-guard` hook, which runs before permissions are checked
   // ставит хук `order-guard`, он работает до проверки прав
@@ -75,8 +77,10 @@ const REQUEST_FIELDS_PUBLIC = [
 // подъезд, этаж и код домофона — в своих полях сразу под ним, по два в ряд;
 // старое однострочное `address_details` идёт после них и видно только
 // заполненным — у заказов, сделанных до пунктов.
+// No address for pickup and, since 26.10.2026, for an order at a table in the hall.
+// Без адреса — самовывоз и, с 26.10.2026, заказ за столиком в зале.
 const tr = (text) => [{ language: 'ru-RU', translation: text }];
-const PICKUP_HIDES = { name: 'Самовывоз', rule: { fulfillment: { _eq: 'pickup' } }, hidden: true };
+const PICKUP_HIDES = { name: 'Самовывоз или зал', rule: { fulfillment: { _in: ['pickup', 'dine_in'] } }, hidden: true };
 const addressPart = (field, name, max) => ({
   field,
   type: 'string',
@@ -95,9 +99,13 @@ const ADDRESS_PARTS = [
   addressPart('address_floor', 'Этаж', 10),
   addressPart('address_intercom', 'Код домофона', 20),
 ];
-// what the two old fields should look like / как должны выглядеть два старых поля
+// what the address fields should look like: the two old ones and the parts
+// (their hiding rule grew the hall on 26.10.2026)
+// как должны выглядеть поля адреса: два старых и пункты (правило скрытия
+// получило зал 26.10.2026)
 const ADDRESS_META = {
-  address: { interface: 'input-multiline', options: { trim: true } },
+  address: { interface: 'input-multiline', options: { trim: true }, conditions: [PICKUP_HIDES] },
+  ...Object.fromEntries(ADDRESS_PARTS.map(({ field }) => [field, { conditions: [PICKUP_HIDES] }])),
   address_details: {
     translations: tr('Квартира, подъезд, этаж (старое поле)'),
     note: 'Заказы до 23.10.2026: квартира, подъезд и этаж одной строкой',
@@ -294,6 +302,12 @@ for (const [collection, rule] of [
   }
 }
 
+// the columns of a dishes bookmark: section, title, price, in stock, venues
+// колонки закладки блюд: раздел, название, цена, в наличии, где готовят
+const DISH_COLUMNS = {
+  layout_query: { tabular: { fields: ['category', 'title', 'price', 'available', 'places'], sort: ['sort'], limit: 100 } },
+  layout_options: { tabular: { widths: { category: 170, title: 320, price: 100, available: 100, places: 230 } } },
+};
 // 3b. how the lists open: orders newest first with the columns a manager
 //     calls from, dishes with a photo; plus a few bookmarks
 //     как открываются списки: заказы — свежие сверху, с колонками, по которым
@@ -315,11 +329,19 @@ const PRESETS = [
   {
     collection: 'products',
     layout_query: {
-      tabular: { fields: ['photo', 'title', 'category', 'price', 'weight', 'available', 'status'], sort: ['sort'], limit: 100 },
+      tabular: { fields: ['photo', 'title', 'category', 'places', 'price', 'weight', 'available', 'status'], sort: ['sort'], limit: 100 },
     },
-    layout_options: { tabular: { widths: { photo: 64, title: 300, category: 160, price: 100, weight: 130, available: 100, status: 150 } } },
+    layout_options: { tabular: { widths: { photo: 64, title: 300, category: 160, places: 230, price: 100, weight: 130, available: 100, status: 150 } } },
   },
-  { collection: 'products', bookmark: 'Нет в наличии', icon: 'remove_shopping_cart', filter: { available: { _eq: false } } },
+  { collection: 'products', bookmark: 'Нет в наличии', icon: 'remove_shopping_cart', filter: { available: { _eq: false } }, ...DISH_COLUMNS },
+  // the menu of each venue (since 26.10.2026): one «Блюда», two views; a dish
+  // ticked for both venues is in both. `_contains` over the csv «1,2» — the
+  // ids are one digit, «1» does not hide in «12»
+  // меню каждой точки (с 26.10.2026): одни «Блюда», два вида; блюдо с обеими
+  // галочками — в обоих. `_contains` по csv «1,2» — id однозначные, «1» не
+  // прячется в «12»
+  { collection: 'products', bookmark: 'Меню · Садовая', icon: 'storefront', filter: { places: { _contains: '1' } }, ...DISH_COLUMNS },
+  { collection: 'products', bookmark: 'Меню · Советской Армии', icon: 'restaurant', filter: { places: { _contains: '2' } }, ...DISH_COLUMNS },
   // catering requests: newest first, the columns a manager calls from and
   // plans by; formats with a photo and the price; questions by topic
   // заявки на кейтеринг: свежие сверху, с колонками, по которым менеджер звонит
@@ -356,6 +378,12 @@ const PRESETS = [
 const presetsNow = await api('GET', `/presets?filter[user][_null]=true&filter[role][_null]=true&limit=-1`);
 for (const preset of PRESETS) {
   const same = presetsNow.find((p) => p.collection === preset.collection && (p.bookmark ?? null) === (preset.bookmark ?? null));
+  // a dishes list from before «Готовят на» gets its columns; any other list stays as it is
+  // список блюд, заведённый до «Готовят на», получает свои колонки; остальные списки не трогаются
+  if (same && preset.collection === 'products' && !same.layout_query?.tabular?.fields?.includes('places')) {
+    await api('PATCH', `/presets/${same.id}`, { layout_query: preset.layout_query, layout_options: preset.layout_options });
+    console.log(`= preset products${preset.bookmark ? ` «${preset.bookmark}»` : ''}: колонка «Готовят на»`);
+  }
   if (same) continue;
   await api('POST', '/presets', { layout: 'tabular', user: null, role: null, bookmark: null, ...preset });
   console.log(`+ preset ${preset.collection}${preset.bookmark ? ` «${preset.bookmark}»` : ''}`);
@@ -429,5 +457,6 @@ await (await import('./setup/delivery.mjs')).setup(api, { editorPolicy: policy.i
 await (await import('./setup/account.mjs')).setup(api, { findOne, ORDER_FIELDS_PUBLIC, publicPolicy: publicAccess.policy }); // личный кабинет и «Вкусные баллы»
 await (await import('./setup/pages.mjs')).setup(api, { editorPolicy: policy.id, builderPolicy: bpolicy.id }); // документы: оферта, политика, доставка, реквизиты
 await (await import('./setup/email.mjs')).setup(api); // только российская почта: подсказки полей и отчёт о чужих адресах
+await (await import('./setup/places.mjs')).setup(api); // меню по точкам и «В зале»: подписи полей, стол, «Готовят на» у старых блюд
 
 console.log('setup: готово');

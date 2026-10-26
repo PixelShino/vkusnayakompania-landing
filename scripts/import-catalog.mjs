@@ -29,6 +29,16 @@
 //   --save file.json  сохранить разобранный магазин в файл (для проверки или переноса)
 //   --from file.json  взять каталог из такого файла вместо магазина
 //   --no-photos       без фото (быстрая проверка)
+//   --place точка     «Готовят на» для новых блюд этого импорта: «Садовая»,
+//                     «Советской Армии», «обе» (или id точки); без флага — обе
+// In a `--from` file a dish may carry its own `place` (or `places`): the same
+// words, or a list; it beats `--place` and, with `--sync`, rewrites the venues
+// of a dish already in Directus. The shop knows nothing of the venues, so a
+// plain `--sync` never touches them.
+// В файле `--from` у блюда может быть своё `place` (или `places`): те же слова
+// или список; оно важнее `--place` и при `--sync` переписывает точки блюда,
+// уже заведённого в Directus. Магазин о точках ничего не знает, поэтому
+// обычный `--sync` их не трогает.
 // SHOP_URL — адрес магазина, по умолчанию https://vkusdostavka.shop
 import fs from 'node:fs';
 import { loadEnv } from './env.mjs';
@@ -45,6 +55,7 @@ const SYNC = flag('--sync');
 const PHOTOS = !flag('--no-photos');
 const FROM = option('--from');
 const SAVE = option('--save');
+const PLACE = option('--place');
 
 const SHOP = (process.env.SHOP_URL ?? 'https://vkusdostavka.shop').replace(/\/+$/, '');
 const BASE = process.env.DIRECTUS_URL ?? 'http://127.0.0.1:8055';
@@ -304,6 +315,55 @@ log(
 
 const stats = { catNew: 0, catSync: 0, new: 0, synced: 0, archived: 0, photos: 0, reused: 0, photoFail: 0 };
 
+// ── «Готовят на»: the venues by the words a person types ─────────────────────
+// ── «Готовят на»: точки по словам, которые набирает человек ─────────────────
+const venues = DRY && !TOKEN ? [] : await api('GET', '/items/places?fields=id,name,street&sort=id&limit=-1');
+const BOTH = /^(?:обе|обеих|оба|все|both|all)$/iu;
+/**
+ * «Садовая», «Советской Армии, 177», «обе», «2», ['Садовая', 'Советской Армии']
+ * → venue ids as the csv field keeps them (`['1', '2']`); nothing given — null.
+ * A word that names no venue, or two, stops the import: a typo must not move a
+ * dish to the wrong menu.
+ * → id точек, как их хранит поле csv (`['1', '2']`); ничего не указано — null.
+ * Слово, которое не называет ни одной точки или называет две, останавливает
+ * импорт: опечатка не должна переносить блюдо в чужое меню.
+ */
+const placesFrom = (value, where) => {
+  if (value === undefined || value === null || value === '') return null;
+  if (!venues.length) {
+    log(`${where}: точки «${value}» не проверены — без токена список точек не прочитать`);
+    return null;
+  }
+  const words = Array.isArray(value) ? value : String(value).split(/\s*(?:;|\/|\+|\s+и\s+)\s*/u);
+  const ids = new Set();
+  for (const raw of words) {
+    const word = String(raw ?? '').trim().toLowerCase().replace(/ё/g, 'е');
+    if (!word) continue;
+    if (BOTH.test(word)) {
+      for (const venue of venues) ids.add(String(venue.id));
+      continue;
+    }
+    const plain = (text) => String(text ?? '').toLowerCase().replace(/ё/g, 'е');
+    const found = venues.filter(
+      (venue) =>
+        String(venue.id) === word ||
+        plain(venue.name).startsWith(word) ||
+        (venue.street && (plain(venue.street).startsWith(word) || word.startsWith(plain(venue.street)))),
+    );
+    if (found.length !== 1)
+      throw new Error(`${where}: «${raw}» — ${found.length ? 'подходит к нескольким точкам' : 'нет такой точки'}; пишите «Садовая», «Советской Армии» или «обе»`);
+    ids.add(String(found[0].id));
+  }
+  return ids.size ? [...ids].sort() : null;
+};
+const placesText = (ids) => ids.map((id) => venues.find((venue) => String(venue.id) === id)?.name ?? id).join(', ');
+const defaultPlaces = placesFrom(PLACE, '--place');
+const ownPlaces = (product) => placesFrom(product.place ?? product.places, `«${product.title ?? product.source_id}»`);
+// every dish's venues are read before the first write: a typo stops the import, not half of it
+// точки всех блюд читаются до первой записи: опечатка останавливает импорт, а не его половину
+for (const product of catalog.products) ownPlaces(product);
+const anyOwnPlaces = catalog.products.some((product) => (product.place ?? product.places) != null);
+
 // folder for the photos, so the file library stays tidy
 // папка для фото, чтобы библиотека файлов не превращалась в свалку
 let folder = DRY ? null : (await api('GET', `/folders?filter[name][_eq]=${encodeURIComponent('Каталог')}&filter[parent][_null]=true&limit=1`))[0];
@@ -331,7 +391,7 @@ const SHOP_FIELDS = ['title', 'description', 'weight', 'price', 'old_price', 'va
 const existing =
   DRY && !TOKEN
     ? []
-    : await api('GET', `/items/products?fields=id,source_id,slug,photo,status,${SHOP_FIELDS.join(',')}&limit=-1`);
+    : await api('GET', `/items/products?fields=id,source_id,slug,photo,status,${SHOP_FIELDS.join(',')}${anyOwnPlaces ? ',places' : ''}&limit=-1`);
 const bySource = new Map(existing.filter((p) => p.source_id).map((p) => [p.source_id, p]));
 const slugs = new Set(existing.map((p) => p.slug).filter(Boolean));
 
@@ -384,11 +444,14 @@ for (const product of catalog.products) {
     if (slugs.has(slug)) slug = `${slug}-${product.source_id}`;
     slugs.add(slug);
     const photo = await photoFor(product);
+    // no venues given — the column's default: both
+    // точки не указаны — значение колонки по умолчанию: обе
+    const places = ownPlaces(product) ?? defaultPlaces;
     await write('POST', '/items/products', {
-      status: 'published', slug, source_id: product.source_id, photo, ...shopFields(product),
+      status: 'published', slug, source_id: product.source_id, photo, ...shopFields(product), ...(places ? { places } : {}),
     });
     stats.new += 1;
-    log(`+ ${product.title}${photo ? '' : PHOTOS && product.photo ? ' (без фото)' : ''}`);
+    log(`+ ${product.title}${photo ? '' : PHOTOS && product.photo ? ' (без фото)' : ''}${places ? ` · готовят: ${placesText(places)}` : ''}`);
     continue;
   }
   // only what really changed: every saved dish is a rebuild event for the Flow
@@ -396,6 +459,9 @@ for (const product of catalog.products) {
   const same = (key, value) => JSON.stringify(found[key] ?? null) === JSON.stringify(value ?? null);
   const patch = SYNC ? Object.fromEntries(Object.entries(shopFields(product)).filter(([key, value]) => !same(key, value))) : {};
   if (SYNC && found.status === 'archived') patch.status = 'published';
+  // the venues only from the file, never from the shop / точки — только из файла, не из магазина
+  const own = SYNC ? ownPlaces(product) : null;
+  if (own && JSON.stringify([...(found.places ?? [])].map(String).sort()) !== JSON.stringify(own)) patch.places = own;
   if (!found.photo) {
     const photo = await photoFor(product);
     if (photo) patch.photo = photo;

@@ -4,6 +4,7 @@
  * узла есть `@type`, `@id` на странице не повторяются, каждая ссылка
  * `{ "@id" }` ведёт на узел той же страницы, заглушка Max в `sameAs` не
  * попадает, меню-заглушка не попадает в `hasMenu`, ответы FAQ — без тегов.
+ * Заказ и меню точки ведут в каталог, открытый на ней (`?place=`, 26.10.2026).
  * Запуск: `pnpm test`.
  */
 import assert from 'node:assert/strict';
@@ -16,6 +17,7 @@ import {
   layoutGraph,
   menusOf,
   orgId,
+  placeCatalogUrl,
   orgSameAs,
   placeId,
   stripHtml,
@@ -148,7 +150,11 @@ assert.equal('paymentAccepted' in sadovaya, false);
 assert.match(String(sadovaya.description), /^Кафе и кондитерская в одном зале: завтраки с 8:00/, 'описание точки — из её направления');
 const action = sadovaya.potentialAction as Json;
 assert.equal(action['@type'], 'OrderAction');
-assert.equal((action.target as Json).urlTemplate, `${origin}/catalog/`);
+// each venue orders from its own menu: the catalog opened on it (26.10.2026)
+// каждая точка принимает заказ по своему меню — каталог, открытый на ней (26.10.2026)
+assert.equal((action.target as Json).urlTemplate, `${origin}/catalog/?place=1`);
+assert.equal(((armii.potentialAction as Json).target as Json).urlTemplate, `${origin}/catalog/?place=2`);
+assert.equal(placeCatalogUrl(site, { id: 2 }), `${origin}/catalog/?place=2`, 'адрес каталога точки');
 assert.deepEqual(action.deliveryMethod, [
   'http://purl.org/goodrelations/v1#DeliveryModeOwnFleet',
   'https://schema.org/OnSitePickup',
@@ -156,6 +162,11 @@ assert.deepEqual(action.deliveryMethod, [
 // пустой каталог — заказывать негде, действия нет
 const noCatalog = layout({ ...content, catalog: { ...content.catalog, count: 0 } }, homeUrl(site));
 assert.equal('potentialAction' in nodeOf(noCatalog, placeId(origin, '1')), false);
+const catalogMenu = (place: { id: number }) => ({ '@type': 'Menu', name: 'Меню для заказа на сайте', url: `${origin}/catalog/?place=${place.id}` });
+assert.ok(
+  !JSON.stringify(nodeOf(noCatalog, placeId(origin, '1')).hasMenu ?? []).includes('/catalog/'),
+  'пустой каталог — меню для заказа в hasMenu нет',
+);
 
 // menus: stubs stay out of the markup, real files (in the fixture since 26.10.2026) go in
 // меню: заглушки в разметку не идут, настоящие файлы (в фикстуре с 26.10.2026) — идут
@@ -163,7 +174,11 @@ const stubMenus = {
   ...content,
   menus: content.menus.map((menu) => ({ ...menu, file: { ...menu.file, placeholder: true } })),
 };
-assert.equal('hasMenu' in nodeOf(layout(stubMenus, homeUrl(site)), placeId(origin, '1')), false, 'меню-заглушка попала в hasMenu');
+assert.deepEqual(
+  nodeOf(layout(stubMenus, homeUrl(site)), placeId(origin, '1')).hasMenu,
+  [catalogMenu(content.places[0])],
+  'меню-заглушка попала в hasMenu, или пропало меню каталога',
+);
 const realMenus = content;
 assert.ok(content.menus.some((menu) => !menu.file.placeholder), 'в фикстуре есть настоящие меню');
 const menuGraph = layout(realMenus, homeUrl(site));
@@ -175,7 +190,12 @@ const expectedMenus = menusOf(realMenus, realMenus.places[0]).map((menu) => ({
   dateModified: menu.updated,
 }));
 assert.ok(expectedMenus.length > 0, 'у Садовой есть настоящее меню');
-assert.deepEqual(nodeOf(menuGraph, placeId(origin, '1')).hasMenu, expectedMenus);
+assert.deepEqual(nodeOf(menuGraph, placeId(origin, '1')).hasMenu, [...expectedMenus, catalogMenu(realMenus.places[0])]);
+assert.deepEqual(
+  (nodeOf(menuGraph, placeId(origin, '2')).hasMenu as Json[]).at(-1),
+  catalogMenu(realMenus.places[1]),
+  'у Советской Армии — своё меню в каталоге',
+);
 // у кондитерской нет своей точки — её меню не приписывается ни одной
 const attributed = realMenus.places.map((place) => menusOf(realMenus, place).map((menu) => menu.title));
 assert.ok(attributed[0].includes('Меню кафе') && attributed[1].includes('Меню ресторана'), 'меню точек на своих местах');

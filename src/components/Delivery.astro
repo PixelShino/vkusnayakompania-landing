@@ -2,13 +2,13 @@
 /**
  * Ink strip about ordering from this site: the pitch under its own mark, three
  * things a guest wants to know before ordering (what there is, how it is
- * confirmed, where to pick it up) and the way in — the catalog. Beside it, the
+ * confirmed, how to get it) and the way in — the catalog. Beside it, the
  * food itself: three dishes from different sections on the page's paper, one
  * large and two small, each a door into its section. On a phone the food comes
  * right after the pitch: appetite first, then the facts, then the button.
  * Чернильная полоса про заказ с этого сайта: суть под своей маркой, три вещи,
- * которые гость хочет знать до заказа (что есть, как подтверждается, где
- * забрать), и вход — каталог. Рядом сама еда: три блюда из разных разделов на
+ * которые гость хочет знать до заказа (что есть, как подтверждается, как
+ * получить), и вход — каталог. Рядом сама еда: три блюда из разных разделов на
  * бумаге страницы, одно крупное и два малых, и каждое — дверь в свой раздел.
  * На телефоне еда идёт сразу за сутью: сначала аппетит, потом факты, потом кнопка.
  */
@@ -19,6 +19,7 @@ import { typo, type Content } from '../lib/content';
 import { BASE } from '../lib/base.ts';
 import { coverOf, photoWidths, positions } from '../lib/catalog.ts';
 import { plural } from '../data/site.ts';
+import { placeAt } from '../data/landings-shop.ts';
 
 interface Props {
   content: Content;
@@ -47,21 +48,31 @@ const longest = picked.reduce((best, shot, i) => (shot.category.title.length > p
 const shots = picked.length ? [picked[longest], ...picked.filter((_, i) => i !== longest)] : picked;
 
 const sections = catalog.categories.length;
-const COUNT: Record<number, string> = { 2: 'двух', 3: 'трёх', 4: 'четырёх' };
+// since 26.10.2026 each venue has its own menu and a guest at a table orders from
+// the catalog too; without the catalog neither is said
+// с 26.10.2026 у каждой точки своё меню, а гость за столиком тоже заказывает из
+// каталога; без каталога ни того, ни другого не говорим
+const manyPlaces = hasCatalog && places.length > 1;
+const pickup = places.length ? `Заберите ${places.map((place) => `на ${placeAt(place)}`).join(' или ')}${hasCatalog ? ', а в зале закажите со столика' : ''}. ` : '';
 const POINTS = [
   {
-    title: 'Всё меню на одной странице',
-    text: hasCatalog
-      ? `${sections} ${plural(sections, 'раздел', 'раздела', 'разделов')} и ${positions(catalog.count)} — от завтраков до праздничных тортов, с фото, весом и ценой.`
-      : 'От завтраков до праздничных тортов — с фото, весом и ценой.',
+    title: manyPlaces ? `Меню ${places.length === 2 ? 'обеих' : 'всех'} точек на одной странице` : 'Всё меню на одной странице',
+    text: `${
+      hasCatalog
+        ? `${sections} ${plural(sections, 'раздел', 'раздела', 'разделов')} и ${positions(catalog.count)} — от завтраков до праздничных тортов, с фото, весом и ценой.`
+        : 'От завтраков до праздничных тортов — с фото, весом и ценой.'
+    }${manyPlaces ? ' У каждой точки своё — выберите нужную вверху каталога.' : ''}`,
   },
   {
     title: 'Оплата онлайн, подтверждение звонком',
     text: 'Соберите корзину, оплатите картой на сайте и оставьте телефон: перезвоним, сверим состав, адрес и время.',
   },
   {
-    title: places.length > 1 ? 'Самовывоз или доставка' : 'Самовывоз',
-    text: `Забрать можно ${places.map((place) => `на ${place.name}`).join(' или ')}. Доставка по Самаре от 400 ₽, точную сумму корзина посчитает по адресу.`,
+    // the third way since 26.10.2026: a guest at a table orders «В зале» and pays on the site
+    // третий способ с 26.10.2026: гость за столиком заказывает «В зале» и платит на сайте
+    title: hasCatalog ? 'Самовывоз, доставка или за столиком' : 'Самовывоз или доставка',
+    // the price never leaves its rouble sign on the next line / цена не отрывается от знака рубля
+    text: `${pickup}Доставка по Самаре от 400\u00a0₽, точную сумму корзина посчитает по адресу.`,
   },
 ];
 

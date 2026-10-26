@@ -202,19 +202,40 @@ export const addressLine = (order = {}) => {
  * `format`), `adminUrl` — карточка в админке.
  */
 /**
- * «Самовывоз: Садовая» or «Доставка: <адрес>». The delivery zone stays in the
- * admin card only: the owner dropped it from the messages on 26.10.2026
+ * «Самовывоз: Садовая», «В зале: Садовая, 212Б, стол 4» (since 26.10.2026: the
+ * guest orders from his table) or «Доставка: <адрес>». The delivery zone stays
+ * in the admin card only: the owner dropped it from the messages on 26.10.2026
  * («сборная солянка из районов»), the delivery cost already tells the zone.
- * «Самовывоз: Садовая» или «Доставка: <адрес>». Зона доставки остаётся только
- * в карточке админки: владелец убрал её из сообщений 26.10.2026 («сборная
- * солянка из районов»), стоимость доставки и так говорит о зоне.
+ * «Самовывоз: Садовая», «В зале: Садовая, 212Б, стол 4» (с 26.10.2026: гость
+ * заказывает со своего столика) или «Доставка: <адрес>». Зона доставки
+ * остаётся только в карточке админки: владелец убрал её из сообщений
+ * 26.10.2026 («сборная солянка из районов»), стоимость доставки и так говорит о зоне.
  */
-export const fulfillmentLine = (order = {}, place = null) =>
-  order.fulfillment === 'pickup' ? `Самовывоз${place ? `: ${place}` : ''}` : `Доставка: ${addressLine(order) || 'адрес не указан'}`;
+export const fulfillmentLine = (order = {}, place = null) => {
+  if (order.fulfillment === 'pickup') return `Самовывоз${place ? `: ${place}` : ''}`;
+  if (order.fulfillment === 'dine_in') {
+    const table = typeof order.table === 'string' || typeof order.table === 'number' ? String(order.table).trim() : '';
+    const where = [place, table ? `стол ${table}` : null].filter(Boolean).join(', ');
+    return `В зале${where ? `: ${where}` : ''}`;
+  }
+  return `Доставка: ${addressLine(order) || 'адрес не указан'}`;
+};
+
+/**
+ * «Готовит: Садовая, 212Б» — the kitchen of a delivery, since 26.10.2026 the
+ * menus differ per venue. Pickup and the hall already name the venue in their
+ * line; a delivery without a venue (chosen on the call) — nothing.
+ * «Готовит: Садовая, 212Б» — кухня доставки: с 26.10.2026 меню на точках
+ * разное. Самовывоз и зал уже называют точку в своей строке; доставка без
+ * точки (выберут при звонке) — ничего.
+ */
+export const kitchenLine = (order = {}, place = null) =>
+  place && order.fulfillment !== 'pickup' && order.fulfillment !== 'dine_in' ? `Готовит: ${place}` : null;
 
 export const orderModel = (order, { place = null, adminUrl = null, now = new Date() } = {}) => {
   const items = json(order.items, []) ?? [];
   const how = fulfillmentLine(order, place);
+  const kitchen = kitchenLine(order, place);
   const payment = paymentLine(order, now);
   const meta = telegramMeta(order);
   return {
@@ -231,7 +252,7 @@ export const orderModel = (order, { place = null, adminUrl = null, now = new Dat
     },
     headline: `${isTestPayment(order) ? TEST_MARK : ''}Заказ №${order.number ?? order.id} — ${rub(order.total)}`,
     person: [order.customer_name, order.phone].filter(Boolean).join(', '),
-    facts: [how, `Когда: ${order.desired_time || 'как можно скорее'}`, ...(payment ? [payment] : [])],
+    facts: [how, ...(kitchen ? [kitchen] : []), `Когда: ${order.desired_time || 'как можно скорее'}`, ...(payment ? [payment] : [])],
     lines: items.map((line) => `${line.title} × ${line.qty} — ${rub(line.sum ?? Number(line.price) * Number(line.qty))}`),
     // an order from the guest account: what points and the birthday discount took off, and what is left
     // заказ из личного кабинета: что сняли баллы и скидка именинника и сколько осталось
@@ -317,7 +338,8 @@ export const pendingModel = (order, { place = null, adminUrl = null } = {}) => {
     facts: [
       ...(shown.length ? [`Состав: ${shown.join(', ')}${more > 0 ? ` и ещё ${more}` : ''}`] : []),
       fulfillmentLine(order, place),
-    ],
+      kitchenLine(order, place),
+    ].filter(Boolean),
     lines: [],
     total: null,
     notes: outcome ? [outcome] : [],

@@ -638,6 +638,17 @@ const sentence = (text: string) => (/[.!?…]$/.test(text) ? text : `${text}.`);
 /** «Садовой, 212Б и Советской Армии, 177» — после «на» */
 const placesList = (content: Content) => andList(content.places.map(placeAt));
 
+/**
+ * Where a dish is picked up. Since 26.10.2026 each venue has its own menu, so a
+ * sentence about a whole shelf («все завтраки», «каждое блюдо») names no venue:
+ * «с той точки, где их готовят». With one venue it is named.
+ * Где забирают блюдо. С 26.10.2026 у каждой точки своё меню, поэтому фраза о
+ * целой полке («все завтраки», «каждое блюдо») точку не называет: «с той
+ * точки, где их готовят». Точка одна — называется она.
+ */
+const pickupFrom = (content: Content, them: 'их' | 'его' = 'их') =>
+  content.places.length > 1 ? `самовывозом с той точки, где ${them} готовят` : `самовывозом на ${placesList(content)}`;
+
 /** «в Telegram или Max» — только мессенджеры, которые правда открывают чат; пусто — ни одного. */
 const chatsText = (content: Content) => {
   const labels = chatLinks(content.settings).map((link) => link.label);
@@ -719,14 +730,17 @@ export const introOf = (key: ShopKey, content: Content): string => {
   }
   if (key === 'menu') {
     const count = content.catalog.count;
-    return `${count}\u00a0${plural(count, 'блюдо', 'блюда', 'блюд')} в\u00a0${sections.length}\u00a0${plural(
+    const head = `${count}\u00a0${plural(count, 'блюдо', 'блюда', 'блюд')} в\u00a0${sections.length}\u00a0${plural(
       sections.length,
       'разделе',
       'разделах',
       'разделах',
-    )} — от завтраков до праздничных тортов, с весом и ценами. Всё можно заказать с доставкой по Самаре или забрать самовывозом на ${placesList(
-      content,
-    )}.`;
+    )} — от завтраков до праздничных тортов, с весом и ценами.`;
+    // the venues' menus differ (26.10.2026): «everything at both» would promise too much
+    // меню точек разное (26.10.2026): «всё на обеих» пообещало бы лишнее
+    return content.places.length > 1
+      ? `${head} На ${placesList(content)} меню разное: в каталоге выберите точку и закажите с доставкой по Самаре или самовывозом.`
+      : `${head} Всё можно заказать с доставкой по Самаре или забрать самовывозом на ${placesList(content)}.`;
   }
   const place = placeOf(key, content);
   return (place && directionOf(place, content)?.text) ?? '';
@@ -769,7 +783,10 @@ export const cakeSteps = (content: Content) => {
     },
     {
       title: 'Доставка или самовывоз',
-      text: `Курьером по Самаре или самовывоз на ${placesList(content)}.`,
+      text:
+        content.places.length > 1
+          ? 'Курьером по Самаре или самовывоз с той точки, где готовят торт.'
+          : `Курьером по Самаре или самовывоз на ${placesList(content)}.`,
     },
   ].filter((step): step is { title: string; text: string } => Boolean(step));
 };
@@ -790,7 +807,7 @@ export type ShopFaq = { id: string; q: string; a: string; link?: { href: string;
 export const faqOf = (key: ShopKey, content: Content): ShopFaq[] => {
   const items: (ShopFaq | false | undefined | null | '')[] = [];
   const { settings, places } = content;
-  const pickup = `самовывозом на ${placesList(content)}`;
+  const pickup = pickupFrom(content);
   if (key === 'cakes') {
     const festive = sectionOf(content, SECTION.festive);
     const ready = sectionOf(content, SECTION.ready);
@@ -898,7 +915,7 @@ export const faqOf = (key: ShopKey, content: Content): ShopFaq[] => {
       breakfasts && {
         id: 'dostavka',
         q: 'Можно заказать завтрак с доставкой?',
-        a: `Да, все завтраки есть в каталоге: доставка по Самаре или ${pickup}.`,
+        a: `Да, все завтраки есть в каталоге — с доставкой по Самаре или ${pickup}.`,
         link: { href: `/catalog/#${breakfasts.slug}`, label: 'Завтраки в каталоге' },
       },
       {
@@ -920,7 +937,7 @@ export const faqOf = (key: ShopKey, content: Content): ShopFaq[] => {
       {
         id: 'dostavka',
         q: 'Можно заказать блюда из меню с доставкой?',
-        a: `Да, каждое блюдо есть в каталоге: доставка по Самаре или ${pickup}.`,
+        a: `Да, каждое блюдо есть в каталоге — с доставкой по Самаре или ${pickupFrom(content, 'его')}.`,
         link: { href: '/catalog/', label: 'Каталог доставки' },
       },
       {
@@ -964,11 +981,14 @@ export const faqOf = (key: ShopKey, content: Content): ShopFaq[] => {
           q: 'Как забронировать стол?',
           a: `Позвоните ${place.phone}${chatsText(content) ? ` или напишите ${chatsText(content)}` : ''}.`,
         },
+        // since 26.10.2026 the venue has its own menu and takes orders from its tables;
+        // the link opens the catalog on this venue
+        // с 26.10.2026 у точки своё меню и заказ со столика; ссылка открывает каталог на этой точке
         content.catalog.count > 0 && {
           id: 'dostavka',
           q: 'Можно заказать еду с собой или с доставкой?',
-          a: `Да, через каталог на сайте: доставка по Самаре или самовывоз на ${placeAt(place)}.`,
-          link: { href: '/catalog/', label: 'Каталог доставки' },
+          a: `Да, через каталог на сайте: доставка по Самаре или самовывоз на ${placeAt(place)}, а в зале можно заказать прямо со столика. Меню у каждой точки своё.`,
+          link: { href: `/catalog/?place=${place.id}`, label: 'Меню точки в каталоге' },
         },
       );
     }

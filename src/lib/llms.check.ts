@@ -79,6 +79,21 @@ assert.ok(
   short.includes('- Советский, Промышленный, Октябрьский, Кировский: доставка 400 ₽, бесплатно от 7 000 ₽, минимальный заказ 1 000 ₽'),
   'llms.txt: зона доставки с ценой, порогом и минимумом',
 );
+// the venues' menus, the hall, online payment and the receipt by mail (the owner, 26.10.2026)
+// меню точек, заказ в зале, оплата онлайн и чек на почту (владелец, 26.10.2026)
+for (const place of content.places)
+  assert.ok(short.includes(`- [Меню точки ${place.name}](${SITE}/catalog/?place=${place.id}): каталог сразу с меню этой точки`), `llms.txt: нет меню точки «${place.name}»`);
+assert.ok(short.includes('Меню на точках разное: в каталоге сначала выбирают точку, и заказ готовит она.'), 'llms.txt: меню на точках разное');
+assert.ok(short.includes('самовывозом из точки или в зале: гость за столиком выбирает точку, при желании номер стола, оплачивает на сайте, и заказ приносят к столу.'), 'llms.txt: заказ в зале');
+assert.ok(
+  short.includes('Оплата на сайте только онлайн: картой МИР, Visa или Mastercard на защищённой странице ЮKassa; электронный чек приходит на почту, указанную при оформлении.'),
+  'llms.txt: оплата только онлайн, чек на почту',
+);
+assert.doesNotMatch(short, /при получении|наличн/i, 'llms.txt: оплаты при получении нет');
+const soloPlace = buildLlms({ ...content, places: content.places.slice(0, 1) }, SITE, { zones });
+assert.ok(!soloPlace.includes('Меню точки') && !soloPlace.includes('Меню на точках разное'), 'llms.txt: одна точка — без меню по точкам');
+assert.ok(soloPlace.includes('или в зале'), 'llms.txt: одна точка — заказ в зале остаётся');
+
 // the count follows the fixture: items in stock and the sections that have them
 // число идёт за фикстурой: позиции в наличии и разделы, где они есть
 const stockLine = /(\d+) позици\S* в (\d+) раздел\S*/.exec(short);
@@ -170,6 +185,7 @@ const bare = load({ ...raw, product_categories: [], products: [], catering_page:
 for (const [name, text] of [['llms.txt', buildLlms(bare, SITE)], ['llms-full.txt', buildLlms(bare, SITE, { full: true })]] as const) {
   clean(text, `${name} без разделов`);
   assert.ok(!text.includes('## Доставка и каталог') && !text.includes('## Кейтеринг'), `${name}: пустые разделы не выводятся`);
+  assert.ok(!text.includes('Меню точки') && !text.includes('в зале:'), `${name}: без каталога ни меню точек, ни заказа в зале`);
   assert.ok(text.includes('## О компании') && text.includes('## Контакты') && text.includes('## Юридическая информация'), `${name}: о компании, контакты и реквизиты есть всегда`);
 }
 

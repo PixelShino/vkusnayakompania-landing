@@ -194,4 +194,125 @@ assert.deepEqual([taken.address, taken.address_flat, taken.address_entrance, tak
 assert.equal(validate({ ...checkout, address: '' }).address, 'Укажите улицу и дом, куда привезти');
 assert.equal(validate({ ...checkout, flat: '', entrance: '', floor: '', intercom: '' }).address, undefined, 'квартира и остальное — необязательны');
 
+// ── точка, «В зале» и почта для чека (26.10.2026) ──────────────────────────
+// the venue, «В зале» and the mail for the receipt (26.10.2026)
+{
+  const order = await import('./order.ts');
+  const { priced } = await import('./cart.ts');
+  const venue = await import('./venue.ts');
+  const { runInNewContext } = await import('node:vm');
+  const base: CheckoutForm = { name: 'Анна', phone: '9879552565', fulfillment: 'delivery', address: 'Садовая, 212Б', when: 'asap', consent: true };
+
+  // способ: зал — третий, незнакомое значение радио — доставка
+  assert.equal(order.fulfillmentOf('dine_in'), 'dine_in');
+  assert.equal(order.fulfillmentOf('pickup'), 'pickup');
+  assert.equal(order.fulfillmentOf('teleport'), 'delivery');
+
+  // точка: самовывозу — «откуда», залу — «где сидите», доставке не обязательна
+  assert.equal(validate({ ...base, fulfillment: 'pickup' }).place, 'Выберите, откуда заберёте');
+  assert.equal(validate({ ...base, fulfillment: 'dine_in' }).place, 'Выберите, где вы сидите');
+  assert.equal(validate({ ...base, fulfillment: 'dine_in', place: 2 }).place, undefined);
+  assert.equal(validate({ ...base, fulfillment: 'dine_in', place: 2, address: '' }).address, undefined, 'в зале адрес не нужен');
+  assert.equal(validate(base).place, undefined, 'доставке точку выбирает каталог, форма её не требует');
+
+  // почта: при онлайн-оплате обязательна, без онлайн-оплаты — как раньше
+  assert.equal(validate({ ...base, payment: 'online' }).email, order.EMAIL_NEEDED);
+  assert.equal(validate({ ...base, payment: 'online', email: '   ' }).email, order.EMAIL_NEEDED, 'пробелы — не почта');
+  assert.equal(validate({ ...base, payment: 'online', email: 'anna@mail.ru' }).email, undefined);
+  assert.equal(validate({ ...base, payment: 'online', email: 'anna@gmail.com' }).email !== undefined, true, 'формат и российская почта — как раньше');
+  assert.equal(validate({ ...base, payment: null }).email, undefined, 'без онлайн-оплаты почта не нужна');
+  assert.deepEqual(Object.keys(validate({ ...base, name: '', payment: 'online' })), ['name', 'email'], 'почта — в порядке полей формы');
+
+  // стол: буквы, цифры, дефис, до десяти знаков; слово «стол» и № не нужны
+  for (const [typed, sent] of [
+    ['5', '5'],
+    [' стол № 5 ', '5'],
+    ['Стол5', '5'],
+    ['столик 7', '7'],
+    ['№12', '12'],
+    ['12А', '12А'],
+    ['VIP-2', 'VIP-2'],
+    ['<b>4</b>', 'b4b'],
+    ['12345678901234', '1234567890'],
+    ['', null],
+    ['---', null],
+    ['стол', null],
+  ] as const)
+    assert.equal(order.tableNumber(typed), sent, `стол: ${JSON.stringify(typed)}`);
+  assert.equal(order.tableLine('Садовая, 212Б', '4'), 'В зале: Садовая, 212Б, стол 4');
+  assert.equal(order.tableLine('Садовая, 212Б', ' '), 'В зале: Садовая, 212Б', 'без стола — только точка');
+
+  // заказ: точка уходит при любом способе, стол — только у зала и только указанный
+  const dishes = new Map([
+    [1, { id: 1, slug: 'borsch', title: 'Борщ', price: 390, variants: [], fillings: [], available: true, places: [2] }],
+    [2, { id: 2, slug: 'mors', title: 'Морс', price: 150, variants: [], fillings: [], available: true, places: [] }],
+    [3, { id: 3, slug: 'bulka', title: 'Булочка', price: 90, variants: [], fillings: [], available: true, places: [1] }],
+  ]);
+  const cart = { v: 1 as const, lines: [1, 2].map((id) => ({ id, variant: null, filling: null, qty: 1 })) };
+  const delivery = order.buildOrder(cart, dishes, { ...base, place: 2 }, '2610-1003');
+  assert.equal(delivery.place, 2, 'доставка: точка уходит — сервер сверит с ней блюда');
+  assert.ok(!('table' in delivery), 'доставка: стола нет');
+  const table = order.buildOrder(cart, dishes, { ...base, fulfillment: 'dine_in', place: 2, table: ' стол № 5 ' }, '2610-1004');
+  assert.deepEqual([table.fulfillment, table.place, table.table, table.address, table.address_flat], ['dine_in', 2, '5', null, null]);
+  assert.ok(!('table' in order.buildOrder(cart, dishes, { ...base, fulfillment: 'dine_in', place: 2, table: '' }, 'x')), 'зал без номера — ключа нет');
+  assert.ok(!('table' in order.buildOrder(cart, dishes, { ...base, fulfillment: 'pickup', place: 2, table: '5' }, 'x')), 'самовывоз: стол из черновика не уходит');
+
+  // корзина и точка: блюдо другой точки названо, но в сумму и заказ не идёт
+  const atOne = priced(cart, dishes, 1);
+  assert.deepEqual(atOne.elsewhere.map((line) => line.title), ['Борщ']);
+  assert.deepEqual([atOne.total, atOne.count, atOne.blocked], [150, 1, false], 'чужое блюдо — не стоп-лист, но и не в сумме');
+  assert.deepEqual([priced(cart, dishes, 2).total, priced(cart, dishes, 2).elsewhere.length], [540, 0]);
+  assert.equal(priced(cart, dishes).total, 540, 'точка не выбрана (одна точка на сайте) — считается всё');
+  const sent = order.buildOrder(cart, dishes, { ...base, place: 1 }, 'x');
+  assert.deepEqual(sent.items.map((line) => line.title), ['Морс'], 'в заказ идут только блюда выбранной точки');
+  assert.equal(sent.total, 150);
+
+  // разделы: где раздел виден, сколько в нём на каждой точке
+  const all = [1, 2];
+  assert.deepEqual(venue.sectionPlaces([dishes.get(1)!, dishes.get(1)!], all), [2], 'раздел из одних блюд точки 2');
+  assert.deepEqual(venue.sectionPlaces([dishes.get(1)!, dishes.get(2)!], all), [], 'есть блюдо на обеих — раздел везде');
+  assert.deepEqual(venue.sectionPlaces([dishes.get(1)!, dishes.get(3)!], all), [], 'блюда обеих точек — раздел везде');
+  assert.deepEqual(venue.sectionPlaces([{ places: [9] }], all), [0], 'только несуществующая точка — раздел нигде');
+  assert.deepEqual(venue.sectionPlaces([dishes.get(1)!], [1]), [], 'одна точка на сайте — прятать нечего');
+  assert.deepEqual(venue.countsAt([...dishes.values()], all), { 1: 2, 2: 2 });
+  assert.equal(venue.placesAttr([1, 2]), '1 2');
+  assert.equal(venue.placesAttr([]), undefined);
+  assert.equal(venue.cookedHere({ places: [2] }, null), true, 'точка не выбрана — готовят');
+  assert.equal(venue.cookedHere({}, 1), true, 'нет списка — на всех');
+
+  // имя точки после «на»: Садовая склоняется, Советской Армии — уже в нужном виде
+  assert.equal(venue.venueCase('Садовая, 212Б', 'loc'), 'Садовой, 212Б');
+  assert.equal(venue.venueCase('Садовая, 212Б', 'acc'), 'Садовую, 212Б');
+  assert.equal(venue.venueCase('Советской Армии, 177', 'loc'), 'Советской Армии, 177');
+  assert.equal(venue.venueCase('Мичурина, 5', 'acc'), 'Мичурина, 5');
+  assert.equal(venue.kindLine('Кондитерская и кафе'), 'кондитерская и кафе');
+
+  // CSS: по правилу на точку; без выбранной точки переключателя нет
+  const css = venue.venueCss(all);
+  assert.match(css, /:root\[data-venue="1"\] \[data-places\]:not\(\[data-places~="1"\]\)/);
+  assert.match(css, /:root\[data-venue="2"\] \.pswitch__seg\{--at:1\}/);
+  assert.match(css, /:root:not\(\[data-venue\]\) \.pswitch\{display:none!important\}/);
+
+  // скрипт в <head>: ?place= главнее и запоминается, затем память, затем черновик, затем первая точка
+  const head = (search: string, stored: Record<string, string> = {}) => {
+    const store = new Map(Object.entries(stored));
+    const html = { dataset: {} as Record<string, string> };
+    runInNewContext(venue.venueScript(all, order.CHECKOUT_KEY), {
+      document: { documentElement: html },
+      location: { search },
+      URLSearchParams,
+      localStorage: { getItem: (key: string) => store.get(key) ?? null, setItem: (key: string, value: string) => store.set(key, value) },
+    });
+    return [html.dataset.venue, store.get(venue.PLACE_KEY)];
+  };
+  assert.deepEqual(head(''), ['1', undefined], 'первый визит — первая точка');
+  assert.deepEqual(head('?place=2&table=5'), ['2', '2'], 'QR-код на столе: точка из адреса и запоминается');
+  assert.deepEqual(head('?place=2', { [venue.PLACE_KEY]: '1' }), ['2', '2'], 'адрес главнее запомненного');
+  assert.deepEqual(head('?place=7', { [venue.PLACE_KEY]: '2' }), ['2', '2'], 'чужая точка в адресе — запомненная');
+  assert.deepEqual(head('', { [order.CHECKOUT_KEY]: JSON.stringify({ place: 2 }) }), ['2', undefined], 'старый черновик самовывоза');
+  assert.deepEqual(head('', { [order.CHECKOUT_KEY]: '{oops' }), ['1', undefined], 'битый черновик — первая точка');
+  assert.equal(venue.pickPlace(all, null, '', 'x', 2), 2);
+  assert.equal(venue.pickPlace(all), 1);
+}
+
 console.log('delivery-client: ok');

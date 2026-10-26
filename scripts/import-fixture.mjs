@@ -146,6 +146,44 @@ if (cp && !Array.isArray(cp) && cateringReady) {
   }
   console.log(`= кейтеринг: форматов ${formatIds.size}, вопросов ${(fixture.catering_faq ?? []).length}`);
 }
+// The delivery catalog, when the fixture has it and the schema already does:
+// sections by address, dishes by address; an existing one is not touched. The
+// venues of a dish («Готовят на», since 26.10.2026) follow the venues' new
+// ids; a fixture from before the field has none, and the column's default —
+// both venues — stands. The usual source is `import-catalog.mjs` from the
+// shop; this is the way without it.
+// Каталог доставки — если он есть в фикстуре и уже есть в схеме: разделы по
+// адресу, блюда по адресу; существующие не трогаются. Точки блюда («Готовят
+// на», с 26.10.2026) переводятся на новые id точек; в фикстуре до этого поля
+// их нет, и действует значение колонки по умолчанию — обе точки. Обычный
+// источник — `import-catalog.mjs` из магазина; это путь без него.
+const catalogReady = await api('GET', '/items/products?limit=1').then(() => true, () => false);
+if (catalogReady && Array.isArray(fixture.products) && fixture.products.length) {
+  const catIds = new Map();
+  for (const c of fixture.product_categories ?? []) {
+    const found = c.slug ? await exists('product_categories', 'slug', c.slug) : null;
+    catIds.set(c.id, found ? found.id : (await api('POST', '/items/product_categories', strip(c))).id);
+  }
+  let added = 0;
+  for (const p of fixture.products) {
+    if (await exists('products', p.slug ? 'slug' : 'title', p.slug ?? p.title)) continue;
+    const { places, photo, category, ...rest } = strip(p);
+    // «1,2», ['1', '2'] or [1, 2] → the new ids as the csv field keeps them
+    // «1,2», ['1', '2'] или [1, 2] → новые id так, как их хранит поле csv
+    const venues = (Array.isArray(places) ? places : typeof places === 'string' ? places.split(',') : [])
+      .map((id) => placeIds.get(Number(id)))
+      .filter(Boolean)
+      .map(String);
+    await api('POST', '/items/products', {
+      ...rest,
+      photo: await file(photo),
+      category: category ? (catIds.get(typeof category === 'object' ? category.id : category) ?? null) : null,
+      ...(venues.length ? { places: [...new Set(venues)] } : {}),
+    });
+    added += 1;
+  }
+  console.log(`= каталог: разделов ${catIds.size}, блюд заведено ${added} из ${fixture.products.length}`);
+}
 // The documents (offer, policy, delivery, requisites), when the schema has
 // them: the missing ones by slug, an existing one is not touched. The same
 // rule as `scripts/import-pages.mjs`, which also knows `--force`.

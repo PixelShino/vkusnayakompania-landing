@@ -1,0 +1,92 @@
+---
+/**
+ * The venue switch: the two venues as one segment — two halves in one 3 px
+ * frame, the chosen one in ink (the cart's «Доставка / Самовывоз» speaks the
+ * same language). The owner asked for «две пилюли», the system has no pills
+ * since the September pass, so it is the segment, not two rounded chips. Each
+ * half names the venue and what it is; the caption says the menus differ.
+ * Native radios: arrows move between the venues, Tab leaves the group.
+ *
+ * Three places, never two in view: the catalog head on every width
+ * (`head`, under the lead), its copy in the sticky left column on a desktop
+ * (`side`, the halves stacked; it opens only once the head one has gone over
+ * the top of the screen), the sections sheet (`sheet`). The page script keeps all of them and the
+ * cart's venue radios one choice (`data-venue-switch`). Which half is inked
+ * comes from `<html data-venue>` (`venueCss`), so the right venue is drawn
+ * before the script wakes up; without scripts the switch is hidden.
+ * Переключатель точек: две точки одним сегментом — две половины в одной рамке
+ * 3 px, выбранная чернилами (так же говорит «Доставка / Самовывоз» в корзине).
+ * Владелец просил «как пилюля», пилюль в системе с сентябрьского прохода нет,
+ * поэтому это сегмент, а не два скруглённых чипа. В каждой половине — имя
+ * точки и что это за место; подпись говорит, что меню разное. Нативные радио:
+ * стрелки переводят между точками, Tab уходит из группы.
+ *
+ * Три места, никогда два в поле зрения: шапка каталога на любой ширине
+ * (`head`, под лидом), её копия в липкой левой колонке на десктопе (`side`,
+ * половины друг под другом; раскрывается, только когда шапочный ушёл за верх
+ * экрана), лист разделов (`sheet`). Скрипт страницы держит их все и радио
+ * точки в корзине одним выбором (`data-venue-switch`). Какая половина
+ * чернильная, решает `<html data-venue>` (`venueCss`), поэтому нужная точка
+ * нарисована до того, как проснётся скрипт; без скриптов переключателя нет.
+ */
+import Icon from '../Icon.astro';
+import type { Place } from '../../lib/content.ts';
+import { kindLine } from '../../lib/venue.ts';
+
+interface Props {
+  places: Place[];
+  /** префикс id и имени группы радио: у каждого экземпляра своя группа */
+  id: string;
+  variant?: 'head' | 'side' | 'sheet';
+}
+
+const { places, id, variant = 'head' } = Astro.props;
+const noteId = `${id}-note`;
+---
+
+<div class:list={['pswitch', `pswitch--${variant}`]} data-venue-switch>
+  {
+    variant === 'head' ? (
+      <p class="pswitch__note" id={noteId}>
+        <b>Меню на точках разное.</b> Выберите, откуда повезём или где заберёте
+      </p>
+    ) : (
+      <p class="pswitch__label" id={noteId}>
+        {variant === 'side' ? 'Точка' : 'Меню на точках разное'}
+      </p>
+    )
+  }
+  <div class="pswitch__seg" role="radiogroup" aria-labelledby={noteId} style={`--n: ${places.length}`}>
+    {
+      places.map((place, i) => (
+        <label class="pswitch__opt" data-venue-id={place.id}>
+          <input type="radio" name={`venue-${id}`} value={place.id} checked={i === 0} />
+          <span class="pswitch__name">{place.name}</span>
+          <span class="pswitch__meta">{kindLine(place.kind)}</span>
+        </label>
+      ))
+    }
+  </div>
+  {/* dishes of the other venue left in the cart: said where the eye is when the venue changes
+      в корзине остались блюда другой точки: сказано там, где взгляд, когда точку меняют */}
+  {
+    variant !== 'sheet' && (
+      <p class="pswitch__cart" data-venue-cart hidden>
+        <span data-venue-cart-text />
+        <button type="button" class="tlink" data-cart-open>
+          Открыть корзину
+        </button>
+      </p>
+    )
+  }
+  {/* at a table (`?place=2&table=5`): the cart is «В зале», the head says so
+      за столом (`?place=2&table=5`): корзина в режиме «В зале», шапка так и говорит */}
+  {
+    variant !== 'sheet' && (
+      <p class="pswitch__dine" data-dine-note hidden>
+        <Icon name="chair" />
+        <span data-dine-text />
+      </p>
+    )
+  }
+</div>

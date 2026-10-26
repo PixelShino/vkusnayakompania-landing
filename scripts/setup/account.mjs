@@ -37,6 +37,8 @@ export const GUEST_ORDER_READ = [
   'payment_method', 'payment_status', 'payment_test', 'paid_at',
   // the mail the receipt went to (since 26.10.2026) / почта, куда ушёл чек (с 26.10.2026)
   'email',
+  // the table of an order in the hall (since 26.10.2026) / стол заказа в зале (с 26.10.2026)
+  'table',
 ];
 // what `order-guard` adds to a guest's order on top of the public fields
 // что `order-guard` добавляет к заказу гостя поверх публичных полей

@@ -42,6 +42,8 @@ const q = (fields, extra = '') => `fields=${fields}&limit=-1${extra}`;
 // порядок, выставленный перетаскиванием, иначе строки идут в порядке вставки
 const gallery = `gallery.id,gallery.sort,gallery.caption,${img('gallery.directus_files_id')}`;
 
+const PRODUCT_FIELDS = 'id,status,sort,category,title,slug,description,composition,weight,price,old_price,variants,fillings,available,badges';
+
 export const QUERIES = {
   settings: `/items/settings?${q(`*,${img('policy_file')},${img('offer_file')}`)}`,
   home: `/items/home?${q(`*,${img('hero_image')},${img('og_image')},${img('app_screenshot')}`)}`,
@@ -59,10 +61,9 @@ export const QUERIES = {
   // каталог доставки: разделы, затем блюда с фото; заказов здесь нет — токен
   // сборщика их не читает
   product_categories: `/items/product_categories?${q('id,status,sort,title,slug,description', '&sort=sort,id')}`,
-  products: `/items/products?${q(
-    `id,status,sort,category,title,slug,description,composition,weight,price,old_price,variants,fillings,available,badges,${img('photo')}`,
-    '&sort=sort,id',
-  )}`,
+  // `places` — «Готовят на» (since 26.10.2026): the venues that cook the dish
+  // `places` — «Готовят на» (с 26.10.2026): точки, где готовят блюдо
+  products: `/items/products?${q(`${PRODUCT_FIELDS},places,${img('photo')}`, '&sort=sort,id')}`,
   // catering and banquets: the page singleton with its gallery, the formats,
   // the steps and the questions; the requests are not here — the builder
   // token never reads them
@@ -88,6 +89,18 @@ export const QUERIES = {
   // документы (оферта, политика, доставка, реквизиты): все статусы, чтобы отчёт
   // сборки назвал черновик; сайт показывает только опубликованные
   pages: `/items/pages?${q('id,status,sort,slug,title,description,body,revised,date_updated', '&sort=sort,id')}`,
+};
+
+// What to ask when the main query is refused: a field the site reads but a
+// Directus may not have yet. A build after `git pull` and before `schema apply`
+// must not lose the whole catalog over «Готовят на» — it gets every dish on
+// both venues and a loud log line instead.
+// Что спросить, когда основной запрос отклонён: поле, которое сайт читает, а
+// Directus может ещё не иметь. Сборка после `git pull` и до `schema apply` не
+// должна терять весь каталог из-за «Готовят на» — она получает все блюда на
+// обеих точках и громкую строку в логе.
+export const FALLBACK = {
+  products: `/items/products?${q(`${PRODUCT_FIELDS},${img('photo')}`, '&sort=sort,id')}`,
 };
 
 // Collections the site builds without: a missing one means an empty catalog or

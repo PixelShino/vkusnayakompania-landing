@@ -76,16 +76,17 @@ export const CARD_ORDER_FIELDS = [
 ];
 /**
  * The full order card (since 24.10.2026) with the mail the receipt went to
- * (since 26.10.2026) — the same list as `GUEST_ORDER_READ` in
- * `scripts/setup/account.mjs`. Never the staff's fields: `status_log`,
- * `telegram_meta` (names of the staff), `manager_note`, `payment_url/_id/_log/_meta`,
- * `notify_result`.
- * Полная карточка заказа (с 24.10.2026) с почтой, куда ушёл чек (с 26.10.2026), —
- * тот же список, что `GUEST_ORDER_READ` в `scripts/setup/account.mjs`. Без
- * служебных полей: `status_log`, `telegram_meta` (имена сотрудников),
- * `manager_note`, `payment_url/_id/_log/_meta`, `notify_result`.
+ * and the table of an order in the hall (both since 26.10.2026) — the same
+ * list as `GUEST_ORDER_READ` in `scripts/setup/account.mjs`. Never the staff's
+ * fields: `status_log`, `telegram_meta` (names of the staff), `manager_note`,
+ * `payment_url/_id/_log/_meta`, `notify_result`.
+ * Полная карточка заказа (с 24.10.2026) с почтой, куда ушёл чек, и столом
+ * заказа в зале (оба с 26.10.2026), — тот же список, что `GUEST_ORDER_READ` в
+ * `scripts/setup/account.mjs`. Без служебных полей: `status_log`,
+ * `telegram_meta` (имена сотрудников), `manager_note`,
+ * `payment_url/_id/_log/_meta`, `notify_result`.
  */
-export const ORDER_FIELDS = [...CARD_ORDER_FIELDS, 'email'];
+export const ORDER_FIELDS = [...CARD_ORDER_FIELDS, 'email', 'table'];
 
 /**
  * The guest's orders with the widest set his read right allows: after a

@@ -8,6 +8,12 @@
  * страницы из данных каталога и картинки самой карточки. Нативный — потому что
  * сам держит фокус внутри, закрывается по Escape и возвращает фокус карточке;
  * по той же причине нативен диалог брони.
+ * A dish the chosen venue does not cook (a shared link `#p-…`, the other
+ * venue's menu) opens all the same, with «Готовят только на …» instead of the
+ * buy row and the way to that venue's menu.
+ * Блюдо, которого выбранная точка не готовит (ссылка `#p-…`, меню другой
+ * точки), открывается всё равно — с «Готовят только на …» вместо строки
+ * покупки и переходом в меню той точки.
  */
 import Icon from '../Icon.astro';
 ---
@@ -44,6 +50,14 @@ import Icon from '../Icon.astro';
       <p class="dish-dlg__out" data-out hidden>
         Сейчас нет в наличии. Загляните позже или позвоните — подскажем, чем заменить.
       </p>
+
+      <div class="dish-dlg__away" data-away hidden>
+        <p class="dish-dlg__away-text">
+          <Icon name="pin" />
+          <span data-away-text></span>
+        </p>
+        <button type="button" class="btn btn--primary btn--block" data-away-go></button>
+      </div>
 
       <span class="dish-dlg__spacer" aria-hidden="true"></span>
       <div class="dish-dlg__buy" data-buy>

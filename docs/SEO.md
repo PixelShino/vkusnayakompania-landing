@@ -12,8 +12,10 @@
   OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-Web, anthropic-ai,
   PerplexityBot, Google-Extended, Applebot-Extended, CCBot, Amazonbot,
   YandexAdditional). В каждой группе `Disallow: /account/` — личный кабинет.
-  У YandexBot `Clean-param` для utm/yclid/ysclid/gclid/fbclid. `Sitemap:` и
-  комментарий со ссылками на `/llms.txt` и `/llms-full.txt`.
+  У YandexBot `Clean-param` для utm/yclid/ysclid/gclid/fbclid и отдельный
+  `Clean-param: place&table /catalog/` (меню точки и стол, см. «Меню по
+  точкам»). `Sitemap:` и комментарий со ссылками на `/llms.txt` и
+  `/llms-full.txt`.
 - **`/llms.txt` и `/llms-full.txt`** (`src/pages/llms*.txt.ts`,
   сборщик `src/lib/llms.ts`, тест `src/lib/llms.check.ts`): собираются при
   каждой сборке из данных Directus — точки с часами и телефонами, каталог
@@ -36,7 +38,9 @@
 `sameAs` — ВКонтакте, Telegram, Max, сеть на Яндекс Картах, 2ГИС из
 `src/data/site.ts`), `WebSite`, две точки (`Bakery` Садовая и `Restaurant`
 Советской Армии: часы `openingHoursSpecification`, гео, бронь,
-`OrderAction` в каталог, фото зала), `WebPage` самой страницы (тип, крошки и
+`OrderAction` и `hasMenu` «Меню для заказа на сайте» в каталог, открытый на
+этой точке, `/catalog/?place=<id>`, PDF-меню точки, фото зала), `WebPage`
+самой страницы (тип, крошки и
 доп. поля — через проп `schema` раскладки). Свои узлы страницы добавляют через
 `slot="head"` с `@id` вида `…#list`, `…#faq`, `…#breadcrumb`:
 
@@ -50,10 +54,35 @@
 - документы: `CollectionPage`/`WebPage`/`ContactPage` с `about: #org`.
 
 Правило: без `aggregateRating` с чужих площадок (Google запрещает) и без
-фактов, которых нет в данных (`hasMenu` появится, когда PDF-меню в админке
-заменят с заглушек на настоящие). Проверка: `node src/lib/seo.check.ts`
+фактов, которых нет в данных (PDF-меню в `hasMenu` — только настоящие файлы,
+заглушки не попадают; меню каталога — только при непустом каталоге). Проверка: `node src/lib/seo.check.ts`
 (в `pnpm test`); по собранному `dist` — скрипт разбора всех `ld+json`
 (уникальные `@id`, нет `null`/`undefined`, ссылки `{@id}` находят узел).
+
+## Меню по точкам и заказ в зале (26.10.2026)
+
+Решение владельца: меню на двух точках разное («Лучше сначала выбирает адрес,
+после блюда»). Над каталогом переключатель точки, каталог показывает меню
+выбранной; третий способ получения — «В зале»: гость за столиком выбирает
+точку и, по желанию, стол и платит на сайте. Чек онлайн-оплаты — только на
+почту. Ссылка `/catalog/?place=2&table=5` открывает меню точки со столом
+(для QR-кодов на столах).
+
+Для поиска это одна страница. `canonical` и `og:url` печатает `BaseLayout` из
+`Astro.url.pathname` статической сборки, поэтому у `/catalog/?place=2` и
+`/catalog/?place=2&table=5` канонический адрес — `/catalog/`; в sitemap
+параметров нет; Яндексу то же говорит `Clean-param: place&table /catalog/`.
+Ссылки с параметром ставим только там, где точка уже выбрана: `OrderAction` и
+`hasMenu` точки в Schema.org, «Меню точки в каталоге» в вопросе страниц
+`/sadovaya/` и `/sovetskoy-armii/`, строки «Меню точки …» в `/llms.txt`.
+
+Тексты: «Вопросы о доставке» (`src/lib/delivery-faq.ts`) отвечают «Меню
+одинаковое на обеих точках?» и «Можно заказать за столиком?», ответ об
+оплате говорит про чек на почту; `/llms.txt` — абзац о меню по точкам, «В
+зале» и оплате в разделе «Доставка и каталог»; посадочные
+(`src/data/landings-shop.ts`) не обещают целую полку «самовывозом на обеих
+точках» — «с той точки, где их готовят». Если меню снова станет общим, это
+места для правки.
 
 ## Метатеги
 

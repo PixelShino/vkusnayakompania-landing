@@ -6,6 +6,11 @@
  * the catalog. A question without its fact is left out, never answered with a
  * guessed number. Every answer comes twice: plain text for the `FAQPage`
  * markup and HTML with links and the zone list for the page.
+ *
+ * The owner's decisions of 26.10.2026 are words here, like «online only» of
+ * 22.10: each venue has its own menu and the catalog shows the chosen one, a
+ * guest at a table orders «В зале», the receipt of an online payment goes to
+ * the mail asked for at checkout.
  * «Вопросы о доставке» в конце каталога: короткие прямые ответы для гостя и
  * для поисковых ответов нейросетей, собранные только из данных, которые у
  * сайта уже есть, — зоны доставки, по которым считает корзина, слоты времени
@@ -13,6 +18,11 @@
  * каталога. Вопрос без своего факта пропускается, а не получает выдуманное
  * число. Каждый ответ — дважды: простой текст для разметки `FAQPage` и HTML со
  * ссылками и списком зон для страницы.
+ *
+ * Решения владельца 26.10.2026 здесь словами, как «только онлайн» от 22.10: у
+ * каждой точки своё меню и каталог показывает выбранную, гость за столиком
+ * заказывает «В зале», чек онлайн-оплаты уходит на почту, которую спрашивает
+ * оформление.
  *
  * Zones: the same rows and the same normalization as the server
  * (`toZones` of `directus/extensions/delivery`): only switched-on zones with a
@@ -265,7 +275,9 @@ export const buildDeliveryFaq = (content: Content, { zones, deliveryHref }: FaqO
       .join(', ');
     const none = zones.filter((zone) => zone.min_order === 0).map((zone) => quoted(shortZone(zone.name)));
     const head = `Да, для доставки: ${rub(base)} за блюда${extra ? `, а ${extra}` : ''}${none.length ? `; без минимума — ${andList(none)}` : ''}.`;
-    const a = `${head} Для самовывоза минимальной суммы нет. Если в корзине меньше, она подскажет, сколько добавить.`;
+    // the zone's minimum is checked for a delivery only (`order-guard`): pickup and the hall have none
+    // минимум зоны проверяется только у доставки (`order-guard`): у самовывоза и зала его нет
+    const a = `${head} Для самовывоза и заказа в зале минимальной суммы нет. Если в корзине меньше, она подскажет, сколько добавить.`;
     items.push({ id: 'minimum', q: 'Есть ли минимальная сумма заказа?', a });
   }
 
@@ -290,11 +302,14 @@ export const buildDeliveryFaq = (content: Content, { zones, deliveryHref }: FaqO
       loyalty.enabled && loyalty.maxSharePercent > 0
         ? ` Если войти в личный кабинет по номеру телефона, до ${loyalty.maxSharePercent} % заказа можно оплатить баллами программы ${quoted(loyalty.name)}.`
         : '';
+    // the receipt goes to the mail only: since 26.10.2026 checkout asks for it with an online payment
+    // чек — только на почту: с 26.10.2026 оформление спрашивает её при онлайн-оплате
+    const receipt = 'Электронный чек придёт на почту, которую вы укажете при оформлении.';
     // true before and after the bank goes live: in test mode a guest sees no
     // online option, and the manager settles payment on the call
     // верно и до запуска банка, и после: в тестовом режиме гость онлайн-оплаты
     // не видит, и способ оплаты согласует менеджер при звонке
-    const a = `Онлайн ${card} сразу после оформления: блюда и доставка одним платежом. Если онлайн-оплата на сайте временно недоступна, способ оплаты согласует менеджер при звонке.${points}`;
+    const a = `Онлайн ${card} сразу после оформления: блюда и доставка одним платежом. ${receipt} Если онлайн-оплата на сайте временно недоступна, способ оплаты согласует менеджер при звонке.${points}`;
     items.push({ id: 'payment', q: 'Как оплатить заказ?', a });
   }
 
@@ -311,18 +326,40 @@ export const buildDeliveryFaq = (content: Content, { zones, deliveryHref }: FaqO
     items.push({ id: 'pickup', q: 'Можно забрать заказ самому?', a, aHtml });
   }
 
-  // 6. was the order accepted / заказ принят
+  // 6. the venues' menus — the owner, 26.10.2026: «Разное меню у нас. Лучше сначала выбирает адрес, после блюда»
+  // меню точек — владелец, 26.10.2026: «Разное меню у нас. Лучше сначала выбирает адрес, после блюда»
+  if (places.length > 1) {
+    const all = places.length === 2 ? 'обеих' : 'всех';
+    const a =
+      'Нет, у каждой точки своё меню. Выберите точку вверху каталога — он покажет её блюда и запомнит выбор. ' +
+      'Заказ готовит выбранная точка: на доставку, с собой или к столику.';
+    items.push({ id: 'menu', q: `Меню одинаковое на ${all} точках?`, a });
+  }
+
+  // 7. an order from the table — «В зале», 26.10.2026: the venue, a table if the guest likes, paid on the site
+  // заказ со столика — «В зале», 26.10.2026: точка, по желанию стол, оплата на сайте
+  if (places.length) {
+    const a =
+      'Да. Откройте каталог на телефоне, выберите вверху точку, где сидите, и в оформлении отметьте «В зале» — номер стола можно указать. ' +
+      'Оплатите заказ на сайте, и его принесут к столу.';
+    items.push({ id: 'table', q: 'Можно заказать за столиком?', a });
+  }
+
+  // 8. was the order accepted / заказ принят
   {
     const statuses = Object.entries(ORDER_STATUS)
       .filter(([key]) => key !== 'cancelled')
       .map(([, label]) => quoted(label));
+    // the owner, 26.10.2026: at a table nobody calls — a waiter comes over to confirm
+    // владелец, 26.10.2026: в зале не звонят — к столу подходит официант и подтверждает
     const a =
       'После оформления корзина покажет номер заказа, а менеджер перезвонит, чтобы подтвердить состав, сумму, адрес и время. ' +
+      'Если вы заказали в зале, к вам подойдут к столу. ' +
       `Если перед оформлением войти в личный кабинет по номеру телефона, статус заказа будет виден там: ${statuses.join(', ')}.`;
     items.push({ id: 'accepted', q: 'Как узнать, что заказ принят?', a, aHtml: esc(a).replace('личный кабинет', link(`${BASE}account/`, 'личный кабинет')) });
   }
 
-  // 7. a cake for a celebration / торт на праздник
+  // 9. a cake for a celebration / торт на праздник
   const festive = catalog.categories.find((category) => category.slug === FESTIVE);
   const ready = catalog.categories.find((category) => category.slug === READY && category.products.some((product) => product.available));
   if (festive?.products.length) {
@@ -343,7 +380,7 @@ export const buildDeliveryFaq = (content: Content, { zones, deliveryHref }: FaqO
     items.push({ id: 'cakes', q: 'Можно ли заказать торт на праздник?', a, aHtml });
   }
 
-  // 8. something went wrong / что-то пошло не так
+  // 10. something went wrong / что-то пошло не так
   {
     const chats = chatLinks(settings);
     const write = chats.length ? ` или напишите в ${chats.map((chat) => chat.label).join(' или ')}` : '';

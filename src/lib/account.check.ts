@@ -20,6 +20,7 @@ import {
   dateTimeText,
   tokenExpiry,
   orderCard,
+  orderHow,
   orderAnchor,
   payLabel,
   placeText,
@@ -234,6 +235,21 @@ assert.equal(profileErrors({ recovery_email: 'anna@' }, '2026-10-19').recovery_e
   assert.deepEqual(pickup.total, { label: 'Оплачено', value: 4800 });
   assert.deepEqual(orderCard({ ...base, fulfillment: 'pickup', place: 2, bonus_spent: 300, to_pay: 4500 }, places, today).bill.map((row) => row.label), ['Блюда', 'Баллами']);
   assert.deepEqual(pickup.where, { label: 'Откуда', value: 'Ресторан, Советской Армии, 177', note: null });
+
+  // доставка называет кухню рядом с адресом (с 26.10.2026), зона — после неё
+  assert.equal(orderCard({ ...base, place: 1 }, places, today).where.note, 'Готовит: Садовая, 212Б · Зона доставки: Рядом с нами');
+  assert.equal(orderCard({ ...base, place: 1, delivery_zone: null }, places, today).where.note, 'Готовит: Садовая, 212Б');
+  assert.equal(orderCard({ ...base, place: 99, delivery_zone: null }, places, today).where.note, null, 'неизвестная точка — без строки');
+  // «В зале»: где гость, без строки доставки и без адреса
+  const hall = orderCard({ ...base, fulfillment: 'dine_in', place: 1, table: '4', delivery_zone: null, delivery_cost: 0, to_pay: 4800 }, places, today);
+  assert.deepEqual(hall.where, { label: 'Где', value: 'В зале, Садовая, 212Б, стол 4', note: null });
+  assert.deepEqual(hall.bill, []);
+  assert.equal(orderCard({ ...base, fulfillment: 'dine_in', place: 1, table: null }, places, today).where.value, 'В зале, Садовая, 212Б');
+  assert.equal(orderCard({ ...base, fulfillment: 'dine_in', place: null, table: ' 7 ' }, places, today).where.value, 'В зале, стол 7');
+  // строка заказа в списке
+  assert.equal(orderHow({ ...base, fulfillment: 'dine_in', place: 1, table: '4' }, places), 'в зале, Садовая, 212Б, стол 4');
+  assert.equal(orderHow({ ...base, fulfillment: 'pickup', place: 2 }, places), 'самовывоз, Ресторан');
+  assert.equal(sp(orderHow({ ...base, address_flat: null, address_entrance: null, address_floor: null, address_intercom: null }, places)), 'доставка, улица Советской Армии, 177');
 
   // старый ответ: без пунктов — строка `address_details`, без истории — «Принят» и статус без времени
   const old = orderCard(

@@ -2,7 +2,8 @@
  * Проверка «Вопросов о доставке»: фикстура и сид зон проходят через тот же
  * построитель, что и сборка. Ответы без `undefined` и `NaN`, цены как
  * «от 400 ₽» и совпадают с зонами до рубля, заглушка Max не попадает, вопрос
- * без данных пропускается, а разметка `FAQPage` — простой текст.
+ * без данных пропускается, а разметка `FAQPage` — простой текст. С 26.10.2026:
+ * меню у точек разное, заказ «В зале», чек только на почту.
  * Запуск: `pnpm test`.
  */
 import assert from 'node:assert/strict';
@@ -36,7 +37,14 @@ assert.equal(shortZone('Советский, Промышленный, Октяб
 assert.equal(shortZone('Новокуйбышевск'), 'Новокуйбышевск');
 
 // ── общее: ни одного пустого места ──────────────────────────────────────────
-assert.ok(faq.length >= 6 && faq.length <= 8, `от 6 до 8 вопросов, а не ${faq.length}`);
+assert.ok(faq.length >= 6 && faq.length <= 10, `от 6 до 10 вопросов, а не ${faq.length}`);
+// the order of the page: prices first, then how to get the order, then after it
+// порядок страницы: сначала цены, потом как получить заказ, потом что после
+assert.deepEqual(
+  faq.map((item) => item.id),
+  ['zones', 'minimum', 'time', 'payment', 'pickup', 'menu', 'table', 'accepted', 'cakes', 'help'],
+  'порядок вопросов',
+);
 assert.equal(new Set(faq.map((item) => item.id)).size, faq.length, 'id вопросов не повторяются — по ним ссылки #faq-…');
 for (const item of faq) {
   for (const text of [item.q, item.a, item.aHtml ?? '']) {
@@ -74,7 +82,7 @@ assert.ok(byId(explained, 'zones')!.aHtml!.includes('Рядом с нами</b><
 const min = byId(faq, 'minimum')!;
 assert.equal(
   plain(min.a),
-  'Да, для доставки: 1 000 ₽ за блюда, а в зонах «Красноглинский район и Смышляевка» и «Новокуйбышевск» — 2 500 ₽. Для самовывоза минимальной суммы нет. Если в корзине меньше, она подскажет, сколько добавить.',
+  'Да, для доставки: 1 000 ₽ за блюда, а в зонах «Красноглинский район и Смышляевка» и «Новокуйбышевск» — 2 500 ₽. Для самовывоза и заказа в зале минимальной суммы нет. Если в корзине меньше, она подскажет, сколько добавить.',
 );
 // у зон нет минимума — вопроса нет
 const noMin = buildDeliveryFaq(content, { zones: zones.map((zone) => ({ ...zone, min_order: 0 })), deliveryHref: href });
@@ -97,6 +105,10 @@ const pay = byId(faq, 'payment')!;
 assert.match(pay.a, /^Онлайн картой МИР, Visa или Mastercard на защищённой странице ЮKassa/);
 assert.doesNotMatch(pay.a, /наличн|курьеру|при получении/i, 'оплата при получении выключена — её нет в ответе');
 assert.ok(pay.a.includes(`до 30 % заказа`), 'доля баллов — из «Программы лояльности»');
+// the receipt goes to the mail asked for at checkout, never «to the phone» (the owner, 26.10.2026)
+// чек — на почту, которую спрашивает оформление, и никогда «на телефон» (владелец, 26.10.2026)
+assert.ok(plain(pay.a).includes('Электронный чек придёт на почту, которую вы укажете при оформлении.'), 'чек — на почту');
+assert.doesNotMatch(pay.a, /чек[^.]*телефон|телефон[^.]*чек/i, 'чек на телефон не обещаем');
 const noPoints = buildDeliveryFaq({ ...content, loyalty: { ...content.loyalty, enabled: false } }, { zones, deliveryHref: href });
 assert.doesNotMatch(byId(noPoints, 'payment')!.a, /балл/, 'программа выключена — о баллах ни слова');
 
@@ -107,6 +119,19 @@ assert.ok(pickup.includes('Садовая, 212Б (пн–пт 8:00–21:00, сб
 assert.ok(pickup.includes('Советской Армии, 177 (ежедневно 9:00–22:30)'));
 assert.ok(byId(faq, 'pickup')!.aHtml!.includes('<span class="dfaq-nw">пн–пт 8:00–21:00</span>'), 'на странице дни не отрываются от часов');
 assert.equal(byId(buildDeliveryFaq({ ...content, places: [] }, { zones, deliveryHref: href }), 'pickup'), undefined, 'нет точек — нет вопроса');
+
+// ── меню точек и заказ в зале (владелец, 26.10.2026) ────────────────────────
+const menu = byId(faq, 'menu')!;
+assert.equal(menu.q, 'Меню одинаковое на обеих точках?');
+assert.ok(plain(menu.a).startsWith('Нет, у каждой точки своё меню. Выберите точку вверху каталога — он покажет её блюда и запомнит выбор.'), plain(menu.a));
+assert.ok(menu.a.includes('на доставку, с собой или к столику'), 'выбранная точка готовит заказ любым способом получения');
+const solo = buildDeliveryFaq({ ...content, places: content.places.slice(0, 1) }, { zones, deliveryHref: href });
+assert.equal(byId(solo, 'menu'), undefined, 'одна точка — вопроса о разном меню нет');
+assert.ok(byId(solo, 'table'), 'одна точка — заказ в зале всё равно есть');
+const table = byId(faq, 'table')!;
+assert.equal(table.q, 'Можно заказать за столиком?');
+assert.ok(plain(table.a).startsWith('Да. Откройте каталог на телефоне, выберите вверху точку, где сидите, и в оформлении отметьте «В зале» — номер стола можно указать.'), plain(table.a));
+assert.ok(table.a.endsWith('Оплатите заказ на сайте, и его принесут к столу.'), 'в зале — оплата на сайте и к столу');
 
 // ── заказ принят: статусы кабинета ──────────────────────────────────────────
 const accepted = byId(faq, 'accepted')!;

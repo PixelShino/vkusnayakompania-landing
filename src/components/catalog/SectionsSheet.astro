@@ -9,30 +9,48 @@
  * телефоне, короткое окно на планшете. Нативный `<dialog>` сам держит фокус,
  * закрывается по Escape и возвращает фокус строке. Текущий раздел несёт ромб
  * страницы и `aria-current`; скрипт страницы держит их в такт прокрутке.
+ * The venue switch stands over the list: on a phone this is where the venue
+ * changes without scrolling back up, and the list answers at once — the
+ * other venue's sections go, the counts change.
+ * Над списком — переключатель точек: на телефоне здесь точку меняют, не
+ * прокручивая наверх, и список отвечает сразу — разделы другой точки уходят,
+ * числа меняются.
  */
 import Icon from '../Icon.astro';
+import PlaceSwitch from './PlaceSwitch.astro';
+import VenueText from './VenueText.astro';
 import { positions, type Catalog } from '../../lib/catalog.ts';
+import type { Place } from '../../lib/content.ts';
+import { countsAt, placesAttr, sectionPlaces } from '../../lib/venue.ts';
 
 interface Props {
   catalog: Catalog;
+  places: Place[];
 }
 
-const { catalog } = Astro.props;
+const { catalog, places } = Astro.props;
+const ids = places.map((place) => place.id);
+const all = catalog.categories.flatMap((category) => category.products);
+const asText = (counts: Record<number, number>, say = (n: number) => String(n)) =>
+  Object.fromEntries(Object.entries(counts).map(([id, n]) => [id, say(n)]));
 ---
 
 <dialog id="sections" class="dlg sheet" aria-labelledby="sheet-title" data-sheet>
   <div class="sheet__in">
     <header class="sheet__head">
       <h2 class="sheet__title" id="sheet-title">Разделы</h2>
-      <span class="sheet__count tnum">{positions(catalog.count)}</span>
+      <span class="sheet__count tnum">
+        <VenueText all={positions(catalog.count)} at={asText(countsAt(all, ids), positions)} />
+      </span>
       <button type="button" class="round-btn" data-close aria-label="Закрыть">
         <Icon name="close" />
       </button>
     </header>
+    {ids.length > 1 && <PlaceSwitch places={places} id="sheet" variant="sheet" />}
     <ul class="sheet__list" role="list">
       {
         catalog.categories.map((category, i) => (
-          <li>
+          <li data-places={placesAttr(sectionPlaces(category.products, ids))}>
             <a
               class="sheet__link"
               href={`#${category.slug}`}
@@ -40,7 +58,9 @@ const { catalog } = Astro.props;
               aria-current={i === 0 ? 'true' : undefined}
             >
               <span class="sheet__name">{category.title}</span>
-              <span class="sheet__n tnum">{category.products.length}</span>
+              <span class="sheet__n tnum">
+                <VenueText all={String(category.products.length)} at={asText(countsAt(category.products, ids))} />
+              </span>
             </a>
           </li>
         ))
