@@ -79,8 +79,8 @@ assert.deepEqual(unconfirmedNumbers('кухня до 22:30, торт за 48 ч�
 assert.deepEqual(unconfirmedNumbers('зал на 140 гостей и торт за 72 часа', corpus), ['140 гостей', '72 часа']);
 assert.deepEqual(unconfirmedNumbers('800 г и 1,5 кг', corpus), []);
 {
-  // the restaurant stops promising a hall of 100 and the kitchen until 22:30
-  // ресторан перестал обещать зал на 100 гостей и кухню до 22:30
+  // the restaurant stops promising a hall of 100+ and the kitchen until 22:30
+  // ресторан перестал обещать зал на 100+ гостей и кухню до 22:30
   const changed: Content = {
     ...content,
     directions: content.directions.map((direction) =>
@@ -94,7 +94,7 @@ assert.deepEqual(unconfirmedNumbers('800 г и 1,5 кг', corpus), []);
   };
   const page = SHOP_LANDINGS.find((p) => p.key === 'sovetskoy-armii')!;
   const seo = seoOf(page, changed);
-  assert.ok(seo.missing.includes('100 гостей') && seo.missing.includes('22:30'), `не заметил: ${seo.missing}`);
+  assert.ok(seo.missing.includes('100+ гостей') && seo.missing.includes('22:30'), `не заметил: ${seo.missing}`);
   assert.equal(seo.description, page.fallback.description, 'устаревшее описание ушло в сниппет');
 }
 
@@ -173,6 +173,32 @@ assert.ok(line.text.length <= 90 && line.price, 'строка меню');
   const { cakeSteps } = await import('../data/landings-shop.ts');
   const steps = cakeSteps(content);
   assert.ok(steps.length === 4 && steps.every((step) => step.title && step.text && !BAD.test(step.text)), `шаги заказа торта: ${JSON.stringify(steps)}`);
+}
+
+// the cakes showcase of the home page: the very festive section the shelves of /cakes/ are cut from
+// витрина тортов главной: тот самый праздничный раздел, из которого режутся полки /cakes/
+{
+  const { cakeShowcase, sectionOf, SECTION } = await import('../data/landings-shop.ts');
+  const { priceLabel } = await import('./catalog.ts');
+  const showcase = cakeShowcase(content);
+  const festive = sectionOf(content, SECTION.festive);
+  assert.ok(showcase && festive, 'витрина тортов: нет раздела «Праздничные торты»');
+  assert.equal(showcase.section, festive);
+  assert.deepEqual(
+    showcase.cakes.map(({ product }) => product.slug),
+    festive.products.map((product) => product.slug),
+    'витрина тортов — весь раздел каталога в его порядке',
+  );
+  const shelved = new Set(cakes.filter((shelf) => shelf.section === festive).flatMap((shelf) => shelf.products.map((p) => p.slug)));
+  assert.ok(showcase.cakes.every(({ product }) => shelved.has(product.slug)), 'витрина тортов — те же торты, что на полках /cakes/');
+  for (const { product, note } of showcase.cakes) {
+    const plain = (text: string) => text.replace(/[\u00a0\u202f]/g, ' ');
+    assert.match(plain(note), /^(\d+(,\d+)? кг( · \d+(,\d+)? кг)*|\d+ размер\p{L}*) · 48 часов$/u, `торт «${product.title}»: подпись «${note}»`);
+    assert.match(plain(priceLabel(product)), /^(от )?\d{1,3}( \d{3})* ₽$/, `торт «${product.title}»: цена «${priceLabel(product)}»`);
+    assert.ok(product.photo && !product.photo.placeholder, `торт «${product.title}»: в фикстуре нет фото`);
+  }
+  const without = { ...content, catalog: { ...content.catalog, categories: content.catalog.categories.filter((category) => category !== festive) } };
+  assert.equal(cakeShowcase(without), null, 'нет раздела «Праздничные торты» — нет витрины');
 }
 
 console.log(`landings-shop: ${SHOP_LANDINGS.length} страниц, вопросы и разметка в порядке`);

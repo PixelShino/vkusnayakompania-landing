@@ -85,7 +85,9 @@ for (const d of fixture.directions) {
 }
 console.log(`= направления: ${dirIds.size}`);
 
-for (const c of fixture.cakes) {
+// the site no longer reads `cakes`, so a fresh `pnpm fixture` has none; an older fixture still seeds them
+// сайт больше не читает `cakes`, поэтому в свежем `pnpm fixture` их нет; старая фикстура ещё засевает их
+for (const c of fixture.cakes ?? []) {
   if (await exists('cakes', 'title', c.title)) continue;
   await api('POST', '/items/cakes', { ...strip(c), photo: await file(c.photo) });
 }

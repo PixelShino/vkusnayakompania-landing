@@ -47,7 +47,7 @@ const row = (collection, item, action = 'update') => ({ collection, item: String
   assert.deepEqual(describe([row('directus_files', 'a', 'create')], {}).counts, ['1 файл']);
   // without titles (the read failed) the counts stay
   // без названий (чтение не удалось) числа остаются
-  assert.deepEqual(describe([row('cakes', 1), row('cakes', 2)], {}).lines, ['- Торты: 2']);
+  assert.deepEqual(describe([row('promos', 1), row('promos', 2)], {}).lines, ['- Акции: 2']);
 }
 
 console.log('уведомления о публикации: тексты и черновики — проверки прошли');

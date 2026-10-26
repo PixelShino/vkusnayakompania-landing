@@ -72,7 +72,7 @@ export const SHOP_LANDINGS: ShopLanding[] = [
     title: `Торты на заказ в Самаре — ${BRAND.name}`,
     h1: 'Торты на заказ в Самаре',
     description:
-      'Праздничные, детские и свадебные торты на заказ от кондитерской «Вкусная компания» в Самаре. Готовим за 48 часов, свадебный — за 5 дней. Есть торты в наличии.',
+      'Праздничные, детские и свадебные торты на заказ от кондитерской «Вкусная компания» в Самаре. Готовим за 48 часов. Есть готовые торты в наличии.',
     keywords: [
       'торт на заказ самара',
       'торт на заказ',
@@ -89,7 +89,13 @@ export const SHOP_LANDINGS: ShopLanding[] = [
     ],
     sections: ['prazdnichnye-torty', 'torty-v-nalichii'],
     schemaType: 'CollectionPage',
-    claims: ['праздничные торты', 'детск', 'свадеб', 'торты в наличии'],
+    // wedding cakes are a request on the page itself (the «Свадебные торты» strip),
+    // not a row of the content, so «свадеб» is not a claim to look up; the old
+    // «свадебный — за 5 дней» rested on the `cakes` collection and is gone with it
+    // свадебные торты — заявка на самой странице (полоса «Свадебные торты»), а не
+    // строка контента, поэтому «свадеб» не сверяется; прежнее «свадебный — за
+    // 5 дней» держалось на коллекции `cakes` и ушло вместе с ней
+    claims: ['праздничные торты', 'детск', 'торты в наличии'],
     fallback: {
       title: `Торты на заказ в Самаре — ${BRAND.name}`,
       description:
@@ -187,7 +193,7 @@ export const SHOP_LANDINGS: ShopLanding[] = [
     title: `Кафе-кондитерская на Садовой, 212Б — ${BRAND.name}`,
     h1: 'Кафе-кондитерская на Садовой, 212Б',
     description:
-      'Кафе-кондитерская «Вкусная компания» на Садовой, 212Б в Самаре: завтраки с 8:00, супы и паста, витрина кондитерской. Меню, фото зала, часы работы и отзывы.',
+      'Кафе-кондитерская «Вкусная компания» на Садовой, 212Б в Самаре: завтраки с 8:00, обеды, торты и пирожные с витрины. Меню, фото зала, часы работы и отзывы.',
     keywords: [
       'вкусная компания садовая ул 212б',
       'вкусная компания садовая ул 212б фото',
@@ -199,7 +205,7 @@ export const SHOP_LANDINGS: ShopLanding[] = [
     sections: [],
     schemaType: 'WebPage',
     place: 'sadovaya',
-    claims: ['супы и паста', 'витрина кондитерской'],
+    claims: ['завтраки с 8:00', 'торты и пирожные с витрины'],
     fallback: {
       title: `Кафе-кондитерская на Садовой, 212Б — ${BRAND.name}`,
       description:
@@ -214,7 +220,7 @@ export const SHOP_LANDINGS: ShopLanding[] = [
     title: `Ресторан на Советской Армии, 177 — ${BRAND.name}`,
     h1: 'Ресторан на Советской Армии, 177',
     description:
-      'Ресторан «Вкусная компания» на Советской Армии, 177 в Самаре: зал на 100 гостей, кухня до 22:30, завтраки весь день, банкеты. Меню, фото, отзывы и маршрут.',
+      'Ресторан «Вкусная компания» на Советской Армии, 177 в Самаре: зал на 100+ гостей, кухня до 22:30, завтраки весь день, банкеты. Меню, фото, отзывы и маршрут.',
     keywords: [
       'вкусная компания самара советская армия',
       'вкусная компания ул советской армии 177 отзывы',
@@ -227,7 +233,7 @@ export const SHOP_LANDINGS: ShopLanding[] = [
     sections: [],
     schemaType: 'WebPage',
     place: 'sovetskoy-armii',
-    claims: ['зал на 100 гостей', 'кухня до 22:30', 'завтраки весь день', 'банкет'],
+    claims: ['зал на 100+ гостей', 'кухня до 22:30', 'завтраки весь день', 'банкет'],
     fallback: {
       title: `Ресторан на Советской Армии, 177 — ${BRAND.name}`,
       description:
@@ -246,15 +252,15 @@ const norm = (text: string) => text.replace(NBSP, ' ').replace(/\s+/g, ' ').toLo
 
 /**
  * Everything the content says, as one lower-case line: the texts of the home
- * page and the directions, the venues with their hours, the cakes and every
- * dish with its weight and price. A promise of a page is true when it is
+ * page and the directions, the venues with their hours and every dish (the
+ * cakes too) with its weight and price. A promise of a page is true when it is
  * found here.
  * Всё, что говорит контент, одной строкой в нижнем регистре: тексты главной и
- * направлений, точки с часами, торты и каждое блюдо с весом и ценой. Обещание
- * страницы правдиво, когда оно здесь находится.
+ * направлений, точки с часами и каждое блюдо (торты тоже) с весом и ценой.
+ * Обещание страницы правдиво, когда оно здесь находится.
  */
 export const factCorpus = (content: Content) => {
-  const { home, directions, places, cakes, catalog } = content;
+  const { home, directions, places, catalog } = content;
   const parts: (string | undefined)[] = [
     home.hero_text,
     home.seo_description,
@@ -269,7 +275,6 @@ export const factCorpus = (content: Content) => {
       ...hoursRows(place.schedule).map((row) => `${row.days} ${row.hours}`),
       ...place.schedule.flatMap((hours) => hours.map(shortTime)),
     ]),
-    ...cakes.flatMap((cake) => [cake.title, cake.note]),
     ...catalog.categories.flatMap((category) => [
       category.title,
       category.description,
@@ -285,10 +290,10 @@ export const factCorpus = (content: Content) => {
   return norm(parts.filter(Boolean).join(' | '));
 };
 
-// a number with the word that makes it a promise: «48 часов», «3 500 ₽», «8:00», «100 гостей»
-// число со словом, которое делает его обещанием: «48 часов», «3 500 ₽», «8:00», «100 гостей»
+// a number with the word that makes it a promise: «48 часов», «3 500 ₽», «8:00», «100+ гостей»
+// число со словом, которое делает его обещанием: «48 часов», «3 500 ₽», «8:00», «100+ гостей»
 const NUMBER =
-  /\d{1,3}(?:[ \u00a0]\d{3})+(?:\s?₽)?|\d+(?::\d{2})|\d+(?:,\d+)?(?:\s?(?:₽|кг|г(?!\p{L})|час(?:ов|а)?|дн(?:ей|я)|день|гост(?:ей|я|ь)))?/giu;
+  /\d{1,3}(?:[ \u00a0]\d{3})+(?:\s?₽)?|\d+(?::\d{2})|\d+\+?(?:,\d+)?(?:\s?(?:₽|кг|г(?!\p{L})|час(?:ов|а)?|дн(?:ей|я)|день|гост(?:ей|я|ь)))?/giu;
 
 /** Числа текста, которых нет в контенте. */
 export const unconfirmedNumbers = (text: string, corpus: string) =>
@@ -335,7 +340,6 @@ const maxPrice = (products: Product[]) =>
 
 const KIDS = /детск/iu;
 const MOUSSE = /мусс/iu;
-const WEDDING = /свадеб/iu;
 
 /** Полка страницы: раздел каталога целиком или его часть под своим заголовком. */
 export type Shelf = {
@@ -380,8 +384,32 @@ const sentenceWith = (text: string | undefined, word: RegExp) =>
     .find((sentence) => word.test(sentence))
     ?.trim();
 
-/** Свадебный торт из витрины тортов главной: «Свадебный, два яруса» · «от 4 кг · 5 дней». */
-export const weddingCake = (content: Content) => content.cakes.find((cake) => WEDDING.test(cake.title));
+/** Торт витрины главной: блюдо каталога и строка под ним — размеры и срок. */
+export type ShowcaseCake = { product: Product; note: string };
+
+/**
+ * The cakes showcase of the home page: the festive cakes of the catalog — the
+ * very section the shelves of `/cakes/` are cut from, in the catalog's order —
+ * each with the line under it, sizes and lead time («1 кг · 1,5 кг · 2 кг ·
+ * 48 часов»). `null` without such a section or with an empty one: then the
+ * showcase, its figure and its links are not drawn.
+ * Витрина тортов главной: праздничные торты каталога — тот самый раздел, из
+ * которого режутся полки `/cakes/`, в порядке каталога, — у каждого строка под
+ * кадром: размеры и срок («1 кг · 1,5 кг · 2 кг · 48 часов»). `null`, если
+ * раздела нет или он пуст: тогда не рисуются ни витрина, ни её цифра, ни ссылки.
+ */
+export const cakeShowcase = (content: Content): { section: CatalogCategory; cakes: ShowcaseCake[] } | null => {
+  const festive = sectionOf(content, SECTION.festive);
+  if (!festive?.products.length) return null;
+  const hours = leadHours(content);
+  return {
+    section: festive,
+    cakes: festive.products.map((product) => ({
+      product,
+      note: [sizeLabel(product), hours !== null && hoursPhrase(hours)].filter(Boolean).join(' · '),
+    })),
+  };
+};
 
 /** Вес праздничных тортов: от самого лёгкого размера до самого тяжёлого. */
 const weightRange = (products: Product[]) => {
@@ -564,11 +592,13 @@ export const directionOf = (place: Place, content: Content) =>
     (direction) => direction.place?.id === place.id && (direction.key === 'cafe' || direction.key === 'restaurant'),
   );
 
-/** Что точка говорит о завтраках: «Завтраки с восьми утра», «Завтраки весь день». */
+/** Что точка говорит о завтраках: «Завтраки с 8:00», «Завтраки весь день». */
 export const breakfastNote = (place: Place, content: Content) => {
   const text = directionOf(place, content)?.text;
+  // the colon too: «Кафе и кондитерская в одном зале: завтраки с 8:00, …» (26.10.2026)
+  // и двоеточие: «Кафе и кондитерская в одном зале: завтраки с 8:00, …» (26.10.2026)
   const part = (text ?? '')
-    .split(/[.;,]\s*/)
+    .split(/[.;,:]\s*/)
     .map((piece) => piece.trim())
     .find((piece) => /^завтрак/iu.test(piece));
   return part ? `${part.charAt(0).toUpperCase()}${part.slice(1)}` : undefined;
@@ -765,9 +795,6 @@ export const faqOf = (key: ShopKey, content: Content): ShopFaq[] => {
     const festive = sectionOf(content, SECTION.festive);
     const ready = sectionOf(content, SECTION.ready);
     const hours = leadHours(content);
-    const wedding = weddingCake(content);
-    const weddingDays = /(\d+)\s*(дн\p{L}*)/iu.exec(wedding?.note ?? '');
-    const weddingWeight = /от\s+\d+(?:,\d+)?\s*кг/iu.exec(wedding?.note ?? '');
     const kids = festive?.products.filter((product) => KIDS.test(product.title)) ?? [];
     const fillings = [...new Set(festive?.products.flatMap((product) => product.fillings) ?? [])];
     const recolor = sentenceWith(content.home.cakes_text, /надпис/iu);
@@ -775,11 +802,7 @@ export const faqOf = (key: ShopKey, content: Content): ShopFaq[] => {
       hours !== null && {
         id: 'srok',
         q: 'За сколько заказывать торт?',
-        a: `Праздничный торт готовим за ${hoursPhrase(hours)} — оформите заказ хотя бы за ${ahead(hours)} до праздника.${
-          wedding && weddingDays
-            ? ` Свадебный торт («${wedding.title}») готовим за ${weddingDays[1]}\u00a0${weddingDays[2]}${weddingWeight ? `, вес — ${weddingWeight[0]}` : ''}.`
-            : ''
-        }`,
+        a: `Праздничный торт готовим за ${hoursPhrase(hours)} — оформите заказ хотя бы за ${ahead(hours)} до праздника.`,
       },
       festive && {
         id: 'cena',
@@ -912,7 +935,9 @@ export const faqOf = (key: ShopKey, content: Content): ShopFaq[] => {
     if (place) {
       const direction = directionOf(place, content);
       const breakfast = breakfastNote(place, content);
-      const hall = /зал на\s+(\d+)\s+гост\p{L}*/iu.exec(direction?.text ?? '');
+      // «100+» as well: the owner gave the capacity without an upper bound (26.10.2026)
+      // и «100+»: владелица назвала вместимость без верхней границы (26.10.2026)
+      const hall = /зал на\s+(\d+\+?)\s+гост\p{L}*/iu.exec(direction?.text ?? '');
       const banquets = content.directions.find((d) => d.key === 'banquets');
       items.push(
         {
@@ -929,7 +954,9 @@ export const faqOf = (key: ShopKey, content: Content): ShopFaq[] => {
         hall && {
           id: 'zal',
           q: 'Сколько гостей вмещает зал?',
-          a: `${hall[0].replace(/^./, (c) => c.toUpperCase())}.${banquets ? ` ${banquets.text}` : ''}`,
+          // the exact seating is confirmed by phone or in the messengers, not by the banquets blurb
+          // точную рассадку подтверждают по телефону или в мессенджерах, а не абзацем о банкетах
+          a: `${hall[0].replace(/^./, (c) => c.toUpperCase())}. Точное число под вашу рассадку подскажем: позвоните ${place.phone}${chatsText(content) ? ` или напишите ${chatsText(content)}` : ''}.`,
           link: { href: '/catering/', label: 'Банкеты и кейтеринг' },
         },
         {

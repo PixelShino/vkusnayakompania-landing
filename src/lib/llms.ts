@@ -25,6 +25,7 @@ import { chatLinks, isChatLink } from './contact-links.ts';
 import { longDate } from './pages.ts';
 import { menusFor } from './select.ts';
 import { BRAND, hoursRows, plural, yandexOrgUrl } from '../data/site.ts';
+import { cakeShowcase } from '../data/landings-shop.ts';
 import seedZones from '../data/delivery-zones.json' with { type: 'json' };
 
 /** Зона доставки так, как её печатает текст: без полигона. */
@@ -377,7 +378,10 @@ export const buildLlms = (content: Content, site: string | URL, { full = false, 
     }
   };
 
-  const { settings, home, places, directions, catalog, catering, pages, cakes, menus } = content;
+  const { settings, home, places, directions, catalog, catering, pages, menus } = content;
+  // the cakes to order are the catalog's festive section, the same as the home showcase
+  // торты на заказ — праздничный раздел каталога, тот же, что витрина главной
+  const cakes = cakeShowcase(content);
   const doc = (slug: string) => pages.find((p) => p.slug === slug);
   const chats = chatLinks(settings);
   const vk = isChatLink(settings.vk) ? String(settings.vk).trim() : undefined;
@@ -401,7 +405,7 @@ export const buildLlms = (content: Content, site: string | URL, { full = false, 
     : '';
   const services = join([
     stockCount > 0 && 'доставка из каталога на сайте',
-    cakes.length > 0 && 'торты на заказ',
+    cakes && 'торты на заказ',
     catering.ready && 'кейтеринг и банкеты',
   ]);
   out.push(`# ${BRAND.name}`);
@@ -437,7 +441,7 @@ export const buildLlms = (content: Content, site: string | URL, { full = false, 
         ),
       ),
     );
-  if (cakes.length) about.push(item(home.cakes_title || 'Торты на заказ', page('#cakes'), home.cakes_text));
+  if (cakes) about.push(item(home.cakes_title || 'Торты на заказ', page('#cakes'), home.cakes_text));
   about.push(item('Контакты и карта', page('#contacts'), `адреса, телефоны и часы работы ${places.length === 2 ? 'обеих точек' : 'точек'}`));
   out.push('## О компании', about.join('\n'));
 
@@ -448,12 +452,17 @@ export const buildLlms = (content: Content, site: string | URL, { full = false, 
     if (lines.length) out.push('## Направления', lines.join('\n'));
   }
 
-  if (full && cakes.length) {
+  // the models themselves are listed once, in their section of the catalog below
+  // сами модели перечислены один раз — в своём разделе каталога ниже
+  if (full && cakes) {
+    const low = Math.min(...cakes.cakes.map(({ product }) => product.price));
     out.push(
       `## ${home.cakes_title || 'Торты на заказ'}`,
       [
         home.cakes_text && line(home.cakes_text),
-        cakes.map((cake) => `- ${line(cake.title)}${cake.note ? ` — ${line(cake.note)}` : ''}`).join('\n'),
+        line(
+          `${count(cakes.cakes.length, 'модель', 'модели', 'моделей')} от ${rub(low)} с фото, размерами и ценами — раздел «${cakes.section.title}» каталога: ${page(`catalog/#${cakes.section.slug}`)}`,
+        ),
       ]
         .filter(Boolean)
         .join('\n\n'),

@@ -26,7 +26,7 @@ const TOKEN = process.env.DIRECTUS_TOKEN;
 // the same collections the watchdog follows (`deploy/watch.sh`): edits there change the site
 // те же коллекции, за которыми следит сторож (`deploy/watch.sh`): правки в них меняют сайт
 export const SITE_COLLECTIONS = [
-  'afisha', 'promos', 'menus', 'cakes', 'places_files', 'directions_files', 'product_categories', 'products',
+  'afisha', 'promos', 'menus', 'places_files', 'directions_files', 'product_categories', 'products',
   'settings', 'home', 'places', 'directions', 'directus_files', 'texts',
   'catering_page', 'catering_page_files', 'catering_formats', 'catering_steps', 'catering_faq', 'pages',
 ];
@@ -36,7 +36,6 @@ export const SITE_COLLECTIONS = [
 const KINDS = {
   products: { label: 'Блюда', words: ['блюдо', 'блюда', 'блюд'], title: 'title', status: true },
   product_categories: { label: 'Разделы каталога', words: ['раздел каталога', 'раздела каталога', 'разделов каталога'], title: 'title', status: true },
-  cakes: { label: 'Торты', words: ['торт', 'торта', 'тортов'], title: 'title', status: true },
   promos: { label: 'Акции', words: ['акция', 'акции', 'акций'], title: 'title', status: true },
   afisha: { label: 'Афиша', words: ['событие афиши', 'события афиши', 'событий афиши'], title: 'title', status: true },
   menus: { label: 'Меню', words: ['меню', 'меню', 'меню'], title: 'title', status: true },

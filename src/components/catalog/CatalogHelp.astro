@@ -12,12 +12,16 @@
 import Icon from '../Icon.astro';
 import { BASE } from '../../lib/base.ts';
 import { typo, type Content } from '../../lib/content.ts';
+import { cakeShowcase } from '../../data/landings-shop.ts';
 
 interface Props {
   content: Content;
 }
 
-const { settings, cakes } = Astro.props.content;
+const { settings } = Astro.props.content;
+// the button leads to /cakes/ and shows only while the catalog has festive cakes
+// кнопка ведёт на /cakes/ и показывается, только пока в каталоге есть праздничные торты
+const cakes = cakeShowcase(Astro.props.content);
 ---
 
 <section class="strip-paper cat-help" aria-labelledby="cat-help-title">
@@ -35,8 +39,8 @@ const { settings, cakes } = Astro.props.content;
         Позвонить <span class="tnum">{settings.phone}</span>
       </a>
       {
-        cakes.length > 0 && (
-          <a class="btn btn--secondary" href={`${BASE}#cakes`}>
+        cakes && (
+          <a class="btn btn--secondary" href={`${BASE}cakes/`}>
             <Icon name="cake" />
             Торты на заказ
           </a>

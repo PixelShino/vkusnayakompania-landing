@@ -180,16 +180,10 @@ const hoursIn = (text: string | null | undefined) => {
   return match ? Number(match[1]) : null;
 };
 
-/** «от 4 кг · 5 дней» → «5 дней»; срок в часах — не исключение, его берёт общий ответ */
-const daysIn = (text: string | null | undefined) => {
-  const match = /(\d+)\s*(дн[яей]*|сут\p{L}*)/iu.exec(text ?? '');
-  return match ? `${match[1]} ${match[2]}` : null;
-};
-
 // ── the questions / вопросы ──────────────────────────────────────────────────
 
 export const buildDeliveryFaq = (content: Content, { zones, deliveryHref }: FaqOptions): FaqItem[] => {
-  const { settings, places, catalog, cakes, home, loyalty } = content;
+  const { settings, places, catalog, home, loyalty } = content;
   const items: FaqItem[] = [];
   const doc = (text: string) => (deliveryHref ? link(deliveryHref, text) : esc(text));
 
@@ -325,15 +319,9 @@ export const buildDeliveryFaq = (content: Content, { zones, deliveryHref }: FaqO
   const ready = catalog.categories.find((category) => category.slug === READY && category.products.some((product) => product.available));
   if (festive?.products.length) {
     const hours = mostCommon(festive.products.map((product) => hoursIn(product.description)).filter((value): value is number => value !== null)) ?? hoursIn(home.cakes_text);
-    // a cake of the showcase that takes days, not hours / торт витрины, которому нужны дни, а не часы
-    const longer = cakes
-      .map((cake) => ({ title: cake.title, days: daysIn(cake.note) }))
-      .filter((cake): cake is { title: string; days: string } => Boolean(cake.days))
-      .slice(0, 2)
-      .map((cake) => `торт ${quoted(cake.title)} — за ${cake.days}`);
     const inscription = festive.products.some((product) => /надпис/iu.test(product.description ?? '') && /комментари/iu.test(product.description ?? ''));
     const lead = hours
-      ? `Да: праздничные торты из каталога делаем на заказ за ${plural(hours, 'час', 'часа', 'часов')}${longer.length ? `, ${andList(longer)}` : ''}.`
+      ? `Да: праздничные торты из каталога делаем на заказ за ${plural(hours, 'час', 'часа', 'часов')}.`
       : `Да: праздничные торты на заказ — в разделе ${quoted(festive.title)} каталога.`;
     const tail = [
       inscription ? 'надпись и цвет можно указать в комментарии к заказу' : '',

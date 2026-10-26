@@ -113,11 +113,15 @@ assert.equal('email' in org, false, 'пустая почта не выводит
 assert.equal((org.contactPoint as Json).contactType, 'customer service');
 assert.equal((org.logo as Json).url, logo.url);
 
-// sameAs: VK, Telegram, сеть на картах; заглушка `https://max.ru/` — нет
-assert.equal(fixture.settings.max, 'https://max.ru/', 'в фикстуре Max — заглушка');
+// sameAs: VK, Telegram, the real Max link (in the fixture since 26.10.2026), сеть на картах
+// sameAs: VK, Telegram, настоящая ссылка Max (в фикстуре с 26.10.2026), сеть на картах
+assert.match(fixture.settings.max ?? '', /^https:\/\/max\.ru\/join\//, 'в фикстуре настоящая ссылка Max');
 const sameAs = org.sameAs as string[];
-assert.deepEqual(sameAs, [fixture.settings.vk, fixture.settings.telegram, YANDEX_CHAIN_URL, TWOGIS_BRANCHES_URL]);
-assert.ok(!sameAs.some((href) => href.includes('max.ru')), 'заглушка Max попала в sameAs');
+assert.deepEqual(sameAs, [fixture.settings.vk, fixture.settings.telegram, fixture.settings.max, YANDEX_CHAIN_URL, TWOGIS_BRANCHES_URL]);
+// the stub `https://max.ru/` opens no chat and stays out of sameAs
+// заглушка `https://max.ru/` чата не открывает и в sameAs не попадает
+const stubbed = orgSameAs({ ...content.settings, max: 'https://max.ru/' });
+assert.ok(!stubbed.some((href) => href.includes('max.ru')), 'заглушка Max попала в sameAs');
 // настоящий канал Max — выводится; пустой VK — нет
 const withMax = orgSameAs({ ...content.settings, max: 'https://max.ru/u/abc', vk: '' });
 assert.deepEqual(withMax, [fixture.settings.telegram, 'https://max.ru/u/abc', YANDEX_CHAIN_URL, TWOGIS_BRANCHES_URL]);
@@ -141,7 +145,7 @@ assert.equal(sadovaya.currenciesAccepted, 'RUB');
 assert.equal(sadovaya.acceptsReservations, true);
 assert.equal('aggregateRating' in sadovaya, false, 'оценки с чужих площадок не переносятся');
 assert.equal('paymentAccepted' in sadovaya, false);
-assert.match(String(sadovaya.description), /Завтраки с восьми утра/, 'описание точки — из её направления');
+assert.match(String(sadovaya.description), /^Кафе и кондитерская в одном зале: завтраки с 8:00/, 'описание точки — из её направления');
 const action = sadovaya.potentialAction as Json;
 assert.equal(action['@type'], 'OrderAction');
 assert.equal((action.target as Json).urlTemplate, `${origin}/catalog/`);
@@ -153,23 +157,29 @@ assert.deepEqual(action.deliveryMethod, [
 const noCatalog = layout({ ...content, catalog: { ...content.catalog, count: 0 } }, homeUrl(site));
 assert.equal('potentialAction' in nodeOf(noCatalog, placeId(origin, '1')), false);
 
-// меню: в фикстуре все файлы — заглушки, в разметку не идут; настоящее — идёт
-assert.ok(content.menus.every((menu) => menu.file.placeholder), 'в фикстуре меню — заглушки');
-assert.equal('hasMenu' in sadovaya, false, 'меню-заглушка попала в hasMenu');
-const realMenus = {
+// menus: stubs stay out of the markup, real files (in the fixture since 26.10.2026) go in
+// меню: заглушки в разметку не идут, настоящие файлы (в фикстуре с 26.10.2026) — идут
+const stubMenus = {
   ...content,
-  menus: content.menus.map((menu) => ({ ...menu, file: { ...menu.file, placeholder: false } })),
+  menus: content.menus.map((menu) => ({ ...menu, file: { ...menu.file, placeholder: true } })),
 };
+assert.equal('hasMenu' in nodeOf(layout(stubMenus, homeUrl(site)), placeId(origin, '1')), false, 'меню-заглушка попала в hasMenu');
+const realMenus = content;
+assert.ok(content.menus.some((menu) => !menu.file.placeholder), 'в фикстуре есть настоящие меню');
 const menuGraph = layout(realMenus, homeUrl(site));
 checkPage('главная с настоящими меню', [menuGraph]);
-assert.deepEqual(nodeOf(menuGraph, placeId(origin, '1')).hasMenu, [
-  { '@type': 'Menu', name: 'Меню кафе', url: `${origin}/media/7d367ade-c513-401a-b64c-41af6e00766f.pdf`, dateModified: '2026-09-01' },
-]);
+const expectedMenus = menusOf(realMenus, realMenus.places[0]).map((menu) => ({
+  '@type': 'Menu',
+  name: menu.title,
+  url: `${origin}${menu.file.href}`,
+  dateModified: menu.updated,
+}));
+assert.ok(expectedMenus.length > 0, 'у Садовой есть настоящее меню');
+assert.deepEqual(nodeOf(menuGraph, placeId(origin, '1')).hasMenu, expectedMenus);
 // у кондитерской нет своей точки — её меню не приписывается ни одной
-assert.deepEqual(
-  realMenus.places.map((place) => menusOf(realMenus, place).map((menu) => menu.title)),
-  [['Меню кафе'], ['Меню ресторана']],
-);
+const attributed = realMenus.places.map((place) => menusOf(realMenus, place).map((menu) => menu.title));
+assert.ok(attributed[0].includes('Меню кафе') && attributed[1].includes('Меню ресторана'), 'меню точек на своих местах');
+assert.ok(!attributed.flat().includes('Меню кондитерской'), 'меню кондитерской приписано точке');
 
 // часы: та же неделя в двух форматах
 const week = toSchedule(

@@ -234,8 +234,6 @@ export type Menu = {
   updated: string;
 };
 
-export type Cake = { id: number; title: string; note?: string; photo: Img };
-
 export type Content = {
   settings: Settings;
   home: Home;
@@ -244,7 +242,6 @@ export type Content = {
   afisha: Afisha | null;
   promos: Promo[];
   menus: Menu[];
-  cakes: Cake[];
   /** каталог доставки; пустой, если в админке его нет или он не заполнен */
   catalog: Catalog;
   /** кейтеринг и банкеты (`/catering/`); пустой, если в админке раздела нет */
@@ -299,7 +296,6 @@ type RawDirection = Omit<Direction, 'photo' | 'place' | 'gallery'> & {
 type RawAfisha = Omit<Afisha, 'poster' | 'place'> & Dated & { poster?: RawFile; place?: number };
 type RawPromo = Omit<Promo, 'place'> & Dated & { place?: number; sort?: number };
 type RawMenu = Omit<Menu, 'file'> & { file: RawFile };
-type RawCake = Omit<Cake, 'photo'> & { status: string; photo: RawFile; sort?: number };
 
 /** Ответ Directus до нормализации: тот же вид имеет `src/data/fixture.json`. */
 export type Raw = {
@@ -310,7 +306,10 @@ export type Raw = {
   afisha: RawAfisha[];
   promos: RawPromo[];
   menus: RawMenu[];
-  cakes: RawCake[];
+  // the old `cakes` collection is not read: the home showcase is the catalog's
+  // «Праздничные торты» (`cakeShowcase` in `src/data/landings-shop.ts`)
+  // старая коллекция `cakes` не читается: витрина тортов главной — раздел
+  // каталога «Праздничные торты» (`cakeShowcase` в `src/data/landings-shop.ts`)
   // optional: an older fixture and a Directus without the catalog have neither
   // необязательны: в старой фикстуре и в Directus без каталога их нет
   product_categories?: RawCategory[] | null;
@@ -517,9 +516,6 @@ export const normalize = (raw: Raw, resolveImage: ResolveImage, today = samaraTo
       updated: menuUpdated(menu),
       file: need(toDoc(menu.file), `меню «${menu.title}»: не приложен файл`),
     })),
-    cakes: raw.cakes
-      .filter((cake) => cake.status === 'published')
-      .map((cake) => ({ ...cake, photo: need(img(cake.photo), `торт «${cake.title}»: нет фото`) })),
     catalog: normalizeCatalog(raw.product_categories, raw.products, (file, alt) => catalogImg(file, alt, resolveImage), warn),
     // the catering page is strict about its photos like the rest of the page
     // (alt, dimensions); the shots of the catering and banquet directions

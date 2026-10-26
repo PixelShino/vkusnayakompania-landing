@@ -10,13 +10,15 @@
 import CountUp from '../islands/CountUp.tsx';
 import { plural } from '../data/site';
 import type { Content } from '../lib/content.ts';
+import { cakeShowcase } from '../data/landings-shop.ts';
 
 interface Props {
   content: Content;
 }
 
 const { content } = Astro.props;
-const { places, cakes } = content;
+const { places } = content;
+const cakes = cakeShowcase(content)?.cakes ?? [];
 
 /**
  * `value` досчитывается островом, `text` стоит как есть: рейтинг «4,9» — строка
@@ -30,12 +32,12 @@ type Figure = { label: string; accent?: boolean } & ({ value: number } | { text:
 // there is no hall capacity in the data, so that figure is absent instead of guessed.
 // The Maps score is not here either: the typed-in «4,9» disagreed with the live
 // widget two screens below (4,8 and 5,0 per venue) — the widget is the one source.
-// The cake count is the catalogue itself, and the same «twelve» stands in the cakes lead.
+// The cake count is the festive cakes of the catalog — the very cards of the cakes showcase.
 // 48 часов — срок торта, он же в `home.cakes_text` и в карточке кондитерской;
 // вместимости зала в данных нет, поэтому такой цифры здесь нет, а не выдумана.
 // Оценки с Карт тут тоже нет: вбитая руками «4,9» спорила с живым виджетом двумя
 // экранами ниже (4,8 и 5,0 по точкам) — источник один, виджет. Число тортов —
-// сам каталог, и та же «двенадцать» стоит в лиде секции тортов.
+// праздничные торты каталога, те самые карточки витрины тортов.
 const figures: Figure[] = [
   { value: places.length, label: `${plural(places.length, 'точка', 'точки', 'точек')} в Самаре` },
   { value: 48, label: 'часов на торт', accent: true },

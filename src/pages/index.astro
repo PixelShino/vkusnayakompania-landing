@@ -15,9 +15,13 @@ import Reviews from '../components/Reviews.astro';
 import Contacts from '../components/Contacts.astro';
 import Footer from '../components/Footer.astro';
 import { getContent } from '../lib/content.ts';
+import { cakeShowcase } from '../data/landings-shop.ts';
 
 const content = await getContent();
 const { afisha, promos, places } = content;
+// the cakes are the catalog's festive section; without it there is no showcase
+// торты — праздничный раздел каталога; без него витрины нет
+const cakes = cakeShowcase(content);
 ---
 
 <BaseLayout content={content} keywords={['вкусная компания самара', 'вкусная компания', 'кондитерская самара', 'кафе самара', 'ресторан вкусная компания в самаре', 'кафе кондитерская самара']}>
@@ -30,7 +34,7 @@ const { afisha, promos, places } = content;
     {afisha && <Afisha afisha={afisha} />}
     <Promos promos={promos} places={places} />
     <Menus content={content} />
-    {content.cakes.length > 0 && <Cakes content={content} />}
+    {cakes && <Cakes content={content} />}
     <Delivery content={content} />
     <Reviews content={content} />
     <Marquee />

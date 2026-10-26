@@ -33,7 +33,7 @@ const clean = (text: string, name: string) => {
   assert.doesNotMatch(text, /\n{3,}/, `${name}: больше одной пустой строки подряд`);
   assert.doesNotMatch(text, /[ \t]$/m, `${name}: пробел в конце строки`);
   // заглушка Max (`https://max.ru/`) чата не открывает — в тексте её нет
-  assert.doesNotMatch(text, /max\.ru/i, `${name}: заглушка Max попала в текст`);
+  assert.doesNotMatch(text, /https:\/\/max\.ru\/(?!\w)/i, `${name}: заглушка Max попала в текст`);
   assert.doesNotMatch(text, /заглушк/i, `${name}: пометка заглушки попала в текст`);
   // свои слова файла — без восклицаний; в текстах из админки (описания блюд) они остаются как есть
   assert.doesNotMatch(text.split('\n## ')[0], /!/, `${name}: восклицательный знак в описании сайта`);
@@ -73,13 +73,18 @@ for (const path of ['', 'catalog/', 'catering/', 'catering/services/', 'catering
   assert.ok(short.includes(`](${SITE}/${path})`), `llms.txt: нет ссылки на /${path}`);
 // цены «1 250 ₽» — с обычными пробелами, рубль через пробел
 assert.ok(short.includes('Доставка боксов — от 1 250 ₽ за бокс'), 'llms.txt: цена формата кейтеринга «от 1 250 ₽ за бокс»');
-assert.ok(short.includes('Праздники — от 3 500 ₽ за гостя, до 140 гостей'), 'llms.txt: цена и гости банкета');
+assert.ok(short.includes('Праздники — от 3 500 ₽ за гостя, 100+ гостей'), 'llms.txt: цена и гости банкета');
 assert.ok(short.includes('Кофе-брейк — по смете'), 'llms.txt: формат без цены — «по смете», как на странице');
 assert.ok(
   short.includes('- Рядом с нами — Советский, Промышленный, Октябрьский, Кировский: доставка 400 ₽, бесплатно от 7 000 ₽, минимальный заказ 1 000 ₽'),
   'llms.txt: зона доставки с ценой, порогом и минимумом',
 );
-assert.ok(short.includes('121 позиция в 13 разделах'), 'llms.txt: число блюд и разделов каталога');
+// the count follows the fixture: items in stock and the sections that have them
+// число идёт за фикстурой: позиции в наличии и разделы, где они есть
+const stockLine = /(\d+) позици\S* в (\d+) раздел\S*/.exec(short);
+assert.ok(stockLine, 'llms.txt: число блюд и разделов каталога');
+const stockCount = Number(stockLine![1]);
+assert.ok(stockCount > 0 && stockCount <= content.catalog.count, 'llms.txt: позиций в наличии не больше, чем в каталоге');
 assert.doesNotMatch(short, /\d{4} ₽/, 'llms.txt: тысячи отделены пробелом');
 assert.ok(Buffer.byteLength(short) < 16_000, `llms.txt: краткая версия разрослась до ${Buffer.byteLength(short)} байт`);
 // краткая версия — без каталога и документов целиком
@@ -98,8 +103,10 @@ for (const category of content.catalog.categories) {
   for (const product of category.products.filter((p) => p.available))
     assert.ok(full.includes(`- [${product.title}](${SITE}/catalog/#p-${product.slug}) — `), `llms-full.txt: нет блюда «${product.title}»`);
 }
-assert.ok(full.includes('3 кг — 10 500 ₽'), 'llms-full.txt: размеры торта с ценой «10 500 ₽»');
-assert.ok(full.includes('Начинки на выбор: Прага, Сникерс'), 'llms-full.txt: начинки торта');
+// a festive cake line carries its sizes with prices and the fillings (the figures follow the fixture)
+// строка праздничного торта несёт размеры с ценами и начинки (цифры идут за фикстурой)
+assert.match(full, /#p-tort[^)]*\) — от \d[\d ]* ₽\.[^\n]*Размеры: [^\n.]*\d кг — \d[\d ]* ₽/, 'llms-full.txt: размеры торта с ценой');
+assert.match(full, /#p-tort[^)]*\)[^\n]*Начинки на выбор: \p{Lu}/u, 'llms-full.txt: начинки торта');
 
 // снятое с продажи и черновик в текст не попадают
 const [first, second] = raw.products!;
@@ -110,7 +117,7 @@ const trimmed = load({
 const fullTrimmed = buildLlms(trimmed, SITE, { zones, full: true });
 assert.ok(!fullTrimmed.includes(`[${first.title}]`), 'llms-full.txt: блюдо из стоп-листа не выводится');
 assert.ok(!fullTrimmed.includes(`[${second.title}]`), 'llms-full.txt: черновик не выводится');
-assert.ok(buildLlms(trimmed, SITE, { zones }).includes('119 позиций в 13 разделах'), 'llms.txt: в счёте только блюда в наличии');
+assert.match(buildLlms(trimmed, SITE, { zones }), new RegExp(`${stockCount - 2} позици\\S* в \\d+ раздел`), 'llms.txt: в счёте только блюда в наличии');
 
 // кейтеринг: каждый формат и каждый вопрос с ответом
 for (const format of content.catering.formats) {
@@ -143,15 +150,20 @@ assert.ok(size < 200_000, `llms-full.txt: ${size} байт — больше 200 
 const withMax = load({ ...raw, settings: { ...raw.settings, max: 'https://max.ru/u/f9LHodD0cOKmT3' } });
 assert.ok(buildLlms(withMax, SITE).includes('[Max](https://max.ru/u/f9LHodD0cOKmT3)'), 'llms.txt: настоящая ссылка Max выводится');
 
-// меню: заглушка не выводится, заменённый файл — выводится
-assert.ok(!short.includes('## Меню'), 'llms.txt: меню-заглушки фикстуры не выводятся');
-const replacedMenus = load({
+// меню: заглушка не выводится, настоящий файл (в фикстуре с 26.10.2026) — выводится
+// a stub is a file that was never replaced: uploaded right after creation, title marked
+// заглушка — файл, который не заменяли: загружен сразу после создания, в заголовке пометка
+const stubbedMenus = load({
   ...raw,
-  menus: raw.menus.map((menu) => ({ ...menu, file: { ...menu.file, uploaded_on: '2026-10-20T10:00:00.000Z' } })),
+  menus: raw.menus.map((menu) => ({
+    ...menu,
+    file: { ...menu.file, title: `[заглушка] ${menu.title}`, created_on: '2026-09-23T10:00:00.000Z', uploaded_on: '2026-09-23T10:00:00.100Z' },
+  })),
 });
-const withMenus = buildLlms(replacedMenus, SITE);
-assert.match(withMenus, /^## Меню$/m, 'llms.txt: заменённое меню выводится');
-assert.match(withMenus, /\]\(https:\/\/vkus-com\.ru\/media\/[0-9a-f-]+\.pdf\): Кафе на Садовой, PDF, обновлено /, 'llms.txt: меню — абсолютная ссылка на PDF');
+assert.ok(!buildLlms(stubbedMenus, SITE).includes('## Меню'), 'llms.txt: меню-заглушки не выводятся');
+assert.match(short, /^## Меню$/m, 'llms.txt: настоящее меню выводится');
+assert.match(short, /\]\(https:\/\/vkus-com\.ru\/media\/[0-9a-f-]+\.pdf\): Кафе на Садовой, PDF, обновлено /, 'llms.txt: меню — абсолютная ссылка на PDF');
+assert.doesNotMatch(short, /Меню кондитерской/, 'llms.txt: заглушка меню кондитерской не выводится');
 
 // пустой каталог, кейтеринг и документы, без зон — сайт описан тем, что есть
 const bare = load({ ...raw, product_categories: [], products: [], catering_page: [], catering_formats: [], catering_faq: [], pages: [] });

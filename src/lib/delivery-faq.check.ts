@@ -110,7 +110,10 @@ assert.ok(accepted.aHtml!.includes('<a href="/account/">личный кабин�
 
 // ── торт: срок из описаний праздничных тортов каталога ──────────────────────
 const cake = byId(faq, 'cakes')!;
-assert.ok(plain(cake.a).startsWith('Да: праздничные торты из каталога делаем на заказ за 48 часов, торт «Свадебный, два яруса» — за 5 дней.'));
+assert.ok(plain(cake.a).startsWith('Да: праздничные торты из каталога делаем на заказ за 48 часов. '), plain(cake.a));
+// the old `cakes` collection is not read: no wedding cake, no «5 дней»
+// старая коллекция `cakes` не читается: ни свадебного торта, ни «5 дней»
+assert.doesNotMatch(cake.a, /свадеб|\d+\s*дн(ей|я)/iu, 'в ответе про торт нет строк старой витрины');
 assert.ok(cake.aHtml!.includes('<a href="#prazdnichnye-torty">праздничные торты из каталога</a>'));
 assert.ok(cake.aHtml!.includes('<a href="#torty-v-nalichii">«Торты в наличии»</a>'));
 const noCakes = buildDeliveryFaq(
@@ -119,12 +122,16 @@ const noCakes = buildDeliveryFaq(
 );
 assert.equal(byId(noCakes, 'cakes'), undefined, 'нет раздела праздничных тортов — нет вопроса');
 
-// ── связь: заглушка Max не попадает ─────────────────────────────────────────
-assert.equal(content.settings.max, 'https://max.ru/', 'в фикстуре Max — заглушка');
-const help = byId(faq, 'help')!;
+// ── связь: заглушка Max не попадает, настоящая ссылка выводится ────────────
+// the fixture carries the real Max link since 26.10.2026; the stub is built here
+// в фикстуре с 26.10.2026 настоящая ссылка Max; заглушка собирается здесь
+const stubbed = buildDeliveryFaq({ ...content, settings: { ...content.settings, max: 'https://max.ru/' } }, { zones, deliveryHref: href });
+const help = byId(stubbed, 'help')!;
 assert.ok(plain(help.a).startsWith('Позвоните по номеру +7 987 955-25-65 или напишите в Telegram.'));
 for (const text of [help.a, help.aHtml!]) assert.doesNotMatch(text, /Max|max\.ru/, 'заглушка Max не выводится');
 assert.ok(help.aHtml!.includes('href="tel:+79879552565"'));
+assert.match(content.settings.max ?? '', /^https:\/\/max\.ru\/join\//, 'в фикстуре настоящая ссылка Max');
+assert.match(byId(faq, 'help')!.aHtml!, /href="https:\/\/max\.ru\/join\/[^"]+"/, 'настоящая ссылка Max выводится');
 assert.ok(help.aHtml!.includes(`<a href="${href}">условиях доставки и оплаты</a>`));
 const withMax = buildDeliveryFaq({ ...content, settings: { ...content.settings, max: 'https://max.ru/u/abc' } }, { zones, deliveryHref: href });
 assert.ok(byId(withMax, 'help')!.a.includes('напишите в Telegram или Max'), 'настоящий Max — выводится');

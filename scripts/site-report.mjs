@@ -28,8 +28,10 @@ const get = async (path) => {
   return (await r.json()).data;
 };
 
-const [home, directions, afisha, menus, cakes, places] = await Promise.all(
-  ['home', 'directions', 'afisha', 'menus', 'cakes', 'places'].map((key) => get(QUERIES[key])),
+// no `cakes`: the site shows the catalog's festive cakes, they are counted with the dishes
+// без `cakes`: сайт показывает праздничные торты каталога, они считаются вместе с блюдами
+const [home, directions, afisha, menus, places] = await Promise.all(
+  ['home', 'directions', 'afisha', 'menus', 'places'].map((key) => get(QUERIES[key])),
 );
 // the catalog may be missing from the schema: then there is nothing to count
 // каталога может не быть в схеме — тогда и считать нечего
@@ -60,7 +62,6 @@ const left = [
   ['направления', published(directions).map((d) => d.photo).filter(stub).length],
   ['афиша', published(afisha).map((a) => a.poster).filter(stub).length],
   ['меню', published(menus).map((m) => m.file).filter(stub).length],
-  ['торты', published(cakes).map((c) => c.photo).filter(stub).length],
   ['фото точек', places.flatMap((p) => p.gallery ?? []).map((g) => g.directus_files_id).filter(stub).length],
   ['фото направлений', directions.flatMap((d) => d.gallery ?? []).map((g) => g.directus_files_id).filter(stub).length],
   // a dish with no photo at all stands as a plate on the catalog page too
@@ -99,7 +100,6 @@ const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Samara' }).fo
 const drafts = [
   [products, ['блюдо', 'блюда', 'блюд']],
   [categories, ['раздел каталога', 'раздела каталога', 'разделов каталога']],
-  [cakes, ['торт', 'торта', 'тортов']],
   [promos, ['акция', 'акции', 'акций']],
   [afisha, ['событие афиши', 'события афиши', 'событий афиши']],
   [menus, ['меню', 'меню', 'меню']],

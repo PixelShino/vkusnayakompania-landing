@@ -50,7 +50,10 @@ export const QUERIES = {
   afisha: `/items/afisha?${q(`*,${img('poster')}`, '&sort=date')}`,
   promos: `/items/promos?${q('*', '&sort=sort')}`,
   menus: `/items/menus?${q(`*,${img('file')}`)}`,
-  cakes: `/items/cakes?${q(`*,${img('photo')}`, '&sort=sort')}`,
+  // no `cakes`: the home showcase is the catalog's «Праздничные торты» now; the
+  // collection stays in the admin and nothing on the site reads it
+  // `cakes` нет: витрина тортов главной теперь — раздел каталога «Праздничные
+  // торты»; коллекция остаётся в админке, сайт её не читает
   // the delivery catalog: sections, then dishes with their photo; the manager's
   // orders are not here — the builder token never reads them
   // каталог доставки: разделы, затем блюда с фото; заказов здесь нет — токен

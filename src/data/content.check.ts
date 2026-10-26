@@ -91,7 +91,7 @@ assert.deepEqual(
   'directions: без поля gallery — пустая галерея',
 );
 const catering = raw.directions.findIndex((direction) => direction.key === 'catering');
-const box = { ...raw.cakes[0].photo, title: 'Бокс с закусками', alt: 'Бокс с закусками' };
+const box = { ...raw.home.hero_image, title: 'Бокс с закусками', alt: 'Бокс с закусками' };
 const [shot] = check(
   {
     ...raw,
@@ -146,24 +146,25 @@ assert.throws(
 );
 
 // заменённый файл — настоящий, даже с пометкой и посевным alt; alt берётся из заголовка
-const seed = raw.cakes[0].photo;
+// (на кадре первого экрана: у всех фото страницы одна строгая нормализация)
+const seed = raw.home.hero_image;
 const stamped = {
   ...seed,
-  title: '[заглушка] Торт «Медовик»',
-  alt: 'Торт «Медовик» — фото появится позже',
+  title: '[заглушка] Зал на Садовой',
+  alt: 'Зал на Садовой — фото появится позже',
   created_on: '2026-09-23T10:26:53.000Z',
 };
-const cakeOf = (photo: typeof stamped) =>
-  check({ ...raw, cakes: [{ ...raw.cakes[0], photo }] }, resolve).cakes[0].photo;
-const untouched = cakeOf({ ...stamped, uploaded_on: '2026-09-23T10:26:53.006Z' });
+const heroOf = (photo: typeof stamped) =>
+  check({ ...raw, home: { ...raw.home, hero_image: photo } }, resolve).home.hero_image;
+const untouched = heroOf({ ...stamped, uploaded_on: '2026-09-23T10:26:53.006Z' });
 assert.equal(untouched.placeholder, true, 'посевной файл остаётся заглушкой');
-assert.equal(untouched.alt, 'Торт «Медовик» — фото появится позже');
-const real = cakeOf({ ...stamped, uploaded_on: '2026-09-29T12:30:15.516Z' });
+assert.equal(untouched.alt, 'Зал на Садовой — фото появится позже');
+const real = heroOf({ ...stamped, uploaded_on: '2026-09-29T12:30:15.516Z' });
 assert.equal(real.placeholder, false, 'заменённый файл — не заглушка');
-assert.equal(real.alt, 'Торт «Медовик»', 'посевной alt под настоящим фото уступает заголовку');
+assert.equal(real.alt, 'Зал на Садовой', 'посевной alt под настоящим фото уступает заголовку');
 assert.equal(
-  cakeOf({ ...stamped, alt: 'Фото торта (заглушка)', uploaded_on: '2026-09-29T12:30:15.516Z' }).alt,
-  'Торт «Медовик»',
+  heroOf({ ...stamped, alt: 'Фото зала (заглушка)', uploaded_on: '2026-09-29T12:30:15.516Z' }).alt,
+  'Зал на Садовой',
   'alt «(заглушка)» без префикса тоже уступает заголовку',
 );
 
@@ -206,16 +207,18 @@ assert.equal(
   assert.equal(fromAdmin.promos.length, content.promos.length, 'остальные акции на месте');
   assert.ok(notes.some((note) => note.includes(appOffer.title)), 'скрытая акция не записана в лог сборки');
 
-  // what the page prints: home texts, offers, directions, poster, cakes, the
-  // catalog; the settings keep the app links for the admin and are not printed
-  // что печатает страница: тексты главной, акции, направления, афиша, торты,
-  // каталог; ссылки на приложение в настройках остаются для админки и не выводятся
+  // what the page prints: home texts, offers, directions, poster, the catalog
+  // (the cakes showcase too); the settings keep the app links for the admin and
+  // are not printed
+  // что печатает страница: тексты главной, акции, направления, афиша, каталог
+  // (с витриной тортов); ссылки на приложение в настройках остаются для админки
+  // и не выводятся
   // the catering section too, and the old catering site is not linked from anywhere
   // раздел кейтеринга тоже, и на старый сайт кейтеринга ничто не ссылается
   for (const shown of [content, fromAdmin]) {
     const { app_screenshot: _shot, ...homeShown } = shown.home;
     const { catering_url: _c, catering_services_url: _s, ...settingsShown } = shown.settings;
-    const printed = JSON.stringify([homeShown, settingsShown, shown.promos, shown.directions, shown.afisha, shown.cakes, shown.catalog, shown.catering]);
+    const printed = JSON.stringify([homeShown, settingsShown, shown.promos, shown.directions, shown.afisha, shown.catalog, shown.catering]);
     const leak = printed.match(/[^"]{0,40}(приложени|app\s?store|google\s?play|apps\.apple|play\.google|vkusdostavka|vkusnayakompania\.ru)[^"]{0,40}/i);
     assert.equal(leak, null, `на сайте осталось упоминание приложения: «${leak?.[0]}»`);
   }
@@ -223,7 +226,7 @@ assert.equal(
 
 console.log(
   `контент фикстуры: ${content.places.length} точки, ${content.directions.length} направлений, ` +
-    `${content.cakes.length} тортов, ${content.promos.length} акций — все проверки прошли`,
+    `${content.promos.length} акций — все проверки прошли`,
 );
 
 // ── каталог доставки ─────────────────────────────────────────────────────────
@@ -510,19 +513,19 @@ console.log(
   for (const slug of c.formats.map((f) => f.slug))
     assert.ok(!['request', 'formats', 'faq', 'top', 'contacts'].includes(slug), `кейтеринг: якорь формата «${slug}» занят секцией`);
 
-  // цены и гости: «от 3 500 ₽» и «за гостя», «до 140 гостей»; без цены — «по смете»
+  // цены и гости: «от 3 500 ₽» и «за гостя», «100+ гостей»; без цены — «по смете»
   for (const format of c.formats) {
     if (format.price) assert.match(format.price.text, /^от \d[\d   ]* ₽$/, `формат «${format.title}»: цена ${format.price.text}`);
     assert.ok(format.includes.length > 0, `формат «${format.title}»: пустое «что входит»`);
     assert.ok(format.description.length > 0, `формат «${format.title}»: нет описания`);
   }
   assert.ok(c.formats.some((format) => !format.price), 'кейтеринг: кофе-брейк идёт без цены — «по смете»');
-  const party = c.formats.find((format) => format.guestsTo === 140);
-  assert.ok(party, 'кейтеринг: нет формата «до 140 гостей»');
+  const party = c.formats.find((format) => format.guests === '100+ гостей');
+  assert.ok(party, 'кейтеринг: нет формата «100+ гостей» (владелица: вместимость без верхней границы)');
   assert.equal(priceLine(party!), `${party!.price!.text} за гостя`);
   assert.equal(guestsText(undefined, 140), 'до 140 гостей');
   assert.equal(guestsText(20, 140), 'от 20 до 140 гостей');
-  assert.equal(guestsText(1), 'от 1 гостя');
+  assert.equal(guestsText(100), '100+ гостей');
   assert.equal(guestsText(undefined, 21), 'до 21 гостя');
   assert.equal(guestsText(), undefined);
 

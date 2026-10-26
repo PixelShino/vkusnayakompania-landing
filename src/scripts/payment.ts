@@ -85,7 +85,7 @@ const tester = () => store.get(TEST_KEY) === '1';
 // радио «при получении» в разметке закомментировано (21.10.2026), поэтому по
 // умолчанию — онлайн; ветка остаётся на случай возврата
 const chosen = () => choice?.querySelector<HTMLInputElement>('input[name="payment"]:checked')?.value ?? 'online';
-const online = () => offered && chosen() === 'online';
+export const online = () => offered && chosen() === 'online';
 
 const submitLabel = drawer?.querySelector<HTMLElement>('[data-submit-label]') ?? null;
 const SEND = 'Отправить заказ';

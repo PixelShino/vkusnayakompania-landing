@@ -202,7 +202,11 @@ const whole = (value: unknown) => {
 export const guestsText = (from?: number, to?: number) => {
   if (from && to && to >= from) return `от${NBSP}${from} до${NBSP}${to} ${plural(to, 'гостя', 'гостей', 'гостей')}`;
   if (to) return `до${NBSP}${to} ${plural(to, 'гостя', 'гостей', 'гостей')}`;
-  if (from) return `от${NBSP}${from} ${plural(from, 'гостя', 'гостей', 'гостей')}`;
+  // «Гостей от» without «до» is an open-ended capacity: the owner confirmed
+  // «100+», not the exact number (26.10.2026), so the page says «100+ гостей»
+  // «Гостей от» без «до» — вместимость без верхней границы: владелица
+  // подтвердила «100+», а не точное число (26.10.2026), страница так и пишет
+  if (from) return `${from}+ ${plural(from, 'гостя', 'гостей', 'гостей')}`;
   return undefined;
 };
 

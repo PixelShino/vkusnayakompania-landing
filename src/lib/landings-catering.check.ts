@@ -46,15 +46,15 @@ assert.equal(landingPath(landingBySlug('corporate')), '/catering/corporate/');
 assert.throws(() => landingBySlug('memorial' as never), /не описана/);
 
 const prices = new Set(content.catering.formats.flatMap((format) => (format.price ? [plain(rub(format.price.from))] : [])));
-const guests = new Set(content.catering.formats.flatMap((format) => (format.guestsTo ? [String(format.guestsTo)] : [])));
+const guests = new Set(content.catering.formats.flatMap((format) => format.guests?.match(/\d+/g) ?? []));
 
-/** Каждое «N ₽» и «до N гостей» текста — из форматов админки. */
+/** Каждое «N ₽» и «до N гостей» / «N+ гостей» текста — из форматов админки. */
 const figuresFromAdmin = (where: string, text: string) => {
   for (const [sum] of plain(text).matchAll(/\d[\d ]*\d ₽|\d ₽/g)) {
     assert.ok(prices.has(sum), `${where}: «${sum}» нет среди цен форматов (${[...prices].join(', ')})`);
   }
-  for (const [, n] of plain(text).matchAll(/до (\d+) гост/g)) {
-    assert.ok(guests.has(n), `${where}: «до ${n} гостей» нет у форматов`);
+  for (const [, n] of plain(text).matchAll(/(?:до |на )?(\d+)\+? гост/g)) {
+    assert.ok(guests.has(n), `${where}: «${n} гостей» нет у форматов`);
   }
 };
 

@@ -3,30 +3,47 @@
  * Cake showcase as an even grid under a centred head: every frame is the same
  * 4:5 plate, a pending photo stands as a hatched plaque with the name on it.
  * The uneven grid with a two-row lead tile made one placeholder 1200 px tall.
+ * The cakes are the catalog's «Праздничные торты» (`cakeShowcase`, the very
+ * section the shelves of `/cakes/` are cut from): photo, name, price, sizes
+ * with the lead time; the card leads to the cake's window in the catalog.
  * Витрина тортов ровной сеткой под заголовком по оси: каждый кадр — одна
  * плашка 4:5, неснятое фото стоит штрихованной плашкой с названием. Неровная
  * сетка с доминантой в две строки растягивала одну заглушку до 1200 px.
+ * Торты — раздел каталога «Праздничные торты» (`cakeShowcase`, тот самый
+ * раздел, из которого режутся полки `/cakes/`): фото, название, цена, размеры
+ * со сроком; карточка ведёт в окно торта в каталоге.
  */
 import Photo from './Photo.astro';
 import Icon from './Icon.astro';
-import type { Cake, Content } from '../lib/content.ts';
+import type { Content } from '../lib/content.ts';
+import { priceLabel, type Product } from '../lib/catalog.ts';
 import { catalogSectionHref } from '../lib/nav.ts';
 import { BASE } from '../lib/base.ts';
+import { cakeShowcase } from '../data/landings-shop.ts';
 
 interface Props {
   content: Content;
 }
 
-const { cakes, home } = Astro.props.content;
+const { home } = Astro.props.content;
+// the home page draws the section only when the showcase exists (`index.astro`)
+// главная рисует секцию, только когда витрина есть (`index.astro`)
+const cakes = cakeShowcase(Astro.props.content)?.cakes ?? [];
 // «Торты в наличии» is a section of our own catalog; without such a section
 // the button opens the catalog page itself
 // «Торты в наличии» — раздел своего каталога; без такого раздела кнопка
 // открывает саму страницу каталога
 const ready = catalogSectionHref(Astro.props.content, 'torty-v-nalichii') ?? `${BASE}catalog/`;
 
-// one rule for every block: normalization decides what is a placeholder
-// одно правило на все блоки: что заглушка, решает нормализация
-const stub = (cake: Cake) => cake.photo.placeholder;
+// one rule for every block: normalization decides what is a placeholder; a
+// dish without a photo stands as a plaque too
+// одно правило на все блоки: что заглушка, решает нормализация; блюдо без
+// фото тоже стоит плашкой
+const shot = (product: Product) => (product.photo && !product.photo.placeholder ? product.photo : undefined);
+
+// the cake's window in the catalog — the address of a tile on `/cakes/`
+// окно торта в каталоге — тот же адрес, что у плитки на `/cakes/`
+const href = (product: Product) => `${BASE}catalog/#p-${product.slug}`;
 
 const SIZES = '(min-width: 1200px) 309px, (min-width: 768px) 243px, 45vw';
 ---
@@ -58,25 +75,34 @@ const SIZES = '(min-width: 1200px) 309px, (min-width: 768px) 243px, 45vw';
 
     <div class="cakes__grid" id="cakes-grid" data-cakes-grid data-reveal="grid">
       {
-        cakes.map((cake) => (
-          <article class="cake-card">
-            {stub(cake) ? (
-              <figure class="stub cake-stub">
-                {/* название несёт плашка: под кадром у заглушки остаются только вес и срок
-                    the plaque carries the name; the caption below keeps weight and lead time */}
-                <span class="stub__title">{cake.title}</span>
-                <span class="stub__meta">фото скоро появится</span>
-              </figure>
-            ) : (
-              <Photo photo={cake.photo} ratio="4 / 5" sizes={SIZES} />
-            )}
+        cakes.map(({ product, note }) => {
+          const photo = shot(product);
+          return (
+            <article class:list={['cake-card', { 'cake-card--out': !product.available }]}>
+              {photo ? (
+                <Photo photo={photo} ratio="4 / 5" sizes={SIZES} />
+              ) : (
+                <figure class="stub cake-stub">
+                  {/* название видно на плашке, а читается из ссылки ниже: под кадром у заглушки остаются цена, вес и срок
+                      the name shows on the plaque and is read from the link below: the caption keeps price, weight and lead time */}
+                  <span class="stub__title" aria-hidden="true">{product.title}</span>
+                  <span class="stub__meta">фото скоро появится</span>
+                </figure>
+              )}
 
-            <div class="cake__cap">
-              {!stub(cake) && <span class="cake__name">{cake.title}</span>}
-              {cake.note && <span class="tag tnum">{cake.note}</span>}
-            </div>
-          </article>
-        ))
+              <div class="cake__cap">
+                <a class="cake__name" href={href(product)}>
+                  <span class:list={[{ cake__hide: !photo }]}>{product.title}</span>
+                </a>
+                <span class="cake__price tnum">
+                  {!product.available && <span class="cake__out">Нет в наличии</span>}
+                  {priceLabel(product)}
+                </span>
+                {note && <span class="tag tnum">{note}</span>}
+              </div>
+            </article>
+          );
+        })
       }
     </div>
 
@@ -117,6 +143,7 @@ const SIZES = '(min-width: 1200px) 309px, (min-width: 768px) 243px, 45vw';
   }
 
   .cake-card {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -225,7 +252,71 @@ const SIZES = '(min-width: 1200px) 309px, (min-width: 768px) 243px, 45vw';
     font-weight: 600;
     line-height: 1.25;
     color: var(--text);
+    text-decoration: none;
     text-wrap: balance;
+    transition: color 0.16s ease;
+  }
+
+  /* the name's link covers the whole card: one stop for the keyboard, the whole card for the finger
+     ссылка названия накрывает всю карточку: одна остановка для клавиатуры, вся карточка для пальца */
+  .cake__name::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .cake__name:focus-visible {
+    outline: none;
+  }
+
+  .cake__name:focus-visible::after {
+    outline: 2px solid var(--terracotta);
+    outline-offset: 4px;
+    border-radius: var(--r-md);
+  }
+
+  /* у заглушки имя уже на плашке: в подписи оно только для скринридера, а
+     накрывающая ссылка остаётся — прячется текст, не сама ссылка
+     a stub has the name on its plaque: in the caption it is for screen readers
+     only, and the covering link stays — the text is hidden, not the link */
+  .cake__hide {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .cake__price {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    margin-top: 2px;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text);
+  }
+
+  .cake__out {
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+
+  /* торт, который сейчас не принимают, — как в каталоге: кадр гаснет
+     a cake not taken right now looks as in the catalog: the frame fades */
+  .cake-card--out .media img {
+    filter: grayscale(1);
+    opacity: 0.5;
+  }
+
+  .cake-card--out .cake__price {
+    color: var(--text-4);
   }
 
   @media (min-width: 768px) {

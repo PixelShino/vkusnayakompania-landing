@@ -24,23 +24,24 @@ import phoneIcon from '../assets/icons/phone.svg?raw';
 import OpenStatus from './OpenStatus.astro';
 import { HERO_SIZES } from '../lib/hero.ts';
 import { typo, type Content } from '../lib/content.ts';
-import { catalogSectionHref, orderLinkFor } from '../lib/nav.ts';
+import { orderLinkFor } from '../lib/nav.ts';
+import { cakeShowcase } from '../data/landings-shop.ts';
 
 interface Props {
   content: Content;
 }
 
 const { content } = Astro.props;
-const { home, places, cakes } = content;
+const { home, places } = content;
 const order = orderLinkFor(content);
 
-// The sticker leads to the cakes: the section when it renders, the festive
-// cakes of the catalog otherwise, and nothing when neither exists — «48 часов»
-// comes from the content, the same figure as in `home.cakes_text`.
-// Стикер ведёт к тортам: в секцию, когда она есть, иначе в праздничные торты
-// каталога, а без того и другого не рисуется — «48 часов» из контента, та же
-// цифра, что в `home.cakes_text`.
-const stickerHref = cakes.length > 0 ? '#cakes' : catalogSectionHref(content, 'prazdnichnye-torty');
+// The sticker leads down to the cakes showcase — the festive cakes of the
+// catalog; without them there is no showcase and no sticker. «48 часов» comes
+// from the content, the same figure as in `home.cakes_text`.
+// Стикер ведёт вниз к витрине тортов — праздничным тортам каталога; без них
+// нет ни витрины, ни стикера. «48 часов» из контента, та же цифра, что в
+// `home.cakes_text`.
+const stickerHref = cakeShowcase(content) ? '#cakes' : undefined;
 ---
 
 <section class="hero" id="top">

@@ -69,7 +69,7 @@ import {
   type Suggestion,
 } from '../lib/delivery';
 import { mountCartAccount } from './account-cart';
-import { payAfterOrder, withPayment } from './payment';
+import { online as paysOnline, payAfterOrder, withPayment } from './payment';
 import minusIcon from '../assets/icons/minus.svg?raw';
 import plusIcon from '../assets/icons/plus.svg?raw';
 import trashIcon from '../assets/icons/trash.svg?raw';
@@ -1168,7 +1168,10 @@ if (dataNode && drawer && dishDialog) {
         })
         .join('') + extras.join('');
     const after = $('[data-done-after]', drawer);
-    if (after) after.textContent = bill.cost === null ? 'Стоимость доставки назовём там же.' : 'Оплату обсудим там же.';
+    // paid online — the receipt from ЮKassa follows; otherwise payment is settled on the call
+    // оплачено онлайн — следом чек от ЮKassa; иначе оплату согласуют при звонке
+    if (after)
+      after.textContent = bill.cost === null ? 'Стоимость доставки назовём там же.' : paysOnline() ? 'Чек придёт на почту или телефон.' : 'Оплату обсудим там же.';
     // where and when, as they left: the guest checks them before the call, the manager says the same
     // куда и когда — как ушло: гость сверяет до звонка, менеджер назовёт то же
     const where = $('[data-done-where]', drawer);
