@@ -39,6 +39,11 @@ const here = Astro.url.pathname;
 // Корзина живёт в каталоге; на других страницах кнопка появляется, только
 // когда гость что-то в неё положил (скрипт читает сохранённую корзину).
 const showCart = content.catalog.count > 0;
+// every venue has its own cart (owner, 27.10.2026): the button counts the one
+// the catalog would open, so it needs the venues; one venue — the shared cart
+// у каждой точки своя корзина (владелец, 27.10.2026): кнопка считает ту, которую
+// открыл бы каталог, поэтому ей нужны точки; одна точка — общая корзина
+const cartVenues = content.places.length > 1 ? content.places.map((place) => place.id).join(' ') : undefined;
 // the guest account exists where orders can be sent: the same Directus address
 // личный кабинет есть там, где можно отправить заказ: тот же адрес Directus
 const showAccount = Boolean(import.meta.env.PUBLIC_DIRECTUS_URL);
@@ -106,6 +111,7 @@ const accountHref = `${BASE}account/`;
           href={`${BASE}catalog/#cart`}
           data-cart-open
           data-cart-link
+          data-venues={cartVenues}
           hidden={!cart}
           aria-label="Корзина"
         >
@@ -750,7 +756,9 @@ const accountHref = `${BASE}account/`;
 </style>
 
 <script>
-  import { CART_KEY, parseCart } from '../lib/cart';
+  import { isCartKey, takeCart, type CartStore } from '../lib/cart';
+  import { CHECKOUT_KEY } from '../lib/order';
+  import { PLACE_KEY, storedPlace } from '../lib/venue';
   import { loadSession, onSessionChange } from '../scripts/account-session';
 
   const header = document.querySelector<HTMLElement>('.header');
@@ -774,15 +782,26 @@ const accountHref = `${BASE}account/`;
 
   // Outside the catalog the cart button only tells there is something in the
   // cart: the count from storage, no prices — those live with the catalog page.
+  // The cart is the venue's the catalog would open (the remembered one, the
+  // draft's, the first); the old shared cart moves into it here if the guest
+  // comes to any page before the catalog.
   // Вне каталога кнопка корзины только сообщает, что в ней что-то есть: число
-  // из хранилища, без цен — цены живут на странице каталога.
+  // из хранилища, без цен — цены живут на странице каталога. Корзина — той
+  // точки, которую открыл бы каталог (запомненная, из черновика, первая); старая
+  // общая корзина переезжает в неё здесь, если гость попал на сайт не через каталог.
   const cartLink = document.querySelector<HTMLAnchorElement>('[data-cart-link]');
   if (cartLink && !header?.classList.contains('header--cart')) {
     const count = cartLink.querySelector<HTMLElement>('[data-cart-count]');
+    const venues = (cartLink.dataset.venues ?? '').split(' ').map(Number).filter(Boolean);
+    const store: CartStore = {
+      get: (key) => localStorage.getItem(key),
+      set: (key, value) => localStorage.setItem(key, value),
+      remove: (key) => localStorage.removeItem(key),
+    };
     const paintCart = () => {
       let n = 0;
       try {
-        n = parseCart(localStorage.getItem(CART_KEY)).lines.reduce((sum, line) => sum + line.qty, 0);
+        n = takeCart(store, storedPlace(venues, store.get, CHECKOUT_KEY)).lines.reduce((sum, line) => sum + line.qty, 0);
       } catch {
         /* storage blocked: no cart button / хранилище закрыто — без кнопки */
       }
@@ -794,7 +813,9 @@ const accountHref = `${BASE}account/`;
       }
     };
     paintCart();
-    window.addEventListener('storage', (event) => event.key === CART_KEY && paintCart());
+    // another tab changed a cart or the venue (or cleared the site's data)
+    // другая вкладка поменяла корзину или точку (или стёрла данные сайта)
+    window.addEventListener('storage', (event) => (event.key === null || event.key === PLACE_KEY || isCartKey(event.key)) && paintCart());
   }
   const burger = header?.querySelector<HTMLButtonElement>('.header__burger');
   const panel = document.getElementById('header-menu');

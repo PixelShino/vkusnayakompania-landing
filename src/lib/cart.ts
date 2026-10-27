@@ -9,11 +9,30 @@
  * проверки гоняют эти функции на фикстуре. В корзине лежат только номера блюд,
  * варианты и количества; названия и цены всегда берутся из каталога, с которым
  * собрана страница, поэтому цена, изменённая в админке, не застревает в корзине.
+ *
+ * Every venue has a cart of its own (owner, 27.10.2026: «разные корзины сделай,
+ * для разных точек»): `vkus:cart:1`, `vkus:cart:2`. The switch over the menu
+ * shows the chosen venue's cart; a dish both kitchens cook lies in the cart it
+ * was put into. The shared cart of before (`vk-cart-v1`) moves whole into the
+ * cart of the venue chosen at the first read and its key is removed; a site
+ * with one venue keeps that key as its only cart.
+ * У каждой точки своя корзина (владелец, 27.10.2026: «разные корзины сделай,
+ * для разных точек»): `vkus:cart:1`, `vkus:cart:2`. Переключатель над меню
+ * показывает корзину выбранной точки; блюдо, которое готовят обе кухни, лежит в
+ * той корзине, куда его положили. Прежняя общая корзина (`vk-cart-v1`) при
+ * первом чтении целиком переезжает в корзину выбранной точки, её ключ
+ * удаляется; сайт с одной точкой держит этот ключ своей единственной корзиной.
  */
 import type { Variant } from './catalog.ts';
 import { cookedHere } from './venue.ts';
 
+/** Общая корзина: до 27.10.2026 — на обе точки, теперь — только у сайта с одной точкой. */
 export const CART_KEY = 'vk-cart-v1';
+const VENUE_CART = 'vkus:cart:';
+/** Ключ корзины точки: `vkus:cart:2`; без точки (одна на сайте) — общий `vk-cart-v1`. */
+export const cartKey = (place: number | null | undefined) => (place ? `${VENUE_CART}${place}` : CART_KEY);
+/** Ключ хранилища — какая-то корзина (точки или общая): шапке и вкладкам есть что перерисовать. */
+export const isCartKey = (key: string | null | undefined) => key === CART_KEY || Boolean(key?.startsWith(VENUE_CART));
 /** больше 50 одного блюда — уже кейтеринг, а не доставка; то же ограничение у сервера */
 export const MAX_QTY = 50;
 /** строк в одном заказе — как у сервера (`order-guard`) */
@@ -140,15 +159,18 @@ export const reconcile = (cart: Cart, index: CartIndex) => {
 };
 
 /**
- * The cart with titles, prices and sums for the chosen venue (`place`). Only
- * what can be ordered counts: a dish from the stop list (`blocked`) or one the
- * venue does not cook (`elsewhere`) stays in the list, named, but out of the
- * total until the guest removes it or picks the venue that cooks it.
- * Корзина с названиями, ценами и суммами для выбранной точки (`place`).
- * Считается только то, что можно заказать: блюдо из стоп-листа (`blocked`) или
- * блюдо, которого эта точка не готовит (`elsewhere`), остаётся в списке и
- * называется, но в сумму не идёт, пока гость его не уберёт или не выберет
- * точку, где его готовят.
+ * The cart with titles, prices and sums for its venue (`place`). Only what can
+ * be ordered counts: a dish from the stop list (`blocked`) or one the venue no
+ * longer cooks (`elsewhere`: the admin took the venue's tick off after the dish
+ * was put in) stays in the list, named, but out of the total until the guest
+ * removes it. With a cart per venue `elsewhere` is a safety net, not a way of
+ * shopping.
+ * Корзина с названиями, ценами и суммами для её точки (`place`). Считается
+ * только то, что можно заказать: блюдо из стоп-листа (`blocked`) или блюдо,
+ * которое точка больше не готовит (`elsewhere`: в админке сняли галочку точки
+ * уже после того, как блюдо положили), остаётся в списке и называется, но в
+ * сумму не идёт, пока гость его не уберёт. С корзиной на точку `elsewhere` —
+ * страховка, а не способ покупать.
  */
 export const priced = (cart: Cart, index: CartIndex, place?: number | null) => {
   const lines: PricedLine[] = cart.lines.flatMap((line) => {
@@ -178,7 +200,7 @@ export const priced = (cart: Cart, index: CartIndex, place?: number | null) => {
     count: ready.reduce((sum, line) => sum + line.qty, 0),
     /** есть строки из стоп-листа: оформить нельзя, пока их не убрали */
     blocked: lines.some((line) => !line.available),
-    /** строки, которых выбранная точка не готовит: оформить нельзя, пока их не убрали или не сменили точку */
+    /** строки, которых точка корзины больше не готовит: оформить нельзя, пока их не убрали */
     elsewhere: lines.filter((line) => line.elsewhere),
   };
 };
@@ -202,4 +224,50 @@ export const parseCart = (json: string | null | undefined): Cart => {
   } catch {
     return empty();
   }
+};
+
+/**
+ * Two readings of one cart, side by side: a line in both keeps the larger
+ * quantity, not the sum — the old shared cart written again by a tab that was
+ * opened before the move is the same cart seen twice, and adding would double it.
+ * Две записи одной корзины рядом: строка, которая есть в обеих, берёт большее
+ * количество, а не сумму — старую общую корзину может снова записать вкладка,
+ * открытая до переезда, это та же корзина, увиденная дважды, и сложение её удвоило бы.
+ */
+export const merge = (cart: Cart, other: Cart): Cart =>
+  other.lines.reduce(
+    (next, line) => setQty(next, line.id, line.variant, Math.max(line.qty, qtyOf(next, line.id, line.variant, line.filling)), line.filling),
+    cart,
+  );
+
+/** Хранилище, как его видят корзина, шапка и кабинет: закрытое хранилище — их забота. */
+export type CartStore = {
+  get: (key: string) => string | null;
+  set: (key: string, value: string) => void;
+  remove: (key: string) => void;
+};
+
+/**
+ * The venue's cart from storage. The shared cart of before (`vk-cart-v1`)
+ * moves into it whole on the first read: merged with what the venue's cart may
+ * already hold, written under the venue's key, and only once that write is
+ * seen in storage is the old key removed — a refused write loses nothing. A
+ * site with one venue (`place` empty) reads the shared key, nothing moves.
+ * Корзина точки из хранилища. Прежняя общая корзина (`vk-cart-v1`) при первом
+ * чтении целиком переезжает в неё: сливается с тем, что в корзине точки уже
+ * могло лежать, записывается под ключом точки, и только когда запись видна в
+ * хранилище, старый ключ удаляется — отказ записи ничего не теряет. Сайт с одной
+ * точкой (`place` пуст) читает общий ключ, ничего не переезжает.
+ */
+export const takeCart = (store: CartStore, place: number | null | undefined): Cart => {
+  const key = cartKey(place);
+  const own = parseCart(store.get(key));
+  if (key === CART_KEY) return own;
+  const shared = store.get(CART_KEY);
+  if (shared === null) return own;
+  const cart = merge(own, parseCart(shared));
+  const json = JSON.stringify(cart);
+  store.set(key, json);
+  if (store.get(key) === json) store.remove(CART_KEY);
+  return cart;
 };

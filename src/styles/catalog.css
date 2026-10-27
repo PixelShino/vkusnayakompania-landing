@@ -297,21 +297,67 @@
   outline-color: var(--terracotta-on-ink);
 }
 
+/* «В корзине на Советской Армии, 177: 3 блюда на 1 370 ₽ · Перейти»: every
+   venue has its own cart (owner, 27.10.2026), the other one waits. A fact in
+   the voice of the facts — the bag in olive, the amount in ink, «Перейти» at
+   the end of the sentence — not a warning: nothing is wrong.
+   «В корзине на Советской Армии, 177: 3 блюда на 1 370 ₽ · Перейти»: у каждой
+   точки своя корзина (владелец, 27.10.2026), другая ждёт. Факт голосом фактов —
+   сумка оливковая, количество чернилами, «Перейти» в конце фразы, — а не
+   предупреждение: ничего не случилось. */
 .pswitch__cart {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0 12px;
-  margin-top: 10px;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
   font-size: 13px;
-  font-weight: 600;
-  line-height: 1.4;
-  color: var(--terracotta-text);
+  line-height: 1.5;
+  color: var(--text-2);
 }
 
-.pswitch__cart .tlink {
-  font-size: 13px;
-  color: var(--terracotta-text);
+.pswitch__cart > .ico {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  color: var(--olive);
+}
+
+.pswitch__cart-text {
+  min-width: 0;
+  text-wrap: pretty;
+}
+
+/* the amount and «Перейти» never part: on a phone they take the second line together
+   количество и «Перейти» не расстаются: на телефоне они вместе уходят на вторую строку */
+.cart-go {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.cart-go b {
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* «Перейти» at the end of the sentence: the line keeps the text's height, the
+   44 px to tap are drawn around it, not added to the line
+   «Перейти» в конце фразы: строка держит высоту текста, 44 px для пальца —
+   вокруг ссылки, а не в высоте строки */
+.pswitch__cart .tlink,
+.drawer__other .tlink {
+  position: relative;
+  min-height: 0;
+  margin: 0 0 0 10px;
+  font-size: inherit;
+  white-space: nowrap;
+}
+
+.pswitch__cart .tlink::before,
+.drawer__other .tlink::before {
+  content: '';
+  position: absolute;
+  inset: -12px -8px;
 }
 
 .pswitch__dine {
@@ -565,6 +611,19 @@
 
   .pswitch--side .pswitch__meta {
     font-size: 12px;
+  }
+
+  /* the other cart in the column: where (balanced, the long street takes two
+     lines), then how much and «Перейти» on a line of their own
+     другая корзина в колонке: где (выровнено, длинная улица — в две строки),
+     затем сколько и «Перейти» отдельной строкой */
+  .pswitch--side .pswitch__cart {
+    font-size: 12.5px;
+  }
+
+  .pswitch--side .pswitch__cart-where {
+    display: block;
+    text-wrap: balance;
   }
 
   .cat-nav ul {
@@ -2080,13 +2139,43 @@ html:has(.dlg[open]) {
   border-bottom: 1px solid var(--line-3);
 }
 
-.drawer__title {
+.drawer__heading {
   flex: 1;
+  min-width: 0;
+}
+
+.drawer__title {
   font-family: var(--font-display);
   font-size: 26px;
   font-weight: 400;
   line-height: 1.1;
   letter-spacing: var(--ls-display);
+}
+
+/* whose cart: the venue under the title, the secbar's voice
+   чья корзина: точка под заголовком, голосом липкой строки */
+.drawer__venue {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--text-3);
+}
+
+.drawer__venue > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.drawer__venue .ico {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--olive);
 }
 
 .drawer__offline {
@@ -2544,6 +2633,43 @@ html:has(.dlg[open]) {
 .drawer__empty-title {
   font-size: 26px;
   color: var(--text);
+}
+
+/* the other venue's cart, right under «В корзине пусто»: the way out of an empty cart
+   корзина другой точки — сразу под «В корзине пусто»: выход из пустой корзины */
+.drawer__empty > .drawer__other {
+  max-width: 36ch;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-2);
+  text-wrap: balance;
+}
+
+/* under the lines: the other cart is not forgotten, said in the voice of the
+   fine print — the lines above are what this cart orders
+   под строками: про другую корзину не забыли, сказано голосом сноски — заказ
+   этой корзины — строки выше */
+.drawer__other--below {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
+.drawer__other--below > .ico {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  margin-top: 1px;
+  color: var(--olive);
+}
+
+.drawer__other--below > span {
+  min-width: 0;
+  text-wrap: pretty;
 }
 
 .drawer__empty > p {

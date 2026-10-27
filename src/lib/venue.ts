@@ -71,6 +71,27 @@ export const pickPlace = (all: readonly number[], ...candidates: unknown[]): num
 };
 
 /**
+ * The venue the catalog would open without `?place=`: the remembered one, an
+ * old checkout draft's, the first one — the same order as the head script, so
+ * the header and the account find the cart the catalog will show. One venue or
+ * none — `null`: the site has one shared cart.
+ * Точка, которую каталог открыл бы без `?place=`: запомненная, из старого
+ * черновика, первая — тот же порядок, что у скрипта в `<head>`, поэтому шапка и
+ * кабинет находят ту корзину, которую покажет каталог. Одна точка или ни одной —
+ * `null`: у сайта одна общая корзина.
+ */
+export const storedPlace = (all: readonly number[], get: (key: string) => string | null, draftKey: string): number | null => {
+  if (all.length < 2) return null;
+  let draft: unknown = null;
+  try {
+    draft = JSON.parse(get(draftKey) || '{}')?.place;
+  } catch {
+    /* a broken draft names no venue / битый черновик точку не называет */
+  }
+  return pickPlace(all, get(PLACE_KEY), draft);
+};
+
+/**
  * A venue's name after «на»: «Садовая, 212Б» → «Садовой, 212Б» (`loc`: готовят
  * на чём) or «Садовую, 212Б» (`acc`: перейти на что); «Советской Армии, 177»
  * stays. Only the first word changes and only a feminine adjective (-ая, -яя),

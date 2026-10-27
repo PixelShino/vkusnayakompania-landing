@@ -13,7 +13,9 @@
  * the top of the screen), the sections sheet (`sheet`). The page script keeps all of them and the
  * cart's venue radios one choice (`data-venue-switch`). Which half is inked
  * comes from `<html data-venue>` (`venueCss`), so the right venue is drawn
- * before the script wakes up; without scripts the switch is hidden.
+ * before the script wakes up; without scripts the switch is hidden. Every
+ * venue has its own cart (owner, 27.10.2026): under the switch, the line that
+ * names the other venue's cart when it holds something, with «Перейти».
  * Переключатель точек: две точки одним сегментом — две половины в одной рамке
  * 3 px, выбранная чернилами (так же говорит «Доставка / Самовывоз» в корзине).
  * Владелец просил «как пилюля», пилюль в системе с сентябрьского прохода нет,
@@ -28,6 +30,8 @@
  * точки в корзине одним выбором (`data-venue-switch`). Какая половина
  * чернильная, решает `<html data-venue>` (`venueCss`), поэтому нужная точка
  * нарисована до того, как проснётся скрипт; без скриптов переключателя нет.
+ * У каждой точки своя корзина (владелец, 27.10.2026): под переключателем —
+ * строка о корзине другой точки, когда в ней что-то есть, с «Перейти».
  */
 import Icon from '../Icon.astro';
 import type { Place } from '../../lib/content.ts';
@@ -67,15 +71,22 @@ const noteId = `${id}-note`;
       ))
     }
   </div>
-  {/* dishes of the other venue left in the cart: said where the eye is when the venue changes
-      в корзине остались блюда другой точки: сказано там, где взгляд, когда точку меняют */}
+  {/* the other venue's cart is waiting: said where the eye is when the venue changes
+      корзина другой точки ждёт: сказано там, где взгляд, когда точку меняют */}
   {
     variant !== 'sheet' && (
       <p class="pswitch__cart" data-venue-cart hidden>
-        <span data-venue-cart-text />
-        <button type="button" class="tlink" data-cart-open>
-          Открыть корзину
-        </button>
+        <Icon name="bag" />
+        <span class="pswitch__cart-text">
+          <span class="pswitch__cart-where" data-venue-cart-text />{' '}
+          {/* the amount and «Перейти» wrap as one / количество и «Перейти» переносятся вместе */}
+          <span class="cart-go">
+            <b class="tnum" data-venue-cart-what />
+            <button type="button" class="tlink" data-venue-go>
+              Перейти
+            </button>
+          </span>
+        </span>
       </p>
     )
   }

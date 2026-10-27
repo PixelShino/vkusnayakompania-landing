@@ -11,16 +11,21 @@
  * меню с ценами, а не пустую страницу.
  * The venue (whose menu the page shows) is one choice for the switches over
  * the menu, the cart's venue radios and the order: `setPlace` changes all of
- * them, `<html data-venue>` hides the other menu (`src/lib/venue.ts`).
+ * them, `<html data-venue>` hides the other menu (`src/lib/venue.ts`). Every
+ * venue has its own cart (owner, 27.10.2026): switching the venue switches
+ * the cart, the other one waits in storage and is offered under the switch.
  * Точка (чьё меню показывает страница) — один выбор для переключателей над
  * меню, радио точки в корзине и заказа: `setPlace` меняет их все, а
- * `<html data-venue>` прячет чужое меню (`src/lib/venue.ts`).
+ * `<html data-venue>` прячет чужое меню (`src/lib/venue.ts`). У каждой точки
+ * своя корзина (владелец, 27.10.2026): сменили точку — сменилась корзина,
+ * другая ждёт в хранилище, и о ней напоминает строка под переключателем.
  */
 import {
-  CART_KEY,
   MAX_QTY,
   add,
+  cartKey,
   empty,
+  isCartKey,
   keyParts,
   parseCart,
   priced,
@@ -28,9 +33,11 @@ import {
   qtyOfProduct,
   reconcile,
   setQty,
+  takeCart,
   type Cart,
   type CartIndex,
   type CartProduct,
+  type CartStore,
 } from '../lib/cart';
 import {
   CHECKOUT_KEY,
@@ -109,22 +116,36 @@ const esc = (text: string) =>
 const icon = (svg: string) => `<span class="ico" aria-hidden="true">${svg}</span>`;
 
 // Storage can be closed (private mode, blocked site data): the page then works
-// with a cart that lives until the tab is closed, and says nothing scary.
+// with carts that live until the tab is closed, and says nothing scary. What
+// storage refused is kept in memory, so switching venues there and back does
+// not lose the cart left behind.
 // Хранилище может быть закрыто (приватный режим, запрет данных сайта): тогда
-// страница работает с корзиной до закрытия вкладки и ничем не пугает.
-const store = {
-  get: (key: string) => {
+// страница работает с корзинами до закрытия вкладки и ничем не пугает. То, что
+// хранилище не приняло, держится в памяти: переход на другую точку и обратно не
+// теряет оставленную корзину.
+const memory = new Map<string, string>();
+const store: CartStore = {
+  get: (key) => {
     try {
-      return localStorage.getItem(key);
+      return localStorage.getItem(key) ?? memory.get(key) ?? null;
     } catch {
-      return null;
+      return memory.get(key) ?? null;
     }
   },
-  set: (key: string, value: string) => {
+  set: (key, value) => {
     try {
       localStorage.setItem(key, value);
+      memory.delete(key);
     } catch {
-      /* no storage — the cart lives in memory / без хранилища корзина живёт в памяти */
+      memory.set(key, value);
+    }
+  },
+  remove: (key) => {
+    memory.delete(key);
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      /* nothing to remove there / там нечего удалять */
     }
   },
 };
@@ -153,6 +174,8 @@ if (dataNode && drawer && dishDialog) {
   const venueById = new Map(venues.map((venue) => [venue.id, venue]));
   let place: number | null = venues.length ? (venueById.has(Number(root.dataset.venue)) ? Number(root.dataset.venue) : venues[0].id) : null;
   const nameOf = (id: number | null | undefined) => (id ? (venueById.get(id)?.name ?? '') : '');
+  /** «на Садовой» — улица без дома: короткое «где» для строк о корзине */
+  const onStreet = (id: number | null | undefined) => (id && venueById.has(id) ? `на ${venueCase(nameOf(id).split(',')[0].trim(), 'loc')}` : '');
   /** «на Садовой, 212Б» (и «на Советской Армии, 177») — где готовят блюдо */
   const whereCooked = (ids: readonly number[]) =>
     ids
@@ -160,17 +183,27 @@ if (dataNode && drawer && dishDialog) {
       .map((id) => `на ${venueCase(nameOf(id), 'loc')}`)
       .join(' и ');
   const dishWord = (n: number) => `${n}\u00a0${plural(n, 'блюдо', 'блюда', 'блюд')}`;
+  /** «Борщ» в кавычках, а «Круассан «Миндальный»» — без вторых: кавычки у него уже есть */
+  const named = (title: string) => (/[«»"]/.test(title) ? title : `«${title}»`);
   /** Видна ли разметка (раздел, плитка, пункт) на точке: `data-places` пуст — везде. */
   const shownAt = (node: HTMLElement, id: number | null) => {
     const list = node.dataset.places;
     return !id || !list || list.split(' ').includes(String(id));
   };
 
-  const restored = reconcile(parseCart(store.get(CART_KEY)), index);
+  // The chosen venue's cart; the old shared one moves into it on the first
+  // visit (`takeCart`). A dish gone from the catalog is dropped and named.
+  // Корзина выбранной точки; старая общая переезжает в неё при первом заходе
+  // (`takeCart`). Блюдо, ушедшее из каталога, выпадает и называется.
+  const loadCart = (id: number | null) => {
+    const restored = reconcile(takeCart(store, id), index);
+    if (restored.dropped.length) store.set(cartKey(id), JSON.stringify(restored.cart));
+    return restored;
+  };
+  const restored = loadCart(place);
   let cart: Cart = restored.cart;
   let undo: Cart | null = null;
   let dropped = restored.dropped;
-  if (dropped.length) store.set(CART_KEY, JSON.stringify(cart));
 
   // «Вкусные баллы» in the drawer (null without the account) / баллы в корзине (null без кабинета)
   let cartAccount: ReturnType<typeof mountCartAccount> = null;
@@ -233,6 +266,9 @@ if (dataNode && drawer && dishDialog) {
 
     // header, side panel, phone bar
     // шапка, боковая панель, полоса на телефоне
+    // a reader hears whose cart it is: the venue changes it
+    // читалка слышит, чья корзина: точка её меняет
+    const whose = place ? ` ${onStreet(place)}` : '';
     const label = sum.count ? `${positions(sum.count)} на ${rub(sum.total)}` : 'пусто';
     for (const node of $$('[data-cart-count]')) {
       node.textContent = String(sum.count);
@@ -240,7 +276,7 @@ if (dataNode && drawer && dishDialog) {
       if (changed) bump(node);
     }
     for (const node of $$('[data-cart-sum]')) node.textContent = sum.count ? rub(sum.total) : '';
-    for (const node of $$('.header__cart, .header__cart-btn')) node.setAttribute('aria-label', `Корзина: ${label}`);
+    for (const node of $$('.header__cart, .header__cart-btn')) node.setAttribute('aria-label', `Корзина${whose}: ${label}`);
     const mcEmpty = $('[data-mc-empty]');
     const mcFull = $('[data-mc-full]');
     if (mcEmpty && mcFull) {
@@ -264,17 +300,10 @@ if (dataNode && drawer && dishDialog) {
         total.textContent = rub(sum.total);
         if (changed) bump(total);
       }
-      $('[data-cart-open]', bar)?.setAttribute('aria-label', `Открыть корзину: ${label}`);
+      $('[data-cart-open]', bar)?.setAttribute('aria-label', `Открыть корзину${whose}: ${label}`);
     }
 
-    // over the menu: the cart still holds dishes the chosen venue does not cook
-    // над меню: в корзине остались блюда, которых выбранная точка не готовит
-    for (const node of $$('[data-venue-cart]')) {
-      const n = sum.elsewhere.length;
-      node.hidden = n === 0;
-      const text = $('[data-venue-cart-text]', node);
-      if (text) text.textContent = n ? `${n === 1 ? 'Одно блюдо' : dishWord(n)} из корзины здесь не готовят.` : '';
-    }
+    paintOther();
     for (const node of $$('[data-count]', drawer)) node.textContent = sum.count ? `· ${positions(sum.count)}` : '';
     for (const node of $$('[data-total]', drawer)) node.textContent = rub(sum.total);
     renderLines(sum);
@@ -302,10 +331,15 @@ if (dataNode && drawer && dishDialog) {
           .join(' · ');
         // a line that cannot be ordered here says why and offers the one way out in words
         // строка, которую здесь не заказать, говорит почему и называет выход словом
+        // `elsewhere` — the admin took this venue off the dish after it was put in
+        // `elsewhere` — в админке сняли эту точку у блюда уже после того, как его положили
+        const cooked = whereCooked(line.places);
         const flag = !line.available
           ? 'Закончилось — уберите из заказа'
           : line.elsewhere
-            ? `Готовят только ${whereCooked(line.places)}`
+            ? cooked
+              ? `Теперь готовят только ${cooked}`
+              : 'Здесь больше не готовят'
             : '';
         const stuck = Boolean(flag);
         return `<li class="line${stuck ? ' line--out' : ''}${line.elsewhere ? ' line--away' : ''}">
@@ -375,27 +409,26 @@ if (dataNode && drawer && dishDialog) {
   };
 
   /**
-   * Dishes the chosen venue does not cook: the notice over the lines says how
-   * many and offers to remove them, or — when everything in the cart is cooked
-   * at another venue — to switch to it; the line over the closed button says
-   * why it is closed.
-   * Блюда, которых выбранная точка не готовит: плашка над строками говорит,
-   * сколько их, и предлагает убрать их или — если всё в корзине готовят на
-   * другой точке — перейти на неё; строка над закрытой кнопкой говорит, почему
-   * она закрыта.
+   * Dishes this venue no longer cooks (a safety net: every venue has its own
+   * cart, so they appear only when the admin takes a venue off a dish already
+   * in a cart): the notice over the lines says how many and offers to remove
+   * them; the line over the closed button says why it is closed.
+   * Блюда, которых точка больше не готовит (страховка: у каждой точки своя
+   * корзина, и такие появляются, только если в админке сняли точку у блюда, уже
+   * лежащего в корзине): плашка над строками говорит, сколько их, и предлагает
+   * убрать; строка над закрытой кнопкой говорит, почему она закрыта.
    */
   const paintAway = (sum = priced(cart, index, place)) => {
     const note = $('[data-away-note]', drawer);
     const warn = $('[data-cart-warn]', drawer);
     const away = sum.elsewhere;
-    // a venue that cooks everything in the cart: switching there fixes it all at once
-    // точка, которая готовит всё из корзины: переход туда чинит всё разом
-    const fits = away.length ? venues.find((venue) => venue.id !== place && sum.lines.every((line) => cookedHere(line, venue.id))) : undefined;
     const n = away.length;
     if (warn) {
       warn.hidden = !n && !sum.blocked;
       warn.textContent = n
-        ? `${n === 1 ? 'Одно блюдо здесь не готовят — уберите его' : `${dishWord(n)} здесь не готовят — уберите их`}${fits ? ' или смените точку' : ''}`
+        ? n === 1
+          ? 'Одно блюдо здесь больше не готовят — уберите его'
+          : `${dishWord(n)} здесь больше не готовят — уберите их`
         : sum.blocked
           ? 'Сначала уберите то, что закончилось'
           : '';
@@ -404,21 +437,74 @@ if (dataNode && drawer && dishDialog) {
     note.hidden = !n;
     if (!n) return;
     $('[data-away-note-text]', note)!.textContent =
-      `${n === 1 ? `«${away[0].title}» не готовят` : `${dishWord(n)} из корзины не готовят`} ${whereCooked(place ? [place] : [])}. ` +
-      (fits ? `${n === 1 ? 'Его' : 'Их'} готовят ${whereCooked([fits.id])} — можно перейти туда.` : `Уберите ${n === 1 ? 'его' : 'их'}, чтобы оформить заказ.`);
-    const drop = $('[data-away-drop]', note)!;
-    drop.textContent = n === 1 ? 'Убрать его' : `Убрать ${dishWord(n)}`;
-    const move = $<HTMLButtonElement>('[data-away-move]', note)!;
-    move.hidden = !fits;
-    if (fits) {
-      move.textContent = `Перейти на ${venueCase(fits.name, 'acc')}`;
-      move.dataset.awayMove = String(fits.id);
+      `${n === 1 ? `${named(away[0].title)} больше не готовят` : `${dishWord(n)} из корзины больше не готовят`} ${whereCooked(place ? [place] : [])}. ` +
+      `Уберите ${n === 1 ? 'его' : 'их'}, чтобы оформить заказ.`;
+    $('[data-away-drop]', note)!.textContent = n === 1 ? 'Убрать его' : `Убрать ${dishWord(n)}`;
+  };
+
+  /**
+   * The other venue's cart, when it holds something: read from storage each
+   * time (another tab may have filled it) and priced at its own venue.
+   * Корзина другой точки, если в ней что-то есть: читается из хранилища каждый
+   * раз (её могла наполнить другая вкладка) и считается по своей точке.
+   */
+  const otherCart = () => {
+    for (const venue of venues) {
+      if (venue.id === place) continue;
+      const sum = priced(reconcile(parseCart(store.get(cartKey(venue.id))), index).cart, index, venue.id);
+      const n = sum.lines.reduce((all, line) => all + line.qty, 0);
+      if (n) return { venue, n, total: sum.total };
+    }
+    return null;
+  };
+
+  /**
+   * «В корзине на Советской Армии: 3 блюда на 1 370 ₽ · Перейти» — under the
+   * switch over the menu (head and column) and under the drawer's lines
+   * whenever the other venue's cart holds something; an empty drawer says it
+   * under «В корзине пусто» as «На Садовой в корзине …». The street without
+   * the house number: the switch right above names the venue in full, and the
+   * line fits the 228 px column.
+   * «В корзине на Советской Армии: 3 блюда на 1 370 ₽ · Перейти» — под
+   * переключателем над меню (в шапке и колонке) и под строками корзины, пока в
+   * корзине другой точки что-то есть; пустая корзина говорит это под «В корзине
+   * пусто» как «На Садовой в корзине …». Улица без номера дома: переключатель
+   * прямо над строкой называет точку полностью, а строка помещается в колонку 228 px.
+   */
+  const paintOther = () => {
+    const other = otherCart();
+    const what = other ? `${dishWord(other.n)}${other.total ? ` на ${rub(other.total)}` : ''}` : '';
+    const where = other ? onStreet(other.venue.id) : '';
+    for (const node of $$('[data-venue-cart], [data-other-cart]')) {
+      const kind = node.dataset.otherCart;
+      const empty = kind === 'empty';
+      node.hidden = !other || (empty && cart.lines.length > 0) || (kind === 'full' && !cart.lines.length);
+      const text = $('[data-venue-cart-text]', node);
+      if (text) text.textContent = !other ? '' : empty ? `${where.charAt(0).toUpperCase()}${where.slice(1)} в корзине` : `В корзине ${where}:`;
+      const amount = $('[data-venue-cart-what]', node);
+      if (amount) amount.textContent = what;
+      const go = $<HTMLButtonElement>('[data-venue-go]', node);
+      if (go && other) {
+        go.dataset.venueGo = String(other.venue.id);
+        go.setAttribute('aria-label', `Перейти на ${venueCase(other.venue.name, 'acc')}: в корзине ${what}`);
+      }
+    }
+    // «Готовит: … · Поменять» in the checkout changes the cart along with the
+    // venue: offered only when the other venue's cart has something to order
+    // «Готовит: … · Поменять» в оформлении меняет вместе с точкой и корзину:
+    // предлагается, только когда в корзине другой точки есть что заказать
+    for (const swap of $$('[data-venue-swap]')) {
+      swap.hidden = !other;
+      if (other) {
+        swap.dataset.venueGo = String(other.venue.id);
+        swap.setAttribute('aria-label', `Поменять точку на ${venueCase(other.venue.name, 'acc')}: там в корзине ${what}`);
+      }
     }
   };
 
   const commit = (next: Cart, message?: string) => {
     cart = next;
-    store.set(CART_KEY, JSON.stringify(cart));
+    store.set(cartKey(place), JSON.stringify(cart));
     render();
     if (message) announce(message);
   };
@@ -589,6 +675,14 @@ if (dataNode && drawer && dishDialog) {
     back?.setAttribute('aria-label', next === 'login' ? 'Назад к оформлению' : 'Назад к корзине');
     const title = $('[data-drawer-title]', drawer);
     if (title) title.textContent = TITLES[next];
+    // whose cart — on the cart step: the form names the venue itself («Готовит:
+    // …», the venue radios), twice in one view would be a duplicate; «Вход» and
+    // «Готово» have their own lines
+    // чья корзина — на шаге корзины: форма называет точку сама («Готовит: …»,
+    // радио точки), дважды на одном экране было бы дублем; у «Входа» и «Готово»
+    // свои строки
+    const venueLine = $('[data-drawer-venue]', drawer);
+    if (venueLine) venueLine.hidden = next !== 'cart';
     if (next === 'checkout') {
       fillTimes();
       cartAccount?.onCheckout();
@@ -738,8 +832,8 @@ if (dataNode && drawer && dishDialog) {
     // без галочки согласия кнопка тоже выглядит закрытой; клик всё равно
     // запускает проверку, которая называет галочку и подсвечивает её
     const consented = field('consent')?.checked ?? false;
-    // the venue changed on this step and the cart has dishes it does not cook
-    // точку сменили на этом шаге, а в корзине блюда, которых она не готовит
+    // dishes the venue no longer cooks (the admin took it off while the cart waited)
+    // блюда, которых точка больше не готовит (в админке сняли, пока корзина ждала)
     const away = priced(cart, index, place).elsewhere;
     if (blocked || !consented || away.length) button?.setAttribute('aria-disabled', 'true');
     else button?.removeAttribute('aria-disabled');
@@ -752,7 +846,7 @@ if (dataNode && drawer && dishDialog) {
     if (awayNote) {
       awayNote.hidden = !away.length;
       if (away.length)
-        $('[data-bill-away-text]', awayNote)!.textContent = `${away.length === 1 ? `«${away[0].title}» не готовят` : `${dishWord(away.length)} из корзины не готовят`} ${whereCooked(place ? [place] : [])}.`;
+        $('[data-bill-away-text]', awayNote)!.textContent = `${away.length === 1 ? `${named(away[0].title)} больше не готовят` : `${dishWord(away.length)} из корзины больше не готовят`} ${whereCooked(place ? [place] : [])}.`;
     }
   };
 
@@ -1165,11 +1259,6 @@ if (dataNode && drawer && dishDialog) {
     for (const input of $$<HTMLInputElement>('[data-venue-switch] input[type="radio"]')) input.checked = Number(input.value) === place;
     for (const input of $$<HTMLInputElement>('input[name="place"]', form)) input.checked = Number(input.value) === place;
     for (const node of $$('[data-venue-name]')) node.textContent = nameOf(place);
-    const other = venues.find((venue) => venue.id !== place);
-    for (const swap of $$('[data-venue-swap]')) {
-      swap.hidden = !other;
-      if (other) swap.setAttribute('aria-label', `Поменять точку: ${other.name}`);
-    }
   };
 
   /** Над меню — «Стол 5: оплатите на сайте, принесём к столу», пока корзина в режиме «В зале». */
@@ -1288,7 +1377,7 @@ if (dataNode && drawer && dishDialog) {
   cartAccount = mountCartAccount({
     drawer,
     form,
-    total: () => priced(cart, index).total,
+    total: () => priced(cart, index, place).total,
     goto,
     announce,
     onChange: () => paintBill(),
@@ -1384,7 +1473,7 @@ if (dataNode && drawer && dishDialog) {
     return { delivery, dishes, discount, points, cost, pay: payable({ dishes, discount, points, delivery: cost }) };
   };
 
-  const finish = (number: string, sent: ReturnType<typeof buildOrder>, bill: Bill) => {
+  const finish = (number: string, sent: ReturnType<typeof buildOrder>, bill: Bill, from: number | null) => {
     $('[data-done-number]', drawer)!.textContent = number;
     $('[data-done-total]', drawer)!.textContent = rub(bill.pay);
     // under the dishes: the delivery, then what points and the birthday took off — the rows the bill had
@@ -1449,8 +1538,10 @@ if (dataNode && drawer && dishDialog) {
     // the account gets the order as it left: the points it took, the address it went to
     // кабинет получает заказ, как он ушёл: списанные баллы и адрес, куда он едет
     cartAccount?.done(bill.points, sent);
-    cart = empty();
-    store.set(CART_KEY, JSON.stringify(cart));
+    // only the cart that left is emptied: the other venue's waits as it was
+    // очищается только ушедшая корзина: корзина другой точки ждёт, как была
+    store.set(cartKey(from), JSON.stringify(empty()));
+    if (from === place) cart = empty();
     const comment = field<HTMLTextAreaElement>('comment');
     if (comment) comment.value = '';
     saveDraft();
@@ -1496,6 +1587,9 @@ if (dataNode && drawer && dishDialog) {
       goto('cart');
       return;
     }
+    // the cart that leaves: the venue may still be switched while the order is on its way
+    // корзина, которая уходит: точку ещё могут переключить, пока заказ в пути
+    const from = place;
     // the delivery must be known before the send: a typed address may still be on its way
     // до отправки доставка должна быть известна: набранный адрес может ещё считаться
     if (data.fulfillment === 'delivery') {
@@ -1532,7 +1626,7 @@ if (dataNode && drawer && dishDialog) {
     // a bot filled the field nobody sees: thank it and send nothing
     // бот заполнил поле, которого никто не видит: поблагодарить и ничего не отправлять
     if ((field('company')?.value ?? '').trim()) {
-      finish(number, payload, bill);
+      finish(number, payload, bill, from);
       return;
     }
     if (!navigator.onLine) {
@@ -1555,7 +1649,7 @@ if (dataNode && drawer && dishDialog) {
         signal: AbortSignal.timeout(20_000),
       });
       if (response.ok) {
-        finish(number, payload, bill);
+        finish(number, payload, bill, from);
         // online payment asks for the dishes after points and the birthday discount, plus the delivery
         // онлайн-оплата просит блюда после баллов и скидки именинника плюс доставку
         payAfterOrder(number, payload, { total: bill.pay, delivery: bill.delivery.kind === 'pickup' ? undefined : bill.cost });
@@ -1672,15 +1766,20 @@ if (dataNode && drawer && dishDialog) {
       $<HTMLButtonElement>('[data-dlg-add]', dishDialog)?.focus();
       return;
     }
-    const moveVenue = hit('[data-away-move]');
-    if (moveVenue) {
-      setPlace(Number(moveVenue.dataset.awayMove));
-      $('[data-drawer-title]', drawer)?.focus();
+    // «Перейти» to the other venue's cart: under the switch or in the empty drawer
+    // «Перейти» к корзине другой точки: под переключателем или в пустой корзине
+    const goCart = hit<HTMLButtonElement>('[data-venue-go]');
+    if (goCart) {
+      setPlace(Number(goCart.dataset.venueGo));
+      // the line may be gone with the cart it offered: the focus stays with the switch or the drawer
+      // строка могла уйти вместе с корзиной, которую предлагала: фокус остаётся у переключателя или корзины
+      if (!goCart.offsetParent)
+        (drawer.contains(goCart) ? $('[data-drawer-title]', drawer) : $<HTMLInputElement>('input:checked', goCart.closest('[data-venue-switch]') ?? document))?.focus();
       return;
     }
-    if (hit('[data-venue-swap]')) {
-      const other = venues.find((venue) => venue.id !== place);
-      if (other) setPlace(other.id);
+    const swap = hit('[data-venue-swap]');
+    if (swap) {
+      setPlace(Number(swap.dataset.venueGo));
       return;
     }
     if (hit('[data-away-drop]')) {
@@ -1752,12 +1851,18 @@ if (dataNode && drawer && dishDialog) {
       if (event.target === dialog) dialog.close();
     });
 
-  // another tab changed the cart / корзину поменяли в другой вкладке
+  // Another tab changed this venue's cart: it is taken as is. The other
+  // venue's cart (or the old shared one being moved) only changes the line
+  // that offers it.
+  // Корзину этой точки поменяли в другой вкладке: она берётся как есть.
+  // Корзина другой точки (или переезд старой общей) меняет только строку,
+  // которая её предлагает.
   window.addEventListener('storage', (event) => {
-    if (event.key !== CART_KEY) return;
-    cart = reconcile(parseCart(event.newValue), index).cart;
-    render();
-    if (current) paintDialog();
+    if (event.key === cartKey(place)) {
+      cart = reconcile(parseCart(event.newValue), index).cart;
+      render();
+      if (current) paintDialog();
+    } else if (event.key === null || isCartKey(event.key)) paintOther();
   });
 
   // ── sections: the desktop column, the sticky bar, the sheet, «наверх» ───
@@ -1944,26 +2049,40 @@ if (dataNode && drawer && dishDialog) {
     place = next;
     root.dataset.venue = String(next);
     store.set(PLACE_KEY, String(next));
+    // the venue's own cart: «Вернуть» and «убрали из корзины» belonged to the one left behind
+    // своя корзина точки: «Вернуть» и «убрали из корзины» относились к оставленной
+    const restored = loadCart(next);
+    cart = restored.cart;
+    undo = null;
+    dropped = restored.dropped;
     const url = new URL(location.href);
     if (url.searchParams.has('place')) {
       url.searchParams.set('place', String(next));
       history.replaceState(history.state, '', url.pathname + url.search + url.hash);
     }
     paintVenue();
+    // the new cart is painted before the eye is put back: the line about the
+    // other cart over the menu appears or goes, and that height is above the eye
+    // новая корзина рисуется до того, как взгляд вернут на место: строка о другой
+    // корзине над меню появляется или уходит, и эта высота — выше взгляда
+    render();
     if (anchor) {
       if (anchor.top === null) anchor.node.scrollIntoView({ block: 'start' });
       else window.scrollBy(0, anchor.node.getBoundingClientRect().top - anchor.top);
       requestAnimationFrame(() => root.style.removeProperty('overflow-anchor'));
     }
     saveDraft();
-    render();
     if (current) paintDialog();
+    // in the checkout the new venue's cart may be empty: back to the cart,
+    // where the empty one offers the cart just left
+    // в оформлении корзина новой точки может оказаться пустой: назад к корзине,
+    // где пустая предложит только что оставленную
+    if (drawer?.open && step === 'checkout' && !cart.lines.length) goto('cart');
     measure();
     labelBar();
     if (!say) return;
     const venue = venueById.get(next)!;
-    const away = priced(cart, index, place).elsewhere.length;
-    announce(`Меню: ${venue.name}, ${positions(venue.dishes)}.${away ? ` В корзине ${dishWord(away)}, которых здесь не готовят.` : ''}`);
+    announce(`Меню: ${venue.name}, ${positions(venue.dishes)}. ${summary()}.`);
   }
 
   // the switches over the menu (head, column, sheet) are one choice

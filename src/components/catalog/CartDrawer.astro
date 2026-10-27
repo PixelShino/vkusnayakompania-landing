@@ -14,12 +14,16 @@
  * сайт не примет заказ, который не сможет доставить.
  * The venue is one choice with the catalog's switch: the pickup and «В зале»
  * radios are that switch inside the form, delivery names it in one line
- * («Готовит: Садовая, 212Б · Поменять»); a dish the venue does not cook is
- * named in the cart and closes the checkout until it is removed.
+ * («Готовит: Садовая, 212Б · Поменять»). Every venue has its own cart (owner,
+ * 27.10.2026): the head names whose cart it is, an empty one offers the other
+ * venue's when it holds something; a dish the venue no longer cooks (the admin
+ * took it off) is named and closes the checkout until it is removed.
  * Точка — один выбор с переключателем каталога: радио самовывоза и «В зале» —
  * этот же переключатель внутри формы, доставка называет её одной строкой
- * («Готовит: Садовая, 212Б · Поменять»); блюдо, которого точка не готовит,
- * называется в корзине и закрывает оформление, пока его не уберут.
+ * («Готовит: Садовая, 212Б · Поменять»). У каждой точки своя корзина
+ * (владелец, 27.10.2026): шапка называет, чья это корзина, пустая предлагает
+ * корзину другой точки, если в ней что-то есть; блюдо, которое точка больше не
+ * готовит (сняли в админке), называется и закрывает оформление, пока его не уберут.
  */
 import Icon from '../Icon.astro';
 import CartAccount from '../account/CartAccount.astro';
@@ -50,15 +54,36 @@ const deliveryApi = directus ? `${directus}/delivery` : '';
 // the first venue until the page script reads the chosen one (the drawer is closed by then)
 // первая точка, пока скрипт страницы не прочтёт выбранную (корзина к тому времени закрыта)
 const first = places[0];
+// two venues and more: a cart per venue, the drawer says whose it is
+// две точки и больше: корзина на точку, корзина говорит, чья она
+const venues = places.length > 1;
 ---
 
-<dialog id="cart" class="dlg drawer" aria-labelledby="cart-title" data-endpoint={endpoint} data-delivery-api={deliveryApi}>
+<dialog
+  id="cart"
+  class="dlg drawer"
+  aria-labelledby={venues ? 'cart-title cart-venue' : 'cart-title'}
+  data-endpoint={endpoint}
+  data-delivery-api={deliveryApi}
+>
   <div class="drawer__in">
     <header class="drawer__head">
       <button type="button" class="round-btn drawer__back" data-back hidden aria-label="Назад к корзине">
         <Icon name="arrow-left" />
       </button>
-      <h2 class="drawer__title" id="cart-title" tabindex="-1" data-drawer-title>Корзина</h2>
+      {/* whose cart this is: every venue has its own (owner, 27.10.2026); the cart step (the form names it itself)
+          чья это корзина: у каждой точки своя (владелец, 27.10.2026); на шаге корзины (форма называет её сама) */}
+      <div class="drawer__heading">
+        <h2 class="drawer__title" id="cart-title" tabindex="-1" data-drawer-title>Корзина</h2>
+        {
+          venues && first && (
+            <p class="drawer__venue" id="cart-venue" data-drawer-venue>
+              <Icon name="pin" />
+              <span data-venue-name>{first.name}</span>
+            </p>
+          )
+        }
+      </div>
       <button type="button" class="round-btn" data-close aria-label="Закрыть">
         <Icon name="close" />
       </button>
@@ -76,20 +101,52 @@ const first = places[0];
         <p class="drawer__notice drawer__notice--warn" data-blocked hidden>
           Часть блюд закончилась — уберите их, чтобы оформить заказ.
         </p>
-        {/* dishes the chosen venue does not cook: what to do, right above them
-            блюда, которых выбранная точка не готовит: что делать — прямо над ними */}
+        {/* dishes the venue no longer cooks (the admin took it off while the cart waited): what to do, right above them
+            блюда, которых точка больше не готовит (сняли в админке, пока корзина ждала): что делать — прямо над ними */}
         <div class="drawer__notice drawer__notice--warn away" data-away-note role="status" hidden>
           <p data-away-note-text></p>
           <p class="away__actions">
             <button type="button" class="tlink" data-away-drop></button>
-            <button type="button" class="tlink" data-away-move hidden></button>
           </p>
         </div>
         <ul class="lines" role="list" data-lines></ul>
+        {/* the other venue's cart waits under this one's lines
+            корзина другой точки ждёт под строками этой */}
+        {
+          venues && (
+            <p class="drawer__other drawer__other--below" data-other-cart="full" hidden>
+              <Icon name="bag" />
+              <span>
+                <span data-venue-cart-text />{' '}
+                <span class="cart-go">
+                  <b class="tnum" data-venue-cart-what />
+                  <button type="button" class="tlink" data-venue-go>
+                    Перейти
+                  </button>
+                </span>
+              </span>
+            </p>
+          )
+        }
 
         <div class="drawer__empty" data-empty hidden>
           <Icon name="cloche" />
           <p class="display drawer__empty-title">В корзине пусто</p>
+          {/* the other venue's cart holds something: one line, one way there
+              в корзине другой точки что-то есть: одна строка, один путь туда */}
+          {
+            venues && (
+              <p class="drawer__other" data-other-cart="empty" hidden>
+                <span data-venue-cart-text />{' '}
+                <span class="cart-go">
+                  <b class="tnum" data-venue-cart-what />
+                  <button type="button" class="tlink" data-venue-go>
+                    Перейти
+                  </button>
+                </span>
+              </p>
+            )
+          }
           <p>Добавьте блюда из каталога — они сохранятся здесь до заказа, даже если закрыть страницу.</p>
           <div class="suggest" data-suggest hidden>
             <p class="label">Часто берут</p>

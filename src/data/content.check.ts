@@ -393,6 +393,62 @@ if (rawCats.length && rawDishes.length) {
   // в фикстуре из магазина есть торты с начинками; без них проверка выше пропускается
   if (all.length) assert.ok(cake, 'фикстура: нет торта с начинками — проверка начинок не прошла бы');
 
+  // A cart per venue (owner, 27.10.2026): keys, the move of the old shared
+  // cart, the venue the header and the account find without the catalog.
+  // Корзина на точку (владелец, 27.10.2026): ключи, переезд старой общей
+  // корзины, точка, которую шапка и кабинет находят без каталога.
+  {
+    const { CART_KEY, cartKey, isCartKey, merge, takeCart } = await import('../lib/cart.ts');
+    const { PLACE_KEY, storedPlace } = await import('../lib/venue.ts');
+    const { CHECKOUT_KEY } = await import('../lib/order.ts');
+    const memoryStore = (seed: Record<string, string> = {}, refuse = false) => {
+      const data = new Map(Object.entries(seed));
+      return {
+        data,
+        get: (key: string) => data.get(key) ?? null,
+        set: (key: string, value: string) => void (refuse || data.set(key, value)),
+        remove: (key: string) => void data.delete(key),
+      };
+    };
+    const line = (id: number, qty: number) => ({ id, variant: null, filling: null, qty });
+    const json = (...lines: ReturnType<typeof line>[]) => JSON.stringify({ v: 1, lines });
+
+    assert.equal(cartKey(2), 'vkus:cart:2', 'корзина точки: свой ключ');
+    assert.equal(cartKey(null), CART_KEY, 'одна точка на сайте — общая корзина, как раньше');
+    assert.deepEqual(['vkus:cart:1', CART_KEY, 'vkus:place', 'vk-checkout-v1', null].map(isCartKey), [true, true, false, false, false]);
+
+    // старая общая корзина переезжает в корзину точки целиком, ключ удаляется
+    const moved = memoryStore({ [CART_KEY]: json(line(5, 2), line(7, 1)) });
+    assert.deepEqual(takeCart(moved, 1).lines, [line(5, 2), line(7, 1)], 'переезд: всё на месте');
+    assert.equal(moved.data.has(CART_KEY), false, 'переезд: старый ключ удалён');
+    assert.equal(moved.get(cartKey(1)), json(line(5, 2), line(7, 1)), 'переезд: записано под ключом точки');
+    assert.deepEqual(takeCart(moved, 2).lines, [], 'другая точка — своя, пустая корзина');
+    assert.deepEqual(takeCart(moved, 1).lines, [line(5, 2), line(7, 1)], 'второе чтение ничего не меняет');
+
+    // в корзине точки уже что-то есть (повтор заказа до каталога): слияние, а не замена
+    const both = memoryStore({ [CART_KEY]: json(line(5, 1), line(9, 3)), [cartKey(2)]: json(line(5, 2)) });
+    assert.deepEqual(takeCart(both, 2).lines, [line(5, 2), line(9, 3)], 'слияние: общая строка берёт большее, не сумму');
+
+    // хранилище не приняло запись: старая корзина остаётся на месте, ничего не потеряно
+    const refused = memoryStore({ [CART_KEY]: json(line(5, 1)) }, true);
+    assert.deepEqual(takeCart(refused, 1).lines, [line(5, 1)]);
+    assert.equal(refused.data.has(CART_KEY), true, 'отказ записи: старый ключ не удалён');
+
+    // сайт с одной точкой: общий ключ и есть корзина, переезжать некуда
+    const single = memoryStore({ [CART_KEY]: json(line(5, 1)) });
+    assert.deepEqual(takeCart(single, null).lines, [line(5, 1)]);
+    assert.equal(single.data.has(CART_KEY), true, 'одна точка: общий ключ остаётся');
+
+    assert.deepEqual(merge(add(empty(), 1, null, 4), add(empty(), 1, null, 2)).lines, [line(1, 4)], 'слияние: большее количество');
+
+    // точка без каталога: запомненная → из черновика → первая; одна точка — общая корзина
+    const venueStore = (seed: Record<string, string>) => memoryStore(seed).get;
+    assert.equal(storedPlace([1, 2], venueStore({ [PLACE_KEY]: '2' }), CHECKOUT_KEY), 2, 'запомненная точка');
+    assert.equal(storedPlace([1, 2], venueStore({ [CHECKOUT_KEY]: JSON.stringify({ place: 2 }) }), CHECKOUT_KEY), 2, 'точка из черновика');
+    assert.equal(storedPlace([1, 2], venueStore({ [PLACE_KEY]: '9', [CHECKOUT_KEY]: '{oops' }), CHECKOUT_KEY), 1, 'чужая точка и битый черновик — первая');
+    assert.equal(storedPlace([1], venueStore({ [PLACE_KEY]: '1' }), CHECKOUT_KEY), null, 'одна точка — общая корзина');
+  }
+
   // телефон: маска и проверка
   assert.equal(maskPhone('89879552565'), '+7 (987) 955-25-65');
   assert.equal(maskPhone('+7 987'), '+7 (987)');

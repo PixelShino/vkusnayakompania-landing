@@ -39,8 +39,9 @@ import {
 import { LABEL_PRESETS, MAX_ADDRESSES, addressErrors, defaultLabel, savedLine, type AddressInput, type SavedAddress } from '../lib/addresses';
 import { canQuote, normalizeAddress, parseQuote } from '../lib/delivery';
 import { addDays, daysBetween, dayOf, points, type Program } from '../lib/loyalty';
-import { CART_KEY, parseCart } from '../lib/cart';
+import { cartKey, takeCart } from '../lib/cart';
 import { CHECKOUT_KEY, maskPhone } from '../lib/order';
+import { PLACE_KEY, pickPlace, storedPlace } from '../lib/venue';
 import { clearSession, loadSession, onSessionChange, storage, touchSession } from './account-session';
 import { mountLogin } from './account-login';
 import repeatIcon from '../assets/icons/repeat.svg?raw';
@@ -993,11 +994,21 @@ if (node) {
       void start();
       return;
     }
+    // «Повторить заказ»: the dishes go into the cart of the venue that cooked
+    // the order, and the catalog opens on that venue; an old delivery without a
+    // venue goes to the venue the catalog would open anyway (remembered,
+    // the draft's, the first)
+    // «Повторить заказ»: блюда ложатся в корзину точки, которая готовила заказ,
+    // и каталог открывается на этой точке; старая доставка без точки — в ту
+    // точку, которую каталог открыл бы и так (запомненная, из черновика, первая)
     const again = target.closest<HTMLElement>('[data-repeat]');
     if (again && me && data.catalog) {
       const order = me.orders.find((item) => item.id === Number(again.dataset.repeat));
       if (!order) return;
-      storage.set(CART_KEY, JSON.stringify(repeatOrder(order, parseCart(storage.get(CART_KEY)))));
+      const venues = data.places.length > 1 ? data.places.map((place) => place.id) : [];
+      const place = venues.length ? pickPlace(venues, order.place, storedPlace(venues, storage.get, CHECKOUT_KEY)) : null;
+      storage.set(cartKey(place), JSON.stringify(repeatOrder(order, takeCart(storage, place))));
+      if (place) storage.set(PLACE_KEY, String(place));
       location.href = `${data.catalog}#cart`;
       return;
     }
