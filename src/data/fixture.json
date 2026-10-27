@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-10-26T06:35:05.819Z",
+  "exportedAt": "2026-10-27T07:03:44.575Z",
   "settings": {
     "id": 1,
     "phone": "+7 987 955-25-65",
@@ -407,10 +407,10 @@
       "id": 4,
       "key": "catering",
       "title": "Кейтеринг",
-      "text": "Фуршет, банкет или праздник под ключ: блюда, обслуживание, оформление и программа. Шесть лет и сотни мероприятий.",
+      "text": "Фуршет в офисе, выездной банкет или боксы к столу: еда, сервировка и официанты на нас, с ведущим и оформлением поможем.",
       "place": null,
       "sort": 4,
-      "date_updated": "2026-10-09T11:53:19.484Z",
+      "date_updated": "2026-10-26T07:54:08.206Z",
       "gallery": [
         {
           "id": 1,
@@ -525,10 +525,10 @@
       "id": 5,
       "key": "banquets",
       "title": "Банкеты",
-      "text": "Залы на обеих точках, своё меню под событие и торт с той же кухни. Дата, число гостей и повод — и мы посчитаем.",
+      "text": "Свадьбы, юбилеи и дни рождения в двух наших залах, меню под ваш праздник.",
       "place": null,
       "sort": 5,
-      "date_updated": "2026-10-09T11:53:20.020Z",
+      "date_updated": "2026-10-26T08:25:57.483Z",
       "gallery": [
         {
           "id": 7,
@@ -797,236 +797,6 @@
       }
     }
   ],
-  "cakes": [
-    {
-      "id": 1,
-      "status": "published",
-      "title": "Торт заказной",
-      "note": "От 2 кг · 48 часов",
-      "sort": 1,
-      "date_updated": "2026-09-29T12:24:18.936Z",
-      "photo": {
-        "id": "b847e704-f01c-4a89-83c8-69319c42c081",
-        "filename_download": "IMG_7614.png",
-        "title": "Торт от 2 кг",
-        "alt": "Торт от 2 кг",
-        "width": 1080,
-        "height": 1350,
-        "type": "image/png",
-        "created_on": "2026-09-23T10:26:53.202Z",
-        "uploaded_on": "2026-09-29T12:20:47.161Z"
-      }
-    },
-    {
-      "id": 2,
-      "status": "published",
-      "title": "Заказной 2х ярусный торт ",
-      "note": "От 4 кг · 48 часов",
-      "sort": 2,
-      "date_updated": "2026-09-29T12:31:43.919Z",
-      "photo": {
-        "id": "adb43604-4a8e-4cc4-998e-2330e413aebe",
-        "filename_download": "re.webp",
-        "title": "Заказной 2х ярусный торт ",
-        "alt": "Торт «Наполеон» — фото появится позже",
-        "width": 1080,
-        "height": 1350,
-        "type": "image/webp",
-        "created_on": "2026-09-23T10:26:53.263Z",
-        "uploaded_on": "2026-10-09T14:06:55.159Z"
-      }
-    },
-    {
-      "id": 3,
-      "status": "published",
-      "title": "Заказной 2х ярусный торт ",
-      "note": "От 4 кг · 48 часов",
-      "sort": 3,
-      "date_updated": "2026-09-29T12:40:11.717Z",
-      "photo": {
-        "id": "e89ff6f6-1ac5-4c2e-a3d1-ba3562f53349",
-        "filename_download": "IMG_0151.jpeg",
-        "title": "Заказной 2х ярусный торт ",
-        "alt": "Торт «Красный бархат» — фото появится позже",
-        "width": 712,
-        "height": 575,
-        "type": "image/jpeg",
-        "created_on": "2026-09-23T10:26:53.318Z",
-        "uploaded_on": "2026-09-29T12:39:17.457Z"
-      }
-    },
-    {
-      "id": 4,
-      "status": "published",
-      "title": "Заказной 3х ярусный торт ",
-      "note": "6 кг · 48 часов",
-      "sort": 4,
-      "date_updated": "2026-09-29T12:44:12.565Z",
-      "photo": {
-        "id": "56f98ecc-3edd-46ec-bab3-0f3661757f0e",
-        "filename_download": "IMG_7626.jpeg",
-        "title": "Заказной 3х ярусный торт ",
-        "alt": "Торт «Фисташка и малина» — фото появится позже",
-        "width": 960,
-        "height": 1280,
-        "type": "image/jpeg",
-        "created_on": "2026-09-23T10:26:53.376Z",
-        "uploaded_on": "2026-09-29T12:43:25.783Z"
-      }
-    },
-    {
-      "id": 5,
-      "status": "published",
-      "title": "Заказной торт в форме сердца ",
-      "note": "1,5 кг · 48 часов",
-      "sort": 5,
-      "date_updated": "2026-10-09T12:47:31.439Z",
-      "photo": {
-        "id": "d556beec-5e70-4022-8536-8bad807acbdd",
-        "filename_download": "IMG_7625.jpeg",
-        "title": "Заказной торт в форме сердца ",
-        "alt": "Торт «Морковный с чизкремом» — фото появится позже",
-        "width": 960,
-        "height": 1280,
-        "type": "image/jpeg",
-        "created_on": "2026-09-23T10:26:53.431Z",
-        "uploaded_on": "2026-09-29T12:45:01.236Z"
-      }
-    },
-    {
-      "id": 6,
-      "status": "published",
-      "title": "Сметанник",
-      "note": "1,5 кг · 48 часов",
-      "sort": 6,
-      "date_updated": null,
-      "photo": {
-        "id": "87f4e01e-c001-4176-8c82-7880c54fe8b8",
-        "filename_download": "re.webp",
-        "title": "Торт «Сметанник»",
-        "alt": "Торт «Сметанник»",
-        "width": 1080,
-        "height": 1350,
-        "type": "image/webp",
-        "created_on": "2026-09-23T10:26:53.484Z",
-        "uploaded_on": "2026-10-09T14:07:01.221Z"
-      }
-    },
-    {
-      "id": 7,
-      "status": "published",
-      "title": "Шоколадный трюфель",
-      "note": "2,2 кг · 48 часов",
-      "sort": 7,
-      "date_updated": null,
-      "photo": {
-        "id": "d52b7ed8-eebf-4bd8-9aa2-c1f2ef38ff86",
-        "filename_download": "IMG_7620.JPG",
-        "title": "Торт «Шоколадный трюфель»",
-        "alt": "Торт «Шоколадный трюфель»",
-        "width": 1920,
-        "height": 2560,
-        "type": "image/jpeg",
-        "created_on": "2026-09-23T10:26:53.539Z",
-        "uploaded_on": "2026-09-30T20:33:53.366Z"
-      }
-    },
-    {
-      "id": 8,
-      "status": "published",
-      "title": "Птичье молоко",
-      "note": "1,6 кг · 48 часов",
-      "sort": 8,
-      "date_updated": null,
-      "photo": {
-        "id": "2be81ca2-a394-4d9b-b40d-579198ddc107",
-        "filename_download": "IMG_7621.JPG",
-        "title": "Торт «Птичье молоко»",
-        "alt": "Торт «Птичье молоко»",
-        "width": 960,
-        "height": 1280,
-        "type": "image/jpeg",
-        "created_on": "2026-09-23T10:26:53.594Z",
-        "uploaded_on": "2026-09-30T20:33:54.565Z"
-      }
-    },
-    {
-      "id": 9,
-      "status": "published",
-      "title": "Чизкейк Нью-Йорк",
-      "note": "1,4 кг · 48 часов",
-      "sort": 9,
-      "date_updated": null,
-      "photo": {
-        "id": "0fa50051-cd31-4981-b577-51f530af5b20",
-        "filename_download": "IMG_7622.JPG",
-        "title": "Торт «Чизкейк Нью-Йорк»",
-        "alt": "Торт «Чизкейк Нью-Йорк»",
-        "width": 960,
-        "height": 1280,
-        "type": "image/jpeg",
-        "created_on": "2026-09-23T10:26:53.656Z",
-        "uploaded_on": "2026-09-30T20:33:54.006Z"
-      }
-    },
-    {
-      "id": 10,
-      "status": "published",
-      "title": "Три шоколада",
-      "note": "2 кг · 48 часов",
-      "sort": 10,
-      "date_updated": null,
-      "photo": {
-        "id": "f0908953-a951-428e-aa3e-6355867ddde3",
-        "filename_download": "IMG_7623.JPG",
-        "title": "Торт «Три шоколада»",
-        "alt": "Торт «Три шоколада»",
-        "width": 960,
-        "height": 1280,
-        "type": "image/jpeg",
-        "created_on": "2026-09-23T10:26:53.722Z",
-        "uploaded_on": "2026-09-30T20:33:54.356Z"
-      }
-    },
-    {
-      "id": 11,
-      "status": "published",
-      "title": "Лимонный тарт",
-      "note": "1,2 кг · 48 часов",
-      "sort": 11,
-      "date_updated": null,
-      "photo": {
-        "id": "ac03692c-7126-42e0-a51f-fcac4c74930b",
-        "filename_download": "IMG_7624.JPG",
-        "title": "Торт «Лимонный тарт»",
-        "alt": "Торт «Лимонный тарт»",
-        "width": 1920,
-        "height": 2560,
-        "type": "image/jpeg",
-        "created_on": "2026-09-23T10:26:53.780Z",
-        "uploaded_on": "2026-09-30T20:33:54.165Z"
-      }
-    },
-    {
-      "id": 12,
-      "status": "published",
-      "title": "Свадебный, два яруса",
-      "note": "от 4 кг · 5 дней",
-      "sort": 12,
-      "date_updated": null,
-      "photo": {
-        "id": "f3f691b8-ddb2-4529-8c27-a1a39be21e8e",
-        "filename_download": "cake-12.jpg",
-        "title": "[заглушка] Торт «Свадебный, два яруса»",
-        "alt": "Торт «Свадебный, два яруса» — фото появится позже",
-        "width": 1200,
-        "height": 1600,
-        "type": "image/jpeg",
-        "created_on": "2026-09-23T10:26:53.838Z",
-        "uploaded_on": "2026-09-23T10:26:53.845Z"
-      }
-    }
-  ],
   "product_categories": [
     {
       "id": 1,
@@ -1152,6 +922,10 @@
       "badges": [
         "hit"
       ],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "991ff629-9db6-497d-b22e-877bcd9c5589",
         "filename_download": "81cded351954c0e47811c5e63a93e89f---jpg_original_919c8_convert.jpg",
@@ -1182,6 +956,10 @@
       "badges": [
         "hit"
       ],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "b89b18ef-826d-49b8-8051-be02584d716e",
         "filename_download": "fb86ad457a8b9b082e4010a923664155---png_original_919c8_convert.webp",
@@ -1210,6 +988,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "66f2ab50-b554-45ad-a811-88e04a224820",
         "filename_download": "bb87123806ae317abb44e4739a95334c---jpg_original_919c8_convert.jpg",
@@ -1238,6 +1020,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "12d4b8a4-9f42-4eee-b512-05ca729835e7",
         "filename_download": "36c04847c3b36e03aaa5abf96564b935---png_original_919c8_convert.webp",
@@ -1266,6 +1052,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "87d04dc1-f953-452a-bb17-8e7faa3fdb16",
         "filename_download": "7403f7a73df4432f28eff2d6283d0edb---png_original_919c8_convert.webp",
@@ -1294,6 +1084,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "58d6a930-8eed-4756-8cde-f3d9b35f4bbe",
         "filename_download": "51f770dfcce12a2d3912827e72e2d22b---png_original_919c8_convert.webp",
@@ -1322,6 +1116,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "ef18041a-0baa-4fc4-a73b-24a99585a6f4",
         "filename_download": "11c93377da23217a22913bcbf518b96f---png_original_919c8_convert.webp",
@@ -1350,6 +1148,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "3ffb0c3e-db58-4100-bba2-61ed75707cfc",
         "filename_download": "d54feb7b61144811d19add13f901f524---png_original_919c8_convert.webp",
@@ -1380,6 +1182,10 @@
       "badges": [
         "hit"
       ],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "7c880138-6c98-43d1-9075-6589bb2ae367",
         "filename_download": "e27cb3b28e7a5e633fc533f5de6fa6e9---png_original_919c8_convert.webp",
@@ -1408,6 +1214,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "66a095ff-c766-4aff-bd02-aa714fba6543",
         "filename_download": "b3caba8e6b3648a6e48ab04602d98a08---jpg_original_919c8_convert.jpg",
@@ -1438,6 +1248,10 @@
       "badges": [
         "hit"
       ],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "c17b3718-5385-434d-94ce-21de67017815",
         "filename_download": "5626d751bf6c39ddc7a9a01a1bac1228---jpg_original_919c8_convert.jpg",
@@ -1466,6 +1280,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "5ce5f96e-ab3a-4e1c-93df-9792814ea0b4",
         "filename_download": "d8592ea3f222170aa2b0cf0df84d5196---jpeg_original_919c8_convert.jpeg",
@@ -1494,6 +1312,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "dea75ee6-f413-44fb-aae6-6253ae40a0bb",
         "filename_download": "a0ad8e246768186f94e5d2940cf1277d---jpg_original_919c8_convert.jpg",
@@ -1522,6 +1344,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "f8f5c4de-ea5e-447d-a72d-9ae94bbf2cd1",
         "filename_download": "9ba7bb5091a6cbdc8a02ad6eae5e0867---png_original_919c8_convert.webp",
@@ -1550,6 +1376,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "e23d3134-f272-401a-8996-0780a3e8d639",
         "filename_download": "ddcf971a53bff44f8653b30ce3e7e168---png_original_919c8_convert.webp",
@@ -1578,6 +1408,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "0bc5b55d-713b-47a3-baa9-0cec85f53032",
         "filename_download": "eba6e3c1d15beac36196efbf1157e5fd---jpg_original_919c8_convert.jpg",
@@ -1607,6 +1441,10 @@
       "available": true,
       "badges": [
         "new"
+      ],
+      "places": [
+        "1",
+        "2"
       ],
       "photo": {
         "id": "3c583057-0a8f-4e04-ab1a-a6738f70f4ea",
@@ -1638,6 +1476,10 @@
       "badges": [
         "new"
       ],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "dca914f4-3a24-4fce-99aa-83689640ec08",
         "filename_download": "54a3f593e3b35b12a5a541b0b6cbfa43---png_original_919c8_convert.webp",
@@ -1666,6 +1508,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "99fd0c3c-c51e-4003-882e-d43df416d969",
         "filename_download": "0ba8b090f5a84cd77fbc9511b38cc7b0---jpg_original_919c8_convert.jpg",
@@ -1694,6 +1540,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "96eb20b4-c8ed-4ff2-8f23-8a9b7c8ebcb4",
         "filename_download": "b98cf39adf623417f9b117ada49c7e90---jpg_original_919c8_convert.jpg",
@@ -1722,6 +1572,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "78eead00-e4c3-4f1e-b425-68dd620f8c59",
         "filename_download": "44c5f1f302f64d20e9ede7642a21f616---jpg_original_919c8_convert.jpg",
@@ -1750,6 +1604,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "e7d71279-7480-423f-9dd5-a8b0f5eb9ae8",
         "filename_download": "028039730110a203d9ede9c101c8b127---jpg_original_919c8_convert.jpg",
@@ -1778,6 +1636,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "7d349e30-43e8-4e81-8c36-196c64658762",
         "filename_download": "0282ca7d3ddc276616755f9a16f0a29f---png_original_919c8_convert.webp",
@@ -1806,6 +1668,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "a356a217-d91e-4eb9-81fc-75bf62b784e8",
         "filename_download": "5f5c148bba7cc563f9dddebbdd56e219---jpeg_original_919c8_convert.jpeg",
@@ -1834,6 +1700,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "62298c37-56f1-45cc-886b-42d1db5ecf29",
         "filename_download": "7a0ea3e5e1038e81115bd1a41b6bcd11---jpg_original_919c8_convert.jpg",
@@ -1862,6 +1732,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "40f57a06-b9eb-4d2c-a8f0-b7316872c78b",
         "filename_download": "2a9bb673de29b504ba2ac28bf1cf7d14---jpg_original_919c8_convert.jpg",
@@ -1890,6 +1764,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "3b1715c1-5161-4220-a646-bce47c08bd20",
         "filename_download": "f230bc13bc85d3ab9f3f474a495a4bbd---jpg_original_919c8_convert.jpg",
@@ -1918,6 +1796,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": null
     },
     {
@@ -1937,6 +1819,10 @@
       "available": true,
       "badges": [
         "new"
+      ],
+      "places": [
+        "1",
+        "2"
       ],
       "photo": {
         "id": "6f102964-633d-4455-b917-341ee30e2021",
@@ -1966,6 +1852,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "67bb41eb-cc97-4fff-ad33-3ce36dc07fa1",
         "filename_download": "dc4f5d8fc6a3b8f6c28be241ecce4ec1---png_original_919c8_convert.webp",
@@ -1996,6 +1886,10 @@
       "badges": [
         "new"
       ],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "6986f751-b318-4e4f-8c36-2e5a1bf70d38",
         "filename_download": "ea6db0874b09ef46d1dcfc71e91f25e9---jpg_original_919c8_convert.jpg",
@@ -2024,6 +1918,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "e1e783d0-1e53-4e13-9998-35e4647aacbf",
         "filename_download": "d42e8ccf3e9d76b8b3eacc382aace33b---png_original_919c8_convert.webp",
@@ -2052,6 +1950,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "cd27e6d6-c28c-43ef-956e-75fee8ca8dc9",
         "filename_download": "8dbc3984624e0a458a808f880af06a21---jpg_original_919c8_convert.jpg",
@@ -2080,6 +1982,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "247bd7d1-3ba7-4266-af98-2fe7bec1fb73",
         "filename_download": "2b7c68cc5f24fd95fb893eda2e5807b7---png_original_919c8_convert.webp",
@@ -2108,6 +2014,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "fb5e8cfe-fe74-4a32-b390-1fc9fd3a7335",
         "filename_download": "0059f26e6cd46573472b5b6e214462a8---jpg_original_919c8_convert.jpg",
@@ -2136,6 +2046,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "347101a3-9423-45da-89f5-f9a1f4abc6cb",
         "filename_download": "e07bd81d2f93e3df6db72cb8557247b7---jpg_original_919c8_convert.jpg",
@@ -2166,6 +2080,10 @@
       "badges": [
         "new"
       ],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "93a6721c-6d30-4dc7-b208-aae551f74d32",
         "filename_download": "cafd6b02397c38579cf6fa245b41538b---png_original_919c8_convert.webp",
@@ -2194,6 +2112,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "ce7e8874-40b6-490a-b00d-0d651b44fcd4",
         "filename_download": "45133d6b26ad39a8acf0eb91ddff1b43---jpeg_original_919c8_convert.jpeg",
@@ -2223,6 +2145,10 @@
       "available": true,
       "badges": [
         "hit"
+      ],
+      "places": [
+        "1",
+        "2"
       ],
       "photo": {
         "id": "4f5c0cc2-8c34-4c97-b46c-b286b74e87c6",
@@ -2254,6 +2180,10 @@
       "badges": [
         "hit"
       ],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "f19bb5cf-f310-4b1e-ad13-9aa7c21b23b7",
         "filename_download": "9b8322e2e5956405aae07172811a65d3---jpg_original_919c8_convert.jpg",
@@ -2282,6 +2212,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "bff3f0fd-d0a6-4dff-9444-5c45739fabb0",
         "filename_download": "0dd6af73f4d419d0b04c39c306716e9c---jpg_original_919c8_convert.jpg",
@@ -2310,6 +2244,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "812bcd4a-4dc5-41f8-b8a7-922c0c163c48",
         "filename_download": "bb9f52f7f57c3ea478df0e60030c18a0---jpg_original_919c8_convert.jpg",
@@ -2338,6 +2276,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "8ff56a81-6dd2-4f01-9682-977901bf69b7",
         "filename_download": "3d9f830201c6ce73b1511600e41402ac---jpg_original_919c8_convert.jpg",
@@ -2366,6 +2308,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "ce466093-3dc4-483e-8e8d-6990705d9bb4",
         "filename_download": "a4d21d19f0f7b9d3c621fb50d55c51e3---jpg_original_919c8_convert.jpg",
@@ -2394,6 +2340,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "a9858a01-284f-4e9e-a3a0-772b620b0ff2",
         "filename_download": "fa30411c269faa277d39f590ffd55f69---jpg_original_919c8_convert.jpg",
@@ -2422,6 +2372,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "964a289d-832d-4cad-8782-8b93d5b768a9",
         "filename_download": "d5f17f6a56619d716f73f1460dd6877f---jpg_original_919c8_convert.jpg",
@@ -2450,6 +2404,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "bf2e586a-e589-4206-b9b4-51c52a6c06f4",
         "filename_download": "75bcc27969d8f150873616e121431c83---jpeg_original_919c8_convert.jpeg",
@@ -2478,6 +2436,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "7ff442fa-0910-4ae8-b952-ae863abc3cce",
         "filename_download": "5321320a21a0d12a80c9a45460e9b1df---jpeg_original_919c8_convert.jpeg",
@@ -2506,6 +2468,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "8d54b628-f655-4dae-aebf-94f9e9c2c395",
         "filename_download": "e5164c6945450826e6e5f0dbb5b3e148---jpeg_original_919c8_convert.jpeg",
@@ -2534,6 +2500,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "06599a1f-c8bc-48af-8ac4-33ecfbe362d3",
         "filename_download": "388ca6cf997f7fc3813bdfcd4119dc98---png_original_919c8_convert.webp",
@@ -2562,6 +2532,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "f66b3aa6-6bfa-4e0c-9176-f2ae1a096ab6",
         "filename_download": "d6ba7715ac68460844e3b62e124eab13---jpg_original_919c8_convert.jpg",
@@ -2590,6 +2564,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "a15050c5-e3c7-48d0-b7df-8825aeb61720",
         "filename_download": "23711a6cde2d0d9a57f2dece1816ad8b---jpg_original_919c8_convert.jpg",
@@ -2618,6 +2596,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "3f647dc5-649d-4fca-a318-95259a551fb2",
         "filename_download": "6ca74867ff87d6fedf89678a52844935---jpg_original_919c8_convert.jpg",
@@ -2646,6 +2628,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "8587bc4f-b13b-497b-8167-8cc8a4881ebc",
         "filename_download": "1f01cce5e2d971a7d7df723ef4169d53---png_original_919c8_convert.webp",
@@ -2674,6 +2660,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "e6d1a801-bf2a-4aa7-b1ed-da2b3428cdde",
         "filename_download": "a5e0260eff4520c85f51ee3e138baa57---png_original_919c8_convert.webp",
@@ -2702,6 +2692,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "97fbcc5c-85f1-4e76-8ce0-d6fefd84199c",
         "filename_download": "1e50fd206815d32a7da1bb916f56345b---jpg_original_919c8_convert.jpg",
@@ -2730,6 +2724,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "5101ec6a-b616-4898-b5c6-4f3de6b28a68",
         "filename_download": "1ca6fcc7f90dc752626853bba9be7e6e---jpg_original_919c8_convert.jpg",
@@ -2758,6 +2756,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "2dd62cb7-68d9-4619-aaf6-2fed878d8fe9",
         "filename_download": "52fe714e3e519655b4462001664318eb---jpg_original_919c8_convert.jpg",
@@ -2786,6 +2788,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "f6aa4541-e0ff-4f74-bbca-7e4e8778f750",
         "filename_download": "e9de1b7bbb5bd1aabb8bd6af9344a2a0---jpeg_original_919c8_convert.jpeg",
@@ -2814,6 +2820,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "cb448f9f-a1df-4b04-b4dc-e94311897a48",
         "filename_download": "2a6a5b7ccce1b464367b6b92b47b71a6---jpeg_original_919c8_convert.jpeg",
@@ -2842,6 +2852,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "25ee4033-9270-4247-9872-d0a07a617166",
         "filename_download": "819de4523e60ca3a16c24b51eb7df724---jpeg_original_919c8_convert.jpeg",
@@ -2870,6 +2884,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "3beaac69-bbb7-4fce-8617-f913157d43c5",
         "filename_download": "1a2832217259217aaf8af79090e0d611---jpeg_original_919c8_convert.jpeg",
@@ -2898,6 +2916,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "c5a1fae7-4bde-46a1-b77a-686dd43308c1",
         "filename_download": "0124ac86a6b3d6cb12c6047135bf0e1d---jpeg_original_919c8_convert.jpeg",
@@ -2926,6 +2948,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "e82152f4-a5ec-4c84-a18c-0e790155d850",
         "filename_download": "2ee5cf99f113f91d0dc485b4457eb5df---jpg_original_919c8_convert.jpg",
@@ -2954,6 +2980,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "188725af-c2ca-4f77-a350-102301da9d59",
         "filename_download": "f9160c34aeddf34824a427b402405f5c---jpg_original_919c8_convert.jpg",
@@ -2982,6 +3012,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "e236f664-e451-4700-bd76-097de3fc2cd7",
         "filename_download": "1005361189c881b3477cc84535731e02---jpg_original_919c8_convert.jpg",
@@ -3010,6 +3044,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "708e5a91-91be-409f-887d-b07e0a40fa29",
         "filename_download": "daa854709314632fc3bc4340a09b37b3---jpg_original_919c8_convert.jpg",
@@ -3038,6 +3076,10 @@
       "fillings": [],
       "available": false,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "de3455f5-a6b9-4657-ae00-0ff506e6baf1",
         "filename_download": "8b08b998c19e2b7e2ae64999b8607349---jpg_original_919c8_convert.jpg",
@@ -3066,6 +3108,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "6f50713a-cd47-4d23-9dd8-6c8147264b0f",
         "filename_download": "010b4c56b2f4dc17101e792dcaa92db9---png_original_919c8_convert.webp",
@@ -3094,6 +3140,10 @@
       "fillings": [],
       "available": false,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "0d57c8f5-98b9-492c-9a46-8c291af2620f",
         "filename_download": "4a490082ba1b31896d32bca0790a679a---png_original_919c8_convert.webp",
@@ -3122,6 +3172,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "d6f44b66-f584-46e7-8463-67170c562b6b",
         "filename_download": "86556f169978c31e2e0b5a901bd54543---jpg_original_919c8_convert.jpg",
@@ -3150,6 +3204,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "4524ccef-c06a-45e9-8d18-a65de9ab3a74",
         "filename_download": "5ac5e40891cf44de18752204b9b619ca---jpg_original_919c8_convert.jpg",
@@ -3178,6 +3236,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "04fd3f6a-4386-4a89-a9ad-cc0f4c3e9342",
         "filename_download": "6570a6961fb2bc21c529947d5992c240---jpg_original_919c8_convert.jpg",
@@ -3206,6 +3268,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "eede8724-303d-46c8-8e16-fe0c750e6b96",
         "filename_download": "adce3f9fe644b92e2ba8ff05c18e7d3d---jpg_original_919c8_convert.jpg",
@@ -3234,6 +3300,10 @@
       "fillings": [],
       "available": false,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "86b6b3e2-9c98-40c7-9d3a-90aef640dccf",
         "filename_download": "0125b0bf50545084a88480e72fb5c618---jpg_original_919c8_convert.jpg",
@@ -3262,6 +3332,10 @@
       "fillings": [],
       "available": false,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "91556de3-4d85-4e47-a0cb-8a85f78d7f2f",
         "filename_download": "34b47568b77881d9d0c526eb846a5ef8---jpg_original_919c8_convert.jpg",
@@ -3290,11 +3364,15 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "2cd2bb60-36cb-49aa-a713-66ac73e2ce48",
         "filename_download": "dcee3e1b47484cb71fbcaaa0882c8fe5---jpg_original_919c8_convert.jpg",
-        "title": "Эстерхайзи",
-        "alt": "Эстерхайзи",
+        "title": "Эстерхази",
+        "alt": "Торт «Эстерхази»",
         "width": 480,
         "height": 600,
         "type": "image/jpeg",
@@ -3318,6 +3396,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "44944f3d-80a8-41fc-8388-d384846b128e",
         "filename_download": "7327914b942e45cf029b2614f7935ad9---jpg_original_919c8_convert.jpg",
@@ -3346,6 +3428,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "2843c9b4-bb68-4cae-984d-11c76e44804e",
         "filename_download": "3bf2cd2173b4fe58beff1884e083f84c---jpeg_original_919c8_convert.jpeg",
@@ -3374,6 +3460,10 @@
       "fillings": [],
       "available": false,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "a5d9782a-5243-4466-a7e4-5558325569aa",
         "filename_download": "d94615f9b80facdbc3eb5b309c818a03---jpg_original_919c8_convert.jpg",
@@ -3402,6 +3492,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "d0bfd862-1291-43bd-970c-216e14ea0341",
         "filename_download": "7d4795eb6f6a23f6b8d784cd4f44dd8d---png_original_919c8_convert.webp",
@@ -3430,6 +3524,10 @@
       "fillings": [],
       "available": false,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "954ac7ae-0010-4474-b1db-a7e05e35ae28",
         "filename_download": "19369876b8bf43f3cec55857559b13c5---jpg_original_919c8_convert.jpg",
@@ -3458,6 +3556,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "9aee1e5b-8010-474d-95db-76712fab64dd",
         "filename_download": "32d688785a00548244a3488f4fe7eb1e---jpg_original_919c8_convert.jpg",
@@ -3486,6 +3588,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "13b38246-7126-4260-9536-16562ac8d254",
         "filename_download": "5caea54a962b8d034a668a630b209b88---jpg_original_919c8_convert.jpg",
@@ -3514,6 +3620,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "4d35e648-663d-4618-9045-03c7a371624b",
         "filename_download": "fdfcbce624c90c865a91ea7742adb3a2---jpg_original_919c8_convert.jpg",
@@ -3542,6 +3652,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "ba83fdee-3b67-4352-8b42-a0e828fcf44e",
         "filename_download": "23f65c3e48875dc25d6b70ddf7f0b9cc---png_original_919c8_convert.webp",
@@ -3570,6 +3684,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "f485d0cd-a506-4857-a938-29617484bafb",
         "filename_download": "9872c8f15b3c9e9783d349880fb06f7a---jpg_original_919c8_convert.jpg",
@@ -3626,6 +3744,10 @@
       ],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "39288674-abb5-4cbb-a13f-aaf8adc2c71f",
         "filename_download": "c5874733d6b851ee6b9052abfc40d49a---png_original_919c8_convert.png",
@@ -3669,6 +3791,10 @@
       ],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "98b30830-b534-44c0-b36c-3ff2a7577293",
         "filename_download": "c74b00f773481711fd1123758f30ad0c---jpeg_original_919c8_convert.jpeg",
@@ -3713,6 +3839,10 @@
       ],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "c9b11757-ed61-49cc-8dc7-885a3f301a5e",
         "filename_download": "d7f8749867b50e33b11c88a396374184---jpeg_original_919c8_convert.jpeg",
@@ -3757,6 +3887,10 @@
       ],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "1b73a1c5-4bce-4bbb-9383-db73b16341f9",
         "filename_download": "ad37fcfde111ee96aeecc1c0800aeedd---png_original_919c8_convert.webp",
@@ -3806,6 +3940,10 @@
       ],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "e4a5e425-d119-4215-8d73-dd29515f7238",
         "filename_download": "3030d0c32fe8d9240c9b75ec3acc9583---png_original_919c8_convert.webp",
@@ -3857,6 +3995,10 @@
       ],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "81bb1511-cdd4-4ace-9034-655a4eefc33d",
         "filename_download": "5e71d85f3e4c847a09e41ea326db7280---jpeg_original_919c8_convert.jpeg",
@@ -3906,6 +4048,10 @@
       ],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "abce30b9-e963-4a40-b989-280a97645475",
         "filename_download": "85920ab9fcab2da4cbe863d79cadcea3---png_original_919c8_convert.png",
@@ -3956,6 +4102,10 @@
       ],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "2123ce99-05d9-476e-af08-d7779a4e84af",
         "filename_download": "6615bd6da282691b9c8389cccd500fe7---png_original_919c8_convert.png",
@@ -3984,6 +4134,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "00e5d59a-f198-4751-b2cc-7d3292d248f4",
         "filename_download": "54d1854ddb583097a499c62eb1f7a8cf---png_original_919c8_convert.png",
@@ -4012,6 +4166,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "4511359a-0ea0-4191-b20d-7c01fa9e5744",
         "filename_download": "fb216b37ad2b5c873e8731f453c3e047---jpg_original_919c8_convert.jpg",
@@ -4040,6 +4198,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "ba6e604c-45c7-4633-a2f7-94c74470fd29",
         "filename_download": "bb2486b2dba534b2e3b10685f85ebbdf---jpg_original_919c8_convert.jpg",
@@ -4068,6 +4230,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "0d38ab06-4b88-4720-be9f-ec922bbae058",
         "filename_download": "25c84045d3510013f3b79f9f072b30fd---jpeg_original_919c8_convert.jpeg",
@@ -4096,6 +4262,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "09a3b7ee-560d-468d-b989-7fd5b071edd9",
         "filename_download": "6fde781e9ad9e30810c38cb9f63a7c19---jpeg_original_919c8_convert.jpeg",
@@ -4124,6 +4294,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "c413a04e-eb1b-4d39-a756-fe1b2f063ff6",
         "filename_download": "c60db1f0dd6c272b1249d6dccb7b3786---jpeg_original_919c8_convert.jpeg",
@@ -4152,6 +4326,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "2f2c8958-a11b-4fac-a7e2-81cd85a860ea",
         "filename_download": "ce429101f6b83c12b55c7ed9ab65bc64---jpeg_original_919c8_convert.jpeg",
@@ -4180,6 +4358,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "0ee6a4b6-c3af-4b98-a38e-d39944733720",
         "filename_download": "18275f405d1a27df4459d20b53bf175e---jpeg_original_919c8_convert.jpeg",
@@ -4208,6 +4390,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "f05a58fa-9859-4282-9319-f45486ed8924",
         "filename_download": "75b386dee0ceda41116cdfa63bba075c---jpeg_original_919c8_convert.jpeg",
@@ -4236,6 +4422,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "8f8ff326-b882-4a75-a9cd-8bb246028471",
         "filename_download": "d7494b1b2369fdea31b1a2d1c31df458---jpg_original_919c8_convert.jpg",
@@ -4264,6 +4454,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": null
     },
     {
@@ -4282,6 +4476,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "9054e65f-97f5-4817-b709-b65d9555d623",
         "filename_download": "5a10b68445e3636cbbf565e6f133232b---jpg_original_919c8_convert.jpg",
@@ -4310,6 +4508,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "c82845d8-8cd3-4802-9fe5-d4f071f6c638",
         "filename_download": "e4c818a34aef33be00c7f2fbe85f70d4---jpeg_original_919c8_convert.jpeg",
@@ -4338,6 +4540,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "aada4e9d-0ae0-420c-8a0c-03c34ecebc2b",
         "filename_download": "8b33ce5dba0e20509d707e63b96dba79---png_original_919c8_convert.webp",
@@ -4366,6 +4572,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "3a35a0eb-8d29-4a9f-8470-4bc54fc89855",
         "filename_download": "055e9632fbe3ba50e98bd44b84fb38e6---png_original_919c8_convert.webp",
@@ -4394,6 +4604,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "82fbcd56-9f19-4f5c-ac8a-31781e63f535",
         "filename_download": "bf7426d214e8b3a03b93fc03548c10c8---png_original_919c8_convert.webp",
@@ -4422,6 +4636,10 @@
       "fillings": [],
       "available": true,
       "badges": [],
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": null
     },
     {
@@ -4441,6 +4659,10 @@
       "available": true,
       "badges": [
         "hit"
+      ],
+      "places": [
+        "1",
+        "2"
       ],
       "photo": {
         "id": "26e900cc-08fc-487c-8400-dd8687dcecf5",
@@ -4470,6 +4692,10 @@
       "fillings": null,
       "available": true,
       "badges": null,
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "ef031ed7-f5ca-46af-9a6b-20a69a091d92",
         "filename_download": "IMG_7243.jpg",
@@ -4498,6 +4724,10 @@
       "fillings": null,
       "available": true,
       "badges": null,
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "efedea86-d866-4783-bca4-7b82f7c748e8",
         "filename_download": "IMG_7235.jpg",
@@ -4526,6 +4756,10 @@
       "fillings": null,
       "available": true,
       "badges": null,
+      "places": [
+        "1",
+        "2"
+      ],
       "photo": {
         "id": "90bae990-92d3-4294-86f0-8fa812b4bae2",
         "filename_download": "IMG_7240.jpg",
@@ -4541,9 +4775,9 @@
   ],
   "catering_page": {
     "id": 1,
-    "date_updated": "2026-10-26T06:29:28.113Z",
+    "date_updated": "2026-10-26T07:50:45.994Z",
     "hero_title": "Кейтеринг и банкеты в Самаре",
-    "hero_text": "Вы можете доверить нам свой праздник на 100 %: от блюд и алкоголя до организации события с обслуживанием, оформлением пространства и программой «под ключ».",
+    "hero_text": "Банкеты, фуршеты и доставка боксов в Самаре. Еда, сервировка и официанты на нас, с ведущим и оформлением поможем.",
     "facts": [
       {
         "value": "6 лет",
@@ -5058,7 +5292,7 @@
       "sort": 2,
       "topic": "Локация, охват и оперативность",
       "question": "В какие районы Самары и области вы доставляете заказы?",
-      "answer": "Доставляем гастробоксы и организуем обслуживание во всех районах Самары. Также выезжаем в Тольятти, Новокуйбышевск и любую точку области без ограничений по километражу.",
+      "answer": "Доставляем гастробоксы и организуем обслуживание во всех районах Самары. Также выезжаем в Тольятти, Новокуйбышевск и по области, выезд за город считаем в смете.",
       "featured": true,
       "format": 1
     },
@@ -5198,7 +5432,7 @@
       "sort": 16,
       "topic": "Сервис, оборудование и гарантии",
       "question": "Помогаете ли вы с подбором ведущих или диджеев?",
-      "answer": "Да, у нас есть база проверенных партнеров. Для наших клиентов они предоставляют самые выгодные цены в Самаре.",
+      "answer": "Да, посоветуем ведущих и диджеев, с которыми работаем на своих праздниках.",
       "featured": false,
       "format": 4
     },
@@ -5451,9 +5685,9 @@
       "slug": "offer",
       "title": "Публичная оферта",
       "description": "Договор купли-продажи и доставки блюд с сайта vkus-com.ru: как оформить и подтвердить заказ, как считается доставка, оплата онлайн, отмена и возврат денег.",
-      "body": "<p>Индивидуальный предприниматель Стрельникова Екатерина Александровна (далее — Продавец) предлагает любому дееспособному лицу (далее — Покупатель) купить блюда, выпечку, торты и другие товары с доставкой или самовывозом на условиях этого договора. Предложение публичное: оформляя заказ на сайте vkus-com.ru или по телефону, Покупатель принимает все условия ниже.</p>\n<h2>1. Термины</h2>\n<p>1.1. Сайт — vkus-com.ru со всеми страницами, в том числе каталог доставки <a href=\"/catalog/\">vkus-com.ru/catalog/</a> и личный кабинет <a href=\"/account/\">vkus-com.ru/account/</a>.</p>\n<p>1.2. Продавец — ИП Стрельникова Екатерина Александровна. Реквизиты — в разделе 11 и на странице <a href=\"/docs/requisites/\">«Реквизиты и контакты»</a>.</p>\n<p>1.3. Товары — продукция Продавца из каталога на Сайте. Внешний вид Товара может отличаться от фотографии на Сайте.</p>\n<p>1.4. Покупатель — дееспособное лицо, которое заказывает, покупает или использует Товары только для личных, семейных, домашних и иных нужд, не связанных с предпринимательской деятельностью.</p>\n<p>1.5. Заказ — заявка Покупателя на покупку Товаров, оформленная в корзине на Сайте или принятая Продавцом по телефону.</p>\n<p>1.6. Оферта — этот документ, публичный договор, который регулирует отношения Продавца и Покупателя.</p>\n<h2>2. Общие положения</h2>\n<p>2.1. Покупатель знакомится с условиями Оферты до оформления Заказа. Оформляя Заказ, он подтверждает, что прочитал и принимает Оферту.</p>\n<p>2.2. Договор розничной купли-продажи по образцам считается заключённым с момента, когда Продавец получил Заказ.</p>\n<p>2.3. Продавец вправе изменять Оферту. Новая редакция действует с момента публикации на Сайте, дата редакции указана вверху страницы. Покупатель самостоятельно следит за изменениями; Заказ исполняется на условиях редакции, действовавшей в момент его оформления.</p>\n<p>2.4. Оферта действует бессрочно.</p>\n<p>2.5. Отношения Продавца и Покупателя регулируются законодательством Российской Федерации, в том числе Законом РФ «О защите прав потребителей».</p>\n<h2>3. Предмет договора</h2>\n<p>3.1. Продавец продаёт Товары из Заказа по ценам, указанным на Сайте, и передаёт их Покупателю: доставляет курьером по адресу Покупателя или выдаёт в точке самовывоза. Покупатель оплачивает и принимает Товары на условиях Оферты.</p>\n<p>3.2. Право собственности и риск случайной гибели или повреждения Товаров переходят к Покупателю в момент передачи Товаров.</p>\n<p>3.3. Состав, вес и описание Товаров указаны в карточке Товара на Сайте. Если у Покупателя есть вопросы о Товаре, до оформления Заказа он может задать их по телефону [[телефон]] в часы работы Продавца.</p>\n<p>3.4. Заявка на кейтеринг или банкет, оставленная в разделе <a href=\"/catering/\">«Кейтеринг и банкеты»</a>, Заказом по Оферте не является: формат, меню, стоимость и порядок оплаты мероприятия Продавец согласует с Покупателем отдельно.</p>\n<h2>4. Оформление и подтверждение заказа</h2>\n<p>4.1. Покупатель оформляет Заказ в корзине каталога на Сайте: выбирает Товары, указывает имя и телефон, способ получения (доставка с адресом или самовывоз из точки), желаемое время и даёт согласие на обработку персональных данных. Заказ можно оформить и по телефону.</p>\n<p>4.2. Покупатель указывает достоверные данные, достаточные для исполнения Заказа.</p>\n<p>4.3. Заказу на Сайте присваивается номер. Продавец перезванивает Покупателю, чтобы подтвердить состав Заказа, адрес и время доставки или самовывоза.</p>\n<p>4.4. Заказать можно только Товары, которые есть в наличии в момент оформления. Если какого-то Товара нет в нужном количестве или ассортименте, Продавец сообщает об этом Покупателю до подтверждения Заказа. Покупатель вправе согласиться на другое количество или ассортимент либо отменить Заказ. Если Покупатель не отвечает, Продавец вправе отменить Заказ полностью.</p>\n<p>4.5. Изменить состав Заказа после его подтверждения можно только по согласованию с Продавцом.</p>\n<p>4.6. Продавец вправе временно приостановить приём Заказов из-за технических неполадок или нехватки продуктов для приготовления Товаров.</p>\n<p>4.7. Продавец вправе звонить Покупателю и отправлять сообщения на телефон из Заказа, чтобы подтвердить Заказ и сообщить о ходе его исполнения. Покупатель, вошедший в личный кабинет на Сайте, видит там статус своих Заказов.</p>\n<h2>5. Цена и оплата</h2>\n<p>5.1. Цены Товаров указаны на Сайте в рублях и устанавливаются Продавцом. Цена Товара в оформленном Заказе не меняется.</p>\n<p>5.2. Стоимость доставки в цену Товаров не входит. Она зависит от зоны доставки, в которую попадает адрес, и от суммы Заказа; зоны, стоимость доставки и сумма, от которой доставка бесплатна, указаны на странице <a href=\"/docs/delivery/\">«Доставка и оплата»</a>. Стоимость доставки рассчитывается по адресу при оформлении Заказа и оплачивается вместе с Заказом. Если адрес не удалось определить на карте, стоимость доставки Продавец называет при подтверждении Заказа, а Покупатель оплачивает её при получении.</p>\n<p>5.3. Заказ на Сайте оплачивается онлайн банковской картой, другого способа оплаты Заказа на Сайте нет. После оформления Заказа Покупатель переходит на защищённую страницу платёжного сервиса ЮKassa и вводит данные карты там, Продавцу они не передаются. Одним платежом оплачивается сумма «К оплате»: стоимость Товаров и доставки за вычетом скидок и баллов (п. 5.4). Только стоимость доставки, которую Продавец называет при подтверждении Заказа, оплачивается при получении (п. 5.2).</p>\n<p>5.4. Покупатель, вошедший в личный кабинет, может оплатить часть Заказа баллами программы «Вкусные баллы» по её правилам, опубликованным в личном кабинете. Оплате деньгами подлежит сумма «К оплате» — за вычетом баллов.</p>\n<p>5.5. При онлайн-оплате электронный чек направляется на телефон или электронную почту, указанные при оплате. Если стоимость доставки оплачивается при получении (п. 5.2), кассовый чек на неё Покупатель получает на месте. Покупателю рекомендуется сохранять подтверждение онлайн-оплаты.</p>\n<h2>6. Доставка и самовывоз</h2>\n<p>6.1. Товары доставляются курьером по адресу, указанному в Заказе, или передаются Покупателю в точке самовывоза.</p>\n<p>6.2. Доставка выполняется в пределах зоны доставки и в часы, указанные на странице <a href=\"/docs/delivery/\">«Доставка и оплата»</a>. По адресам вне зоны доставки Товары не доставляются.</p>\n<p>6.3. Доставка выполняется при Заказе на сумму не меньше минимальной для зоны доставки. Минимальную сумму для каждой зоны Продавец устанавливает сам и указывает на странице <a href=\"/docs/delivery/\">«Доставка и оплата»</a>; она и сумма, от которой доставка бесплатна, считаются по стоимости Товаров до скидок и оплаты баллами. Заказ на меньшую сумму можно забрать самовывозом.</p>\n<p>6.4. Время доставки согласуется при звонке и может отличаться от желаемого времени, указанного в Заказе.</p>\n<p>6.5. Продавец вправе отказаться от исполнения договора, если курьер не может передать Товары по вине Покупателя: Покупатель в течение 10 минут не отвечает на звонок или не открывает дверь.</p>\n<h2>7. Отмена заказа и возврат денег</h2>\n<p>7.1. Покупатель вправе отменить Заказ до передачи Товаров, позвонив Продавцу по телефону [[телефон]].</p>\n<p>7.2. Если Заказ оплачен онлайн, Покупатель вправе до передачи Товаров попросить отменить платёж. Решение о возврате денег Продавец принимает с учётом требований законодательства РФ и обстоятельств Заказа.</p>\n<p>7.3. Деньги возвращаются на банковский счёт карты, с которой оплачен Заказ, в течение 5–30 рабочих дней: срок зависит от банка, выпустившего карту.</p>\n<p>7.4. При отмене Заказа баллы, списанные за него, возвращаются на счёт Покупателя в программе «Вкусные баллы», а начисленные за него — списываются.</p>\n<h2>8. Качество, возврат и обмен</h2>\n<p>8.1. Продавец передаёт Покупателю Товары, которые соответствуют Заказу и информации о Товаре на Сайте, на этикетке или упаковке.</p>\n<p>8.2. При получении Покупатель в течение 10 минут проверяет, соответствуют ли Товары Заказу, всё ли на месте и нет ли претензий к внешнему виду.</p>\n<p>8.3. Если Товар некачественный или не соответствует Заказу (например, в нём нет заявленных ингредиентов), Покупатель вправе в течение 5 минут после проверки потребовать заменить его Товаром надлежащего качества, сообщив об этом курьеру, сотруднику точки или по телефону [[телефон]].</p>\n<p>8.4. Товар надлежащего качества возврату и обмену не подлежит.</p>\n<p>8.5. Остальные требования о качестве Товара Покупатель предъявляет в порядке, установленном Законом РФ «О защите прав потребителей».</p>\n<h2>9. Ответственность</h2>\n<p>9.1. Продавец не отвечает за вред, причинённый Покупателю из-за ненадлежащего использования приобретённых Товаров.</p>\n<p>9.2. Продавец не отвечает за убытки Покупателя, возникшие из-за неправильно заполненного Заказа, в том числе неверно указанных данных.</p>\n<p>9.3. Если Покупатель злоупотребляет правами потребителя, например отказывается принять или оплатить заказанный и доставленный Товар, Продавец вправе не принимать от него Заказы в будущем.</p>\n<p>9.4. Стороны освобождаются от ответственности за полное или частичное неисполнение обязательств, если оно вызвано обстоятельствами непреодолимой силы: стихийными бедствиями, пожарами, наводнениями, военными действиями, забастовками и другими событиями, которые стороны не могли предвидеть и предотвратить разумными средствами.</p>\n<h2>10. Персональные данные и споры</h2>\n<p>10.1. Продавец обрабатывает персональные данные Покупателя по <a href=\"/docs/privacy/\">Политике конфиденциальности</a>.</p>\n<p>10.2. Стороны решают споры переговорами. Претензию Покупатель направляет Продавцу по контактам из раздела 11. Спор, который не удалось урегулировать, рассматривается в суде по законодательству Российской Федерации.</p>\n<h2>11. Реквизиты продавца</h2>\n<p>[[реквизиты]]</p>\n<p>[[связь]]</p>",
-      "revised": "2026-10-22",
-      "date_updated": "2026-10-22T11:23:29.953Z"
+      "body": "<p>Индивидуальный предприниматель Стрельникова Екатерина Александровна (далее — Продавец) предлагает любому дееспособному лицу (далее — Покупатель) купить блюда, выпечку, торты и другие товары с доставкой или самовывозом на условиях этого договора. Предложение публичное: оформляя заказ на сайте vkus-com.ru или по телефону, Покупатель принимает все условия ниже.</p>\n<h2>1. Термины</h2>\n<p>1.1. Сайт — vkus-com.ru со всеми страницами, в том числе каталог доставки <a href=\"/catalog/\">vkus-com.ru/catalog/</a> и личный кабинет <a href=\"/account/\">vkus-com.ru/account/</a>.</p>\n<p>1.2. Продавец — ИП Стрельникова Екатерина Александровна. Реквизиты — в разделе 11 и на странице <a href=\"/docs/requisites/\">«Реквизиты и контакты»</a>.</p>\n<p>1.3. Товары — продукция Продавца из каталога на Сайте. Внешний вид Товара может отличаться от фотографии на Сайте.</p>\n<p>1.4. Покупатель — дееспособное лицо, которое заказывает, покупает или использует Товары только для личных, семейных, домашних и иных нужд, не связанных с предпринимательской деятельностью.</p>\n<p>1.5. Заказ — заявка Покупателя на покупку Товаров, оформленная в корзине на Сайте или принятая Продавцом по телефону.</p>\n<p>1.6. Оферта — этот документ, публичный договор, который регулирует отношения Продавца и Покупателя.</p>\n<h2>2. Общие положения</h2>\n<p>2.1. Покупатель знакомится с условиями Оферты до оформления Заказа. Оформляя Заказ, он подтверждает, что прочитал и принимает Оферту.</p>\n<p>2.2. Договор розничной купли-продажи по образцам считается заключённым с момента, когда Продавец получил Заказ.</p>\n<p>2.3. Продавец вправе изменять Оферту. Новая редакция действует с момента публикации на Сайте, дата редакции указана вверху страницы. Покупатель самостоятельно следит за изменениями; Заказ исполняется на условиях редакции, действовавшей в момент его оформления.</p>\n<p>2.4. Оферта действует бессрочно.</p>\n<p>2.5. Отношения Продавца и Покупателя регулируются законодательством Российской Федерации, в том числе Законом РФ «О защите прав потребителей».</p>\n<h2>3. Предмет договора</h2>\n<p>3.1. Продавец продаёт Товары из Заказа по ценам, указанным на Сайте, и передаёт их Покупателю: доставляет курьером по адресу Покупателя или выдаёт в точке самовывоза. Покупатель оплачивает и принимает Товары на условиях Оферты.</p>\n<p>3.2. Право собственности и риск случайной гибели или повреждения Товаров переходят к Покупателю в момент передачи Товаров.</p>\n<p>3.3. Состав, вес и описание Товаров указаны в карточке Товара на Сайте. Если у Покупателя есть вопросы о Товаре, до оформления Заказа он может задать их по телефону [[телефон]] в часы работы Продавца.</p>\n<p>3.4. Заявка на кейтеринг или банкет, оставленная в разделе <a href=\"/catering/\">«Кейтеринг и банкеты»</a>, Заказом по Оферте не является: формат, меню, стоимость и порядок оплаты мероприятия Продавец согласует с Покупателем отдельно.</p>\n<h2>4. Оформление и подтверждение заказа</h2>\n<p>4.1. Покупатель оформляет Заказ в корзине каталога на Сайте: выбирает Товары, указывает имя, телефон и адрес электронной почты для чека, способ получения (доставка с адресом, самовывоз из точки или получение в зале точки с указанием стола), желаемое время и даёт согласие на обработку персональных данных. Заказ можно оформить и по телефону.</p>\n<p>4.2. Покупатель указывает достоверные данные, достаточные для исполнения Заказа.</p>\n<p>4.3. Заказу на Сайте присваивается номер. Продавец перезванивает Покупателю, чтобы подтвердить состав Заказа, адрес и время доставки или самовывоза; Заказ в зале Продавец подтверждает у стола Покупателя.</p>\n<p>4.4. Заказать можно только Товары, которые есть в наличии в момент оформления. Если какого-то Товара нет в нужном количестве или ассортименте, Продавец сообщает об этом Покупателю до подтверждения Заказа. Покупатель вправе согласиться на другое количество или ассортимент либо отменить Заказ. Если Покупатель не отвечает, Продавец вправе отменить Заказ полностью.</p>\n<p>4.5. Изменить состав Заказа после его подтверждения можно только по согласованию с Продавцом.</p>\n<p>4.6. Продавец вправе временно приостановить приём Заказов из-за технических неполадок или нехватки продуктов для приготовления Товаров.</p>\n<p>4.7. Продавец вправе звонить Покупателю и отправлять сообщения на телефон из Заказа, чтобы подтвердить Заказ и сообщить о ходе его исполнения. Покупатель, вошедший в личный кабинет на Сайте, видит там статус своих Заказов.</p>\n<h2>5. Цена и оплата</h2>\n<p>5.1. Цены Товаров указаны на Сайте в рублях и устанавливаются Продавцом. Цена Товара в оформленном Заказе не меняется.</p>\n<p>5.2. Стоимость доставки в цену Товаров не входит. Она зависит от зоны доставки, в которую попадает адрес, и от суммы Заказа; зоны, стоимость доставки и сумма, от которой доставка бесплатна, указаны на странице <a href=\"/docs/delivery/\">«Доставка и оплата»</a>. Стоимость доставки рассчитывается по адресу при оформлении Заказа и оплачивается вместе с Заказом. Если адрес не удалось определить на карте, стоимость доставки Продавец называет при подтверждении Заказа, а Покупатель оплачивает её при получении.</p>\n<p>5.3. Заказ на Сайте оплачивается онлайн банковской картой, другого способа оплаты Заказа на Сайте нет. После оформления Заказа Покупатель переходит на защищённую страницу платёжного сервиса ЮKassa и вводит данные карты там, Продавцу они не передаются. Одним платежом оплачивается сумма «К оплате»: стоимость Товаров и доставки за вычетом скидок и баллов (п. 5.4). Только стоимость доставки, которую Продавец называет при подтверждении Заказа, оплачивается при получении (п. 5.2).</p>\n<p>5.4. Покупатель, вошедший в личный кабинет, может оплатить часть Заказа баллами программы «Вкусные баллы» по её правилам, опубликованным в личном кабинете. Оплате деньгами подлежит сумма «К оплате» — за вычетом баллов.</p>\n<p>5.5. При онлайн-оплате электронный чек направляется на электронную почту, указанную Покупателем при оформлении Заказа. Если стоимость доставки оплачивается при получении (п. 5.2), кассовый чек на неё Покупатель получает на месте. Покупателю рекомендуется сохранять подтверждение онлайн-оплаты.</p>\n<h2>6. Доставка и самовывоз</h2>\n<p>6.1. Товары доставляются курьером по адресу, указанному в Заказе, передаются Покупателю в точке самовывоза или подаются к столу Покупателя в зале выбранной точки.</p>\n<p>6.2. Доставка выполняется в пределах зоны доставки и в часы, указанные на странице <a href=\"/docs/delivery/\">«Доставка и оплата»</a>. По адресам вне зоны доставки Товары не доставляются.</p>\n<p>6.3. Доставка выполняется при Заказе на сумму не меньше минимальной для зоны доставки. Минимальную сумму для каждой зоны Продавец устанавливает сам и указывает на странице <a href=\"/docs/delivery/\">«Доставка и оплата»</a>; она и сумма, от которой доставка бесплатна, считаются по стоимости Товаров до скидок и оплаты баллами. Заказ на меньшую сумму можно забрать самовывозом.</p>\n<p>6.4. Время доставки согласуется при звонке и может отличаться от желаемого времени, указанного в Заказе.</p>\n<p>6.5. Продавец вправе отказаться от исполнения договора, если курьер не может передать Товары по вине Покупателя: Покупатель в течение 10 минут не отвечает на звонок или не открывает дверь.</p>\n<h2>7. Отмена заказа и возврат денег</h2>\n<p>7.1. Покупатель вправе отменить Заказ до передачи Товаров, позвонив Продавцу по телефону [[телефон]].</p>\n<p>7.2. Если Заказ оплачен онлайн, Покупатель вправе до передачи Товаров попросить отменить платёж. Решение о возврате денег Продавец принимает с учётом требований законодательства РФ и обстоятельств Заказа.</p>\n<p>7.3. Деньги возвращаются на банковский счёт карты, с которой оплачен Заказ, в течение 5–30 рабочих дней: срок зависит от банка, выпустившего карту.</p>\n<p>7.4. При отмене Заказа баллы, списанные за него, возвращаются на счёт Покупателя в программе «Вкусные баллы», а начисленные за него — списываются.</p>\n<h2>8. Качество, возврат и обмен</h2>\n<p>8.1. Продавец передаёт Покупателю Товары, которые соответствуют Заказу и информации о Товаре на Сайте, на этикетке или упаковке.</p>\n<p>8.2. При получении Покупатель в течение 10 минут проверяет, соответствуют ли Товары Заказу, всё ли на месте и нет ли претензий к внешнему виду.</p>\n<p>8.3. Если Товар некачественный или не соответствует Заказу (например, в нём нет заявленных ингредиентов), Покупатель вправе в течение 5 минут после проверки потребовать заменить его Товаром надлежащего качества, сообщив об этом курьеру, сотруднику точки или по телефону [[телефон]].</p>\n<p>8.4. Товар надлежащего качества возврату и обмену не подлежит.</p>\n<p>8.5. Остальные требования о качестве Товара Покупатель предъявляет в порядке, установленном Законом РФ «О защите прав потребителей».</p>\n<h2>9. Ответственность</h2>\n<p>9.1. Продавец не отвечает за вред, причинённый Покупателю из-за ненадлежащего использования приобретённых Товаров.</p>\n<p>9.2. Продавец не отвечает за убытки Покупателя, возникшие из-за неправильно заполненного Заказа, в том числе неверно указанных данных.</p>\n<p>9.3. Если Покупатель злоупотребляет правами потребителя, например отказывается принять или оплатить заказанный и доставленный Товар, Продавец вправе не принимать от него Заказы в будущем.</p>\n<p>9.4. Стороны освобождаются от ответственности за полное или частичное неисполнение обязательств, если оно вызвано обстоятельствами непреодолимой силы: стихийными бедствиями, пожарами, наводнениями, военными действиями, забастовками и другими событиями, которые стороны не могли предвидеть и предотвратить разумными средствами.</p>\n<h2>10. Персональные данные и споры</h2>\n<p>10.1. Продавец обрабатывает персональные данные Покупателя по <a href=\"/docs/privacy/\">Политике конфиденциальности</a>.</p>\n<p>10.2. Стороны решают споры переговорами. Претензию Покупатель направляет Продавцу по контактам из раздела 11. Спор, который не удалось урегулировать, рассматривается в суде по законодательству Российской Федерации.</p>\n<h2>11. Реквизиты продавца</h2>\n<p>[[реквизиты]]</p>\n<p>[[связь]]</p>",
+      "revised": "2026-10-27",
+      "date_updated": "2026-10-27T07:02:09.543Z"
     },
     {
       "id": 2,
@@ -5461,10 +5695,10 @@
       "sort": 2,
       "slug": "delivery",
       "title": "Доставка и оплата",
-      "description": "Зоны и стоимость доставки по Самаре, минимальный заказ, часы 08:00–21:00, самовывоз из двух точек, оплата онлайн картой и баллами, чек и возврат.",
-      "body": "<h2>Как заказать</h2>\n<ol>\n<li>Соберите корзину в <a href=\"/catalog/\">каталоге доставки</a>. У тортов и блюд с размерами выберите размер и начинку.</li>\n<li>Оформите заказ: имя, телефон, доставка или самовывоз, время — «как можно скорее» или к определённому часу. Для доставки укажите адрес: корзина сразу посчитает стоимость доставки и сумму к оплате.</li>\n<li>Оплатите заказ картой на защищённой странице ЮKassa — блюда и доставку одним платежом.</li>\n<li>Мы перезвоним и подтвердим состав, адрес и время.</li>\n</ol>\n<p>Можно заказать и по телефону [[телефон]]. Если войти в <a href=\"/account/\">личный кабинет</a> по номеру телефона, за заказы с сайта копятся «Вкусные баллы», а статус заказа виден в кабинете.</p>\n<h2>Доставка по Самаре</h2>\n<p>Курьер привозит заказы ежедневно с 08:00 до 21:00. Стоимость доставки зависит от зоны, в которую попадает адрес, и от суммы блюд в заказе:</p>\n<ul>\n<li><strong>Рядом с нами — Советский, Промышленный, Октябрьский, Кировский</strong><br>доставка 400&nbsp;₽, бесплатно от 7&nbsp;000&nbsp;₽, минимальный заказ 1&nbsp;000&nbsp;₽</li>\n<li><strong>Центр — Ленинский, Самарский, Железнодорожный</strong><br>доставка 600&nbsp;₽, бесплатно от 7&nbsp;000&nbsp;₽, минимальный заказ 1&nbsp;000&nbsp;₽</li>\n<li><strong>Куйбышевский район — Волгарь, Сухая Самарка, 116-й километр</strong><br>доставка 1&nbsp;000&nbsp;₽, бесплатно от 10&nbsp;000&nbsp;₽, минимальный заказ 1&nbsp;000&nbsp;₽</li>\n<li><strong>Красноглинский район, Зубчаниновка, Мехзавод, Крутые Ключи, Кошелев-Парк, Смышляевка</strong><br>доставка 1&nbsp;000&nbsp;₽, бесплатно от 10&nbsp;000&nbsp;₽, минимальный заказ 2&nbsp;500&nbsp;₽</li>\n<li><strong>Дальние посёлки — Курумоч, Новосемейкино, Царевщина, Волжский</strong><br>доставка 2&nbsp;500&nbsp;₽, бесплатно от 30&nbsp;000&nbsp;₽, минимальный заказ 1&nbsp;000&nbsp;₽</li>\n<li><strong>Новокуйбышевск</strong><br>доставка 4&nbsp;000&nbsp;₽, бесплатно от 170&nbsp;000&nbsp;₽, минимальный заказ 2&nbsp;500&nbsp;₽</li>\n</ul>\n<p>Стоимость доставки корзина считает по адресу при оформлении — она оплачивается онлайн вместе с заказом. Бесплатная доставка и минимальный заказ считаются по сумме блюд до скидки и баллов.</p>\n<ul>\n<li>Если сумма меньше минимального заказа зоны, корзина подскажет, сколько добавить, — или выберите самовывоз.</li>\n<li>Если адрес не нашли на карте, заказ всё равно можно отправить: онлайн оплачиваются блюда, а стоимость доставки назовём при звонке и возьмём при доставке.</li>\n<li>Если адрес вне зон доставки, заказ можно забрать самовывозом.</li>\n<li>Время доставки подтвердим при звонке: оно может отличаться от указанного в заказе.</li>\n<li>Курьер ждёт 10 минут: если за это время до вас не дозвониться или вы не открываете дверь, заказ может быть отменён.</li>\n</ul>\n<h2>Самовывоз</h2>\n<p>Заберите заказ в одной из двух наших точек в часы их работы. Самовывоз бесплатный: оплачиваются только блюда. Когда заказ будет готов, скажем при звонке.</p>\n<p>[[точки]]</p>\n<h2>Оплата</h2>\n<p>Заказ с сайта оплачивается онлайн сразу после оформления: блюда и доставка — одним платежом.</p>\n<ul>\n<li><strong>Онлайн картой на сайте.</strong> После оформления заказа откроется защищённая страница платёжного сервиса ЮKassa: данные карты вводятся там, нам они не передаются.</li>\n<li><strong>Баллами.</strong> Гость, который вошёл в личный кабинет, может оплатить баллами часть заказа: сколько можно списать, показывает корзина. Остальное оплачивается картой.</li>\n</ul>\n<p>Исключение — доставка по адресу, который не нашёлся на карте: её стоимость назовём при звонке и возьмём при доставке.</p>\n<h2>Чек</h2>\n<p>Электронный чек за онлайн-оплату приходит от ЮKassa на телефон или почту, указанные при оплате. Если стоимость доставки назвали при звонке и вы оплатили её курьеру, чек на доставку выдаём на месте.</p>\n<h2>Отмена и возврат</h2>\n<ul>\n<li>Отменить заказ можно до того, как его передали вам: позвоните [[телефон]].</li>\n<li>Деньги за онлайн-оплату возвращаются на карту, с которой платили, за 5–30 рабочих дней: срок зависит от банка карты.</li>\n<li>Баллы, списанные за отменённый заказ, возвращаются на ваш счёт.</li>\n<li>Проверьте заказ при получении: всё ли на месте и в порядке ли внешний вид. Если блюдо не то или с ним что-то не так, сразу скажите курьеру или позвоните — заменим.</li>\n<li>Блюда и торты надлежащего качества возврату и обмену не подлежат.</li>\n</ul>\n<p>Подробно порядок отмены, возврата и замены описан в <a href=\"/docs/offer/\">публичной оферте</a>, разделы 7 и 8.</p>\n<h2>Банкеты и кейтеринг</h2>\n<p>Для праздника оставьте заявку в разделе <a href=\"/catering/\">«Кейтеринг и банкеты»</a>: менеджер перезвонит, обсудит формат, меню и смету. Условия оплаты мероприятия согласуем отдельно.</p>",
-      "revised": "2026-10-22",
-      "date_updated": "2026-10-22T11:23:30.052Z"
+      "description": "Зоны и стоимость доставки по Самаре, минимальный заказ, часы 08:00–21:00, самовывоз из двух точек, заказ в зале, оплата онлайн картой и баллами, чек на почту и возврат.",
+      "body": "<h2>Как заказать</h2>\n<ol>\n<li>Вверху <a href=\"/catalog/\">каталога доставки</a> выберите точку: меню на Садовой, 212Б и на Советской Армии, 177 разное, и каталог покажет блюда выбранной. Соберите корзину; у тортов и блюд с размерами выберите размер и начинку.</li>\n<li>Оформите заказ: имя, телефон, почта для чека, способ получения — доставка, самовывоз или «В зале» — и время: «как можно скорее» или к определённому часу. Для доставки укажите адрес: корзина сразу посчитает стоимость доставки и сумму к оплате.</li>\n<li>Оплатите заказ картой на защищённой странице ЮKassa — блюда и доставку одним платежом.</li>\n<li>Мы перезвоним и подтвердим состав, адрес и время. По заказу в зале подойдём к столу.</li>\n</ol>\n<p>Можно заказать и по телефону [[телефон]]. Если войти в <a href=\"/account/\">личный кабинет</a> по номеру телефона, за заказы с сайта копятся «Вкусные баллы», а статус заказа виден в кабинете.</p>\n<h2>Доставка по Самаре</h2>\n<p>Курьер привозит заказы ежедневно с 08:00 до 21:00. Стоимость доставки зависит от зоны, в которую попадает адрес, и от суммы блюд в заказе:</p>\n<ul>\n<li><strong>Советский, Промышленный, Октябрьский, Кировский</strong><br>доставка 400&nbsp;₽, бесплатно от 7&nbsp;000&nbsp;₽, минимальный заказ 1&nbsp;000&nbsp;₽</li>\n<li><strong>Ленинский, Самарский, Железнодорожный</strong><br>доставка 600&nbsp;₽, бесплатно от 7&nbsp;000&nbsp;₽, минимальный заказ 1&nbsp;000&nbsp;₽</li>\n<li><strong>Куйбышевский район</strong> (Волгарь, Сухая Самарка, 116-й километр)<br>доставка 1&nbsp;000&nbsp;₽, бесплатно от 10&nbsp;000&nbsp;₽, минимальный заказ 1&nbsp;000&nbsp;₽</li>\n<li><strong>Красноглинский район и Смышляевка</strong> (Зубчаниновка, Мехзавод, Крутые Ключи, Кошелев-Парк)<br>доставка 1&nbsp;000&nbsp;₽, бесплатно от 10&nbsp;000&nbsp;₽, минимальный заказ 2&nbsp;500&nbsp;₽</li>\n<li><strong>Курумоч, Новосемейкино, Царевщина, Волжский</strong><br>доставка 2&nbsp;500&nbsp;₽, бесплатно от 30&nbsp;000&nbsp;₽, минимальный заказ 1&nbsp;000&nbsp;₽</li>\n<li><strong>Новокуйбышевск</strong><br>доставка 4&nbsp;000&nbsp;₽, бесплатно от 170&nbsp;000&nbsp;₽, минимальный заказ 2&nbsp;500&nbsp;₽</li>\n</ul>\n<p>Стоимость доставки корзина считает по адресу при оформлении — она оплачивается онлайн вместе с заказом. Бесплатная доставка и минимальный заказ считаются по сумме блюд до скидки и баллов.</p>\n<ul>\n<li>Если сумма меньше минимального заказа зоны, корзина подскажет, сколько добавить, — или выберите самовывоз.</li>\n<li>Если адрес не нашли на карте, заказ всё равно можно отправить: онлайн оплачиваются блюда, а стоимость доставки назовём при звонке и возьмём при доставке.</li>\n<li>Если адрес вне зон доставки, заказ можно забрать самовывозом.</li>\n<li>Время доставки подтвердим при звонке: оно может отличаться от указанного в заказе.</li>\n<li>Курьер ждёт 10 минут: если за это время до вас не дозвониться или вы не открываете дверь, заказ может быть отменён.</li>\n</ul>\n<h2>Самовывоз</h2>\n<p>Заберите заказ в той точке, которую выбрали в каталоге, в часы её работы. Самовывоз бесплатный: оплачиваются только блюда. Когда заказ будет готов, скажем при звонке.</p>\n<p>[[точки]]</p>\n<h2>Заказ в зале</h2>\n<p>Сидите в нашем зале — закажите со своего столика. Откройте каталог на телефоне, выберите вверху точку, где сидите, соберите заказ и в оформлении отметьте «В зале»; номер стола можно указать. Оплатите заказ онлайн, и его принесут к столу: подойдём и подтвердим заказ у стола, без звонка. Минимальной суммы для заказа в зале нет.</p>\n<h2>Оплата</h2>\n<p>Заказ с сайта оплачивается онлайн сразу после оформления: блюда и доставка — одним платежом.</p>\n<ul>\n<li><strong>Онлайн картой на сайте.</strong> После оформления заказа откроется защищённая страница платёжного сервиса ЮKassa: данные карты вводятся там, нам они не передаются.</li>\n<li><strong>Баллами.</strong> Гость, который вошёл в личный кабинет, может оплатить баллами часть заказа: сколько можно списать, показывает корзина. Остальное оплачивается картой.</li>\n</ul>\n<p>Исключение — доставка по адресу, который не нашёлся на карте: её стоимость назовём при звонке и возьмём при доставке.</p>\n<h2>Чек</h2>\n<p>Электронный чек за онлайн-оплату ЮKassa присылает на почту, которую вы указали при оформлении заказа, — поэтому при оплате на сайте почта обязательна. Если стоимость доставки назвали при звонке и вы оплатили её курьеру, чек на доставку выдаём на месте.</p>\n<h2>Отмена и возврат</h2>\n<ul>\n<li>Отменить заказ можно до того, как его передали вам: позвоните [[телефон]].</li>\n<li>Деньги за онлайн-оплату возвращаются на карту, с которой платили, за 5–30 рабочих дней: срок зависит от банка карты.</li>\n<li>Баллы, списанные за отменённый заказ, возвращаются на ваш счёт.</li>\n<li>Проверьте заказ при получении: всё ли на месте и в порядке ли внешний вид. Если блюдо не то или с ним что-то не так, сразу скажите курьеру или позвоните — заменим.</li>\n<li>Блюда и торты надлежащего качества возврату и обмену не подлежат.</li>\n</ul>\n<p>Подробно порядок отмены, возврата и замены описан в <a href=\"/docs/offer/\">публичной оферте</a>, разделы 7 и 8.</p>\n<h2>Банкеты и кейтеринг</h2>\n<p>Для праздника оставьте заявку в разделе <a href=\"/catering/\">«Кейтеринг и банкеты»</a>: менеджер перезвонит, обсудит формат, меню и смету. Условия оплаты мероприятия согласуем отдельно.</p>",
+      "revised": "2026-10-27",
+      "date_updated": "2026-10-27T07:02:09.470Z"
     },
     {
       "id": 3,
@@ -5473,9 +5707,9 @@
       "slug": "privacy",
       "title": "Политика конфиденциальности",
       "description": "Какие данные получает сайт vkus-com.ru, зачем, кому их передаём, сколько храним и как отозвать согласие на обработку персональных данных.",
-      "body": "<p>Политика объясняет, какие персональные данные получает сайт vkus-com.ru, зачем, кому их передаём, сколько храним и как их удалить или отозвать согласие. Политика действует для всех страниц сайта: каталога доставки, корзины, личного кабинета и раздела «Кейтеринг и банкеты». Она составлена по Федеральному закону от 27.07.2006 № 152-ФЗ «О персональных данных».</p>\n<h2>1. Оператор</h2>\n<p>Оператор персональных данных — индивидуальный предприниматель Стрельникова Екатерина Александровна (далее — Оператор).</p>\n<p>[[реквизиты]]</p>\n<p>Обращения о персональных данных принимаем по этим контактам:</p>\n<p>[[связь]]</p>\n<h2>2. Термины</h2>\n<p>2.1. Персональные данные — любая информация, относящаяся прямо или косвенно к определённому или определяемому физическому лицу (субъекту персональных данных).</p>\n<p>2.2. Обработка персональных данных — любое действие с персональными данными с использованием средств автоматизации или без них: сбор, запись, систематизация, накопление, хранение, уточнение, извлечение, использование, передача, обезличивание, блокирование, удаление, уничтожение.</p>\n<p>2.3. Пользователь — человек, который пользуется сайтом vkus-com.ru.</p>\n<p>2.4. Cookie и локальное хранилище — небольшие фрагменты данных, которые сайт сохраняет в браузере Пользователя, чтобы помнить корзину, черновики форм и вход в личный кабинет.</p>\n<p>2.5. IP-адрес — сетевой адрес устройства, с которого Пользователь открывает сайт.</p>\n<h2>3. Какие данные мы получаем</h2>\n<p>Только те, что Пользователь сам указывает в формах сайта, и технические данные, без которых сайт не работает.</p>\n<ul>\n<li><strong>Заказ в каталоге доставки</strong>: имя, телефон, способ получения, адрес доставки с подъездом, этажом и квартирой, желаемое время, комментарий, состав и сумма заказа.</li>\n<li><strong>Личный кабинет и «Вкусные баллы»</strong>: телефон, по которому Пользователь входит по коду; фамилия, имя, отчество, дата рождения, пол и почта для восстановления, если Пользователь их указал; история заказов и операций с баллами.</li>\n<li><strong>Заявка на кейтеринг или банкет</strong>: имя, телефон, дата мероприятия, число гостей, формат, зал или адрес, пожелания.</li>\n<li><strong>Онлайн-оплата</strong>: номер и сумма заказа, статус платежа. Данные банковской карты Пользователь вводит на странице платёжного сервиса ЮKassa, Оператору они не передаются.</li>\n<li><strong>Технические данные</strong>: IP-адрес и данные в cookie и локальном хранилище браузера.</li>\n</ul>\n<p>Сайт не запрашивает специальные категории персональных данных (о здоровье, убеждениях и т. п.) и биометрические данные.</p>\n<h2>4. Цели обработки</h2>\n<ul>\n<li>оформить, подтвердить, приготовить, доставить или выдать заказ, связаться с Пользователем по заказу;</li>\n<li>принять онлайн-оплату, сделать возврат, выдать кассовый чек;</li>\n<li>пустить Пользователя в личный кабинет по коду из SMS или звонка, вести программу «Вкусные баллы»: начислять и списывать баллы, считать уровень, дарить баллы ко дню рождения. Дата рождения нужна только для подарка ко дню рождения;</li>\n<li>обработать заявку на кейтеринг или банкет: перезвонить, обсудить формат и смету;</li>\n<li>отвечать на обращения и претензии Пользователя;</li>\n<li>защищать сайт от мошенничества и злоупотреблений: ограничивать число заказов, заявок и кодов входа с одного адреса;</li>\n<li>находить и исправлять технические сбои, вести обезличенную статистику посещений.</li>\n</ul>\n<p>Рекламные рассылки Оператор отправляет только с отдельного согласия Пользователя. Сейчас сайт рекламу не рассылает.</p>\n<h2>5. Правовые основания</h2>\n<p>Оператор обрабатывает персональные данные на основании согласия Пользователя (отметка «Согласен на обработку персональных данных» в форме заказа, заявки или входа в кабинет) и для исполнения договора, стороной которого является Пользователь, — <a href=\"/docs/offer/\">публичной оферты</a>.</p>\n<h2>6. Как обрабатываем и кому передаём</h2>\n<p>6.1. Данные обрабатываются с использованием средств автоматизации и без них. Доступ к ним есть только у сотрудников, которым он нужен для работы, по личным учётным записям. Сайт и обмен данными с ним защищены шифрованием (HTTPS).</p>\n<p>6.2. Оператор передаёт данные третьим лицам только в объёме, нужном для цели:</p>\n<ul>\n<li>курьерам и курьерским службам — имя, телефон и адрес, чтобы доставить заказ;</li>\n<li>оператору SMS-рассылки (SMS Aero) и операторам связи — телефон, чтобы отправить код входа в личный кабинет;</li>\n<li>платёжному сервису ЮKassa — номер и сумму заказа, а для электронного чека — телефон или почту;</li>\n<li>хостинг-провайдеру, на сервере которого работают сайт и база данных.</li>\n</ul>\n<p>6.3. Уведомления о новых заказах и заявках (номер, имя, телефон, адрес, состав) приходят сотрудникам Оператора на рабочую почту и в рабочий чат в мессенджере Telegram.</p>\n<p>6.4. Государственным органам данные передаются только по основаниям и в порядке, установленным законодательством РФ.</p>\n<p>6.5. Оператор не продаёт и не публикует персональные данные Пользователей.</p>\n<p>6.6. Если персональные данные утрачены или разглашены, Оператор сообщает об этом Пользователю и принимает меры, чтобы предотвратить отрицательные последствия.</p>\n<h2>7. Сроки хранения</h2>\n<p>7.1. Данные хранятся, пока это нужно для целей обработки, или до отзыва согласия, если более долгий срок не требует закон (например, для бухгалтерских документов).</p>\n<p>7.2. Коды входа в личный кабинет удаляются через двое суток. Профиль личного кабинета хранится, пока Пользователь им пользуется или пока он не попросит его удалить.</p>\n<h2>8. Cookie и локальное хранилище</h2>\n<p>8.1. Сайт хранит в браузере корзину и черновик заказа, черновик заявки на кейтеринг, ключ входа в личный кабинет (он действует 30 дней) и состояние онлайн-оплаты. Без этого корзина и вход в кабинет не работают.</p>\n<p>8.2. Если на сайте подключена Яндекс Метрика, она получает обезличенные сведения о посещениях: просмотренные страницы, тип устройства и браузера, примерное местоположение по IP-адресу. Сведения нужны для статистики; данные обрабатывает ООО «Яндекс» по своей политике конфиденциальности.</p>\n<p>8.3. Отключить cookie и очистить хранилище можно в настройках браузера. Тогда корзина, черновики и вход в кабинет перестанут сохраняться.</p>\n<h2>9. Права Пользователя</h2>\n<p>9.1. Пользователь вправе получить сведения об обработке своих персональных данных, потребовать уточнить, заблокировать или удалить их, если они неполные, устаревшие, неточные или обрабатываются незаконно, отозвать согласие на обработку и обжаловать действия Оператора в Роскомнадзоре или в суде.</p>\n<p>9.2. Чтобы воспользоваться правом, Пользователь направляет обращение по контактам Оператора из раздела 1. Отзыв согласия отправляется с пометкой «Отзыв согласия на обработку персональных данных». Оператор отвечает в течение 10 рабочих дней с момента получения обращения.</p>\n<p>9.3. После отзыва согласия Оператор прекращает обработку и удаляет данные в течение 30 дней, если нет других законных оснований их хранить.</p>\n<p>9.4. Имя, отчество, фамилию, пол и почту Пользователь может исправить сам во вкладке «Профиль» личного кабинета. Телефон для входа и дату рождения исправит сотрудник по звонку Пользователя.</p>\n<h2>10. Обязанности Пользователя</h2>\n<p>Пользователь указывает достоверные данные, обновляет их, если они изменились, и не указывает данные других людей без их согласия.</p>\n<h2>11. Изменения политики</h2>\n<p>Оператор вправе изменять политику. Новая редакция действует с момента публикации на этой странице, если в ней не сказано иное; дата редакции указана вверху страницы.</p>",
-      "revised": "2026-10-20",
-      "date_updated": null
+      "body": "<p>Политика объясняет, какие персональные данные получает сайт vkus-com.ru, зачем, кому их передаём, сколько храним и как их удалить или отозвать согласие. Политика действует для всех страниц сайта: каталога доставки, корзины, личного кабинета и раздела «Кейтеринг и банкеты». Она составлена по Федеральному закону от 27.07.2006 № 152-ФЗ «О персональных данных».</p>\n<h2>1. Оператор</h2>\n<p>Оператор персональных данных — индивидуальный предприниматель Стрельникова Екатерина Александровна (далее — Оператор).</p>\n<p>[[реквизиты]]</p>\n<p>Обращения о персональных данных принимаем по этим контактам:</p>\n<p>[[связь]]</p>\n<h2>2. Термины</h2>\n<p>2.1. Персональные данные — любая информация, относящаяся прямо или косвенно к определённому или определяемому физическому лицу (субъекту персональных данных).</p>\n<p>2.2. Обработка персональных данных — любое действие с персональными данными с использованием средств автоматизации или без них: сбор, запись, систематизация, накопление, хранение, уточнение, извлечение, использование, передача, обезличивание, блокирование, удаление, уничтожение.</p>\n<p>2.3. Пользователь — человек, который пользуется сайтом vkus-com.ru.</p>\n<p>2.4. Cookie и локальное хранилище — небольшие фрагменты данных, которые сайт сохраняет в браузере Пользователя, чтобы помнить корзину, черновики форм и вход в личный кабинет.</p>\n<p>2.5. IP-адрес — сетевой адрес устройства, с которого Пользователь открывает сайт.</p>\n<h2>3. Какие данные мы получаем</h2>\n<p>Только те, что Пользователь сам указывает в формах сайта, и технические данные, без которых сайт не работает.</p>\n<ul>\n<li><strong>Заказ в каталоге доставки</strong>: имя, телефон, электронная почта для чека, способ получения, выбранная точка, адрес доставки с подъездом, этажом и квартирой или номер стола в зале, желаемое время, комментарий, состав и сумма заказа.</li>\n<li><strong>Личный кабинет и «Вкусные баллы»</strong>: телефон, по которому Пользователь входит по коду; фамилия, имя, отчество, дата рождения, пол и почта для восстановления, если Пользователь их указал; история заказов и операций с баллами.</li>\n<li><strong>Заявка на кейтеринг или банкет</strong>: имя, телефон, дата мероприятия, число гостей, формат, зал или адрес, пожелания.</li>\n<li><strong>Онлайн-оплата</strong>: номер и сумма заказа, статус платежа. Данные банковской карты Пользователь вводит на странице платёжного сервиса ЮKassa, Оператору они не передаются.</li>\n<li><strong>Технические данные</strong>: IP-адрес и данные в cookie и локальном хранилище браузера.</li>\n</ul>\n<p>Сайт не запрашивает специальные категории персональных данных (о здоровье, убеждениях и т. п.) и биометрические данные.</p>\n<h2>4. Цели обработки</h2>\n<ul>\n<li>оформить, подтвердить, приготовить, доставить или выдать заказ, связаться с Пользователем по заказу;</li>\n<li>принять онлайн-оплату, сделать возврат, выдать кассовый чек;</li>\n<li>пустить Пользователя в личный кабинет по коду из SMS или звонка, вести программу «Вкусные баллы»: начислять и списывать баллы, считать уровень, дарить баллы ко дню рождения. Дата рождения нужна только для подарка ко дню рождения;</li>\n<li>обработать заявку на кейтеринг или банкет: перезвонить, обсудить формат и смету;</li>\n<li>отвечать на обращения и претензии Пользователя;</li>\n<li>защищать сайт от мошенничества и злоупотреблений: ограничивать число заказов, заявок и кодов входа с одного адреса;</li>\n<li>находить и исправлять технические сбои, вести обезличенную статистику посещений.</li>\n</ul>\n<p>Рекламные рассылки Оператор отправляет только с отдельного согласия Пользователя. Сейчас сайт рекламу не рассылает.</p>\n<h2>5. Правовые основания</h2>\n<p>Оператор обрабатывает персональные данные на основании согласия Пользователя (отметка «Согласен на обработку персональных данных» в форме заказа, заявки или входа в кабинет) и для исполнения договора, стороной которого является Пользователь, — <a href=\"/docs/offer/\">публичной оферты</a>.</p>\n<h2>6. Как обрабатываем и кому передаём</h2>\n<p>6.1. Данные обрабатываются с использованием средств автоматизации и без них. Доступ к ним есть только у сотрудников, которым он нужен для работы, по личным учётным записям. Сайт и обмен данными с ним защищены шифрованием (HTTPS).</p>\n<p>6.2. Оператор передаёт данные третьим лицам только в объёме, нужном для цели:</p>\n<ul>\n<li>курьерам и курьерским службам — имя, телефон и адрес, чтобы доставить заказ;</li>\n<li>оператору SMS-рассылки (SMS Aero) и операторам связи — телефон, чтобы отправить код входа в личный кабинет;</li>\n<li>платёжному сервису ЮKassa — номер и сумму заказа, а для электронного чека — электронную почту;</li>\n<li>хостинг-провайдеру, на сервере которого работают сайт и база данных.</li>\n</ul>\n<p>6.3. Уведомления о новых заказах и заявках (номер, имя, телефон, адрес, состав) приходят сотрудникам Оператора на рабочую почту и в рабочий чат в мессенджере Telegram.</p>\n<p>6.4. Государственным органам данные передаются только по основаниям и в порядке, установленным законодательством РФ.</p>\n<p>6.5. Оператор не продаёт и не публикует персональные данные Пользователей.</p>\n<p>6.6. Если персональные данные утрачены или разглашены, Оператор сообщает об этом Пользователю и принимает меры, чтобы предотвратить отрицательные последствия.</p>\n<h2>7. Сроки хранения</h2>\n<p>7.1. Данные хранятся, пока это нужно для целей обработки, или до отзыва согласия, если более долгий срок не требует закон (например, для бухгалтерских документов).</p>\n<p>7.2. Коды входа в личный кабинет удаляются через двое суток. Профиль личного кабинета хранится, пока Пользователь им пользуется или пока он не попросит его удалить.</p>\n<h2>8. Cookie и локальное хранилище</h2>\n<p>8.1. Сайт хранит в браузере корзину и черновик заказа, черновик заявки на кейтеринг, ключ входа в личный кабинет (он действует 30 дней) и состояние онлайн-оплаты. Без этого корзина и вход в кабинет не работают.</p>\n<p>8.2. Если на сайте подключена Яндекс Метрика, она получает обезличенные сведения о посещениях: просмотренные страницы, тип устройства и браузера, примерное местоположение по IP-адресу. Сведения нужны для статистики; данные обрабатывает ООО «Яндекс» по своей политике конфиденциальности.</p>\n<p>8.3. Отключить cookie и очистить хранилище можно в настройках браузера. Тогда корзина, черновики и вход в кабинет перестанут сохраняться.</p>\n<h2>9. Права Пользователя</h2>\n<p>9.1. Пользователь вправе получить сведения об обработке своих персональных данных, потребовать уточнить, заблокировать или удалить их, если они неполные, устаревшие, неточные или обрабатываются незаконно, отозвать согласие на обработку и обжаловать действия Оператора в Роскомнадзоре или в суде.</p>\n<p>9.2. Чтобы воспользоваться правом, Пользователь направляет обращение по контактам Оператора из раздела 1. Отзыв согласия отправляется с пометкой «Отзыв согласия на обработку персональных данных». Оператор отвечает в течение 10 рабочих дней с момента получения обращения.</p>\n<p>9.3. После отзыва согласия Оператор прекращает обработку и удаляет данные в течение 30 дней, если нет других законных оснований их хранить.</p>\n<p>9.4. Имя, отчество, фамилию, пол и почту Пользователь может исправить сам во вкладке «Профиль» личного кабинета. Телефон для входа и дату рождения исправит сотрудник по звонку Пользователя.</p>\n<h2>10. Обязанности Пользователя</h2>\n<p>Пользователь указывает достоверные данные, обновляет их, если они изменились, и не указывает данные других людей без их согласия.</p>\n<h2>11. Изменения политики</h2>\n<p>Оператор вправе изменять политику. Новая редакция действует с момента публикации на этой странице, если в ней не сказано иное; дата редакции указана вверху страницы.</p>",
+      "revised": "2026-10-27",
+      "date_updated": "2026-10-27T07:02:09.590Z"
     },
     {
       "id": 4,
